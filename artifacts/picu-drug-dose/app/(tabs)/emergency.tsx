@@ -1,0 +1,475 @@
+import { Feather } from "@expo/vector-icons";
+import React, { useMemo } from "react";
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  useColorScheme,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import Colors from "@/constants/colors";
+import { DRUGS, calculateDose } from "@/constants/drugs";
+import { useWeight } from "@/context/WeightContext";
+
+interface EmergencyItem {
+  label: string;
+  dose: string;
+  route: string;
+  notes: string;
+  color: string;
+  warning?: boolean;
+}
+
+export default function EmergencyScreen() {
+  const insets = useSafeAreaInsets();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+  const colors = Colors.light;
+  const { weight } = useWeight();
+  const topPadding = Platform.OS === "web" ? 67 : insets.top;
+
+  const emergencyCards = useMemo((): EmergencyItem[] => {
+    const results: EmergencyItem[] = [];
+
+    const epinephrine = DRUGS.find((d) => d.id === "epinephrine");
+    if (epinephrine) {
+      const d = epinephrine.doses[0];
+      const calc = calculateDose(d, weight);
+      results.push({
+        label: "Epinephrine (Cardiac Arrest)",
+        dose: calc.dose,
+        route: "IV/IO",
+        notes: `0.1 mL/kg of 1:10,000 = ${+(0.1 * weight).toFixed(1)} mL`,
+        color: "#AE2012",
+        warning: true,
+      });
+      const anaph = epinephrine.doses[1];
+      const calcIM = calculateDose(anaph, weight);
+      results.push({
+        label: "Epinephrine (Anaphylaxis)",
+        dose: calcIM.dose,
+        route: "IM",
+        notes: "Use 1:1,000 solution",
+        color: "#AE2012",
+        warning: true,
+      });
+    }
+
+    const atropine = DRUGS.find((d) => d.id === "atropine");
+    if (atropine) {
+      const d = atropine.doses[0];
+      const calc = calculateDose(d, weight);
+      results.push({
+        label: "Atropine (Bradycardia)",
+        dose: calc.dose,
+        route: "IV/IO",
+        notes: "Minimum 0.1 mg; max 0.5 mg child",
+        color: "#E67E22",
+      });
+    }
+
+    const adenosine = DRUGS.find((d) => d.id === "adenosine");
+    if (adenosine) {
+      const d = adenosine.doses[0];
+      const calc = calculateDose(d, weight);
+      const dose2 = +(0.2 * weight).toFixed(2);
+      results.push({
+        label: "Adenosine (SVT) — 1st Dose",
+        dose: calc.dose,
+        route: "IV rapid push",
+        notes: `2nd dose: ${dose2} mg (max 12 mg) — rapid flush!`,
+        color: "#8E44AD",
+      });
+    }
+
+    const bicarb = DRUGS.find((d) => d.id === "sodium-bicarbonate");
+    if (bicarb) {
+      const d = bicarb.doses[0];
+      const calc = calculateDose(d, weight);
+      results.push({
+        label: "Sodium Bicarbonate",
+        dose: calc.dose,
+        route: "IV",
+        notes: "For severe metabolic acidosis",
+        color: "#2E86AB",
+      });
+    }
+
+    const calcGluc = DRUGS.find((d) => d.id === "calcium-gluconate");
+    if (calcGluc) {
+      const d = calcGluc.doses[0];
+      const calcResult = calculateDose(d, weight);
+      results.push({
+        label: "Calcium Gluconate",
+        dose: calcResult.dose,
+        route: "IV",
+        notes: "Infuse slowly with cardiac monitoring",
+        color: "#1A5276",
+      });
+    }
+
+    const dextrose = DRUGS.find((d) => d.id === "dextrose");
+    if (dextrose) {
+      const d10 = +(4 * weight).toFixed(0);
+      const d25 = +(2 * weight).toFixed(0);
+      const d50 = +(1 * weight).toFixed(0);
+      results.push({
+        label: "Dextrose (Hypoglycemia)",
+        dose: `D10: ${d10} mL · D25: ${d25} mL · D50: ${d50} mL`,
+        route: "IV",
+        notes: "Neonates: D10 only",
+        color: "#27AE60",
+      });
+    }
+
+    const naloxone = DRUGS.find((d) => d.id === "naloxone");
+    if (naloxone) {
+      const d = naloxone.doses[0];
+      const calc = calculateDose(d, weight);
+      results.push({
+        label: "Naloxone (Opioid OD)",
+        dose: calc.dose,
+        route: "IV/IM/IN",
+        notes: "May repeat every 2–3 min; max 2 mg",
+        color: "#7B2D8B",
+      });
+    }
+
+    const amiodarone = DRUGS.find((d) => d.id === "amiodarone");
+    if (amiodarone) {
+      const d = amiodarone.doses[0];
+      const calc = calculateDose(d, weight);
+      results.push({
+        label: "Amiodarone (Pulseless VT/VF)",
+        dose: calc.dose,
+        route: "IV/IO",
+        notes: "Max 300 mg per dose",
+        color: "#C0392B",
+        warning: true,
+      });
+    }
+
+    const lorazepam = DRUGS.find((d) => d.id === "lorazepam");
+    if (lorazepam) {
+      const d = lorazepam.doses[0];
+      const calc = calculateDose(d, weight);
+      results.push({
+        label: "Lorazepam (Status Epilepticus)",
+        dose: calc.dose,
+        route: "IV",
+        notes: "Max 4 mg; may repeat once after 5 min",
+        color: "#B7770D",
+      });
+    }
+
+    const midazolam = DRUGS.find((d) => d.id === "midazolam");
+    if (midazolam) {
+      const inDose = +(0.3 * weight).toFixed(2);
+      results.push({
+        label: "Midazolam IN (Seizures)",
+        dose: `${inDose} mg`,
+        route: "Intranasal",
+        notes: "0.3 mg/kg IN; max 10 mg",
+        color: "#B7770D",
+      });
+    }
+
+    return results;
+  }, [weight]);
+
+  return (
+    <View style={[styles.container, { backgroundColor: isDark ? "#080E16" : "#F0F4F8" }]}>
+      {/* Header */}
+      <View
+        style={[
+          styles.header,
+          {
+            paddingTop: topPadding + 12,
+            backgroundColor: "#AE2012",
+          },
+        ]}
+      >
+        <View style={styles.headerRow}>
+          <Feather name="alert-circle" size={22} color="#FFFFFF" />
+          <Text
+            style={[
+              styles.headerTitle,
+              { fontFamily: "Inter_700Bold" },
+            ]}
+          >
+            Emergency Doses
+          </Text>
+        </View>
+        <Text style={[styles.headerSubtitle, { fontFamily: "Inter_400Regular" }]}>
+          Weight: {weight} kg · All doses weight-based
+        </Text>
+        <View style={styles.warningBanner}>
+          <Feather name="alert-triangle" size={14} color="#FFFFFF" />
+          <Text style={[styles.warningText, { fontFamily: "Inter_500Medium" }]}>
+            Always verify doses. For emergency use only.
+          </Text>
+        </View>
+      </View>
+
+      {/* Emergency Cards */}
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          {
+            paddingBottom:
+              insets.bottom + (Platform.OS === "web" ? 84 : 90),
+          },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        {emergencyCards.map((item, idx) => (
+          <View
+            key={idx}
+            style={[
+              styles.emergencyCard,
+              {
+                backgroundColor: isDark ? "#0F1E2E" : "#FFFFFF",
+                borderLeftColor: item.color,
+              },
+            ]}
+          >
+            <View style={styles.cardTop}>
+              <View style={styles.cardTitleRow}>
+                {item.warning && (
+                  <View
+                    style={[
+                      styles.criticalBadge,
+                      { backgroundColor: item.color + "22" },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.criticalText,
+                        { color: item.color, fontFamily: "Inter_700Bold" },
+                      ]}
+                    >
+                      CRITICAL
+                    </Text>
+                  </View>
+                )}
+                <Text
+                  style={[
+                    styles.cardLabel,
+                    {
+                      color: isDark ? "#E8F0FE" : "#0D1B2A",
+                      fontFamily: "Inter_600SemiBold",
+                    },
+                  ]}
+                >
+                  {item.label}
+                </Text>
+              </View>
+              <View
+                style={[
+                  styles.routeTag,
+                  { backgroundColor: item.color + "22" },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.routeTagText,
+                    { color: item.color, fontFamily: "Inter_600SemiBold" },
+                  ]}
+                >
+                  {item.route}
+                </Text>
+              </View>
+            </View>
+
+            <Text
+              style={[
+                styles.cardDose,
+                { color: item.color, fontFamily: "Inter_700Bold" },
+              ]}
+            >
+              {item.dose}
+            </Text>
+
+            <Text
+              style={[
+                styles.cardNotes,
+                {
+                  color: isDark ? "#5A7A96" : "#8A9BB0",
+                  fontFamily: "Inter_400Regular",
+                },
+              ]}
+            >
+              {item.notes}
+            </Text>
+          </View>
+        ))}
+
+        {/* PALS Quick Reference */}
+        <View
+          style={[
+            styles.palsBanner,
+            {
+              backgroundColor: isDark ? "#0A1520" : "#FFFFFF",
+              borderColor: isDark ? "#1E2D3D" : "#E2E8F0",
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.palsTitle,
+              { color: colors.tint, fontFamily: "Inter_700Bold" },
+            ]}
+          >
+            PALS Quick Reference
+          </Text>
+
+          {[
+            {
+              label: "CPR Rate",
+              value: "100–120 compressions/min",
+              color: "#AE2012",
+            },
+            {
+              label: "Compression Depth",
+              value: "≥ 1/3 AP chest depth",
+              color: "#AE2012",
+            },
+            {
+              label: "Defibrillation",
+              value: `${2 * weight} J (2 J/kg) → ${4 * weight} J (4 J/kg)`,
+              color: "#E67E22",
+            },
+            {
+              label: "ET Tube Size",
+              value: `~${Math.round((weight / 4 + 4) * 10) / 10} mm (uncuffed)`,
+              color: "#1A5276",
+            },
+            {
+              label: "ETT Depth (oral)",
+              value: `~${Math.round((weight / 2 + 12) * 10) / 10} cm at lip`,
+              color: "#1A5276",
+            },
+          ].map((ref) => (
+            <View
+              key={ref.label}
+              style={[
+                styles.refRow,
+                { borderBottomColor: isDark ? "#1E2D3D" : "#F0F4F8" },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.refLabel,
+                  {
+                    color: isDark ? "#8A9BB0" : "#4A5568",
+                    fontFamily: "Inter_400Regular",
+                  },
+                ]}
+              >
+                {ref.label}
+              </Text>
+              <Text
+                style={[
+                  styles.refValue,
+                  { color: ref.color, fontFamily: "Inter_600SemiBold" },
+                ]}
+              >
+                {ref.value}
+              </Text>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  header: {
+    paddingHorizontal: 16,
+    paddingBottom: 14,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 4,
+  },
+  headerTitle: {
+    fontSize: 22,
+    color: "#FFFFFF",
+    letterSpacing: -0.5,
+  },
+  headerSubtitle: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.75)",
+    marginBottom: 10,
+  },
+  warningBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "rgba(0,0,0,0.25)",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  warningText: { fontSize: 12, color: "#FFFFFF" },
+  scrollContent: { padding: 12, gap: 10 },
+  emergencyCard: {
+    borderRadius: 14,
+    padding: 14,
+    borderLeftWidth: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
+    gap: 6,
+    marginBottom: 10,
+  },
+  cardTop: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  cardTitleRow: { flex: 1, gap: 4 },
+  criticalBadge: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  criticalText: { fontSize: 9, letterSpacing: 0.5 },
+  cardLabel: { fontSize: 14, flex: 1 },
+  routeTag: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
+  routeTagText: { fontSize: 11 },
+  cardDose: { fontSize: 22, letterSpacing: -0.5 },
+  cardNotes: { fontSize: 12, lineHeight: 16 },
+  palsBanner: {
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+    marginBottom: 10,
+  },
+  palsTitle: { fontSize: 16, marginBottom: 12 },
+  refRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    alignItems: "center",
+  },
+  refLabel: { fontSize: 13, flex: 1 },
+  refValue: { fontSize: 14, textAlign: "right", flex: 1 },
+});
