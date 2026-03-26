@@ -9,12 +9,18 @@ import { Platform, StyleSheet, View, useColorScheme } from "react-native";
 
 import Colors from "@/constants/colors";
 
+const C = Colors.light;
+
 function NativeTabLayout() {
   return (
     <NativeTabs>
       <NativeTabs.Trigger name="index">
         <Icon sf={{ default: "pills", selected: "pills.fill" }} />
         <Label>Drugs</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="infusion">
+        <Icon sf={{ default: "drop", selected: "drop.fill" }} />
+        <Label>Infusion</Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="calculator">
         <Icon sf={{ default: "scalemass", selected: "scalemass.fill" }} />
@@ -37,8 +43,8 @@ function ClassicTabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors.light.tint,
-        tabBarInactiveTintColor: Colors.light.tabIconDefault,
+        tabBarActiveTintColor: C.tint,
+        tabBarInactiveTintColor: C.tabIconDefault,
         headerShown: false,
         tabBarStyle: {
           position: "absolute",
@@ -46,7 +52,12 @@ function ClassicTabLayout() {
           borderTopWidth: isWeb ? 1 : 0,
           borderTopColor: isDark ? "#1E2D3D" : "#E2E8F0",
           elevation: 0,
-          height: isWeb ? 84 : undefined,
+          height: isWeb ? 64 : undefined,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: "600",
+          marginBottom: Platform.OS === "android" ? 4 : 0,
         },
         tabBarBackground: () =>
           isIOS ? (
@@ -74,6 +85,18 @@ function ClassicTabLayout() {
               <SymbolView name="pills" tintColor={color} size={24} />
             ) : (
               <Feather name="list" size={22} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="infusion"
+        options={{
+          title: "Infusion",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="drop.fill" tintColor={color} size={24} />
+            ) : (
+              <Feather name="activity" size={22} color={color} />
             ),
         }}
       />

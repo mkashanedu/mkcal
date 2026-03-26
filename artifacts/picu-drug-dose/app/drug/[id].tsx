@@ -245,6 +245,64 @@ export default function DrugDetailScreen() {
             </View>
           </>
         )}
+
+        {/* Renal Dose Adjustments */}
+        {drug.renalAdjustment && drug.renalAdjustment.length > 0 && (
+          <>
+            <SectionHeader title="Renal Dose Adjustment" icon="filter" color="#0C7B9C" isDark={isDark} />
+            <View style={[styles.card, { backgroundColor: isDark ? "#0F1E2E" : "#FFFFFF", overflow: "visible" }]}>
+              <View style={[styles.renalHeader, { backgroundColor: "#0C7B9C" + "18", borderBottomWidth: 1, borderBottomColor: isDark ? "#1E2D3D" : "#E8F4F8" }]}>
+                <Text style={[styles.renalHeaderCell, { color: "#0C7B9C", flex: 1, fontFamily: "Inter_600SemiBold" }]}>GFR (mL/min/1.73m²)</Text>
+                <Text style={[styles.renalHeaderCell, { color: "#0C7B9C", flex: 2, fontFamily: "Inter_600SemiBold" }]}>Adjustment</Text>
+              </View>
+              {drug.renalAdjustment.map((r, i) => (
+                <View
+                  key={i}
+                  style={[
+                    styles.renalRow,
+                    { borderTopWidth: i === 0 ? 0 : 1, borderTopColor: isDark ? "#1E2D3D" : "#F0F4F8" },
+                  ]}
+                >
+                  <View style={[styles.renalGfrBox, { flex: 1 }]}>
+                    <Text style={[styles.renalGfr, { color: "#0C7B9C", fontFamily: "Inter_600SemiBold" }]}>
+                      {r.gfr}
+                    </Text>
+                  </View>
+                  <Text style={[styles.renalAdjText, { flex: 2, color: isDark ? "#C8D8E8" : "#0D1B2A", fontFamily: "Inter_400Regular" }]}>
+                    {r.adjustment}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </>
+        )}
+
+        {/* Monitoring Parameters */}
+        {drug.monitoring && drug.monitoring.length > 0 && (
+          <>
+            <SectionHeader title="Monitoring" icon="eye" color="#6B2D8E" isDark={isDark} />
+            <View style={[styles.card, { backgroundColor: isDark ? "#0F1E2E" : "#FFFFFF" }]}>
+              {drug.monitoring.map((m, i) => (
+                <View key={i} style={[styles.listRow, { borderTopWidth: i === 0 ? 0 : 1, borderTopColor: isDark ? "#1E2D3D" : "#F0F4F8" }]}>
+                  <Feather name="check" size={14} color="#6B2D8E" />
+                  <Text style={[styles.listText, { color: isDark ? "#C8D8E8" : "#0D1B2A", fontFamily: "Inter_400Regular" }]}>
+                    {m}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </>
+        )}
+
+        {/* Reference */}
+        {drug.reference && (
+          <View style={styles.referenceRow}>
+            <Feather name="book-open" size={12} color={isDark ? "#5A7A96" : "#8A9BB0"} />
+            <Text style={[styles.referenceText, { color: isDark ? "#5A7A96" : "#8A9BB0", fontFamily: "Inter_400Regular" }]}>
+              {drug.reference}
+            </Text>
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -370,4 +428,29 @@ const styles = StyleSheet.create({
   formulationsRow: { flexDirection: "row", flexWrap: "wrap", padding: 12, gap: 8 },
   formulationTag: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
   formulationText: { fontSize: 13 },
+  renalHeader: {
+    flexDirection: "row",
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  renalHeaderCell: { fontSize: 11, textTransform: "uppercase", letterSpacing: 0.5 },
+  renalRow: {
+    flexDirection: "row",
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    alignItems: "flex-start",
+    gap: 8,
+  },
+  renalGfrBox: {},
+  renalGfr: { fontSize: 13 },
+  renalAdjText: { fontSize: 13, lineHeight: 19 },
+  referenceRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 4,
+    paddingVertical: 8,
+    marginTop: 4,
+  },
+  referenceText: { fontSize: 12, fontStyle: "italic" },
 });
