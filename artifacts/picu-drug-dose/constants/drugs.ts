@@ -410,6 +410,201 @@ export const DRUGS: Drug[] = [
   },
 
   // ════════════════════════════════════════════════════════════
+  //  NMBDs / RSI DRUGS
+  // ════════════════════════════════════════════════════════════
+  {
+    id: "suxamethonium",
+    name: "Suxamethonium",
+    genericName: "Succinylcholine — Scoline / Kinz",
+    category: "nmbd",
+    indications: ["Rapid sequence intubation (RSI) — 1st choice for short procedure", "Laryngospasm", "Emergency intubation requiring rapid onset"],
+    doses: [
+      { value: 1.5, unit: "mg/kg", perKg: true, route: "IV", maxDose: "150 mg", label: "RSI — Children (IV)", notes: "Onset 30–60 sec; duration 4–6 min. PALS 2025: 1.5–2 mg/kg for RSI." },
+      { value: 2, unit: "mg/kg", perKg: true, route: "IV", maxDose: "200 mg", label: "RSI — Neonates / Infants", notes: "Higher dose needed in infants due to larger Vd" },
+      { value: 4, unit: "mg/kg", perKg: true, route: "IM", maxDose: "150 mg", label: "IM (no IV access)", notes: "Onset 3–4 min IM; use only if IV/IO unavailable" },
+    ],
+    contraindications: [
+      "Hyperkalemia (K⁺ > 5.5 mEq/L) — causes 0.5–1 mEq/L K⁺ rise → fatal cardiac arrest",
+      "Crush injury / burns (> 24 hr onset) — risk of massive hyperkalemia",
+      "Denervation injury / prolonged immobility (> 5 days)",
+      "Malignant hyperthermia susceptibility or family history",
+      "Personal or family history of myopathy",
+      "Acute rhabdomyolysis",
+    ],
+    warnings: [
+      "⚠️ AVOID in crush injury, burns after 24 hr, prolonged ICU immobility — fatal hyperkalemia",
+      "Bradycardia (especially 2nd dose / children < 5 yr) — pre-treat with atropine 0.02 mg/kg IV",
+      "Malignant hyperthermia trigger — have dantrolene available",
+      "Pseudocholinesterase deficiency — prolonged block (hours) — support ventilation",
+      "PALS 2025: Rocuronium 1.2 mg/kg + sugammadex preferred if succinylcholine contraindicated",
+    ],
+    formulations: ["50 mg/mL (2 mL amp = 100 mg)", "20 mg/mL multi-dose vial"],
+    monitoring: ["SpO₂, HR, ETCO₂, train-of-four (TOF) for repeat dosing"],
+    reference: "PALS 2025 | Harriet Lane 23e | Miller's Anesthesia",
+  },
+  {
+    id: "ketamine-rsi",
+    name: "Ketamine (RSI / Induction)",
+    genericName: "Kinz — RSI induction agent",
+    category: "nmbd",
+    indications: ["RSI induction (hemodynamically unstable patients)", "Procedural sedation induction", "Status asthmaticus with intubation"],
+    doses: [
+      { min: 1, max: 2, unit: "mg/kg", perKg: true, route: "IV over 30–60 sec", maxDose: "200 mg", label: "RSI induction — standard", notes: "Onset 30–60 sec; duration 5–10 min. Preferred in shock/bronchospasm." },
+      { min: 1.5, max: 2, unit: "mg/kg", perKg: true, route: "IV", label: "Status asthmaticus with impending respiratory failure", notes: "Bronchodilatory and induction combined — ideal in severe asthma" },
+      { min: 4, max: 6, unit: "mg/kg", perKg: true, route: "IM", maxDose: "500 mg", label: "IM induction (no IV access)", notes: "Onset 3–5 min; use when IV/IO not feasible" },
+    ],
+    warnings: [
+      "Increases secretions — give glycopyrrolate 0.005 mg/kg IV (or atropine) before",
+      "Emergence agitation — can give midazolam 0.05 mg/kg to reduce",
+      "Use cautiously if elevated ICP suspected (avoid in isolated head trauma without hypotension)",
+      "PALS 2025: Ketamine is the preferred induction agent in hemodynamically unstable children",
+    ],
+    formulations: ["10 mg/mL (20 mL vial)", "50 mg/mL (10 mL vial)", "100 mg/mL (10 mL vial)"],
+    monitoring: ["BP, HR, SpO₂, airway secretions"],
+    reference: "PALS 2025 | Harriet Lane 23e",
+  },
+  {
+    id: "rocuronium",
+    name: "Rocuronium",
+    genericName: "Esmeron",
+    category: "nmbd",
+    indications: ["RSI (preferred non-depolarizing NMBD)", "Neuromuscular blockade for intubation", "ICU paralysis for mechanical ventilation", "Status asthmaticus refractory to treatment"],
+    doses: [
+      { value: 1.2, unit: "mg/kg", perKg: true, route: "IV", maxDose: "120 mg", label: "RSI dose (high-dose)", notes: "Onset 60 sec at 1.2 mg/kg — equivalent to succinylcholine onset. Reversible with sugammadex 16 mg/kg." },
+      { value: 0.6, unit: "mg/kg", perKg: true, route: "IV", maxDose: "60 mg", label: "Routine intubation dose", notes: "Onset 90–120 sec; duration 30–45 min. Sugammadex 4 mg/kg reversal." },
+      { min: 0.1, max: 0.2, unit: "mg/kg", perKg: true, route: "IV", label: "Maintenance bolus", notes: "Give when TOF count 1–2 returns; usually every 20–30 min" },
+      { min: 5, max: 12, unit: "mcg/kg/min", perKg: true, route: "IV infusion (ICU)", label: "Continuous ICU infusion", notes: "For refractory bronchospasm, ARDS prone positioning, ICP management" },
+    ],
+    warnings: [
+      "REVERSAL MANDATORY: Sugammadex 16 mg/kg (RSI dose) or 4 mg/kg (routine) — have at bedside",
+      "No analgesic or sedative effect — MUST give adequate sedation/analgesia before paralysis",
+      "Awareness under paralysis — confirm deep sedation (RASS −4 or −5) before/during paralysis",
+      "Prolonged block with hepatic failure (rocuronium is hepatically metabolised)",
+    ],
+    formulations: ["10 mg/mL (5 mL vial = 50 mg)", "10 mg/mL (10 mL vial = 100 mg)"],
+    renalAdjustment: [
+      { gfr: "Any", adjustment: "Primarily hepatic metabolism — no renal dose adjustment. Severe hepatic impairment: prolonged duration, reduce maintenance dose by 30–50%" },
+    ],
+    monitoring: ["Train-of-four (TOF) monitoring — target 0–1/4 twitches during ICU paralysis", "Sedation level (BIS if available)", "ETCO₂, airway pressures"],
+    reference: "PALS 2025 | Harriet Lane 23e | Miller's Anesthesia",
+  },
+  {
+    id: "atracurium",
+    name: "Atracurium",
+    genericName: "Tracrium",
+    category: "nmbd",
+    indications: ["Neuromuscular blockade for intubation", "ICU mechanical ventilation paralysis", "Preferred in hepatic/renal failure (Hofmann elimination)"],
+    doses: [
+      { min: 0.3, max: 0.6, unit: "mg/kg", perKg: true, route: "IV over 30–60 sec", maxDose: "60 mg", label: "Intubation / bolus", notes: "Standard: 0.5 mg/kg. Onset 2–3 min; duration 20–35 min." },
+      { min: 0.1, max: 0.2, unit: "mg/kg", perKg: true, route: "IV", frequency: "Every 15–25 min as needed", label: "Maintenance bolus" },
+      { min: 5, max: 10, unit: "mcg/kg/min", perKg: true, route: "IV infusion", label: "ICU continuous infusion", notes: "Start at 5–9 mcg/kg/min; titrate by TOF monitoring" },
+    ],
+    warnings: [
+      "Laudanosine metabolite can accumulate in hepatic failure and cause seizures — monitor",
+      "Histamine release with rapid injection — inject slowly over 60 sec; bronchospasm/hypotension possible",
+      "No reversal agent (neostigmine only partial) — allow spontaneous recovery or use TOF monitoring",
+      "No analgesic or sedative effect — ensure adequate sedation before paralysis",
+      "Advantage: Hofmann elimination — safe in severe renal AND hepatic failure",
+    ],
+    formulations: ["10 mg/mL (2.5 mL = 25 mg amp)", "10 mg/mL (5 mL = 50 mg vial)"],
+    renalAdjustment: [
+      { gfr: "Any (including dialysis)", adjustment: "No dose adjustment needed — Hofmann elimination is spontaneous (pH/temperature-dependent), not organ-dependent. Preferred NMBD in multi-organ failure." },
+    ],
+    monitoring: ["TOF monitoring (target 0–1/4 twitch for ICU paralysis)", "Temperature and pH (affect Hofmann elimination rate)", "Laudanosine levels if prolonged use > 72 hr (reference lab)"],
+    reference: "Harriet Lane 23e | Miller's Anesthesia",
+  },
+  {
+    id: "cisatracurium",
+    name: "Cisatracurium",
+    genericName: "Nimbex",
+    category: "nmbd",
+    indications: ["ICU mechanical ventilation (preferred NMBD in ARDS)", "Neuromuscular blockade in hepatic/renal failure", "ARDS early paralysis (ACURASYS protocol)"],
+    doses: [
+      { min: 0.1, max: 0.2, unit: "mg/kg", perKg: true, route: "IV", maxDose: "20 mg", label: "Intubation bolus", notes: "Onset 3–5 min; duration 40–75 min. Slower onset than atracurium — NOT for RSI." },
+      { value: 0.1, unit: "mg/kg", perKg: true, route: "IV", frequency: "Every 20–40 min", label: "Maintenance bolus" },
+      { min: 1, max: 3, unit: "mcg/kg/min", perKg: true, route: "IV infusion", label: "ICU continuous infusion (ARDS)", notes: "ACURASYS: 37.5 mcg/kg/hr = ~0.625 mcg/kg/min × 48 hr in early ARDS. Typical 1–3 mcg/kg/min." },
+    ],
+    warnings: [
+      "NOT suitable for RSI — onset too slow (3–5 min)",
+      "Much less histamine release than atracurium — preferred in asthma/haemodynamic instability",
+      "No analgesic or sedative effect — mandatory sedation/analgesia during paralysis",
+      "Laudanosine accumulates less than atracurium (cisatracurium produces 5× less laudanosine)",
+      "ACURASYS trial: 48 hr cisatracurium infusion in moderate-severe ARDS reduces 90-day mortality",
+    ],
+    formulations: ["2 mg/mL (10 mL vial = 20 mg)", "2 mg/mL (20 mL vial = 40 mg)"],
+    renalAdjustment: [
+      { gfr: "Any (including dialysis)", adjustment: "No dose adjustment — Hofmann elimination. PREFERRED NMBD for ICU patients with multi-organ failure (less laudanosine than atracurium)." },
+    ],
+    monitoring: ["TOF monitoring (target 0/4 for ARDS protocol)", "Sedation depth (RASS −4 to −5 during paralysis)", "Spontaneous breathing efforts during ARDS paralysis"],
+    reference: "Harriet Lane 23e | ACURASYS Trial | PALICC 2023",
+  },
+  {
+    id: "vecuronium",
+    name: "Vecuronium",
+    genericName: "Norcuron",
+    category: "nmbd",
+    indications: ["Intubation and neuromuscular blockade", "ICU paralysis (intermediate duration)", "Cardiovascular stability required (no histamine release)"],
+    doses: [
+      { min: 0.1, max: 0.2, unit: "mg/kg", perKg: true, route: "IV", maxDose: "20 mg", label: "Intubation bolus", notes: "Onset 2–3 min; duration 25–40 min. No cardiovascular effects." },
+      { min: 0.05, max: 0.1, unit: "mg/kg", perKg: true, route: "IV", frequency: "Every 20–35 min", label: "Maintenance bolus" },
+      { min: 0.8, max: 1.2, unit: "mcg/kg/min", perKg: true, route: "IV infusion", label: "Continuous infusion", notes: "Titrate by TOF monitoring; tolerance develops — may need dose increase" },
+    ],
+    warnings: [
+      "Active 3-desacetyl metabolite accumulates in renal failure — prolonged block",
+      "No histamine release — preferred when haemodynamic stability needed",
+      "No analgesic or sedative effect — ensure adequate analgosedation",
+    ],
+    formulations: ["4 mg/vial (lyophilised — reconstitute with 2 mL WFI = 2 mg/mL)", "10 mg/vial"],
+    renalAdjustment: [
+      { gfr: "< 30 mL/min/1.73m²", adjustment: "Prolonged block — active 3-OH metabolite accumulates. Use atracurium or cisatracurium instead in severe renal failure." },
+    ],
+    monitoring: ["TOF monitoring mandatory in ICU", "Duration prolonged in renal/hepatic failure"],
+    reference: "Harriet Lane 23e | Miller's Anesthesia",
+  },
+  {
+    id: "sugammadex",
+    name: "Sugammadex",
+    genericName: "Bridion — Rocuronium/Vecuronium reversal",
+    category: "nmbd",
+    indications: ["Reversal of rocuronium or vecuronium blockade", "Immediate reversal after RSI dose rocuronium (can't intubate, can't oxygenate — CICO)"],
+    doses: [
+      { value: 2, unit: "mg/kg", perKg: true, route: "IV", maxDose: "200 mg", label: "Routine reversal (TOF count ≥ 2)", notes: "Give when TOF count returns to 2/4. Full reversal in 3 min." },
+      { value: 4, unit: "mg/kg", perKg: true, route: "IV", maxDose: "400 mg", label: "Deep block reversal (TOF count 1 or PTC 1–2)", notes: "Use when TOF count = 1 or Post-tetanic count 1–2." },
+      { value: 16, unit: "mg/kg", perKg: true, route: "IV rapid bolus", maxDose: "1600 mg", label: "EMERGENCY reversal (CICO after RSI rocuronium)", notes: "PALS 2025: 16 mg/kg IV STAT for cannot intubate/cannot oxygenate (CICO) scenario. Full reversal in 3 min." },
+    ],
+    warnings: [
+      "ONLY reverses rocuronium and vecuronium — NO effect on succinylcholine, atracurium, cisatracurium",
+      "Re-curarisation possible if inadequate dose — confirm TOF ratio ≥ 0.9 before extubation",
+      "Anaphylaxis (0.3%) — have epinephrine available",
+      "Binds oral contraceptives — advise additional contraception for 7 days",
+    ],
+    formulations: ["200 mg/2 mL (100 mg/mL) vials"],
+    renalAdjustment: [
+      { gfr: "< 30 mL/min/1.73m²", adjustment: "Use with caution — sugammadex-rocuronium complex may accumulate; however reversal still effective. Avoid re-dosing within 24 hr." },
+    ],
+    monitoring: ["TOF monitoring before and after reversal", "SpO₂, RR after reversal"],
+    reference: "PALS 2025 | Harriet Lane 23e | Miller's Anesthesia",
+  },
+  {
+    id: "neostigmine",
+    name: "Neostigmine",
+    genericName: "Prostigmin — with glycopyrrolate",
+    category: "nmbd",
+    indications: ["Reversal of non-depolarizing NMBDs (atracurium, vecuronium, rocuronium)", "Myasthenia gravis treatment"],
+    doses: [
+      { min: 0.05, max: 0.07, unit: "mg/kg", perKg: true, route: "IV over 1–2 min", maxDose: "5 mg", label: "NMBD reversal", notes: "Always give WITH glycopyrrolate 0.01 mg/kg IV (or atropine 0.02 mg/kg) to prevent bradycardia. Only effective if TOF ≥ 2/4." },
+    ],
+    warnings: [
+      "ALWAYS co-administer with glycopyrrolate or atropine — bradycardia/asystole risk",
+      "Only partially reverses deep block (TOF 0/4) — use sugammadex for deep vecuronium/rocuronium block",
+      "Ineffective against succinylcholine — may prolong phase II block",
+      "Bronchospasm risk — use glycopyrrolate (not atropine) in asthmatic patients",
+    ],
+    formulations: ["0.5 mg/mL (1 mL amp)", "2.5 mg/mL (1 mL amp)"],
+    reference: "Harriet Lane 23e",
+  },
+
+  // ════════════════════════════════════════════════════════════
   //  INOTROPES / VASOPRESSORS
   // ════════════════════════════════════════════════════════════
   {

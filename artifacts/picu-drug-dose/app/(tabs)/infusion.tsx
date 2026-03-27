@@ -19,7 +19,6 @@ import {
   INFUSION_DRUGS,
   InfusionDrug,
   InfusionUnit,
-  StandardConcentration,
   calculateInfusionRate,
   formatRate,
   ruleOf6Concentration,
@@ -37,6 +36,14 @@ const DOSE_UNITS: InfusionUnit[] = [
   "mg/hr",
 ];
 
+// ── QUICK VOLUME PRESETS ────────────────────────────────────────────────────
+const VOLUME_PRESETS = [
+  { label: "10 mL", sublabel: "Sedation", value: "10" },
+  { label: "20 mL", sublabel: "Sedation", value: "20" },
+  { label: "50 mL", sublabel: "Inotropes", value: "50" },
+  { label: "100 mL", sublabel: "Standard", value: "100" },
+];
+
 // ──────────────────────────────────────────────────────────────────────────────
 // DRUG SEARCH ITEM
 // ──────────────────────────────────────────────────────────────────────────────
@@ -51,76 +58,35 @@ function DrugSearchItem({
 }) {
   return (
     <TouchableOpacity
-      style={[styles.drugSearchItem, selected && { backgroundColor: drug.color + "22", borderColor: drug.color }]}
+      style={[
+        styles.drugSearchItem,
+        selected && {
+          backgroundColor: drug.color + "18",
+          borderLeftWidth: 3,
+          borderLeftColor: drug.color,
+        },
+      ]}
       onPress={() => onSelect(drug)}
       activeOpacity={0.7}
     >
       <View style={[styles.drugDot, { backgroundColor: drug.color }]} />
       <View style={{ flex: 1 }}>
-        <Text style={[styles.drugSearchName, selected && { color: drug.color }]}>{drug.name}</Text>
+        <Text style={[styles.drugSearchName, selected && { color: drug.color }]}>
+          {drug.name}
+        </Text>
         <Text style={styles.drugSearchCategory}>{drug.category}</Text>
       </View>
-      {selected && <Feather name="check-circle" size={18} color={drug.color} />}
+      {selected && (
+        <Feather name="check-circle" size={18} color={drug.color} />
+      )}
     </TouchableOpacity>
   );
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// CONCENTRATION PICKER
+// CONCENTRATION MODE TYPES
 // ──────────────────────────────────────────────────────────────────────────────
-function ConcentrationPicker({
-  drug,
-  selected,
-  onSelect,
-  weight,
-}: {
-  drug: InfusionDrug;
-  selected: number;
-  onSelect: (idx: number) => void;
-  weight: number;
-}) {
-  return (
-    <View style={styles.concContainer}>
-      {drug.standardConcentrations.map((c, idx) => {
-        const isWeightBased = c.totalDrug_mg === -1;
-        const displayConc = isWeightBased
-          ? ruleOf6Concentration(
-              Number(c.label.split(" ")[0]), // multiplier from label "3 mg/kg..."
-              weight,
-              c.totalVolume_mL
-            )
-          : c.concentration_per_mL;
-        const concStr = displayConc > 0 ? ` — ${displayConc.toFixed(3)} mg/mL` : "";
-
-        return (
-          <TouchableOpacity
-            key={idx}
-            style={[
-              styles.concOption,
-              selected === idx && { borderColor: drug.color, backgroundColor: drug.color + "18" },
-            ]}
-            onPress={() => onSelect(idx)}
-            activeOpacity={0.7}
-          >
-            <View style={styles.concRow}>
-              <View style={[styles.radioOuter, selected === idx && { borderColor: drug.color }]}>
-                {selected === idx && <View style={[styles.radioInner, { backgroundColor: drug.color }]} />}
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.concLabel, selected === idx && { color: drug.color }]}>
-                  {c.label}
-                </Text>
-                {isWeightBased && weight > 0 && (
-                  <Text style={styles.concNote}>For {weight} kg: {(Number(c.label.split(" ")[0]) * weight).toFixed(1)} mg in {c.totalVolume_mL} mL{concStr}</Text>
-                )}
-              </View>
-            </View>
-          </TouchableOpacity>
-        );
-      })}
-    </View>
-  );
-}
+type ConcMode = "standard" | "dilution";
 
 // ──────────────────────────────────────────────────────────────────────────────
 // MAIN SCREEN
@@ -133,8 +99,15 @@ export default function InfusionScreen() {
   const [selectedConcIdx, setSelectedConcIdx] = useState(0);
   const [doseInput, setDoseInput] = useState("");
   const [doseUnit, setDoseUnit] = useState<InfusionUnit>("mcg/kg/min");
-  const [customConc, setCustomConc] = useState("");
-  const [useCustomConc, setUseCustomConc] = useState(false);
+
+  // Concentration mode
+  const [concMode, setConcMode] = useState<ConcMode>("standard");
+  // Custom dilution inputs
+  const [dilutionDrug_mg, setDilutionDrug_mg] = useState("");
+  const [dilutionVol_mL, setDilutionVol_mL] = useState("50");
+  // Fallback: manual mg/mL entry
+  const [manualConc_mgmL, setManualConc_mgmL] = useState("");
+
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   const weightNum = parseFloat(weight) || 0;
@@ -159,8 +132,10 @@ export default function InfusionScreen() {
       setSelectedConcIdx(0);
       setDoseInput(String(drug.typicalDose ?? drug.minDose));
       setDoseUnit(drug.primaryUnit);
-      setUseCustomConc(false);
-      setCustomConc("");
+      setConcMode("standard");
+      setDilutionDrug_mg("");
+      setDilutionVol_mL("50");
+      setManualConc_mgmL("");
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 300,
@@ -170,9 +145,18 @@ export default function InfusionScreen() {
     [fadeAnim]
   );
 
-  const getConcentration = (): number => {
-    if (useCustomConc) return parseFloat(customConc) || 0;
+  // ── Concentration calculation ─────────────────────────────────
+  const concentration = useMemo((): number => {
     if (!selectedDrug) return 0;
+
+    if (concMode === "dilution") {
+      const mg = parseFloat(dilutionDrug_mg);
+      const mL = parseFloat(dilutionVol_mL);
+      if (mg > 0 && mL > 0) return mg / mL;
+      return 0;
+    }
+
+    // standard
     const c = selectedDrug.standardConcentrations[selectedConcIdx];
     if (!c) return 0;
     if (c.totalDrug_mg === -1) {
@@ -180,9 +164,14 @@ export default function InfusionScreen() {
       return ruleOf6Concentration(multiplier, weightNum, c.totalVolume_mL);
     }
     return c.concentration_per_mL;
-  };
-
-  const concentration = getConcentration();
+  }, [
+    concMode,
+    dilutionDrug_mg,
+    dilutionVol_mL,
+    selectedDrug,
+    selectedConcIdx,
+    weightNum,
+  ]);
 
   const rateMLhr = useMemo(() => {
     if (!doseNum || !weightNum || !concentration) return 0;
@@ -191,6 +180,14 @@ export default function InfusionScreen() {
 
   const rateStr = formatRate(rateMLhr);
   const rateValid = rateMLhr > 0 && isFinite(rateMLhr);
+
+  // Derived dilution display
+  const dilutionConc = useMemo(() => {
+    const mg = parseFloat(dilutionDrug_mg);
+    const mL = parseFloat(dilutionVol_mL);
+    if (mg > 0 && mL > 0) return mg / mL;
+    return 0;
+  }, [dilutionDrug_mg, dilutionVol_mL]);
 
   const unitOptions = selectedDrug
     ? [selectedDrug.primaryUnit, ...(selectedDrug.alternateUnits ?? [])].filter(
@@ -205,13 +202,12 @@ export default function InfusionScreen() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
       >
-        {/* HEADER */}
+        {/* ── HEADER ── */}
         <View style={styles.header}>
           <View>
             <Text style={styles.headerTitle}>Infusion Calculator</Text>
-            <Text style={styles.headerSubtitle}>mL/hr output for infusion pump</Text>
+            <Text style={styles.headerSubtitle}>mL/hr for infusion pump</Text>
           </View>
-          {/* Weight badge */}
           <View style={styles.weightBadge}>
             <Text style={styles.weightLabel}>WEIGHT (KG)</Text>
             <TextInput
@@ -228,47 +224,60 @@ export default function InfusionScreen() {
 
         <ScrollView
           style={styles.scroll}
-          contentContainerStyle={{ paddingBottom: 120 }}
+          contentContainerStyle={{ paddingBottom: 130 }}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* ── STEP 1: Drug Search ── */}
+          {/* ══════════════════════════════════════════════
+              STEP 1 — SELECT DRUG
+          ══════════════════════════════════════════════ */}
           <View style={styles.section}>
             <View style={styles.stepRow}>
-              <View style={styles.stepBadge}><Text style={styles.stepNumber}>1</Text></View>
+              <View style={[styles.stepBadge, selectedDrug && { backgroundColor: selectedDrug.color }]}>
+                <Text style={styles.stepNumber}>1</Text>
+              </View>
               <Text style={styles.stepLabel}>Select Drug</Text>
             </View>
 
-            {/* Drug selector button */}
             <TouchableOpacity
               style={[
                 styles.drugSelector,
-                selectedDrug && { borderColor: selectedDrug.color, borderWidth: 1.5 },
+                selectedDrug && {
+                  borderColor: selectedDrug.color,
+                  borderWidth: 2,
+                },
               ]}
               onPress={() => setShowSearch((s) => !s)}
               activeOpacity={0.8}
             >
               {selectedDrug ? (
                 <View style={styles.selectedDrugRow}>
-                  <View style={[styles.drugDot, { backgroundColor: selectedDrug.color }]} />
+                  <View style={[styles.drugDot, { backgroundColor: selectedDrug.color, width: 12, height: 12, borderRadius: 6 }]} />
                   <View style={{ flex: 1 }}>
                     <Text style={[styles.selectedDrugName, { color: selectedDrug.color }]}>
                       {selectedDrug.name}
                     </Text>
-                    <Text style={styles.selectedDrugCategory}>{selectedDrug.category}</Text>
+                    <Text style={styles.selectedDrugCategory}>
+                      {selectedDrug.category}
+                    </Text>
                   </View>
-                  <Feather name={showSearch ? "chevron-up" : "chevron-down"} size={18} color={C.textMuted} />
+                  <Feather
+                    name={showSearch ? "chevron-up" : "chevron-down"}
+                    size={18}
+                    color={C.textMuted}
+                  />
                 </View>
               ) : (
                 <View style={styles.selectedDrugRow}>
                   <Feather name="search" size={18} color={C.textMuted} style={{ marginRight: 10 }} />
-                  <Text style={{ color: C.textMuted, fontSize: 15 }}>Search drug (dopamine, fentanyl…)</Text>
+                  <Text style={{ color: C.textMuted, fontSize: 15 }}>
+                    Search drug…
+                  </Text>
                   <Feather name="chevron-down" size={18} color={C.textMuted} />
                 </View>
               )}
             </TouchableOpacity>
 
-            {/* Search dropdown */}
             {showSearch && (
               <View style={styles.searchDropdown}>
                 <View style={styles.searchInputRow}>
@@ -277,7 +286,7 @@ export default function InfusionScreen() {
                     style={styles.searchInput}
                     value={search}
                     onChangeText={setSearch}
-                    placeholder="Type to filter…"
+                    placeholder="Dopamine, fentanyl, atracurium…"
                     placeholderTextColor={C.textMuted}
                     autoFocus
                     returnKeyType="search"
@@ -298,7 +307,7 @@ export default function InfusionScreen() {
                       onSelect={handleDrugSelect}
                     />
                   )}
-                  style={{ maxHeight: 280 }}
+                  style={{ maxHeight: 300 }}
                   keyboardShouldPersistTaps="handled"
                   showsVerticalScrollIndicator={false}
                 />
@@ -308,14 +317,18 @@ export default function InfusionScreen() {
 
           {selectedDrug && (
             <Animated.View style={{ opacity: fadeAnim }}>
-              {/* ── STEP 2: Dose Input ── */}
+              {/* ══════════════════════════════════════════════
+                  STEP 2 — DOSE
+              ══════════════════════════════════════════════ */}
               <View style={styles.section}>
                 <View style={styles.stepRow}>
-                  <View style={styles.stepBadge}><Text style={styles.stepNumber}>2</Text></View>
-                  <Text style={styles.stepLabel}>Enter Desired Dose</Text>
+                  <View style={[styles.stepBadge, { backgroundColor: selectedDrug.color }]}>
+                    <Text style={styles.stepNumber}>2</Text>
+                  </View>
+                  <Text style={styles.stepLabel}>Desired Dose</Text>
                 </View>
 
-                <View style={styles.doseInputRow}>
+                <View style={styles.doseRow}>
                   <TextInput
                     style={[styles.doseInput, { borderColor: selectedDrug.color }]}
                     value={doseInput}
@@ -325,24 +338,23 @@ export default function InfusionScreen() {
                     placeholderTextColor={C.textMuted}
                     selectTextOnFocus
                   />
-                  <View style={{ flex: 1 }} />
                   <View style={styles.doseRangeBox}>
-                    <Text style={styles.doseRangeLabel}>Range</Text>
-                    <Text style={styles.doseRange}>
+                    <Text style={styles.doseRangeLabel}>Normal Range</Text>
+                    <Text style={[styles.doseRange, { color: selectedDrug.color }]}>
                       {selectedDrug.minDose} – {selectedDrug.maxDose}
                     </Text>
+                    <Text style={styles.doseRangeUnit}>{selectedDrug.primaryUnit}</Text>
                   </View>
                 </View>
 
-                {/* Typical dose hint */}
-                {selectedDrug.typicalDose && (
+                {selectedDrug.typicalDose !== undefined && (
                   <TouchableOpacity
-                    style={styles.hintChip}
+                    style={styles.typicalBtn}
                     onPress={() => setDoseInput(String(selectedDrug.typicalDose))}
                   >
                     <Feather name="zap" size={12} color={selectedDrug.color} />
-                    <Text style={[styles.hintChipText, { color: selectedDrug.color }]}>
-                      Typical: {selectedDrug.typicalDose} {doseUnit}
+                    <Text style={[styles.typicalBtnText, { color: selectedDrug.color }]}>
+                      Typical dose: {selectedDrug.typicalDose} {selectedDrug.primaryUnit}
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -358,137 +370,399 @@ export default function InfusionScreen() {
                       key={u}
                       style={[
                         styles.unitChip,
-                        doseUnit === u && { backgroundColor: selectedDrug.color, borderColor: selectedDrug.color },
+                        doseUnit === u && {
+                          backgroundColor: selectedDrug.color,
+                          borderColor: selectedDrug.color,
+                        },
                       ]}
                       onPress={() => setDoseUnit(u)}
                     >
-                      <Text style={[styles.unitChipText, doseUnit === u && { color: "#fff" }]}>{u}</Text>
+                      <Text
+                        style={[
+                          styles.unitChipText,
+                          doseUnit === u && { color: "#fff", fontWeight: "700" },
+                        ]}
+                      >
+                        {u}
+                      </Text>
                     </TouchableOpacity>
                   ))}
                 </ScrollView>
               </View>
 
-              {/* ── STEP 3: Concentration ── */}
+              {/* ══════════════════════════════════════════════
+                  STEP 3 — CONCENTRATION / DILUTION
+              ══════════════════════════════════════════════ */}
               <View style={styles.section}>
                 <View style={styles.stepRow}>
-                  <View style={styles.stepBadge}><Text style={styles.stepNumber}>3</Text></View>
-                  <Text style={styles.stepLabel}>Select Concentration</Text>
+                  <View style={[styles.stepBadge, { backgroundColor: selectedDrug.color }]}>
+                    <Text style={styles.stepNumber}>3</Text>
+                  </View>
+                  <Text style={styles.stepLabel}>Concentration / Dilution</Text>
                 </View>
 
-                {/* Standard concentrations */}
-                {!useCustomConc && (
-                  <ConcentrationPicker
-                    drug={selectedDrug}
-                    selected={selectedConcIdx}
-                    onSelect={setSelectedConcIdx}
-                    weight={weightNum}
-                  />
-                )}
-
-                {/* Custom concentration toggle */}
-                <TouchableOpacity
-                  style={[styles.customToggle, useCustomConc && { borderColor: selectedDrug.color }]}
-                  onPress={() => setUseCustomConc((v) => !v)}
-                >
-                  <View style={[styles.radioOuter, useCustomConc && { borderColor: selectedDrug.color }]}>
-                    {useCustomConc && <View style={[styles.radioInner, { backgroundColor: selectedDrug.color }]} />}
-                  </View>
-                  <Text style={[styles.customToggleText, useCustomConc && { color: selectedDrug.color }]}>
-                    Custom concentration
-                  </Text>
-                </TouchableOpacity>
-
-                {useCustomConc && (
-                  <View style={styles.customConcInputRow}>
-                    <TextInput
-                      style={[styles.customConcInput, { borderColor: selectedDrug.color }]}
-                      value={customConc}
-                      onChangeText={setCustomConc}
-                      keyboardType="decimal-pad"
-                      placeholder="e.g. 0.5"
-                      placeholderTextColor={C.textMuted}
-                      selectTextOnFocus
+                {/* Mode tabs */}
+                <View style={styles.modeTabs}>
+                  <TouchableOpacity
+                    style={[
+                      styles.modeTab,
+                      concMode === "standard" && {
+                        backgroundColor: selectedDrug.color,
+                        borderColor: selectedDrug.color,
+                      },
+                    ]}
+                    onPress={() => setConcMode("standard")}
+                    activeOpacity={0.8}
+                  >
+                    <Feather
+                      name="list"
+                      size={14}
+                      color={concMode === "standard" ? "#fff" : C.textSecondary}
                     />
-                    <Text style={styles.customConcUnit}>mg/mL</Text>
+                    <Text
+                      style={[
+                        styles.modeTabText,
+                        concMode === "standard" && { color: "#fff" },
+                      ]}
+                    >
+                      Standard Mix
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.modeTab,
+                      concMode === "dilution" && {
+                        backgroundColor: selectedDrug.color,
+                        borderColor: selectedDrug.color,
+                      },
+                    ]}
+                    onPress={() => setConcMode("dilution")}
+                    activeOpacity={0.8}
+                  >
+                    <Feather
+                      name="droplet"
+                      size={14}
+                      color={concMode === "dilution" ? "#fff" : C.textSecondary}
+                    />
+                    <Text
+                      style={[
+                        styles.modeTabText,
+                        concMode === "dilution" && { color: "#fff" },
+                      ]}
+                    >
+                      My Dilution
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* ── MODE A: STANDARD CONCENTRATIONS ── */}
+                {concMode === "standard" && (
+                  <View style={styles.standardConcList}>
+                    {selectedDrug.standardConcentrations.map((c, idx) => {
+                      const isWeightBased = c.totalDrug_mg === -1;
+                      const multiplier = isWeightBased
+                        ? parseFloat(c.label.split(" ")[0]) || 0
+                        : 0;
+                      const calcConc = isWeightBased
+                        ? ruleOf6Concentration(multiplier, weightNum, c.totalVolume_mL)
+                        : c.concentration_per_mL;
+                      const isSelected = selectedConcIdx === idx;
+
+                      return (
+                        <TouchableOpacity
+                          key={idx}
+                          style={[
+                            styles.standardConcItem,
+                            isSelected && {
+                              borderColor: selectedDrug.color,
+                              backgroundColor: selectedDrug.color + "12",
+                            },
+                          ]}
+                          onPress={() => setSelectedConcIdx(idx)}
+                          activeOpacity={0.8}
+                        >
+                          <View style={styles.radioRow}>
+                            <View
+                              style={[
+                                styles.radioOuter,
+                                isSelected && { borderColor: selectedDrug.color },
+                              ]}
+                            >
+                              {isSelected && (
+                                <View
+                                  style={[
+                                    styles.radioInner,
+                                    { backgroundColor: selectedDrug.color },
+                                  ]}
+                                />
+                              )}
+                            </View>
+                            <View style={{ flex: 1 }}>
+                              <Text
+                                style={[
+                                  styles.stdConcLabel,
+                                  isSelected && { color: selectedDrug.color },
+                                ]}
+                              >
+                                {c.label}
+                              </Text>
+                              {isWeightBased && weightNum > 0 && (
+                                <Text style={styles.stdConcNote}>
+                                  For {weightNum} kg → {(multiplier * weightNum).toFixed(1)} mg in{" "}
+                                  {c.totalVolume_mL} mL ={" "}
+                                  <Text style={{ color: selectedDrug.color, fontWeight: "700" }}>
+                                    {calcConc.toFixed(3)} mg/mL
+                                  </Text>
+                                </Text>
+                              )}
+                              {!isWeightBased && (
+                                <Text style={styles.stdConcNote}>
+                                  Concentration:{" "}
+                                  <Text style={{ color: selectedDrug.color, fontWeight: "700" }}>
+                                    {calcConc.toFixed(3)} mg/mL
+                                  </Text>
+                                </Text>
+                              )}
+                            </View>
+                          </View>
+                        </TouchableOpacity>
+                      );
+                    })}
                   </View>
                 )}
 
+                {/* ── MODE B: CUSTOM DILUTION CALCULATOR ── */}
+                {concMode === "dilution" && (
+                  <View style={styles.dilutionContainer}>
+                    <Text style={styles.dilutionHelp}>
+                      Enter how you prepared the syringe
+                    </Text>
+
+                    {/* Drug amount row */}
+                    <View style={styles.dilutionRow}>
+                      <View style={styles.dilutionInputGroup}>
+                        <Text style={styles.dilutionLabel}>Drug Amount</Text>
+                        <View style={styles.dilutionInputRow}>
+                          <TextInput
+                            style={[
+                              styles.dilutionInput,
+                              { borderColor: selectedDrug.color },
+                            ]}
+                            value={dilutionDrug_mg}
+                            onChangeText={setDilutionDrug_mg}
+                            keyboardType="decimal-pad"
+                            placeholder="e.g. 50"
+                            placeholderTextColor={C.textMuted}
+                            selectTextOnFocus
+                          />
+                          <Text style={styles.dilutionUnit}>mg</Text>
+                        </View>
+                      </View>
+
+                      <View style={styles.dilutionDivider}>
+                        <Text style={styles.dilutionIn}>in</Text>
+                      </View>
+
+                      <View style={styles.dilutionInputGroup}>
+                        <Text style={styles.dilutionLabel}>Total Volume</Text>
+                        <View style={styles.dilutionInputRow}>
+                          <TextInput
+                            style={[
+                              styles.dilutionInput,
+                              { borderColor: selectedDrug.color },
+                            ]}
+                            value={dilutionVol_mL}
+                            onChangeText={setDilutionVol_mL}
+                            keyboardType="decimal-pad"
+                            placeholder="50"
+                            placeholderTextColor={C.textMuted}
+                            selectTextOnFocus
+                          />
+                          <Text style={styles.dilutionUnit}>mL</Text>
+                        </View>
+                      </View>
+                    </View>
+
+                    {/* Volume quick buttons */}
+                    <View style={styles.volPresetRow}>
+                      {VOLUME_PRESETS.map((p) => (
+                        <TouchableOpacity
+                          key={p.value}
+                          style={[
+                            styles.volPreset,
+                            dilutionVol_mL === p.value && {
+                              backgroundColor: selectedDrug.color,
+                              borderColor: selectedDrug.color,
+                            },
+                          ]}
+                          onPress={() => setDilutionVol_mL(p.value)}
+                        >
+                          <Text
+                            style={[
+                              styles.volPresetLabel,
+                              dilutionVol_mL === p.value && { color: "#fff" },
+                            ]}
+                          >
+                            {p.label}
+                          </Text>
+                          <Text
+                            style={[
+                              styles.volPresetSub,
+                              dilutionVol_mL === p.value && { color: "rgba(255,255,255,0.8)" },
+                            ]}
+                          >
+                            {p.sublabel}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+
+                    {/* Result: concentration */}
+                    {dilutionConc > 0 ? (
+                      <View
+                        style={[
+                          styles.dilutionResult,
+                          { borderColor: selectedDrug.color, backgroundColor: selectedDrug.color + "0E" },
+                        ]}
+                      >
+                        <Feather name="check-circle" size={16} color={selectedDrug.color} />
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.dilutionResultLabel}>Calculated Concentration</Text>
+                          <Text style={[styles.dilutionResultValue, { color: selectedDrug.color }]}>
+                            {dilutionConc.toFixed(4)} mg/mL
+                          </Text>
+                          <Text style={styles.dilutionResultSub}>
+                            {parseFloat(dilutionDrug_mg).toFixed(1)} mg in{" "}
+                            {parseFloat(dilutionVol_mL).toFixed(0)} mL syringe
+                          </Text>
+                        </View>
+                      </View>
+                    ) : (
+                      <View style={styles.dilutionPlaceholder}>
+                        <Feather name="info" size={14} color={C.textMuted} />
+                        <Text style={styles.dilutionPlaceholderText}>
+                          Fill in drug amount and volume to calculate concentration
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                )}
+
+                {/* Active concentration summary */}
                 {concentration > 0 && (
-                  <View style={styles.concSummary}>
-                    <Feather name="info" size={13} color={C.tint} />
+                  <View
+                    style={[
+                      styles.concSummaryBar,
+                      { borderColor: selectedDrug.color + "40" },
+                    ]}
+                  >
+                    <Feather name="layers" size={13} color={selectedDrug.color} />
                     <Text style={styles.concSummaryText}>
-                      Using: <Text style={{ color: C.tint, fontWeight: "700" }}>{concentration.toFixed(4)} mg/mL</Text> (or units/mL)
+                      Using:{" "}
+                      <Text style={{ color: selectedDrug.color, fontWeight: "800" }}>
+                        {concentration.toFixed(4)} mg/mL
+                      </Text>
                     </Text>
                   </View>
                 )}
               </View>
 
-              {/* ── RESULT BOX ── */}
-              <View style={[styles.resultBox, rateValid && { borderColor: selectedDrug.color }]}>
+              {/* ══════════════════════════════════════════════
+                  RESULT BOX
+              ══════════════════════════════════════════════ */}
+              <View
+                style={[
+                  styles.resultBox,
+                  rateValid
+                    ? { borderColor: selectedDrug.color, borderWidth: 2 }
+                    : { borderColor: C.border },
+                ]}
+              >
                 <View style={styles.resultHeader}>
-                  <Feather name="activity" size={20} color={rateValid ? selectedDrug.color : C.textMuted} />
-                  <Text style={styles.resultHeaderText}>Pump Rate</Text>
+                  <Feather
+                    name="activity"
+                    size={20}
+                    color={rateValid ? selectedDrug.color : C.textMuted}
+                  />
+                  <Text style={styles.resultHeaderLabel}>Infusion Pump Rate</Text>
                 </View>
 
-                <Text style={[styles.resultRate, { color: rateValid ? selectedDrug.color : C.textMuted }]}>
+                <Text
+                  style={[
+                    styles.resultRate,
+                    { color: rateValid ? selectedDrug.color : C.textMuted },
+                  ]}
+                >
                   {rateStr}
                 </Text>
 
                 {rateValid && (
                   <>
                     <View style={styles.resultDivider} />
-                    <View style={styles.resultDetailRow}>
+                    <View style={styles.resultGrid}>
                       <ResultDetail label="Drug" value={selectedDrug.name} />
                       <ResultDetail label="Dose" value={`${doseInput} ${doseUnit}`} />
                       <ResultDetail label="Weight" value={`${weight} kg`} />
-                      <ResultDetail label="Conc." value={`${concentration.toFixed(4)} mg/mL`} />
+                      <ResultDetail
+                        label="Concentration"
+                        value={`${concentration.toFixed(4)} mg/mL`}
+                      />
                     </View>
                   </>
                 )}
 
                 {!rateValid && (
                   <Text style={styles.resultPlaceholder}>
-                    Enter dose, weight & concentration to calculate
+                    Complete all steps above to calculate pump rate
                   </Text>
                 )}
               </View>
 
-              {/* ── Drug notes & warnings ── */}
+              {/* Notes, warnings, reference */}
               {selectedDrug.notes && (
-                <View style={styles.infoCard}>
-                  <Feather name="book-open" size={14} color={C.tint} style={{ marginRight: 8, marginTop: 1 }} />
-                  <Text style={styles.infoCardText}>{selectedDrug.notes}</Text>
+                <View style={styles.noteCard}>
+                  <Feather name="book-open" size={13} color={C.tint} style={{ marginTop: 1 }} />
+                  <Text style={styles.noteCardText}>{selectedDrug.notes}</Text>
                 </View>
               )}
-              {selectedDrug.warnings && selectedDrug.warnings.map((w, i) => (
-                <View key={i} style={styles.warningCard}>
-                  <Feather name="alert-triangle" size={13} color="#B7791F" style={{ marginRight: 8, marginTop: 1 }} />
-                  <Text style={styles.warningCardText}>{w}</Text>
+              {(selectedDrug.warnings ?? []).map((w, i) => (
+                <View key={i} style={styles.warnCard}>
+                  <Feather name="alert-triangle" size={13} color="#B7791F" style={{ marginTop: 1 }} />
+                  <Text style={styles.warnCardText}>{w}</Text>
                 </View>
               ))}
-
               {selectedDrug.reference && (
-                <Text style={styles.referenceText}>Ref: {selectedDrug.reference}</Text>
+                <Text style={styles.refText}>Ref: {selectedDrug.reference}</Text>
               )}
             </Animated.View>
           )}
 
-          {/* Indication hint below search */}
+          {/* ── Empty state ── */}
           {!selectedDrug && (
             <View style={styles.emptyState}>
-              <Feather name="activity" size={48} color={C.tint + "44"} />
-              <Text style={styles.emptyTitle}>Select a drug above</Text>
+              <Feather name="activity" size={52} color={C.tint + "33"} />
+              <Text style={styles.emptyTitle}>Select a drug to begin</Text>
               <Text style={styles.emptySubtitle}>
-                Choose from dopamine, norepinephrine, fentanyl, midazolam, heparin, and 20+ ICU infusion drugs
+                Dopamine, norepinephrine, fentanyl, midazolam, atracurium, cisatracurium, heparin, and 20+ ICU drugs
               </Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginTop: 16 }}>
-                {INFUSION_DRUGS.slice(0, 8).map((d) => (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{ marginTop: 20 }}
+                contentContainerStyle={{ gap: 8 }}
+              >
+                {INFUSION_DRUGS.slice(0, 10).map((d) => (
                   <TouchableOpacity
                     key={d.id}
                     style={[styles.quickChip, { borderColor: d.color }]}
                     onPress={() => handleDrugSelect(d)}
                   >
-                    <View style={[styles.drugDot, { backgroundColor: d.color, width: 8, height: 8, borderRadius: 4 }]} />
+                    <View
+                      style={[
+                        styles.drugDot,
+                        { backgroundColor: d.color, width: 7, height: 7, borderRadius: 3.5 },
+                      ]}
+                    />
                     <Text style={[styles.quickChipText, { color: d.color }]}>{d.name}</Text>
                   </TouchableOpacity>
                 ))}
@@ -513,6 +787,7 @@ function ResultDetail({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: C.background },
   scroll: { flex: 1 },
+
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -523,10 +798,21 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: C.border,
   },
-  headerTitle: { fontSize: 22, fontWeight: "800", color: C.text, letterSpacing: -0.5 },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: "800",
+    color: C.text,
+    letterSpacing: -0.5,
+  },
   headerSubtitle: { fontSize: 12, color: C.textMuted, marginTop: 2 },
   weightBadge: { alignItems: "center" },
-  weightLabel: { fontSize: 9, color: C.tint, fontWeight: "700", letterSpacing: 0.5, marginBottom: 2 },
+  weightLabel: {
+    fontSize: 9,
+    color: C.tint,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+    marginBottom: 2,
+  },
   weightInput: {
     borderWidth: 2,
     borderColor: C.tint,
@@ -538,40 +824,53 @@ const styles = StyleSheet.create({
     color: C.tint,
     minWidth: 72,
     textAlign: "center",
-    backgroundColor: C.tint + "0F",
+    backgroundColor: C.tint + "10",
   },
 
   section: {
     backgroundColor: C.card,
-    marginHorizontal: 16,
-    marginTop: 14,
-    borderRadius: 16,
+    marginHorizontal: 14,
+    marginTop: 12,
+    borderRadius: 18,
     padding: 16,
     borderWidth: 1,
     borderColor: C.border,
     ...Platform.select({
-      ios: { shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 6 },
+      ios: { shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8 },
       android: { elevation: 2 },
-      web: { boxShadow: "0 2px 8px rgba(0,0,0,0.06)" },
+      web: { boxShadow: "0 2px 10px rgba(0,0,0,0.06)" },
     }),
   },
-  stepRow: { flexDirection: "row", alignItems: "center", marginBottom: 14 },
-  stepBadge: {
-    width: 24, height: 24, borderRadius: 12,
-    backgroundColor: C.tint, justifyContent: "center", alignItems: "center", marginRight: 10,
+  stepRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 14,
+    gap: 10,
   },
-  stepNumber: { color: "#fff", fontSize: 12, fontWeight: "800" },
+  stepBadge: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: C.tint,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  stepNumber: { color: "#fff", fontSize: 13, fontWeight: "800" },
   stepLabel: { fontSize: 16, fontWeight: "700", color: C.text },
 
   drugSelector: {
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: C.border,
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 14,
     backgroundColor: C.background,
   },
-  selectedDrugRow: { flexDirection: "row", alignItems: "center" },
-  drugDot: { width: 10, height: 10, borderRadius: 5, marginRight: 10 },
+  selectedDrugRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  drugDot: { width: 10, height: 10, borderRadius: 5 },
   selectedDrugName: { fontSize: 16, fontWeight: "700" },
   selectedDrugCategory: { fontSize: 12, color: C.textMuted, marginTop: 2 },
 
@@ -579,7 +878,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
     borderWidth: 1,
     borderColor: C.border,
-    borderRadius: 12,
+    borderRadius: 14,
     backgroundColor: C.card,
     overflow: "hidden",
   },
@@ -600,35 +899,46 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderBottomWidth: 1,
     borderBottomColor: C.border,
-    borderWidth: 0,
-    borderRadius: 0,
+    gap: 10,
+    borderLeftWidth: 0,
   },
   drugSearchName: { fontSize: 14, fontWeight: "600", color: C.text },
-  drugSearchCategory: { fontSize: 11, color: C.textMuted, marginTop: 1 },
+  drugSearchCategory: { fontSize: 11, color: C.textMuted, marginTop: 2 },
 
-  doseInputRow: { flexDirection: "row", alignItems: "center", gap: 12 },
-  doseInput: {
-    fontSize: 32,
-    fontWeight: "800",
-    color: C.text,
-    borderBottomWidth: 2,
-    paddingBottom: 4,
-    minWidth: 120,
-    letterSpacing: -0.5,
-  },
-  doseRangeBox: { alignItems: "flex-end" },
-  doseRangeLabel: { fontSize: 10, color: C.textMuted, fontWeight: "600", letterSpacing: 0.5 },
-  doseRange: { fontSize: 13, color: C.textSecondary, fontWeight: "600", marginTop: 2 },
-
-  hintChip: {
+  // Dose
+  doseRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 8,
-    gap: 5,
+    gap: 14,
+    marginBottom: 10,
   },
-  hintChipText: { fontSize: 12, fontWeight: "600" },
-
-  unitRow: { paddingTop: 14, gap: 8 },
+  doseInput: {
+    fontSize: 36,
+    fontWeight: "900",
+    color: C.text,
+    borderBottomWidth: 3,
+    paddingBottom: 4,
+    minWidth: 120,
+    letterSpacing: -1,
+  },
+  doseRangeBox: { alignItems: "flex-end", flex: 1 },
+  doseRangeLabel: {
+    fontSize: 10,
+    color: C.textMuted,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+  },
+  doseRange: { fontSize: 15, fontWeight: "800", marginTop: 2 },
+  doseRangeUnit: { fontSize: 10, color: C.textMuted, marginTop: 1 },
+  typicalBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 12,
+  },
+  typicalBtnText: { fontSize: 13, fontWeight: "600" },
+  unitRow: { paddingTop: 4, gap: 8 },
   unitChip: {
     borderWidth: 1.5,
     borderColor: C.border,
@@ -638,87 +948,262 @@ const styles = StyleSheet.create({
   },
   unitChipText: { fontSize: 13, color: C.textSecondary, fontWeight: "600" },
 
-  concContainer: { gap: 10 },
-  concOption: {
-    borderWidth: 1.5,
-    borderColor: C.border,
-    borderRadius: 12,
-    padding: 12,
+  // Concentration mode tabs
+  modeTabs: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 14,
   },
-  concRow: { flexDirection: "row", alignItems: "flex-start", gap: 10 },
-  radioOuter: {
-    width: 18, height: 18, borderRadius: 9,
-    borderWidth: 2, borderColor: C.border,
-    justifyContent: "center", alignItems: "center",
-    marginTop: 1,
-  },
-  radioInner: { width: 8, height: 8, borderRadius: 4 },
-  concLabel: { fontSize: 13, fontWeight: "600", color: C.text },
-  concNote: { fontSize: 11, color: C.textMuted, marginTop: 3 },
-
-  customToggle: {
+  modeTab: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 12,
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: C.border,
+    backgroundColor: C.background,
+  },
+  modeTabText: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: C.textSecondary,
+  },
+
+  // Standard concentrations
+  standardConcList: { gap: 10 },
+  standardConcItem: {
     borderWidth: 1.5,
     borderColor: C.border,
     borderRadius: 12,
     padding: 12,
-    gap: 10,
   },
-  customToggleText: { fontSize: 14, color: C.textSecondary, fontWeight: "600" },
-  customConcInputRow: { flexDirection: "row", alignItems: "center", marginTop: 10, gap: 10 },
-  customConcInput: {
+  radioRow: { flexDirection: "row", alignItems: "flex-start", gap: 10 },
+  radioOuter: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: C.border,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 1,
+    flexShrink: 0,
+  },
+  radioInner: { width: 9, height: 9, borderRadius: 4.5 },
+  stdConcLabel: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: C.text,
+    marginBottom: 4,
+  },
+  stdConcNote: { fontSize: 12, color: C.textMuted, lineHeight: 18 },
+
+  // Custom dilution calculator
+  dilutionContainer: { gap: 12 },
+  dilutionHelp: {
+    fontSize: 13,
+    color: C.textMuted,
+    fontStyle: "italic",
+    marginBottom: 4,
+  },
+  dilutionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  dilutionInputGroup: { flex: 1 },
+  dilutionLabel: {
+    fontSize: 11,
+    color: C.textMuted,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+    marginBottom: 6,
+  },
+  dilutionInputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  dilutionInput: {
     flex: 1,
     borderWidth: 2,
     borderRadius: 10,
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     paddingVertical: 10,
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: "800",
     color: C.text,
+    textAlign: "center",
   },
-  customConcUnit: { fontSize: 15, color: C.textSecondary, fontWeight: "600" },
-
-  concSummary: {
+  dilutionUnit: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: C.textSecondary,
+  },
+  dilutionDivider: {
+    alignItems: "center",
+    paddingTop: 22,
+  },
+  dilutionIn: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: C.textMuted,
+  },
+  volPresetRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  volPreset: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: C.border,
+    backgroundColor: C.background,
+    gap: 2,
+  },
+  volPresetLabel: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: C.textSecondary,
+  },
+  volPresetSub: {
+    fontSize: 10,
+    color: C.textMuted,
+    fontWeight: "600",
+  },
+  dilutionResult: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 12,
-    backgroundColor: C.tint + "0E",
-    borderRadius: 8,
-    padding: 10,
-    gap: 6,
-  },
-  concSummaryText: { fontSize: 13, color: C.textSecondary },
-
-  resultBox: {
-    margin: 16,
-    marginTop: 14,
-    backgroundColor: C.card,
-    borderRadius: 20,
-    padding: 20,
+    gap: 10,
     borderWidth: 2,
+    borderRadius: 14,
+    padding: 14,
+  },
+  dilutionResultLabel: {
+    fontSize: 10,
+    color: C.textMuted,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+    marginBottom: 3,
+  },
+  dilutionResultValue: {
+    fontSize: 28,
+    fontWeight: "900",
+    letterSpacing: -0.5,
+  },
+  dilutionResultSub: {
+    fontSize: 12,
+    color: C.textMuted,
+    marginTop: 2,
+  },
+  dilutionPlaceholder: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    padding: 12,
+    backgroundColor: C.background,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: C.border,
+  },
+  dilutionPlaceholderText: {
+    flex: 1,
+    fontSize: 13,
+    color: C.textMuted,
+    fontStyle: "italic",
+  },
+  concSummaryBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 14,
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    backgroundColor: C.background,
+  },
+  concSummaryText: {
+    fontSize: 13,
+    color: C.textSecondary,
+  },
+
+  // Result
+  resultBox: {
+    margin: 14,
+    marginTop: 12,
+    backgroundColor: C.card,
+    borderRadius: 22,
+    padding: 22,
+    borderWidth: 1,
     borderColor: C.border,
     ...Platform.select({
-      ios: { shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 12 },
-      android: { elevation: 4 },
-      web: { boxShadow: "0 4px 16px rgba(0,0,0,0.1)" },
+      ios: { shadowColor: "#000", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.14, shadowRadius: 16 },
+      android: { elevation: 6 },
+      web: { boxShadow: "0 6px 24px rgba(0,0,0,0.1)" },
     }),
   },
-  resultHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 },
-  resultHeaderText: { fontSize: 13, color: C.textMuted, fontWeight: "600", letterSpacing: 0.5, textTransform: "uppercase" },
-  resultRate: { fontSize: 52, fontWeight: "900", letterSpacing: -2, lineHeight: 58 },
-  resultPlaceholder: { fontSize: 14, color: C.textMuted, marginTop: 8, fontStyle: "italic" },
-  resultDivider: { height: 1, backgroundColor: C.border, marginVertical: 14 },
-  resultDetailRow: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
+  resultHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 6,
+  },
+  resultHeaderLabel: {
+    fontSize: 12,
+    color: C.textMuted,
+    fontWeight: "700",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+  },
+  resultRate: {
+    fontSize: 56,
+    fontWeight: "900",
+    letterSpacing: -2,
+    lineHeight: 64,
+  },
+  resultPlaceholder: {
+    fontSize: 14,
+    color: C.textMuted,
+    marginTop: 8,
+    fontStyle: "italic",
+  },
+  resultDivider: {
+    height: 1,
+    backgroundColor: C.border,
+    marginVertical: 14,
+  },
+  resultGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12,
+  },
   resultDetail: { minWidth: "40%" },
-  resultDetailLabel: { fontSize: 10, color: C.textMuted, fontWeight: "700", letterSpacing: 0.5, textTransform: "uppercase", marginBottom: 2 },
-  resultDetailValue: { fontSize: 14, fontWeight: "700", color: C.text },
+  resultDetailLabel: {
+    fontSize: 10,
+    color: C.textMuted,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+    textTransform: "uppercase",
+    marginBottom: 3,
+  },
+  resultDetailValue: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: C.text,
+  },
 
-  infoCard: {
+  noteCard: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginHorizontal: 16,
+    gap: 8,
+    marginHorizontal: 14,
     marginBottom: 8,
     padding: 12,
     backgroundColor: C.tint + "0E",
@@ -726,25 +1211,42 @@ const styles = StyleSheet.create({
     borderLeftWidth: 3,
     borderLeftColor: C.tint,
   },
-  infoCardText: { flex: 1, fontSize: 13, color: C.textSecondary, lineHeight: 19 },
-  warningCard: {
+  noteCardText: { flex: 1, fontSize: 13, color: C.textSecondary, lineHeight: 19 },
+  warnCard: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginHorizontal: 16,
+    gap: 8,
+    marginHorizontal: 14,
     marginBottom: 8,
     padding: 12,
-    backgroundColor: "#FEF3C7",
+    backgroundColor: "#FFFBEB",
     borderRadius: 12,
     borderLeftWidth: 3,
     borderLeftColor: "#D97706",
   },
-  warningCardText: { flex: 1, fontSize: 13, color: "#92400E", lineHeight: 19 },
-  referenceText: { marginHorizontal: 16, marginBottom: 8, fontSize: 11, color: C.textMuted, fontStyle: "italic" },
+  warnCardText: { flex: 1, fontSize: 13, color: "#92400E", lineHeight: 19 },
+  refText: {
+    marginHorizontal: 14,
+    marginBottom: 8,
+    fontSize: 11,
+    color: C.textMuted,
+    fontStyle: "italic",
+  },
 
   emptyState: { margin: 24, alignItems: "center", paddingTop: 20 },
-  emptyTitle: { fontSize: 18, fontWeight: "700", color: C.text, marginTop: 16 },
-  emptySubtitle: { fontSize: 14, color: C.textMuted, textAlign: "center", marginTop: 8, lineHeight: 21 },
-
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: C.text,
+    marginTop: 16,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: C.textMuted,
+    textAlign: "center",
+    marginTop: 8,
+    lineHeight: 22,
+  },
   quickChip: {
     flexDirection: "row",
     alignItems: "center",
@@ -752,7 +1254,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 14,
     paddingVertical: 8,
-    marginRight: 8,
     gap: 6,
   },
   quickChipText: { fontSize: 13, fontWeight: "700" },
