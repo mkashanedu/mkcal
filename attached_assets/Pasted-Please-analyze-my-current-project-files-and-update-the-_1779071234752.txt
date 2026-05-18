@@ -1,0 +1,21 @@
+Please analyze my current project files and update the existing application by integrating the following features and clinical standards. Do not remove existing functionalities unless they conflict with these new safety requirements.
+​Project Context & Clinical Standards:
+The application must meet the high-stress, fast-paced demands of a Cardiac and Pediatric ICU. The UI and calculations must be tailored for clinical professionals requiring rapid, zero-error outputs, reflecting practical usability for staff with 03+ years of clinical experience.
+​1. Critical UI & Navigation Updates:
+​Emergency / Code Blue Tab: Create a highly visible, dedicated section or tab for instant one-click access to critical resuscitation drugs (e.g., Epinephrine, Amiodarone, Atropine).
+​Night Shift Mode: Add a dark mode toggle to reduce visual fatigue during night shifts, ensuring high-contrast text for readability.
+​2. Strict Safety & Dosing Alerts:
+​Weight Input Safety: The primary weight input must strictly process in Kilograms (kg). If a pounds (lbs) option exists, it must automatically and instantly convert to kg, displaying the kg value prominently to prevent any dosing errors.
+​Adult Max Dose Cap: Implement a strict calculation check. If any calculated pediatric dose exceeds the standard maximum adult limit for that drug, display a prominent "Red Alert: Dose exceeds adult maximum limit" and cap the recommended dose automatically.
+​Administration Routes: Clearly label the standard routes (IV, IO, IM) for every calculated medication. You must explicitly include and highlight the Intranasal (IN) route where applicable, as it is a critical, standard, and highly effective protocol in pediatric emergencies.
+​3. Advanced Inotrope Infusion Module:
+​Dynamic Syringe Sizing: For continuous infusions, provide a dropdown or input for the user to select the total syringe preparation volume, ranging from a minimum of 10 ml to a maximum of 50 ml. The dilution formulas must scale dynamically based on this selection.
+​Epinephrine (Adrenaline) Specific Dilutions: Update the inotrope section to allow the user to select the Epinephrine infusion concentration based on vascular access. Use the standard vial strength of 1 mg / 1 ml. For a standard 50 ml syringe volume, program the following specific logic (ensure the math scales if a smaller syringe like 10 ml is selected):
+​Option 1: Peripheral IV Line (20 mcg/ml)
+​Preparation: 49 ml diluent (NS/D5W) + 1 ml (1 vial) Epinephrine.
+​Option 2: Central Venous Catheter (CVC) - Standard (40 mcg/ml)
+​Preparation: 48 ml diluent (NS/D5W) + 2 ml (2 vials) Epinephrine.
+​Option 3: Central Venous Catheter (CVC) - Concentrated (60 mcg/ml)
+​Preparation: 47 ml diluent (NS/D5W) + 3 ml (3 vials) Epinephrine.
+​Backend Requirement: Ensure the infusion rate output (ml/hr) is accurately calculated using the formula: (Rate in mcg/kg/min * Weight in kg * 60) / Concentration in mcg/ml.
+​Please generate and apply the necessary HTML, CSS, and JavaScript code updates to my existing files to reflect these requirements.
