@@ -107,6 +107,9 @@ export default function InfusionScreen() {
   const [dilutionVol_mL, setDilutionVol_mL] = useState("50");
   // Fallback: manual mg/mL entry
   const [manualConc_mgmL, setManualConc_mgmL] = useState("");
+  // Epinephrine-specific vascular access
+  const [epiAccessType, setEpiAccessType] = useState<"peripheral" | "cvc_standard" | "cvc_concentrated">("peripheral");
+  const [epiSyringeML, setEpiSyringeML] = useState(50);
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -136,6 +139,8 @@ export default function InfusionScreen() {
       setDilutionDrug_mg("");
       setDilutionVol_mL("50");
       setManualConc_mgmL("");
+      setEpiAccessType("peripheral");
+      setEpiSyringeML(50);
       Animated.timing(fadeAnim, {
         toValue: 1,
         duration: 300,
@@ -145,9 +150,21 @@ export default function InfusionScreen() {
     [fadeAnim]
   );
 
+  // ── Epinephrine vascular-access config ───────────────────────
+  const EPI_CONFIGS = {
+    peripheral:        { label: "Peripheral IV",         conc_mcg_ml: 20, conc_mg_ml: 0.02, vials50mL: 1, warning: "Safe for peripheral lines · max 5 mcg/kg/min" },
+    cvc_standard:      { label: "CVC — Standard",        conc_mcg_ml: 40, conc_mg_ml: 0.04, vials50mL: 2, warning: "Central line required" },
+    cvc_concentrated:  { label: "CVC — Concentrated",    conc_mcg_ml: 60, conc_mg_ml: 0.06, vials50mL: 3, warning: "Central line — concentrated, verify access" },
+  } as const;
+
   // ── Concentration calculation ─────────────────────────────────
   const concentration = useMemo((): number => {
     if (!selectedDrug) return 0;
+
+    // Special case: Epinephrine infusion uses vascular-access based concentrations
+    if (selectedDrug.id === "epinephrine-infusion") {
+      return EPI_CONFIGS[epiAccessType].conc_mg_ml;
+    }
 
     if (concMode === "dilution") {
       const mg = parseFloat(dilutionDrug_mg);
@@ -194,6 +211,20 @@ export default function InfusionScreen() {
         (u, i, a) => a.indexOf(u) === i
       )
     : DOSE_UNITS;
+
+  const isEpinephrine = selectedDrug?.id === "epinephrine-infusion";
+
+  const epiConfig = EPI_CONFIGS[epiAccessType];
+  const epiScale = epiSyringeML / 50;
+  const epiDrugML = +(epiConfig.vials50mL * epiScale).toFixed(2);
+  const epiDiluentML = +(epiSyringeML - epiDrugML).toFixed(2);
+
+  const EPI_SYRINGE_OPTIONS = [10, 20, 30, 50];
+  const EPI_ACCESS_OPTIONS: Array<{ key: "peripheral" | "cvc_standard" | "cvc_concentrated"; label: string; sub: string; color: string }> = [
+    { key: "peripheral",       label: "Peripheral IV",       sub: `20 mcg/mL`,  color: "#2563EB" },
+    { key: "cvc_standard",     label: "CVC — Standard",      sub: `40 mcg/mL`,  color: "#9333EA" },
+    { key: "cvc_concentrated", label: "CVC — Concentrated",  sub: `60 mcg/mL`,  color: "#DC2626" },
+  ];
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top"]}>
@@ -401,6 +432,124 @@ export default function InfusionScreen() {
                   <Text style={styles.stepLabel}>Concentration / Dilution</Text>
                 </View>
 
+                {isEpinephrine ? (
+                  /* ── EPINEPHRINE VASCULAR ACCESS MODULE ───────── */
+                  <View>
+                    {/* Access type selector */}
+                    <Text style={styles.epiSectionLabel}>Vascular Access</Text>
+                    <View style={styles.epiAccessRow}>
+                      {EPI_ACCESS_OPTIONS.map((opt) => (
+                        <TouchableOpacity
+                          key={opt.key}
+                          style={[
+                            styles.epiAccessBtn,
+                            epiAccessType === opt.key && {
+                              backgroundColor: opt.color,
+                              borderColor: opt.color,
+                            },
+                          ]}
+                          onPress={() => setEpiAccessType(opt.key)}
+                          activeOpacity={0.8}
+                        >
+                          <Text
+                            style={[
+                              styles.epiAccessBtnLabel,
+                              epiAccessType === opt.key && { color: "#fff" },
+                            ]}
+                          >
+                            {opt.label}
+                          </Text>
+                          <Text
+                            style={[
+                              styles.epiAccessBtnSub,
+                              epiAccessType === opt.key && { color: "rgba(255,255,255,0.8)" },
+                            ]}
+                          >
+                            {opt.sub}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+
+                    {/* Syringe size */}
+                    <Text style={[styles.epiSectionLabel, { marginTop: 12 }]}>Syringe Volume</Text>
+                    <View style={styles.epiSyringeRow}>
+                      {EPI_SYRINGE_OPTIONS.map((ml) => (
+                        <TouchableOpacity
+                          key={ml}
+                          style={[
+                            styles.epiSyringeBtn,
+                            epiSyringeML === ml && {
+                              backgroundColor: selectedDrug.color,
+                              borderColor: selectedDrug.color,
+                            },
+                          ]}
+                          onPress={() => setEpiSyringeML(ml)}
+                          activeOpacity={0.8}
+                        >
+                          <Text
+                            style={[
+                              styles.epiSyrBtnText,
+                              epiSyringeML === ml && { color: "#fff" },
+                            ]}
+                          >
+                            {ml} mL
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+
+                    {/* Preparation instructions */}
+                    <View
+                      style={[
+                        styles.epiPrepCard,
+                        { borderColor: selectedDrug.color, backgroundColor: selectedDrug.color + "0D" },
+                      ]}
+                    >
+                      <View style={styles.epiPrepHeader}>
+                        <Feather name="droplet" size={14} color={selectedDrug.color} />
+                        <Text style={[styles.epiPrepTitle, { color: selectedDrug.color }]}>
+                          Preparation — {epiSyringeML} mL Syringe
+                        </Text>
+                      </View>
+                      <View style={styles.epiPrepRow}>
+                        <View style={styles.epiPrepItem}>
+                          <Text style={styles.epiPrepItemLabel}>Epinephrine (1 mg/mL)</Text>
+                          <Text style={[styles.epiPrepItemValue, { color: selectedDrug.color }]}>
+                            {epiDrugML} mL
+                          </Text>
+                          <Text style={styles.epiPrepItemSub}>
+                            ({epiConfig.vials50mL * epiScale < 1
+                              ? `${epiDrugML} mL of 1 vial`
+                              : `${epiConfig.vials50mL * epiScale >= 1
+                                  ? `${+(epiConfig.vials50mL * epiScale).toFixed(1)} vial(s)`
+                                  : `${epiDrugML} mL`}`})
+                          </Text>
+                        </View>
+                        <Text style={styles.epiPrepPlus}>+</Text>
+                        <View style={styles.epiPrepItem}>
+                          <Text style={styles.epiPrepItemLabel}>NS / D5W (diluent)</Text>
+                          <Text style={[styles.epiPrepItemValue, { color: C.tint }]}>
+                            {epiDiluentML} mL
+                          </Text>
+                          <Text style={styles.epiPrepItemSub}>to make {epiSyringeML} mL total</Text>
+                        </View>
+                      </View>
+                      <View style={styles.epiConcRow}>
+                        <Text style={styles.epiConcLabel}>Final Concentration</Text>
+                        <Text style={[styles.epiConcValue, { color: selectedDrug.color }]}>
+                          {epiConfig.conc_mcg_ml} mcg/mL ({epiConfig.conc_mg_ml * 1000} mcg/mL)
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* Access warning */}
+                    <View style={styles.epiWarnRow}>
+                      <Feather name="alert-triangle" size={12} color="#B7791F" />
+                      <Text style={styles.epiWarnText}>{epiConfig.warning}</Text>
+                    </View>
+                  </View>
+                ) : (<>
                 {/* Mode tabs */}
                 <View style={styles.modeTabs}>
                   <TouchableOpacity
@@ -665,6 +814,7 @@ export default function InfusionScreen() {
                     </Text>
                   </View>
                 )}
+              </>)}
               </View>
 
               {/* ══════════════════════════════════════════════
@@ -1257,4 +1407,141 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   quickChipText: { fontSize: 13, fontWeight: "700" },
+
+  // ── Epinephrine vascular access styles ─────────────────────
+  epiSectionLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: C.textSecondary,
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+    marginBottom: 6,
+    marginTop: 4,
+  },
+  epiAccessRow: {
+    flexDirection: "row",
+    gap: 6,
+    flexWrap: "wrap",
+  },
+  epiAccessBtn: {
+    flex: 1,
+    minWidth: 90,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: C.border,
+    alignItems: "center",
+    gap: 2,
+    backgroundColor: C.card,
+  },
+  epiAccessBtnLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: C.text,
+    textAlign: "center",
+  },
+  epiAccessBtnSub: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: C.textSecondary,
+    textAlign: "center",
+  },
+  epiSyringeRow: {
+    flexDirection: "row",
+    gap: 6,
+    marginBottom: 14,
+  },
+  epiSyringeBtn: {
+    flex: 1,
+    paddingVertical: 9,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: C.border,
+    alignItems: "center",
+    backgroundColor: C.card,
+  },
+  epiSyrBtnText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: C.textSecondary,
+  },
+  epiPrepCard: {
+    borderWidth: 1.5,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 10,
+    gap: 10,
+  },
+  epiPrepHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 7,
+  },
+  epiPrepTitle: {
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  epiPrepRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  epiPrepItem: {
+    flex: 1,
+    alignItems: "center",
+    gap: 2,
+  },
+  epiPrepItemLabel: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: C.textSecondary,
+    textAlign: "center",
+  },
+  epiPrepItemValue: {
+    fontSize: 22,
+    fontWeight: "800",
+  },
+  epiPrepItemSub: {
+    fontSize: 10,
+    color: C.textMuted,
+    textAlign: "center",
+  },
+  epiPrepPlus: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: C.textSecondary,
+  },
+  epiConcRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: C.border,
+  },
+  epiConcLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: C.textSecondary,
+  },
+  epiConcValue: {
+    fontSize: 14,
+    fontWeight: "800",
+  },
+  epiWarnRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 6,
+    backgroundColor: "#FFFBEB",
+    borderRadius: 8,
+    padding: 9,
+  },
+  epiWarnText: {
+    flex: 1,
+    fontSize: 11,
+    color: "#92400E",
+    fontWeight: "500",
+    lineHeight: 16,
+  },
 });

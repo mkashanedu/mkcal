@@ -14,6 +14,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ThemeProvider } from "@/context/ThemeContext";
 import { WeightProvider } from "@/context/WeightContext";
 
 SplashScreen.preventAutoHideAsync();
@@ -59,13 +60,15 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          <WeightProvider>
-            <GestureHandlerRootView>
-              <KeyboardProvider>
-                <RootLayoutNav />
-              </KeyboardProvider>
-            </GestureHandlerRootView>
-          </WeightProvider>
+          <ThemeProvider>
+            <WeightProvider>
+              <GestureHandlerRootView>
+                <KeyboardProvider>
+                  <RootLayoutNav />
+                </KeyboardProvider>
+              </GestureHandlerRootView>
+            </WeightProvider>
+          </ThemeProvider>
         </QueryClientProvider>
       </ErrorBoundary>
     </SafeAreaProvider>

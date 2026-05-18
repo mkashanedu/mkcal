@@ -7,34 +7,61 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
-  useColorScheme,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Colors from "@/constants/colors";
 import { CATEGORIES, DRUGS, DrugCategory, calculateDose } from "@/constants/drugs";
+import { useTheme } from "@/context/ThemeContext";
 import { useWeight } from "@/context/WeightContext";
 
 const QUICK_WEIGHTS = [3, 5, 8, 10, 15, 20, 25, 30, 40, 50, 70];
+const LBS_TO_KG = 0.453592;
+
+function isIntranasalRoute(route: string): boolean {
+  const r = route.toLowerCase();
+  return r.includes("intranasal") || r.includes("/ in") || r.startsWith("in ") || r === "in";
+}
 
 export default function CalculatorScreen() {
   const insets = useSafeAreaInsets();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { isDark, toggleDark } = useTheme();
   const colors = Colors.light;
   const { weight, setWeight, weightInput, setWeightInput } = useWeight();
 
   const [selectedCategory, setSelectedCategory] = useState<DrugCategory | null>(null);
+  const [weightUnit, setWeightUnit] = useState<"kg" | "lbs">("kg");
+  const [lbsInput, setLbsInput] = useState("");
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
 
   function handleWeightChange(text: string) {
-    setWeightInput(text);
-    const num = parseFloat(text);
-    if (!isNaN(num) && num > 0 && num <= 150) {
-      setWeight(num);
+    if (weightUnit === "kg") {
+      setWeightInput(text);
+      const num = parseFloat(text);
+      if (!isNaN(num) && num > 0 && num <= 150) setWeight(num);
+    } else {
+      setLbsInput(text);
+      const lbs = parseFloat(text);
+      if (!isNaN(lbs) && lbs > 0) {
+        const kg = +(lbs * LBS_TO_KG).toFixed(1);
+        if (kg <= 150) {
+          setWeight(kg);
+          setWeightInput(kg.toString());
+        }
+      }
     }
   }
+
+  function handleUnitToggle(unit: "kg" | "lbs") {
+    setWeightUnit(unit);
+    if (unit === "lbs" && weight > 0) {
+      setLbsInput((+(weight / LBS_TO_KG).toFixed(1)).toString());
+    }
+  }
+
+  const displayInput = weightUnit === "kg" ? weightInput : lbsInput;
 
   const drugsToShow = useMemo(() => {
     if (!selectedCategory) return DRUGS;
@@ -55,22 +82,48 @@ export default function CalculatorScreen() {
           },
         ]}
       >
-        <Text
-          style={[
-            styles.headerTitle,
-            { color: isDark ? "#E8F0FE" : "#0D1B2A", fontFamily: "Inter_700Bold" },
-          ]}
-        >
-          Dose Calculator
-        </Text>
-        <Text
-          style={[
-            styles.headerSubtitle,
-            { color: isDark ? "#5A7A96" : "#8A9BB0", fontFamily: "Inter_400Regular" },
-          ]}
-        >
-          Enter patient weight to calculate doses
-        </Text>
+        <View style={styles.headerRow}>
+          <View style={{ flex: 1 }}>
+            <Text
+              style={[
+                styles.headerTitle,
+                { color: isDark ? "#E8F0FE" : "#0D1B2A", fontFamily: "Inter_700Bold" },
+              ]}
+            >
+              Dose Calculator
+            </Text>
+            <Text
+              style={[
+                styles.headerSubtitle,
+                { color: isDark ? "#5A7A96" : "#8A9BB0", fontFamily: "Inter_400Regular" },
+              ]}
+            >
+              Enter patient weight to calculate doses
+            </Text>
+          </View>
+          <TouchableOpacity
+            onPress={toggleDark}
+            style={[
+              styles.nightToggle,
+              { backgroundColor: isDark ? "#1E2D3D" : "#F0F4F8" },
+            ]}
+            activeOpacity={0.7}
+          >
+            <Feather
+              name={isDark ? "sun" : "moon"}
+              size={18}
+              color={isDark ? "#FFD700" : "#4A5568"}
+            />
+            <Text
+              style={[
+                styles.nightToggleText,
+                { color: isDark ? "#FFD700" : "#4A5568", fontFamily: "Inter_500Medium" },
+              ]}
+            >
+              {isDark ? "Day" : "Night"}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
         {/* Weight Section */}
         <View
@@ -79,16 +132,44 @@ export default function CalculatorScreen() {
             { backgroundColor: isDark ? "#1E2D3D" : "#F8FAFC" },
           ]}
         >
-          <View style={styles.weightInputRow}>
-            <Feather name="user" size={20} color={colors.tint} />
+          {/* Unit toggle */}
+          <View style={styles.unitToggleRow}>
+            <Feather name="user" size={16} color={colors.tint} />
             <Text
               style={[
-                styles.weightInputLabel,
+                styles.weightLabel,
                 { color: isDark ? "#E8F0FE" : "#0D1B2A", fontFamily: "Inter_500Medium" },
               ]}
             >
               Patient Weight
             </Text>
+            <View style={[styles.unitToggleWrap, { backgroundColor: isDark ? "#0D1B2A" : "#E8EDF2" }]}>
+              {(["kg", "lbs"] as const).map((u) => (
+                <TouchableOpacity
+                  key={u}
+                  onPress={() => handleUnitToggle(u)}
+                  style={[
+                    styles.unitToggleBtn,
+                    weightUnit === u && { backgroundColor: colors.tint },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.unitToggleBtnText,
+                      {
+                        color: weightUnit === u ? "#fff" : isDark ? "#8A9BB0" : "#4A5568",
+                        fontFamily: "Inter_600SemiBold",
+                      },
+                    ]}
+                  >
+                    {u}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          <View style={styles.weightInputRow}>
             <View style={styles.weightInputContainer}>
               <TextInput
                 style={[
@@ -99,11 +180,11 @@ export default function CalculatorScreen() {
                     fontFamily: "Inter_700Bold",
                   },
                 ]}
-                value={weightInput}
+                value={displayInput}
                 onChangeText={handleWeightChange}
                 keyboardType="decimal-pad"
                 selectTextOnFocus
-                maxLength={5}
+                maxLength={6}
               />
               <Text
                 style={[
@@ -111,9 +192,21 @@ export default function CalculatorScreen() {
                   { color: colors.tint, fontFamily: "Inter_600SemiBold" },
                 ]}
               >
-                kg
+                {weightUnit}
               </Text>
             </View>
+
+            {weightUnit === "lbs" && weight > 0 && (
+              <View style={[styles.kgConvBadge, { backgroundColor: colors.tint + "18", borderColor: colors.tint + "40" }]}>
+                <Feather name="refresh-cw" size={11} color={colors.tint} />
+                <Text style={[styles.kgConvText, { color: colors.tint, fontFamily: "Inter_700Bold" }]}>
+                  {weight} kg
+                </Text>
+                <Text style={[styles.kgConvSub, { color: colors.tint, fontFamily: "Inter_400Regular" }]}>
+                  (used for all calculations)
+                </Text>
+              </View>
+            )}
           </View>
 
           {/* Quick Weight Buttons */}
@@ -128,6 +221,9 @@ export default function CalculatorScreen() {
                 onPress={() => {
                   setWeight(w);
                   setWeightInput(w.toString());
+                  if (weightUnit === "lbs") {
+                    setLbsInput((+(w / LBS_TO_KG).toFixed(1)).toString());
+                  }
                 }}
                 style={[
                   styles.quickWeightBtn,
@@ -262,6 +358,7 @@ export default function CalculatorScreen() {
 
               {drug.doses.map((dose, i) => {
                 const calc = calculateDose(dose, weight);
+                const isIN = isIntranasalRoute(dose.route);
                 return (
                   <View
                     key={i}
@@ -274,11 +371,25 @@ export default function CalculatorScreen() {
                     ]}
                   >
                     <View style={styles.doseLeft}>
-                      <View style={[styles.routeBadge, { backgroundColor: isDark ? "#1E2D3D" : "#F0F4F8" }]}>
+                      {/* Route badge — IN gets a special orange highlight */}
+                      <View
+                        style={[
+                          styles.routeBadge,
+                          isIN
+                            ? { backgroundColor: "#FF6B0022" }
+                            : { backgroundColor: isDark ? "#1E2D3D" : "#F0F4F8" },
+                        ]}
+                      >
+                        {isIN && (
+                          <Text style={[styles.inPill, { fontFamily: "Inter_700Bold" }]}>IN</Text>
+                        )}
                         <Text
                           style={[
                             styles.routeText,
-                            { color: colors.tint, fontFamily: "Inter_600SemiBold" },
+                            {
+                              color: isIN ? "#D4500A" : colors.tint,
+                              fontFamily: "Inter_600SemiBold",
+                            },
                           ]}
                         >
                           {dose.route}
@@ -326,7 +437,15 @@ export default function CalculatorScreen() {
                       >
                         {calc.range}
                       </Text>
-                      {dose.maxDose ? (
+                      {calc.exceedsAdultMax && (
+                        <View style={styles.adultMaxAlert}>
+                          <Feather name="alert-triangle" size={10} color="#B91C1C" />
+                          <Text style={[styles.adultMaxAlertText, { fontFamily: "Inter_700Bold" }]}>
+                            {calc.adultMaxLabel}
+                          </Text>
+                        </View>
+                      )}
+                      {!calc.exceedsAdultMax && dose.maxDose ? (
                         <Text
                           style={[
                             styles.maxDose,
@@ -360,20 +479,55 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 14,
+    gap: 10,
+  },
   headerTitle: { fontSize: 24, letterSpacing: -0.5, marginBottom: 2 },
-  headerSubtitle: { fontSize: 13, marginBottom: 14 },
+  headerSubtitle: { fontSize: 13 },
+  nightToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginTop: 4,
+  },
+  nightToggleText: { fontSize: 13 },
   weightSection: {
     borderRadius: 14,
     padding: 14,
     marginBottom: 12,
   },
+  unitToggleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 10,
+  },
+  weightLabel: { flex: 1, fontSize: 15 },
+  unitToggleWrap: {
+    flexDirection: "row",
+    borderRadius: 10,
+    padding: 2,
+    gap: 2,
+  },
+  unitToggleBtn: {
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 8,
+  },
+  unitToggleBtnText: { fontSize: 13 },
   weightInputRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
     marginBottom: 12,
+    flexWrap: "wrap",
   },
-  weightInputLabel: { flex: 1, fontSize: 15 },
   weightInputContainer: { flexDirection: "row", alignItems: "center", gap: 6 },
   weightInput: {
     width: 80,
@@ -389,6 +543,17 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   kgLabel: { fontSize: 16 },
+  kgConvBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  kgConvText: { fontSize: 16 },
+  kgConvSub: { fontSize: 11 },
   quickWeightList: { gap: 6 },
   quickWeightBtn: {
     width: 44,
@@ -432,7 +597,24 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   doseLeft: { flex: 1, gap: 4 },
-  routeBadge: { alignSelf: "flex-start", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
+  routeBadge: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  inPill: {
+    fontSize: 9,
+    color: "#D4500A",
+    backgroundColor: "#FF6B0033",
+    paddingHorizontal: 4,
+    paddingVertical: 1,
+    borderRadius: 3,
+    letterSpacing: 0.3,
+  },
   routeText: { fontSize: 11 },
   freqText: { fontSize: 11 },
   noteText: { fontSize: 11, lineHeight: 16 },
@@ -440,4 +622,19 @@ const styles = StyleSheet.create({
   calcDose: { fontSize: 16, textAlign: "right" },
   doseRange: { fontSize: 11, textAlign: "right" },
   maxDose: { fontSize: 11, textAlign: "right" },
+  adultMaxAlert: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+    backgroundColor: "#FEE2E2",
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 5,
+    marginTop: 2,
+  },
+  adultMaxAlertText: {
+    fontSize: 9,
+    color: "#B91C1C",
+    letterSpacing: 0.1,
+  },
 });

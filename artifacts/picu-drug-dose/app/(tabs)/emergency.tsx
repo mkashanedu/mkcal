@@ -5,13 +5,14 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
-  useColorScheme,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Colors from "@/constants/colors";
 import { DRUGS, calculateDose } from "@/constants/drugs";
+import { useTheme } from "@/context/ThemeContext";
 import { useWeight } from "@/context/WeightContext";
 
 interface EmergencyItem {
@@ -21,12 +22,13 @@ interface EmergencyItem {
   notes: string;
   color: string;
   warning?: boolean;
+  exceedsAdultMax?: boolean;
+  adultMaxLabel?: string;
 }
 
 export default function EmergencyScreen() {
   const insets = useSafeAreaInsets();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { isDark, toggleDark } = useTheme();
   const colors = Colors.light;
   const { weight } = useWeight();
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
@@ -41,20 +43,24 @@ export default function EmergencyScreen() {
       results.push({
         label: "Epinephrine (Cardiac Arrest)",
         dose: calc.dose,
-        route: "IV/IO",
+        route: "IV / IO",
         notes: `0.1 mL/kg of 1:10,000 = ${+(0.1 * weight).toFixed(1)} mL`,
         color: "#AE2012",
         warning: true,
+        exceedsAdultMax: calc.exceedsAdultMax,
+        adultMaxLabel: calc.adultMaxLabel,
       });
       const anaph = epinephrine.doses[1];
       const calcIM = calculateDose(anaph, weight);
       results.push({
         label: "Epinephrine (Anaphylaxis)",
         dose: calcIM.dose,
-        route: "IM",
-        notes: "Use 1:1,000 solution",
+        route: "IM · IN (0.01 mg/kg)",
+        notes: "IM: 1:1,000 solution · IN: use atomiser, both nostrils",
         color: "#AE2012",
         warning: true,
+        exceedsAdultMax: calcIM.exceedsAdultMax,
+        adultMaxLabel: calcIM.adultMaxLabel,
       });
     }
 
@@ -65,9 +71,11 @@ export default function EmergencyScreen() {
       results.push({
         label: "Atropine (Bradycardia)",
         dose: calc.dose,
-        route: "IV/IO",
-        notes: "Minimum 0.1 mg; max 0.5 mg child",
+        route: "IV / IO",
+        notes: "Minimum 0.1 mg; max 0.5 mg child / 3 mg adolescent",
         color: "#E67E22",
+        exceedsAdultMax: calc.exceedsAdultMax,
+        adultMaxLabel: calc.adultMaxLabel,
       });
     }
 
@@ -82,6 +90,8 @@ export default function EmergencyScreen() {
         route: "IV rapid push",
         notes: `2nd dose: ${dose2} mg (max 12 mg) — rapid flush!`,
         color: "#8E44AD",
+        exceedsAdultMax: calc.exceedsAdultMax,
+        adultMaxLabel: calc.adultMaxLabel,
       });
     }
 
@@ -95,6 +105,8 @@ export default function EmergencyScreen() {
         route: "IV",
         notes: "For severe metabolic acidosis",
         color: "#2E86AB",
+        exceedsAdultMax: calc.exceedsAdultMax,
+        adultMaxLabel: calc.adultMaxLabel,
       });
     }
 
@@ -108,6 +120,8 @@ export default function EmergencyScreen() {
         route: "IV",
         notes: "Infuse slowly with cardiac monitoring",
         color: "#1A5276",
+        exceedsAdultMax: calcResult.exceedsAdultMax,
+        adultMaxLabel: calcResult.adultMaxLabel,
       });
     }
 
@@ -132,9 +146,11 @@ export default function EmergencyScreen() {
       results.push({
         label: "Naloxone (Opioid OD)",
         dose: calc.dose,
-        route: "IV/IM/IN",
-        notes: "May repeat every 2–3 min; max 2 mg",
+        route: "IV · IM · IN",
+        notes: "IN: use 4 mg/mL atomiser · may repeat every 2–3 min",
         color: "#7B2D8B",
+        exceedsAdultMax: calc.exceedsAdultMax,
+        adultMaxLabel: calc.adultMaxLabel,
       });
     }
 
@@ -145,10 +161,12 @@ export default function EmergencyScreen() {
       results.push({
         label: "Amiodarone (Pulseless VT/VF)",
         dose: calc.dose,
-        route: "IV/IO",
-        notes: "Max 300 mg per dose",
+        route: "IV / IO",
+        notes: "Max 300 mg per dose — dilute in D5W only",
         color: "#C0392B",
         warning: true,
+        exceedsAdultMax: calc.exceedsAdultMax,
+        adultMaxLabel: calc.adultMaxLabel,
       });
     }
 
@@ -162,18 +180,39 @@ export default function EmergencyScreen() {
         route: "IV",
         notes: "Max 4 mg; may repeat once after 5 min",
         color: "#B7770D",
+        exceedsAdultMax: calc.exceedsAdultMax,
+        adultMaxLabel: calc.adultMaxLabel,
       });
     }
 
     const midazolam = DRUGS.find((d) => d.id === "midazolam");
     if (midazolam) {
       const inDose = +(0.3 * weight).toFixed(2);
+      const cappedDose = Math.min(inDose, 10);
+      const exceeded = inDose > 10;
       results.push({
         label: "Midazolam IN (Seizures)",
-        dose: `${inDose} mg`,
-        route: "Intranasal",
-        notes: "0.3 mg/kg IN; max 10 mg",
+        dose: `${cappedDose} mg`,
+        route: "Intranasal (IN)",
+        notes: "0.3 mg/kg via atomiser · divide equally between nostrils · max 10 mg",
         color: "#B7770D",
+        exceedsAdultMax: exceeded,
+        adultMaxLabel: exceeded ? "Adult max: 10 mg — dose capped" : undefined,
+      });
+    }
+
+    const fentanyl = DRUGS.find((d) => d.id === "fentanyl");
+    if (fentanyl) {
+      const d = fentanyl.doses[2];
+      const calc = calculateDose(d, weight);
+      results.push({
+        label: "Fentanyl IN (Procedural Pain)",
+        dose: calc.dose,
+        route: "Intranasal (IN)",
+        notes: "Use atomiser · max 0.5 mL per nostril · max 200 mcg total",
+        color: "#6B2FA0",
+        exceedsAdultMax: calc.exceedsAdultMax,
+        adultMaxLabel: calc.adultMaxLabel,
       });
     }
 
@@ -192,19 +231,36 @@ export default function EmergencyScreen() {
           },
         ]}
       >
-        <View style={styles.headerRow}>
-          <Feather name="alert-circle" size={22} color="#FFFFFF" />
-          <Text
-            style={[
-              styles.headerTitle,
-              { fontFamily: "Inter_700Bold" },
-            ]}
+        <View style={styles.headerTop}>
+          <View style={styles.headerRow}>
+            <Feather name="alert-circle" size={22} color="#FFFFFF" />
+            <Text
+              style={[
+                styles.headerTitle,
+                { fontFamily: "Inter_700Bold" },
+              ]}
+            >
+              Code Blue / Emergency
+            </Text>
+          </View>
+          {/* Night shift toggle */}
+          <TouchableOpacity
+            onPress={toggleDark}
+            style={styles.nightToggle}
+            activeOpacity={0.7}
           >
-            Emergency Doses
-          </Text>
+            <Feather
+              name={isDark ? "sun" : "moon"}
+              size={16}
+              color={isDark ? "#FFD700" : "rgba(255,255,255,0.85)"}
+            />
+            <Text style={[styles.nightToggleText, { fontFamily: "Inter_500Medium" }]}>
+              {isDark ? "Day" : "Night"}
+            </Text>
+          </TouchableOpacity>
         </View>
         <Text style={[styles.headerSubtitle, { fontFamily: "Inter_400Regular" }]}>
-          Weight: {weight} kg · All doses weight-based
+          Weight: {weight} kg · All doses weight-based · Capped at adult max
         </Text>
         <View style={styles.warningBanner}>
           <Feather name="alert-triangle" size={14} color="#FFFFFF" />
@@ -238,23 +294,33 @@ export default function EmergencyScreen() {
           >
             <View style={styles.cardTop}>
               <View style={styles.cardTitleRow}>
-                {item.warning && (
-                  <View
-                    style={[
-                      styles.criticalBadge,
-                      { backgroundColor: item.color + "22" },
-                    ]}
-                  >
-                    <Text
+                <View style={styles.badgeRow}>
+                  {item.warning && (
+                    <View
                       style={[
-                        styles.criticalText,
-                        { color: item.color, fontFamily: "Inter_700Bold" },
+                        styles.criticalBadge,
+                        { backgroundColor: item.color + "22" },
                       ]}
                     >
-                      CRITICAL
-                    </Text>
-                  </View>
-                )}
+                      <Text
+                        style={[
+                          styles.criticalText,
+                          { color: item.color, fontFamily: "Inter_700Bold" },
+                        ]}
+                      >
+                        CRITICAL
+                      </Text>
+                    </View>
+                  )}
+                  {/* IN route badge for intranasal items */}
+                  {(item.route.includes("IN") || item.route.toLowerCase().includes("intranasal")) && (
+                    <View style={styles.inBadge}>
+                      <Text style={[styles.inBadgeText, { fontFamily: "Inter_700Bold" }]}>
+                        IN
+                      </Text>
+                    </View>
+                  )}
+                </View>
                 <Text
                   style={[
                     styles.cardLabel,
@@ -292,6 +358,16 @@ export default function EmergencyScreen() {
             >
               {item.dose}
             </Text>
+
+            {/* Adult max dose red alert */}
+            {item.exceedsAdultMax && (
+              <View style={styles.adultMaxAlert}>
+                <Feather name="alert-octagon" size={13} color="#fff" />
+                <Text style={[styles.adultMaxAlertText, { fontFamily: "Inter_700Bold" }]}>
+                  RED ALERT: {item.adultMaxLabel}
+                </Text>
+              </View>
+            )}
 
             <Text
               style={[
@@ -393,16 +469,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingBottom: 14,
   },
+  headerTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 4,
+  },
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginBottom: 4,
+    flex: 1,
   },
   headerTitle: {
-    fontSize: 22,
+    fontSize: 20,
     color: "#FFFFFF",
     letterSpacing: -0.5,
+  },
+  nightToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    backgroundColor: "rgba(0,0,0,0.25)",
+    borderRadius: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  nightToggleText: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.85)",
   },
   headerSubtitle: {
     fontSize: 13,
@@ -439,6 +534,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   cardTitleRow: { flex: 1, gap: 4 },
+  badgeRow: { flexDirection: "row", gap: 4, flexWrap: "wrap" },
   criticalBadge: {
     alignSelf: "flex-start",
     paddingHorizontal: 6,
@@ -446,10 +542,33 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   criticalText: { fontSize: 9, letterSpacing: 0.5 },
+  inBadge: {
+    alignSelf: "flex-start",
+    backgroundColor: "#FF6B0022",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  inBadgeText: { fontSize: 9, color: "#D4500A", letterSpacing: 0.5 },
   cardLabel: { fontSize: 14, flex: 1 },
   routeTag: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
   routeTagText: { fontSize: 11 },
   cardDose: { fontSize: 22, letterSpacing: -0.5 },
+  adultMaxAlert: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: "#B91C1C",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+  },
+  adultMaxAlertText: {
+    fontSize: 11,
+    color: "#FFFFFF",
+    flex: 1,
+    letterSpacing: 0.1,
+  },
   cardNotes: { fontSize: 12, lineHeight: 16 },
   palsBanner: {
     borderRadius: 14,

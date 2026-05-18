@@ -25,6 +25,8 @@ export interface DoseRange {
   maxDose?: string;
   frequency?: string;
   label?: string;
+  /** Numeric adult maximum in the same computed unit — triggers red alert if calculated dose exceeds this */
+  adultMaxDose_num?: number;
 }
 
 export interface RenalAdjustment {
@@ -78,8 +80,8 @@ export const DRUGS: Drug[] = [
     category: "emergency",
     indications: ["Cardiac arrest", "Anaphylaxis", "Severe bradycardia"],
     doses: [
-      { value: 0.01, unit: "mg/kg", perKg: true, route: "IV/IO", maxDose: "1 mg", frequency: "Every 3–5 min", label: "Cardiac Arrest", notes: "= 0.1 mL/kg of 1:10,000 solution" },
-      { min: 0.01, max: 0.5, unit: "mg/kg", perKg: true, route: "IM Anterolateral thigh", maxDose: "0.5 mg", label: "Anaphylaxis", notes: "Use 1:1,000 solution; may repeat after 5–15 min" },
+      { value: 0.01, unit: "mg/kg", perKg: true, route: "IV/IO", maxDose: "1 mg", frequency: "Every 3–5 min", label: "Cardiac Arrest", notes: "= 0.1 mL/kg of 1:10,000 solution", adultMaxDose_num: 1 },
+      { min: 0.01, max: 0.5, unit: "mg/kg", perKg: true, route: "IM Anterolateral thigh", maxDose: "0.5 mg", label: "Anaphylaxis", notes: "Use 1:1,000 solution; may repeat after 5–15 min", adultMaxDose_num: 0.5 },
       { min: 0.01, max: 1.0, unit: "mcg/kg/min", perKg: true, route: "IV infusion (Central)", label: "Vasopressor infusion", notes: "Titrate to effect" },
     ],
     warnings: ["PALS 2025: IO route equally effective as IV", "Tissue necrosis with peripheral extravasation", "Ensure adequate IO/IV access before use"],
@@ -93,7 +95,7 @@ export const DRUGS: Drug[] = [
     category: "emergency",
     indications: ["Symptomatic bradycardia", "Organophosphate poisoning", "Pre-medication for RSI"],
     doses: [
-      { value: 0.02, unit: "mg/kg", perKg: true, route: "IV/IO", maxDose: "1 mg (child), 3 mg (adolescent)", frequency: "May repeat × 1", label: "Bradycardia", notes: "Minimum dose 0.1 mg (paradoxical bradycardia with smaller doses)" },
+      { value: 0.02, unit: "mg/kg", perKg: true, route: "IV/IO", maxDose: "1 mg (child), 3 mg (adolescent)", frequency: "May repeat × 1", label: "Bradycardia", notes: "Minimum dose 0.1 mg (paradoxical bradycardia with smaller doses)", adultMaxDose_num: 3 },
       { min: 0.02, max: 0.05, unit: "mg/kg", perKg: true, route: "IV/IO/ET", maxDose: "2 mg", label: "Organophosphate", notes: "Repeat every 5–10 min until secretions dry; may need very large doses" },
     ],
     warnings: ["MINIMUM dose 0.1 mg — smaller doses may worsen bradycardia (vagotonic effect)", "PALS 2025: Not routinely recommended for asystole"],
@@ -107,8 +109,8 @@ export const DRUGS: Drug[] = [
     category: "emergency",
     indications: ["SVT (Supraventricular Tachycardia)"],
     doses: [
-      { value: 0.1, unit: "mg/kg", perKg: true, route: "IV rapid push + saline flush", maxDose: "6 mg", label: "1st Dose", notes: "Use most proximal IV; immediate rapid NS flush 5–10 mL" },
-      { value: 0.2, unit: "mg/kg", perKg: true, route: "IV rapid push + saline flush", maxDose: "12 mg", label: "2nd Dose", notes: "If 1st dose ineffective; wait 1–2 min" },
+      { value: 0.1, unit: "mg/kg", perKg: true, route: "IV rapid push + saline flush", maxDose: "6 mg", label: "1st Dose", notes: "Use most proximal IV; immediate rapid NS flush 5–10 mL", adultMaxDose_num: 6 },
+      { value: 0.2, unit: "mg/kg", perKg: true, route: "IV rapid push + saline flush", maxDose: "12 mg", label: "2nd Dose", notes: "If 1st dose ineffective; wait 1–2 min", adultMaxDose_num: 12 },
     ],
     warnings: ["PALS 2025: Do NOT use for irregular wide-complex tachycardia", "May cause transient AV block, asystole — warn patient", "Ineffective with caffeine (competitive antagonist)"],
     formulations: ["3 mg/mL (2 mL vial)"],
@@ -121,8 +123,8 @@ export const DRUGS: Drug[] = [
     category: "emergency",
     indications: ["Pulseless VT/VF refractory to defibrillation", "Hemodynamically stable VT", "Atrial fibrillation"],
     doses: [
-      { value: 5, unit: "mg/kg", perKg: true, route: "IV/IO bolus", maxDose: "300 mg", label: "Pulseless VT/VF", notes: "PALS 2025: Give rapidly; compatible with D5W only, NOT NS" },
-      { value: 5, unit: "mg/kg", perKg: true, route: "IV infusion over 20–60 min", maxDose: "300 mg per dose", label: "Stable VT/SVT", notes: "Infuse slowly to avoid hypotension; max 15 mg/kg/day" },
+      { value: 5, unit: "mg/kg", perKg: true, route: "IV/IO bolus", maxDose: "300 mg", label: "Pulseless VT/VF", notes: "PALS 2025: Give rapidly; compatible with D5W only, NOT NS", adultMaxDose_num: 300 },
+      { value: 5, unit: "mg/kg", perKg: true, route: "IV infusion over 20–60 min", maxDose: "300 mg per dose", label: "Stable VT/SVT", notes: "Infuse slowly to avoid hypotension; max 15 mg/kg/day", adultMaxDose_num: 300 },
     ],
     warnings: ["Dilute in D5W ONLY — precipitates in NS", "Hypotension with rapid infusion", "QT prolongation — monitor ECG", "PALS 2025 preferred over lidocaine for shock-refractory VF/pVT"],
     formulations: ["50 mg/mL (3 mL amp)"],
@@ -148,7 +150,7 @@ export const DRUGS: Drug[] = [
     category: "emergency",
     indications: ["Severe metabolic acidosis (pH < 7.1)", "Hyperkalemia with ECG changes", "TCA overdose", "Sodium channel blocker poisoning"],
     doses: [
-      { value: 1, unit: "mEq/kg", perKg: true, route: "IV slow push", maxDose: "50 mEq", label: "Acute correction", notes: "Infuse over 5–10 min; may repeat based on blood gas" },
+      { value: 1, unit: "mEq/kg", perKg: true, route: "IV slow push", maxDose: "50 mEq", label: "Acute correction", notes: "Infuse over 5–10 min; may repeat based on blood gas", adultMaxDose_num: 50 },
     ],
     warnings: ["WHO 2024: Only after securing airway — worsens intracellular acidosis in respiratory acidosis", "Hyperosmolarity, hypernatremia", "Neonates: use 4.2% (0.5 mEq/mL) to avoid IVH"],
     formulations: ["4.2% (0.5 mEq/mL) — neonates", "8.4% (1 mEq/mL) — infants/children"],
@@ -231,7 +233,7 @@ export const DRUGS: Drug[] = [
     category: "analgesic",
     indications: ["Severe acute pain", "Post-operative analgesia", "Dyspnea in palliative care"],
     doses: [
-      { min: 0.05, max: 0.1, unit: "mg/kg", perKg: true, route: "IV over 5 min", maxDose: "5 mg", frequency: "Every 2–4 hr", label: "IV bolus" },
+      { min: 0.05, max: 0.1, unit: "mg/kg", perKg: true, route: "IV over 5 min", maxDose: "5 mg", frequency: "Every 2–4 hr", label: "IV bolus", adultMaxDose_num: 5 },
       { min: 0.1, max: 0.3, unit: "mg/kg", perKg: true, route: "PO/SC", maxDose: "15 mg", frequency: "Every 4 hr", label: "Oral / Subcutaneous" },
       { min: 0.01, max: 0.04, unit: "mg/kg/hr", perKg: true, route: "IV infusion", label: "Continuous infusion", notes: "Start low, titrate; neonates start at 0.005–0.01 mg/kg/hr" },
     ],
@@ -251,7 +253,7 @@ export const DRUGS: Drug[] = [
     category: "analgesic",
     indications: ["Severe acute pain", "Procedural analgesia", "Ventilated ICU patients", "Hemodynamically unstable patients (preferred over morphine)"],
     doses: [
-      { min: 1, max: 2, unit: "mcg/kg", perKg: true, route: "IV over 3–5 min", maxDose: "100 mcg", frequency: "Every 1–2 hr", label: "IV bolus" },
+      { min: 1, max: 2, unit: "mcg/kg", perKg: true, route: "IV over 3–5 min", maxDose: "100 mcg", frequency: "Every 1–2 hr", label: "IV bolus", adultMaxDose_num: 100 },
       { min: 1, max: 5, unit: "mcg/kg/hr", perKg: true, route: "IV infusion", label: "Continuous infusion", notes: "Ventilated: 1–5 mcg/kg/hr; adjust for tolerance" },
       { min: 10, max: 15, unit: "mcg/kg", perKg: true, route: "IN (intranasal)", maxDose: "200 mcg", label: "Intranasal", notes: "Use atomiser device; max 0.5 mL per nostril" },
     ],
@@ -270,7 +272,7 @@ export const DRUGS: Drug[] = [
     indications: ["Procedural sedation", "Sub-dissociative analgesia", "Burns dressing changes", "RSI induction", "Refractory status epilepticus"],
     doses: [
       { min: 0.1, max: 0.5, unit: "mg/kg", perKg: true, route: "IV slow push", label: "Sub-dissociative (analgesia)", notes: "Does not cause loss of consciousness at this dose" },
-      { min: 1, max: 2, unit: "mg/kg", perKg: true, route: "IV over 60 sec", maxDose: "200 mg", label: "Procedural sedation / RSI", notes: "Onset 30–60 sec; duration 10–15 min" },
+      { min: 1, max: 2, unit: "mg/kg", perKg: true, route: "IV over 60 sec", maxDose: "200 mg", label: "Procedural sedation / RSI", notes: "Onset 30–60 sec; duration 10–15 min", adultMaxDose_num: 200 },
       { min: 4, max: 5, unit: "mg/kg", perKg: true, route: "IM", maxDose: "500 mg", label: "IM sedation", notes: "Onset 3–5 min; duration 15–30 min" },
       { min: 0.5, max: 2, unit: "mg/kg/hr", perKg: true, route: "IV infusion", label: "ICU analgosedation", notes: "Combine with benzodiazepine for ICU use" },
     ],
@@ -345,8 +347,8 @@ export const DRUGS: Drug[] = [
     category: "sedative",
     indications: ["Procedural sedation", "Status epilepticus", "ICU sedation", "Pre-medication"],
     doses: [
-      { min: 0.05, max: 0.1, unit: "mg/kg", perKg: true, route: "IV over 2 min", maxDose: "5 mg", label: "IV procedural sedation" },
-      { min: 0.2, max: 0.3, unit: "mg/kg", perKg: true, route: "Intranasal (atomiser)", maxDose: "10 mg", label: "IN seizure/sedation", notes: "0.3 mg/kg IN for acute seizures (PALS 2025)" },
+      { min: 0.05, max: 0.1, unit: "mg/kg", perKg: true, route: "IV over 2 min", maxDose: "5 mg", label: "IV procedural sedation", adultMaxDose_num: 5 },
+      { min: 0.2, max: 0.3, unit: "mg/kg", perKg: true, route: "Intranasal (atomiser)", maxDose: "10 mg", label: "IN seizure/sedation", notes: "0.3 mg/kg IN for acute seizures (PALS 2025)", adultMaxDose_num: 10 },
       { min: 0.3, max: 0.5, unit: "mg/kg", perKg: true, route: "PO/Buccal", maxDose: "20 mg", label: "Buccal / Oral pre-medication" },
       { min: 0.05, max: 0.2, unit: "mg/kg/hr", perKg: true, route: "IV infusion", label: "ICU sedation infusion", notes: "Target RASS 0 to −2 for light sedation per PICU protocol" },
     ],
@@ -861,7 +863,7 @@ export const DRUGS: Drug[] = [
     category: "antiepileptic",
     indications: ["Status epilepticus (1st line IV)", "Acute seizures"],
     doses: [
-      { min: 0.05, max: 0.1, unit: "mg/kg", perKg: true, route: "IV/IO", maxDose: "4 mg", frequency: "May repeat once after 5 min", label: "Status epilepticus — 1st line", notes: "PALS 2025: Preferred first-line IV BZD over diazepam" },
+      { min: 0.05, max: 0.1, unit: "mg/kg", perKg: true, route: "IV/IO", maxDose: "4 mg", frequency: "May repeat once after 5 min", label: "Status epilepticus — 1st line", notes: "PALS 2025: Preferred first-line IV BZD over diazepam", adultMaxDose_num: 4 },
     ],
     warnings: ["Respiratory depression — airway management ready", "PALS 2025: If IV unavailable, use IN midazolam 0.2 mg/kg or IM midazolam 0.2 mg/kg"],
     formulations: ["2 mg/mL", "4 mg/mL"],
@@ -1453,7 +1455,7 @@ export const DRUGS: Drug[] = [
 export function calculateDose(
   doseRange: DoseRange,
   weightKg: number
-): { dose: string; range: string } {
+): { dose: string; range: string; exceedsAdultMax?: boolean; adultMaxLabel?: string } {
   if (!doseRange.perKg) {
     const val = doseRange.value !== undefined
       ? doseRange.value
@@ -1464,20 +1466,40 @@ export function calculateDose(
     return { dose: rangeStr, range: "(fixed dose)" };
   }
 
+  const unitStr = doseRange.unit.replace("/kg", "").replace("kg", "");
+
   if (doseRange.value !== undefined) {
     const calc = +(doseRange.value * weightKg).toFixed(3);
+    const exceedsAdultMax =
+      doseRange.adultMaxDose_num !== undefined && calc > doseRange.adultMaxDose_num;
+    const displayDose = exceedsAdultMax
+      ? `${doseRange.adultMaxDose_num} ${unitStr}`
+      : `${calc} ${unitStr}`;
     return {
-      dose: `${calc} ${doseRange.unit.replace("/kg", "").replace("kg", "")}`,
+      dose: displayDose,
       range: `(${doseRange.value} ${doseRange.unit})`,
+      exceedsAdultMax,
+      adultMaxLabel: exceedsAdultMax
+        ? `Adult max: ${doseRange.adultMaxDose_num} ${unitStr} — dose capped`
+        : undefined,
     };
   }
 
   if (doseRange.min !== undefined && doseRange.max !== undefined) {
     const calcMin = +(doseRange.min * weightKg).toFixed(3);
     const calcMax = +(doseRange.max * weightKg).toFixed(3);
+    const exceedsAdultMax =
+      doseRange.adultMaxDose_num !== undefined && calcMax > doseRange.adultMaxDose_num;
+    const displayMax = exceedsAdultMax
+      ? doseRange.adultMaxDose_num
+      : calcMax;
     return {
-      dose: `${calcMin} – ${calcMax} ${doseRange.unit.replace("/kg", "").replace("kg", "")}`,
+      dose: `${calcMin} – ${displayMax} ${unitStr}`,
       range: `(${doseRange.min} – ${doseRange.max} ${doseRange.unit})`,
+      exceedsAdultMax,
+      adultMaxLabel: exceedsAdultMax
+        ? `Adult max: ${doseRange.adultMaxDose_num} ${unitStr} — upper limit capped`
+        : undefined,
     };
   }
   return { dose: "—", range: "—" };
