@@ -14,6 +14,7 @@ import Colors from "@/constants/colors";
 import { DRUGS, calculateDose } from "@/constants/drugs";
 import { useTheme } from "@/context/ThemeContext";
 import { useWeight } from "@/context/WeightContext";
+import { ProfessionalFooter } from "@/components/ProfessionalFooter";
 
 interface EmergencyItem {
   label: string;
@@ -458,6 +459,7 @@ export default function EmergencyScreen() {
             </View>
           ))}
         </View>
+        <ProfessionalFooter />
       </ScrollView>
     </View>
   );

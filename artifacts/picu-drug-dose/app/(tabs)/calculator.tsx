@@ -16,6 +16,7 @@ import Colors from "@/constants/colors";
 import { CATEGORIES, DRUGS, DrugCategory, calculateDose } from "@/constants/drugs";
 import { useTheme } from "@/context/ThemeContext";
 import { useWeight } from "@/context/WeightContext";
+import { ProfessionalFooter } from "@/components/ProfessionalFooter";
 
 const QUICK_WEIGHTS = [3, 5, 8, 10, 15, 20, 25, 30, 40, 50, 70];
 const LBS_TO_KG = 0.453592;
@@ -463,6 +464,7 @@ export default function CalculatorScreen() {
             </View>
           );
         })}
+        <ProfessionalFooter />
       </ScrollView>
     </View>
   );
