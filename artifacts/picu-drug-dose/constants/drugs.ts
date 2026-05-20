@@ -41,6 +41,8 @@ export interface Drug {
   category: DrugCategory;
   doses: DoseRange[];
   indications: string[];
+  /** High-alert drug — requires double-check before administration */
+  highAlert?: boolean;
   contraindications?: string[];
   warnings?: string[];
   formulations?: string[];
@@ -78,6 +80,7 @@ export const DRUGS: Drug[] = [
     name: "Epinephrine",
     genericName: "Adrenaline",
     category: "emergency",
+    highAlert: true,
     indications: ["Cardiac arrest", "Anaphylaxis", "Severe bradycardia"],
     doses: [
       { value: 0.01, unit: "mg/kg", perKg: true, route: "IV/IO", maxDose: "1 mg", frequency: "Every 3–5 min", label: "Cardiac Arrest", notes: "= 0.1 mL/kg of 1:10,000 solution", adultMaxDose_num: 1 },
@@ -121,6 +124,7 @@ export const DRUGS: Drug[] = [
     id: "amiodarone",
     name: "Amiodarone",
     category: "emergency",
+    highAlert: true,
     indications: ["Pulseless VT/VF refractory to defibrillation", "Hemodynamically stable VT", "Atrial fibrillation"],
     doses: [
       { value: 5, unit: "mg/kg", perKg: true, route: "IV/IO bolus", maxDose: "300 mg", label: "Pulseless VT/VF", notes: "PALS 2025: Give rapidly; compatible with D5W only, NOT NS", adultMaxDose_num: 300 },
@@ -135,6 +139,7 @@ export const DRUGS: Drug[] = [
     id: "lidocaine",
     name: "Lidocaine",
     category: "emergency",
+    highAlert: true,
     indications: ["Pulseless VT/VF (alternative to amiodarone)", "Ventricular arrhythmias"],
     doses: [
       { value: 1, unit: "mg/kg", perKg: true, route: "IV/IO", maxDose: "100 mg", label: "Loading dose", notes: "PALS 2025: Alternative if amiodarone unavailable" },

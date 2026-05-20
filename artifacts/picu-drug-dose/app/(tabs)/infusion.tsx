@@ -34,6 +34,17 @@ const C = Colors.light;
 const SYRINGE_SIZES = [10, 20, 30, 40, 50] as const;
 type SyringeSize = typeof SYRINGE_SIZES[number];
 
+const INFUSION_CATS = [
+  { key: "all",        label: "All",         color: "#0EA5E9", match: [] as string[] },
+  { key: "inotrope",  label: "Inotropes",    color: "#E53E3E", match: ["Inotrope", "Vasopressor", "Inodilator"] },
+  { key: "sedation",  label: "Sedation",     color: "#805AD5", match: ["Sedative", "Opioid", "Analgosedative", "Analgesic"] },
+  { key: "resp",      label: "Respiratory",  color: "#38A169", match: ["Bronchodilator", "Respiratory"] },
+  { key: "cardiac",   label: "Cardiac",      color: "#DD6B20", match: ["Antiarrhythmic", "Vasodilator", "Antihypertensive", "Diuretic"] },
+  { key: "nmbd",      label: "NMBDs",        color: "#D69E2E", match: ["NMBD"] },
+  { key: "other",     label: "Other",        color: "#718096", match: ["Anticoagulant", "Hormone", "Electrolyte", "Antiepileptic"] },
+] as const;
+type InfusionCatKey = typeof INFUSION_CATS[number]["key"];
+
 const DOSE_UNITS: InfusionUnit[] = [
   "mcg/kg/min",
   "mcg/kg/hr",
@@ -216,6 +227,7 @@ export default function InfusionScreen() {
 
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
+  const [catFilter, setCatFilter] = useState<InfusionCatKey>("all");
   const [selectedDrug, setSelectedDrug] = useState<InfusionDrug | null>(null);
   const [selectedConcIdx, setSelectedConcIdx] = useState(0);
   const [doseInput, setDoseInput] = useState("");
@@ -238,16 +250,20 @@ export default function InfusionScreen() {
   const weightNum = parseFloat(weight) || 0;
   const doseNum = parseFloat(doseInput) || 0;
 
-  const filteredDrugs = useMemo(
-    () =>
-      INFUSION_DRUGS.filter(
-        (d) =>
-          d.name.toLowerCase().includes(search.toLowerCase()) ||
-          d.category.toLowerCase().includes(search.toLowerCase()) ||
-          d.indication.toLowerCase().includes(search.toLowerCase())
-      ),
-    [search]
-  );
+  const filteredDrugs = useMemo(() => {
+    const catDef = INFUSION_CATS.find((c) => c.key === catFilter);
+    return INFUSION_DRUGS.filter((d) => {
+      const matchCat =
+        catFilter === "all" ||
+        (catDef && catDef.match.length > 0 && catDef.match.some((m) => d.category.includes(m)));
+      const matchSearch =
+        !search ||
+        d.name.toLowerCase().includes(search.toLowerCase()) ||
+        d.category.toLowerCase().includes(search.toLowerCase()) ||
+        d.indication.toLowerCase().includes(search.toLowerCase());
+      return matchCat && matchSearch;
+    });
+  }, [search, catFilter]);
 
   const handleDrugSelect = useCallback(
     (drug: InfusionDrug) => {
@@ -370,8 +386,42 @@ export default function InfusionScreen() {
                 <Text style={styles.stepNumber}>1</Text>
               </View>
               <Text style={[styles.stepLabel, { color: TEXT }]}>Select Drug</Text>
-              <Text style={[styles.stepHint, { color: MUTED }]}>{INFUSION_DRUGS.length} available</Text>
+              <Text style={[styles.stepHint, { color: MUTED }]}>{filteredDrugs.length} available</Text>
             </View>
+
+            {/* Category filter chips */}
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.catChipList}
+            >
+              {INFUSION_CATS.map((cat) => {
+                const isActive = catFilter === cat.key;
+                return (
+                  <TouchableOpacity
+                    key={cat.key}
+                    onPress={() => {
+                      setCatFilter(cat.key as InfusionCatKey);
+                      setSelectedDrug(null);
+                      setShowSearch(false);
+                      setSearch("");
+                    }}
+                    style={[
+                      styles.catChip,
+                      {
+                        backgroundColor: isActive ? cat.color : isDark ? "#1E293B" : "#F1F5F9",
+                        borderColor: isActive ? cat.color : "transparent",
+                      },
+                    ]}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={[styles.catChipText, { color: isActive ? "#FFFFFF" : MUTED }]}>
+                      {cat.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
 
             <TouchableOpacity
               style={[
@@ -1375,4 +1425,12 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8, gap: 6,
   },
   quickChipText: { fontSize: 13, fontWeight: "700" },
+  catChipList: { gap: 7, paddingBottom: 10, paddingTop: 4 },
+  catChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1.5,
+  },
+  catChipText: { fontSize: 12, fontWeight: "600" },
 });

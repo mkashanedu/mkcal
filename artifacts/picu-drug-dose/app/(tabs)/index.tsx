@@ -8,29 +8,29 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableOpacity,
   View,
-  useColorScheme,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Colors from "@/constants/colors";
 import { CATEGORIES, DRUGS, Drug, DrugCategory } from "@/constants/drugs";
-import { useWeight } from "@/context/WeightContext";
+import { useTheme } from "@/context/ThemeContext";
+import { MAX_WEIGHT_KG, useWeight } from "@/context/WeightContext";
 
 const ALL = "all" as const;
 type FilterTab = DrugCategory | typeof ALL;
 
 export default function DrugListScreen() {
   const insets = useSafeAreaInsets();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { isDark, toggleDark } = useTheme();
   const colors = Colors.light;
-  const { weight, setWeight, weightInput, setWeightInput } = useWeight();
+  const { weight, setWeight, weightInput, setWeightInput, resetWeight, favorites } = useWeight();
 
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<FilterTab>(ALL);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
-  const { favorites } = useWeight();
+  const [weightWarning, setWeightWarning] = useState(false);
 
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
 
@@ -61,9 +61,22 @@ export default function DrugListScreen() {
   function handleWeightChange(text: string) {
     setWeightInput(text);
     const num = parseFloat(text);
-    if (!isNaN(num) && num > 0 && num <= 150) {
-      setWeight(num);
+    if (!isNaN(num) && num > 0) {
+      if (num > MAX_WEIGHT_KG) {
+        setWeight(MAX_WEIGHT_KG);
+        setWeightWarning(true);
+      } else {
+        setWeight(num);
+        setWeightWarning(false);
+      }
+    } else {
+      setWeightWarning(false);
     }
+  }
+
+  function handleReset() {
+    resetWeight();
+    setWeightWarning(false);
   }
 
   function renderCategoryPill(item: { key: FilterTab; label: string; color: string }) {
@@ -110,18 +123,23 @@ export default function DrugListScreen() {
           },
         ]}
       >
-        <View
-          style={[styles.categoryDot, { backgroundColor: cat.color }]}
-        />
+        <View style={[styles.categoryDot, { backgroundColor: cat.color }]} />
         <View style={styles.drugInfo}>
-          <Text
-            style={[
-              styles.drugName,
-              { color: isDark ? "#E8F0FE" : "#0D1B2A", fontFamily: "Inter_600SemiBold" },
-            ]}
-          >
-            {item.name}
-          </Text>
+          <View style={styles.drugNameRow}>
+            <Text
+              style={[
+                styles.drugName,
+                { color: isDark ? "#E8F0FE" : "#0D1B2A", fontFamily: "Inter_600SemiBold" },
+              ]}
+            >
+              {item.name}
+            </Text>
+            {item.highAlert && (
+              <View style={styles.highAlertBadge}>
+                <Text style={styles.highAlertText}>⚠ HIGH ALERT</Text>
+              </View>
+            )}
+          </View>
           {item.genericName ? (
             <Text
               style={[
@@ -169,12 +187,14 @@ export default function DrugListScreen() {
         ]}
       >
         <View style={styles.headerTop}>
-          <View>
+          {/* Title */}
+          <View style={{ flex: 1, minWidth: 0 }}>
             <Text
               style={[
                 styles.headerTitle,
                 { color: isDark ? "#E8F0FE" : "#0D1B2A", fontFamily: "Inter_700Bold" },
               ]}
+              numberOfLines={1}
             >
               PICU Drug Guide
             </Text>
@@ -187,6 +207,21 @@ export default function DrugListScreen() {
               Harriet Lane · {DRUGS.length} drugs
             </Text>
           </View>
+
+          {/* Dark mode toggle */}
+          <TouchableOpacity
+            onPress={toggleDark}
+            style={[styles.darkToggle, { backgroundColor: isDark ? "#1E2D3D" : "#F0F4F8" }]}
+            activeOpacity={0.7}
+          >
+            <Feather
+              name={isDark ? "sun" : "moon"}
+              size={16}
+              color={isDark ? "#FFD700" : "#4A5568"}
+            />
+          </TouchableOpacity>
+
+          {/* Weight box */}
           <View style={styles.weightBox}>
             <Text
               style={[
@@ -196,21 +231,35 @@ export default function DrugListScreen() {
             >
               Weight (kg)
             </Text>
-            <TextInput
-              style={[
-                styles.weightInput,
-                {
-                  color: isDark ? "#E8F0FE" : "#0D1B2A",
-                  backgroundColor: isDark ? "#1E2D3D" : "#F0F4F8",
-                  fontFamily: "Inter_700Bold",
-                },
-              ]}
-              value={weightInput}
-              onChangeText={handleWeightChange}
-              keyboardType="decimal-pad"
-              selectTextOnFocus
-              maxLength={5}
-            />
+            <View style={styles.weightInputRow}>
+              <TextInput
+                style={[
+                  styles.weightInput,
+                  {
+                    color: weightWarning ? "#E53E3E" : isDark ? "#E8F0FE" : "#0D1B2A",
+                    backgroundColor: isDark ? "#1E2D3D" : "#F0F4F8",
+                    fontFamily: "Inter_700Bold",
+                    borderColor: weightWarning ? "#E53E3E" : "transparent",
+                    borderWidth: weightWarning ? 1.5 : 0,
+                  },
+                ]}
+                value={weightInput}
+                onChangeText={handleWeightChange}
+                keyboardType="decimal-pad"
+                selectTextOnFocus
+                maxLength={5}
+              />
+              <TouchableOpacity
+                onPress={handleReset}
+                style={[styles.resetBtn, { backgroundColor: isDark ? "#1E2D3D" : "#E2E8F0" }]}
+                activeOpacity={0.7}
+              >
+                <Feather name="x" size={13} color={isDark ? "#5A7A96" : "#4A5568"} />
+              </TouchableOpacity>
+            </View>
+            {weightWarning && (
+              <Text style={styles.weightWarning}>Max {MAX_WEIGHT_KG} kg</Text>
+            )}
           </View>
         </View>
 
@@ -303,21 +352,44 @@ const styles = StyleSheet.create({
   },
   headerTop: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "flex-start",
     marginBottom: 12,
+    gap: 8,
   },
   headerTitle: { fontSize: 24, letterSpacing: -0.5 },
   headerSubtitle: { fontSize: 12, marginTop: 2 },
-  weightBox: { alignItems: "flex-end" },
+  darkToggle: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 4,
+    flexShrink: 0,
+  },
+  weightBox: { alignItems: "flex-end", flexShrink: 0 },
   weightLabel: { fontSize: 10, marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 },
+  weightInputRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   weightInput: {
-    width: 72,
+    width: 64,
     height: 36,
     borderRadius: 8,
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     fontSize: 18,
     textAlign: "center",
+  },
+  resetBtn: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  weightWarning: {
+    fontSize: 10,
+    color: "#E53E3E",
+    marginTop: 2,
+    fontWeight: "600",
   },
   searchBar: {
     flexDirection: "row",
@@ -358,7 +430,20 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   drugInfo: { flex: 1 },
-  drugName: { fontSize: 16, marginBottom: 2 },
+  drugNameRow: { flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap", marginBottom: 2 },
+  drugName: { fontSize: 16 },
+  highAlertBadge: {
+    backgroundColor: "#FEF3C7",
+    borderRadius: 4,
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+  },
+  highAlertText: {
+    fontSize: 9,
+    color: "#92400E",
+    fontWeight: "700",
+    letterSpacing: 0.3,
+  },
   genericName: { fontSize: 13, marginBottom: 3 },
   indication: { fontSize: 12 },
   drugRight: { alignItems: "flex-end" },

@@ -5,6 +5,7 @@ import {
   Inter_700Bold,
   useFonts,
 } from "@expo-google-fonts/inter";
+import { Feather } from "@expo/vector-icons";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -14,6 +15,7 @@ import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { DisclaimerModal } from "@/components/DisclaimerModal";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { WeightProvider } from "@/context/WeightContext";
 
@@ -46,6 +48,7 @@ export default function RootLayout() {
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
+    ...Feather.font,
   });
 
   useEffect(() => {
@@ -65,6 +68,7 @@ export default function RootLayout() {
               <GestureHandlerRootView>
                 <KeyboardProvider>
                   <RootLayoutNav />
+                  <DisclaimerModal />
                 </KeyboardProvider>
               </GestureHandlerRootView>
             </WeightProvider>

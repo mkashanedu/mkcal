@@ -1,11 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 
+export const MAX_WEIGHT_KG = 40;
+
 interface WeightContextValue {
   weight: number;
   setWeight: (w: number) => void;
   weightInput: string;
   setWeightInput: (s: string) => void;
+  resetWeight: () => void;
   favorites: string[];
   toggleFavorite: (drugId: string) => void;
   isFavorite: (drugId: string) => boolean;
@@ -23,8 +26,9 @@ export function WeightProvider({ children }: { children: React.ReactNode }) {
       if (val) {
         const num = parseFloat(val);
         if (!isNaN(num)) {
-          setWeightState(num);
-          setWeightInput(val);
+          const capped = Math.min(num, MAX_WEIGHT_KG);
+          setWeightState(capped);
+          setWeightInput(capped.toString());
         }
       }
     });
@@ -38,8 +42,15 @@ export function WeightProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setWeight = useCallback((w: number) => {
-    setWeightState(w);
-    AsyncStorage.setItem("picu_weight", w.toString());
+    const capped = Math.min(w, MAX_WEIGHT_KG);
+    setWeightState(capped);
+    AsyncStorage.setItem("picu_weight", capped.toString());
+  }, []);
+
+  const resetWeight = useCallback(() => {
+    setWeightState(10);
+    setWeightInput("10");
+    AsyncStorage.setItem("picu_weight", "10");
   }, []);
 
   const toggleFavorite = useCallback(
@@ -62,7 +73,7 @@ export function WeightProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <WeightContext.Provider
-      value={{ weight, setWeight, weightInput, setWeightInput, favorites, toggleFavorite, isFavorite }}
+      value={{ weight, setWeight, weightInput, setWeightInput, resetWeight, favorites, toggleFavorite, isFavorite }}
     >
       {children}
     </WeightContext.Provider>
