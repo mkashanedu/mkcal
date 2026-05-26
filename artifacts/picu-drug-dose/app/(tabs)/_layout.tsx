@@ -30,6 +30,10 @@ function NativeTabLayout() {
         <Icon sf={{ default: "stethoscope", selected: "stethoscope" }} />
         <Label>Tools</Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="calcs">
+        <Icon sf={{ default: "flask", selected: "flask.fill" }} />
+        <Label>Protocols</Label>
+      </NativeTabs.Trigger>
       <NativeTabs.Trigger name="emergency">
         <Icon sf={{ default: "cross.circle", selected: "cross.circle.fill" }} />
         <Label>Emergency</Label>
@@ -125,6 +129,18 @@ function ClassicTabLayout() {
               <SymbolView name="stethoscope" tintColor={color} size={24} />
             ) : (
               <Feather name="tool" size={22} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="calcs"
+        options={{
+          title: "Protocols",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="list.clipboard" tintColor={color} size={24} />
+            ) : (
+              <Feather name="clipboard" size={22} color={color} />
             ),
         }}
       />

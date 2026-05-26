@@ -1,0 +1,32 @@
+Act as a Senior Mobile App Developer (React Native/Expo) and an Expert Medical UI/UX Designer.
+
+CRITICAL INSTRUCTION: DO NOT CREATE A NEW PROJECT. Modify my EXISTING React Native files directly. My deployment will break if you create a new workspace. Write modular, efficient code to fit within output limits, but provide the COMPLETE implementation for all requirements listed below.
+
+### REQUIREMENT 1: GLOBAL UI/UX & ARCHITECTURE
+1. Theme: Deep Navy Blue (#1E3A8A) for headers/primary, Teal (#0D9488) for buttons/accents, Soft Slate Gray (#F8FAFC) for backgrounds. High-contrast large text for calculation results (e.g., ml/hr).
+2. Category Colors: Inotropes (Soft Red), Sedation (Soft Orange), Airway (Soft Cyan).
+3. Footer: Every screen MUST have a fixed footer stating exactly: "Prepared by Staff Kashan Peads ICU (03+ Years Clinical Experience)".
+4. Architecture: 100% Offline. All logic and formulas must be hardcoded within the app.
+
+### REQUIREMENT 2: DRUG DATABASE OVERHAUL
+- Update the existing drug array.
+- CRITICAL FIX: Ensure 'Milrinone' is strictly categorized under 'Inotropes' and removed from Sedation.
+- Inotropes (Dopamine, Dobutamine, Epinephrine, Norepinephrine, Milrinone) MUST have logic to calculate infusion rate (ml/hr) using a standard 50ml syringe volume. Formula: (Dose * Weight * 60) / Concentration.
+- Add Inj. Risek (Omeprazole): 1 mg/kg/day IV OD. Severe: up to 2 mg/kg/day divided 12-hourly. Max: 40 mg/day.
+
+### REQUIREMENT 3: IMPLEMENT ALL 10 CLINICAL CALCULATOR MODULES
+Build and integrate these 10 calculators into the main navigation/UI:
+
+1. Electrolyte Correction: Calculate safe IV correction doses and max infusion rates for K+ and Na+.
+2. ABG Analyzer: Input pH, pCO2, HCO3 -> Output Acid-Base interpretation.
+3. Osmotherapy / Raised ICP: Calculate precise doses for Mannitol (0.5-1 mg/kg) and 3% Hypertonic Saline (2-5 ml/kg).
+4. Toxicology: Display step-by-step antidotes (N-Acetylcysteine for Paracetamol, Naloxone, Flumazenil).
+5. Airway & Lines: Calculate Cuffed/Uncuffed OETT sizes and depths, plus UAC/UVC insertion depth formulas.
+6. Pediatric Transfusion: Calculate volume for PRBC/FFP (10ml/kg) and Platelets (1 unit/5kg).
+7. Status Epilepticus Pathway: Step-by-step timer-based algorithm (0-5m: Lorazepam, 5-15m: Phenytoin, >15m: Thiopental).
+8. Cardiac Care / Tet Spells: PGE1 infusion calculator and rapid Tet Spell protocol display.
+9. GIR & TPN: Calculate Glucose Infusion Rate (mg/kg/min) using % Dextrose, ml/hr, and body weight.
+10. Pediatric Burns: Calculate 24-hr fluid resuscitation (Parkland formula: 50% first 8hrs, 50% next 16hrs).
+
+EXECUTION COMMAND: 
+Start writing the complete, updated code for my main App components and logic files immediately. Integrate everything beautifully. If you reach your output token limit, stop cleanly so I can command you to "continue".
