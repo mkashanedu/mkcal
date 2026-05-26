@@ -90,12 +90,12 @@ export function DisclaimerModal() {
 
           {/* Attribution */}
           <View style={[styles.attribution, { borderTopColor: BORDER }]}>
-            <Text style={[styles.attributionBy, { color: MUTED }]}>Prepared By</Text>
+            <Text style={[styles.attributionBy, { color: MUTED }]}>Prepared by</Text>
             <Text style={[styles.attributionName, { color: "#0EA5E9" }]}>
-              Muhammad Kashan
+              Staff Kashan Peads ICU
             </Text>
             <Text style={[styles.attributionRole, { color: MUTED }]}>
-              Cardiac and Pediatric Specialist
+              (03+ Years Clinical Experience)
             </Text>
           </View>
 
