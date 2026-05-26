@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "PICU Drug Guide",
-    "slug": "picu-drug-dose",
+    "name": "peadscal",
+    "slug": "peadscal",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "picu-drug-dose",
+    "scheme": "peadscal",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -14,9 +14,12 @@
       "backgroundColor": "#005F73"
     },
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "com.peadscal.app"
     },
-    "android": {},
+    "android": {
+      "package": "com.peadscal.app"
+    },
     "web": {
       "favicon": "./assets/images/favicon.png"
     },

@@ -1,0 +1,53 @@
+Act as an expert Senior Full-Stack Developer and Medical Informatics Engineer. 
+
+CRITICAL INSTRUCTION: DO NOT CREATE A NEW PROJECT OR WORKSPACE. You must UPDATE and INJECT new features into my EXISTING application's codebase. My current environment is already linked to my GitHub and Netlify deployment pipeline, and you must not break it. Modify the existing files directly.
+
+### PHASE 1: CORE UI/UX & PWA UPDATES
+1. UI/THEME OVERHAUL:
+   - Update the current styling. Remove any dominant bright red themes completely.
+   - Primary Theme: Deep Navy Blue (#1E3A8A). Accent: Professional Teal (#0D9488). Background: Soft Slate Gray-White (#F1F5F9).
+   - Use Crimson Red (#DC2626) ONLY for high-alert medication boundaries or Code Blue states.
+   - UPDATE FOOTER: Modify the existing footer to explicitly display exactly this text: "Prepared by Staff Kashan Peads ICU (03+ Years Clinical Experience)".
+2. PWA INTEGRATION:
+   - Generate and inject a 'manifest.json' and a robust 'service-worker.js' into the existing directory to make the app offline-capable.
+
+### PHASE 2: CLINICAL MODULES (Based on Nelson & Harriet Lane)
+Update the existing application to include the following modules. 
+
+MODULE 1: EXPANDED DRUG DOSING (Modify Existing Database)
+   - Audit the existing drug list. CRITICAL: Move 'Milrinone' strictly under the 'Inotropes' category, NOT 'Sedation'.
+   - Ensure Inotropes list includes: Dopamine, Dobutamine, Epinephrine, Norepinephrine, Milrinone.
+   - Add Inj. Risek (Omeprazole): Standard dose 1 mg/kg/day IV once daily. Severe cases up to 2 mg/kg/day divided 12-hourly. Max 40 mg/day.
+   - Inject Harriet Lane specific logic: Differentiate Neonatal vs Pediatric ranges. Include dilution instructions (NS vs D5W), auto-calculated infusion rates for 50ml syringes (Inotropes), and Y-site compatibility.
+
+MODULE 2: HARRIET LANE AIRWAY MODULE (New Component)
+   - Uncuffed OETT: (Age/4) + 4. Cuffed OETT: (Age/4) + 3.5. Depth: (Age/2) + 12. Include Laryngoscope blade size references.
+
+MODULE 3: NELSON GROWTH CHARTS (New Component)
+   - Calculator for Weight, Height/Length, Head Circumference. Use WHO standards for ages 0-2, CDC charts for >2 years.
+
+MODULE 4: PALS / CODE BLUE (New Component)
+   - Emergency drugs (Epi 0.01 mg/kg, Amiodarone 5 mg/kg). Defibrillation calculator (First: 2 J/kg, Second: 4 J/kg, Max: 10 J/kg). CPR metronome (100-120 bpm).
+
+MODULE 5: HEMODYNAMIC CALCULATORS
+   - VIS (Vasoactive Inotropic Score), Age-specific normal vitals, and normal ECG parameters.
+
+MODULE 6: PICU CARE BUNDLES
+   - Digital checklists for VAP and CLABSI bundles.
+
+MODULE 7: MAINTENANCE FLUIDS & DEHYDRATION
+   - Holliday-Segar 24-hour maintenance fluid calculator. Fluid deficit calculator for dehydration (mild, moderate, severe).
+
+MODULE 8: PEDIATRIC GCS
+   - Interactive UI to calculate pGCS score (3-15).
+
+MODULE 9: RENAL & HEPATIC DOSE ADJUSTMENTS
+   - Add warning tags on medications requiring adjustment for renal (CrCl) or hepatic impairment.
+
+### STRICT EXECUTION RULE TO PREVENT CONTEXT LIMITS:
+Do NOT attempt to write code for all 9 modules right now. 
+For your FIRST response, ONLY output the code to:
+1. Apply the Phase 1 UI updates (Navy Blue/Teal colors and the specific Footer).
+2. Setup the offline PWA files (manifest & service worker).
+3. Update the existing MODULE 1 (Drug Database with the Milrinone fix and 50ml syringe logic).
+Stop after executing these three things and wait for me to say "Proceed to Module 2".
