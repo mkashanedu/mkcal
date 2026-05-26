@@ -95,7 +95,7 @@ export function DisclaimerModal() {
               Staff Kashan Peads ICU
             </Text>
             <Text style={[styles.attributionRole, { color: MUTED }]}>
-              (03+ Years Clinical Experience)
+              Peads ICU Specialist
             </Text>
           </View>
 
