@@ -83,9 +83,9 @@ export const DRUGS: Drug[] = [
     highAlert: true,
     indications: ["Cardiac arrest", "Anaphylaxis", "Severe bradycardia"],
     doses: [
-      { value: 0.01, unit: "mg/kg", perKg: true, route: "IV/IO", maxDose: "1 mg", frequency: "Every 3–5 min", label: "Cardiac Arrest", notes: "= 0.1 mL/kg of 1:10,000 solution", adultMaxDose_num: 1 },
-      { min: 0.01, max: 0.5, unit: "mg/kg", perKg: true, route: "IM Anterolateral thigh", maxDose: "0.5 mg", label: "Anaphylaxis", notes: "Use 1:1,000 solution; may repeat after 5–15 min", adultMaxDose_num: 0.5 },
-      { min: 0.01, max: 1.0, unit: "mcg/kg/min", perKg: true, route: "IV infusion (Central)", label: "Vasopressor infusion", notes: "Titrate to effect" },
+      { value: 10, unit: "mic/kg", perKg: true, route: "IV/IO", maxDose: "1000 mic", frequency: "Every 3–5 min", label: "Cardiac Arrest", notes: "= 0.1 mL/kg of 1:10,000 solution", adultMaxDose_num: 1000 },
+      { min: 10, max: 500, unit: "mic/kg", perKg: true, route: "IM Anterolateral thigh", maxDose: "500 mic", label: "Anaphylaxis", notes: "Use 1:1,000 solution; may repeat after 5–15 min", adultMaxDose_num: 500 },
+      { min: 0.01, max: 1.0, unit: "mic/kg/min", perKg: true, route: "IV infusion (Central)", label: "Vasopressor infusion", notes: "Titrate to effect" },
     ],
     warnings: ["PALS 2025: IO route equally effective as IV", "Tissue necrosis with peripheral extravasation", "Ensure adequate IO/IV access before use"],
     formulations: ["1:1,000 (1 mg/mL) — Anaphylaxis IM", "1:10,000 (0.1 mg/mL) — Cardiac arrest IV"],
@@ -620,9 +620,9 @@ export const DRUGS: Drug[] = [
     category: "inotrope",
     indications: ["Cardiogenic shock", "Septic shock (2nd line)", "Symptomatic bradycardia (refractory to atropine)"],
     doses: [
-      { min: 2, max: 5, unit: "mcg/kg/min", perKg: true, route: "IV infusion (Central preferred)", label: "Renal / Mesenteric (low dose)", notes: "PALS 2025: 'Renal dose' concept no longer supported — this range has inotropic effect" },
-      { min: 5, max: 10, unit: "mcg/kg/min", perKg: true, route: "IV infusion (Central preferred)", label: "Inotropic dose", notes: "Increases cardiac output; β1-adrenergic effect dominant" },
-      { min: 10, max: 20, unit: "mcg/kg/min", perKg: true, route: "IV infusion (Central line)", label: "Vasopressor dose", notes: "α1-adrenergic; consider adding norepinephrine for vasopressor effect" },
+      { min: 2, max: 5, unit: "mic/kg/min", perKg: true, route: "IV infusion (Central preferred)", label: "Renal / Mesenteric (low dose)", notes: "PALS 2025: 'Renal dose' concept no longer supported — this range has inotropic effect" },
+      { min: 5, max: 10, unit: "mic/kg/min", perKg: true, route: "IV infusion (Central preferred)", label: "Inotropic dose", notes: "Increases cardiac output; β1-adrenergic effect dominant" },
+      { min: 10, max: 20, unit: "mic/kg/min", perKg: true, route: "IV infusion (Central line)", label: "Vasopressor dose", notes: "α1-adrenergic; consider adding norepinephrine for vasopressor effect" },
     ],
     warnings: ["PALS 2025: Norepinephrine preferred over dopamine for septic shock in children", "Central line MANDATORY at > 10 mcg/kg/min", "Tissue necrosis with extravasation — use phentolamine 5 mg/5 mL NS if extravasated"],
     formulations: ["40 mg/mL (5 mL)", "160 mg/mL (5 mL)"],
@@ -635,7 +635,7 @@ export const DRUGS: Drug[] = [
     category: "inotrope",
     indications: ["Cardiogenic shock", "Low cardiac output syndrome (post-cardiac surgery)", "Septic shock with myocardial dysfunction"],
     doses: [
-      { min: 2, max: 20, unit: "mcg/kg/min", perKg: true, route: "IV infusion", label: "Inotropic support", notes: "Start at 5 mcg/kg/min; titrate to hemodynamic response; max 40 mcg/kg/min reported" },
+      { min: 2, max: 20, unit: "mic/kg/min", perKg: true, route: "IV infusion", label: "Inotropic support", notes: "Start at 5 mic/kg/min; titrate to hemodynamic response; max 40 mic/kg/min reported" },
     ],
     warnings: ["May worsen hypotension (vasodilatory) — use with vasopressor if MAP low", "Tachycardia and arrhythmias at high doses", "NOT a vasopressor — no vasoconstrictive effect"],
     formulations: ["12.5 mg/mL (20 mL vial)"],
@@ -649,7 +649,7 @@ export const DRUGS: Drug[] = [
     category: "inotrope",
     indications: ["Vasodilatory/distributive shock (first-line)", "Septic shock", "Anaphylaxis (after epinephrine)"],
     doses: [
-      { min: 0.01, max: 2.0, unit: "mcg/kg/min", perKg: true, route: "IV infusion (Central line)", label: "Vasopressor", notes: "PALS 2025: First-line vasopressor for fluid-refractory septic shock; start 0.05–0.1 mcg/kg/min" },
+      { min: 0.01, max: 2.0, unit: "mic/kg/min", perKg: true, route: "IV infusion (Central line)", label: "Vasopressor", notes: "PALS 2025: First-line vasopressor for fluid-refractory septic shock; start 0.05–0.1 mic/kg/min" },
     ],
     warnings: ["MANDATORY central line — significant necrosis risk with peripheral extravasation", "PALS 2025: Higher doses (> 1 mcg/kg/min) signal need for additional agents or ECMO consideration"],
     formulations: ["1 mg/mL (4 mL amp)", "4 mg/mL concentrate"],
@@ -663,7 +663,7 @@ export const DRUGS: Drug[] = [
     category: "inotrope",
     indications: ["Refractory septic shock", "Anaphylaxis (post-initial IM)", "Cardiogenic shock", "Post-cardiac arrest"],
     doses: [
-      { min: 0.01, max: 1.0, unit: "mcg/kg/min", perKg: true, route: "IV infusion (Central line)", label: "Inotrope / vasopressor", notes: "Low: 0.01–0.1 (inotropic); High: 0.1–1.0 (vasopressor/inotrope combined)" },
+      { min: 0.01, max: 1.0, unit: "mic/kg/min", perKg: true, route: "IV infusion (Central line)", label: "Inotrope / vasopressor", notes: "Low: 0.01–0.1 (inotropic); High: 0.1–1.0 (vasopressor/inotrope combined)" },
     ],
     warnings: ["Higher doses may increase myocardial oxygen demand and cause arrhythmias", "Monitor for hyperglycemia and hypokalemia at high doses"],
     formulations: ["1 mg/mL (1 mL amp) — dilute for infusion"],
@@ -676,8 +676,8 @@ export const DRUGS: Drug[] = [
     category: "inotrope",
     indications: ["Low cardiac output post-cardiac surgery", "Cardiomyopathy with high SVR", "Refractory heart failure"],
     doses: [
-      { value: 50, unit: "mcg/kg", perKg: true, route: "IV over 30–60 min (loading)", label: "Loading dose (optional)", notes: "OMIT loading dose if hypotensive — causes vasodilation" },
-      { min: 0.25, max: 0.75, unit: "mcg/kg/min", perKg: true, route: "IV infusion", label: "Maintenance infusion", notes: "Start 0.25 mcg/kg/min; increase by 0.25 every 30 min; typical target 0.5 mcg/kg/min" },
+      { value: 50, unit: "mic/kg", perKg: true, route: "IV over 30–60 min (loading)", label: "Loading dose (optional)", notes: "OMIT loading dose if hypotensive — causes vasodilation" },
+      { min: 0.25, max: 0.75, unit: "mic/kg/min", perKg: true, route: "IV infusion", label: "Maintenance infusion", notes: "Start 0.25 mic/kg/min; increase by 0.25 every 30 min; typical target 0.5 mic/kg/min" },
     ],
     warnings: ["Vasodilation and hypotension — withhold loading dose if MAP borderline", "PDE3 inhibitor (different mechanism from catecholamines — useful in catecholamine resistance)"],
     formulations: ["1 mg/mL (10 mL, 20 mL vials)"],
