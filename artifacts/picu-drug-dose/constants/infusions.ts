@@ -58,34 +58,35 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
     name: "Dopamine",
     category: "Inotrope / Vasopressor",
     primaryUnit: "mcg/kg/min",
-    alternateUnits: ["mcg/kg/hr", "mg/hr"],
-    minDose: 1,
+    alternateUnits: ["mcg/kg/hr"],
+    minDose: 2,
     maxDose: 20,
     typicalDose: 5,
     doseStep: 0.5,
     color: "#B5171A",
     indication: "Cardiogenic/septic shock, symptomatic bradycardia",
     vialConc_per_mL: 40,
-    vialLabel: "40 mg/mL vial",
+    vialLabel: "200 mg/5 mL vial (40 mg/mL)",
     diluent: "NS or D5W",
     standardConcentrations: [
       {
-        label: "3 mg/kg in 50 mL (Rule of 6)",
-        totalDrug_mg: -1, totalVolume_mL: 50, concentration_per_mL: -1, unit: "mg",
+        label: "Standard 50 mL Syringe — 4000 mcg/mL",
+        totalDrug_mg: 200, totalVolume_mL: 50, concentration_per_mL: 4, unit: "mg",
       },
       {
-        label: "6 mg/kg in 100 mL (Rule of 6)",
-        totalDrug_mg: -1, totalVolume_mL: 100, concentration_per_mL: -1, unit: "mg",
+        label: "Standard 30 mL Syringe — 4000 mcg/mL",
+        totalDrug_mg: 120, totalVolume_mL: 30, concentration_per_mL: 4, unit: "mg",
       },
       {
-        label: "1.6 mg/mL — 400 mg in 250 mL",
-        totalDrug_mg: 400, totalVolume_mL: 250, concentration_per_mL: 1.6, unit: "mg",
+        label: "100 mL Chamber — 2000 mcg/mL",
+        totalDrug_mg: 200, totalVolume_mL: 100, concentration_per_mL: 2, unit: "mg",
       },
     ],
-    notes: "Rule of 6: 3 × wt (kg) mg in 50 mL NS → 1 mL/hr = 1 mcg/kg/min",
+    notes: "Recipe: 5 mL Dopamine (1 vial) + 45 mL NS/D5W = 50 mL @ 4000 mcg/mL  |  3 mL + 27 mL = 30 mL @ 4000 mcg/mL  |  5 mL + 95 mL = 100 mL @ 2000 mcg/mL",
     warnings: [
-      "Central line preferred at > 10 mcg/kg/min",
+      "Central line MANDATORY at > 10 mcg/kg/min",
       "PALS 2025: Norepinephrine preferred for septic shock",
+      "Tissue necrosis with extravasation — use phentolamine if extravasated",
     ],
     reference: "PALS 2025 | Harriet Lane 23e",
   },
@@ -1156,6 +1157,8 @@ export function computeRecipe(
     finalConcStr = `${finalConc.toFixed(2)} units/mL`;
   } else if (isMcgDrug || finalConc < 0.1) {
     finalConcStr = `${(finalConc * 1000).toFixed(2)} mcg/mL`;
+  } else if (finalConc >= 1) {
+    finalConcStr = `${(finalConc * 1000).toFixed(0)} mcg/mL`;
   } else {
     finalConcStr = `${finalConc.toFixed(4)} mg/mL`;
   }

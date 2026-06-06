@@ -683,7 +683,9 @@ export default function InfusionScreen() {
                                   <Text style={{ color: selectedDrug.color, fontWeight: "700" }}>
                                     {calcConc < 0.1
                                       ? (calcConc * 1000).toFixed(2) + " mcg/mL"
-                                      : calcConc.toFixed(4) + " mg/mL"}
+                                      : calcConc >= 1
+                                        ? (calcConc * 1000).toFixed(0) + " mcg/mL"
+                                        : calcConc.toFixed(4) + " mg/mL"}
                                   </Text>
                                 </Text>
                               )}
@@ -693,7 +695,9 @@ export default function InfusionScreen() {
                                   <Text style={{ color: selectedDrug.color, fontWeight: "700" }}>
                                     {calcConc < 0.1
                                       ? (calcConc * 1000).toFixed(2) + " mcg/mL"
-                                      : calcConc.toFixed(4) + " mg/mL"}
+                                      : calcConc >= 1
+                                        ? (calcConc * 1000).toFixed(0) + " mcg/mL"
+                                        : calcConc.toFixed(4) + " mg/mL"}
                                   </Text>
                                 </Text>
                               )}
