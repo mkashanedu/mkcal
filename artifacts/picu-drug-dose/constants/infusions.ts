@@ -63,26 +63,26 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
     maxDose: 20,
     typicalDose: 5,
     doseStep: 0.5,
-    color: "#B5171A",
+    color: "#7C3AED",
     indication: "Cardiogenic/septic shock, symptomatic bradycardia",
     vialConc_per_mL: 40,
     vialLabel: "200 mg/5 mL vial (40 mg/mL)",
     diluent: "NS or D5W",
     standardConcentrations: [
       {
-        label: "Standard 50 mL Syringe — 4000 mcg/mL",
+        label: "4000 mcg/mL — 50 mL Syringe (5 mL drug + 45 mL diluent)",
         totalDrug_mg: 200, totalVolume_mL: 50, concentration_per_mL: 4, unit: "mg",
       },
       {
-        label: "Standard 30 mL Syringe — 4000 mcg/mL",
+        label: "4000 mcg/mL — 30 mL Syringe (3 mL drug + 27 mL diluent)",
         totalDrug_mg: 120, totalVolume_mL: 30, concentration_per_mL: 4, unit: "mg",
       },
       {
-        label: "100 mL Chamber — 2000 mcg/mL",
+        label: "2000 mcg/mL — 100 mL Chamber (5 mL drug + 95 mL diluent)",
         totalDrug_mg: 200, totalVolume_mL: 100, concentration_per_mL: 2, unit: "mg",
       },
     ],
-    notes: "Recipe: 5 mL Dopamine (1 vial) + 45 mL NS/D5W = 50 mL @ 4000 mcg/mL  |  3 mL + 27 mL = 30 mL @ 4000 mcg/mL  |  5 mL + 95 mL = 100 mL @ 2000 mcg/mL",
+    notes: "Recipe: 5 mL Dopamine (1 vial, 40 mg/mL) + 45 mL NS/D5W = 50 mL @ 4000 mcg/mL  |  3 mL + 27 mL = 30 mL @ 4000 mcg/mL  |  5 mL + 95 mL = 100 mL @ 2000 mcg/mL",
     warnings: [
       "Central line MANDATORY at > 10 mcg/kg/min",
       "PALS 2025: Norepinephrine preferred for septic shock",
@@ -96,28 +96,32 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
     name: "Dobutamine",
     category: "Inotrope",
     primaryUnit: "mcg/kg/min",
-    alternateUnits: ["mcg/kg/hr", "mg/hr"],
+    alternateUnits: ["mcg/kg/hr"],
     minDose: 2,
     maxDose: 20,
     typicalDose: 5,
     doseStep: 0.5,
-    color: "#C0392B",
+    color: "#7C3AED",
     indication: "Cardiogenic shock, low cardiac output syndrome",
-    vialConc_per_mL: 12.5,
-    vialLabel: "12.5 mg/mL vial (250 mg/20 mL)",
+    vialConc_per_mL: 40,
+    vialLabel: "200 mg/5 mL vial (40 mg/mL)",
     diluent: "NS or D5W",
     standardConcentrations: [
       {
-        label: "3 mg/kg in 50 mL (Rule of 6)",
-        totalDrug_mg: -1, totalVolume_mL: 50, concentration_per_mL: -1, unit: "mg",
+        label: "4000 mcg/mL — 50 mL Syringe (5 mL drug + 45 mL diluent)",
+        totalDrug_mg: 200, totalVolume_mL: 50, concentration_per_mL: 4, unit: "mg",
       },
       {
-        label: "1 mg/mL — 250 mg in 250 mL",
-        totalDrug_mg: 250, totalVolume_mL: 250, concentration_per_mL: 1, unit: "mg",
+        label: "4000 mcg/mL — 30 mL Syringe (3 mL drug + 27 mL diluent)",
+        totalDrug_mg: 120, totalVolume_mL: 30, concentration_per_mL: 4, unit: "mg",
+      },
+      {
+        label: "2000 mcg/mL — 100 mL Chamber (5 mL drug + 95 mL diluent)",
+        totalDrug_mg: 200, totalVolume_mL: 100, concentration_per_mL: 2, unit: "mg",
       },
     ],
-    notes: "Rule of 6: 3 × wt (kg) mg in 50 mL → 1 mL/hr = 1 mcg/kg/min",
-    warnings: ["May worsen hypotension (vasodilatory) — add vasopressor if MAP low"],
+    notes: "Recipe: 5 mL Dobutamine (1 vial, 40 mg/mL) + 45 mL NS/D5W = 50 mL @ 4000 mcg/mL  |  3 mL + 27 mL = 30 mL @ 4000 mcg/mL  |  5 mL + 95 mL = 100 mL @ 2000 mcg/mL",
+    warnings: ["Vasodilatory — may worsen hypotension; add vasopressor if MAP low"],
     reference: "PALS 2025 | Harriet Lane 23e",
   },
 
@@ -126,31 +130,34 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
     name: "Norepinephrine",
     category: "Vasopressor",
     primaryUnit: "mcg/kg/min",
-    alternateUnits: ["mcg/min", "mg/hr"],
+    alternateUnits: ["mcg/min"],
     minDose: 0.01,
-    maxDose: 2,
+    maxDose: 1.0,
     typicalDose: 0.1,
     doseStep: 0.01,
-    color: "#8B0000",
-    indication: "Septic/distributive shock (1st line PALS 2025)",
+    color: "#7C3AED",
+    indication: "Septic/distributive shock — 1st line vasopressor (PALS 2025)",
     vialConc_per_mL: 1,
     vialLabel: "1 mg/mL ampoule (4 mg/4 mL)",
     diluent: "D5W or NS",
     standardConcentrations: [
       {
-        label: "0.1 mg/kg in 50 mL (Rule of 6)",
-        totalDrug_mg: -1, totalVolume_mL: 50, concentration_per_mL: -1, unit: "mg",
+        label: "20 mcg/mL — 1 mg in 50 mL (Peripheral max)",
+        totalDrug_mg: 1, totalVolume_mL: 50, concentration_per_mL: 0.02, unit: "mg",
       },
       {
-        label: "16 mcg/mL — 4 mg in 250 mL",
-        totalDrug_mg: 4, totalVolume_mL: 250, concentration_per_mL: 0.016, unit: "mg",
+        label: "40 mcg/mL — 2 mg in 50 mL (CVC Standard)",
+        totalDrug_mg: 2, totalVolume_mL: 50, concentration_per_mL: 0.04, unit: "mg",
       },
       {
-        label: "32 mcg/mL — 8 mg in 250 mL (concentrated)",
-        totalDrug_mg: 8, totalVolume_mL: 250, concentration_per_mL: 0.032, unit: "mg",
+        label: "60 mcg/mL — 3 mg in 50 mL (CVC Concentrated)",
+        totalDrug_mg: 3, totalVolume_mL: 50, concentration_per_mL: 0.06, unit: "mg",
       },
     ],
-    warnings: ["MANDATORY central line — severe necrosis with peripheral extravasation"],
+    warnings: [
+      "Central line MANDATORY — severe tissue necrosis with peripheral extravasation",
+      "Peripheral route: ONLY 20 mcg/mL, monitor site continuously",
+    ],
     reference: "PALS 2025 | SSC Pediatric 2024",
   },
 
@@ -201,7 +208,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
     primaryUnit: "mcg/kg/min",
     alternateUnits: ["mcg/kg/hr"],
     minDose: 0.1,
-    maxDose: 0.75,
+    maxDose: 1.0,
     typicalDose: 0.375,
     doseStep: 0.025,
     color: "#6B2D8E",
@@ -211,12 +218,20 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
     diluent: "NS or D5W",
     standardConcentrations: [
       {
-        label: "0.3 mg/kg in 50 mL",
-        totalDrug_mg: -1, totalVolume_mL: 50, concentration_per_mL: -1, unit: "mg",
+        label: "100 mcg/mL — 50 mL Syringe (5 mL drug + 45 mL diluent)",
+        totalDrug_mg: 5, totalVolume_mL: 50, concentration_per_mL: 0.1, unit: "mg",
       },
       {
-        label: "200 mcg/mL — 20 mg in 100 mL",
-        totalDrug_mg: 20, totalVolume_mL: 100, concentration_per_mL: 0.2, unit: "mg",
+        label: "100 mcg/mL — 30 mL Syringe (3 mL drug + 27 mL diluent)",
+        totalDrug_mg: 3, totalVolume_mL: 30, concentration_per_mL: 0.1, unit: "mg",
+      },
+      {
+        label: "200 mcg/mL — 50 mL Syringe (10 mL drug + 40 mL diluent)",
+        totalDrug_mg: 10, totalVolume_mL: 50, concentration_per_mL: 0.2, unit: "mg",
+      },
+      {
+        label: "200 mcg/mL — 30 mL Syringe (6 mL drug + 24 mL diluent)",
+        totalDrug_mg: 6, totalVolume_mL: 30, concentration_per_mL: 0.2, unit: "mg",
       },
     ],
     notes: "Loading dose (optional): 50 mcg/kg IV over 30–60 min. OMIT if hypotensive.",
@@ -1155,10 +1170,12 @@ export function computeRecipe(
   let finalConcStr: string;
   if (isUnitsDrug) {
     finalConcStr = `${finalConc.toFixed(2)} units/mL`;
-  } else if (isMcgDrug || finalConc < 0.1) {
-    finalConcStr = `${(finalConc * 1000).toFixed(2)} mcg/mL`;
   } else if (finalConc >= 1) {
     finalConcStr = `${(finalConc * 1000).toFixed(0)} mcg/mL`;
+  } else if (isMcgDrug || finalConc < 1) {
+    // Show everything below 1 mg/mL in mcg/mL for clarity
+    const mcgVal = finalConc * 1000;
+    finalConcStr = `${mcgVal < 1 ? mcgVal.toFixed(2) : mcgVal.toFixed(0)} mcg/mL`;
   } else {
     finalConcStr = `${finalConc.toFixed(4)} mg/mL`;
   }

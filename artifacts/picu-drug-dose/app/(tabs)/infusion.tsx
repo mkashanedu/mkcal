@@ -808,11 +808,14 @@ export default function InfusionScreen() {
                             Calculated Concentration
                           </Text>
                           <Text style={[styles.dilutionResultValue, { color: selectedDrug.color }]}>
-                            {dilutionConc < 0.1
-                              ? (dilutionConc * 1000).toFixed(2) + " mcg/mL"
-                              : dilutionConc >= 1
-                                ? (dilutionConc * 1000).toFixed(0) + " mcg/mL"
-                                : dilutionConc.toFixed(4) + " mg/mL"}
+                            {(() => {
+                              const mcg = dilutionConc * 1000;
+                              return dilutionConc >= 1
+                                ? mcg.toFixed(0) + " mcg/mL"
+                                : mcg < 1
+                                  ? mcg.toFixed(2) + " mcg/mL"
+                                  : mcg.toFixed(0) + " mcg/mL";
+                            })()}
                           </Text>
                           <Text style={[styles.dilutionResultSub, { color: MUTED }]}>
                             {parseFloat(dilutionDrug_mg).toFixed(1)} mg in{" "}
@@ -838,11 +841,14 @@ export default function InfusionScreen() {
                     <Text style={[styles.concSummaryText, { color: SEC }]}>
                       Active:{" "}
                       <Text style={{ color: selectedDrug.color, fontWeight: "800" }}>
-                        {concentration < 0.1
-                          ? (concentration * 1000).toFixed(2) + " mcg/mL"
-                          : concentration >= 1
-                            ? (concentration * 1000).toFixed(0) + " mcg/mL"
-                            : concentration.toFixed(4) + " mg/mL"}
+                        {(() => {
+                          const mcg = concentration * 1000;
+                          return concentration >= 1
+                            ? mcg.toFixed(0) + " mcg/mL"
+                            : mcg < 1
+                              ? mcg.toFixed(2) + " mcg/mL"
+                              : mcg.toFixed(0) + " mcg/mL";
+                        })()}
                       </Text>
                     </Text>
                   </View>
@@ -970,13 +976,14 @@ export default function InfusionScreen() {
                       <ResultDetail label="Weight" value={`${weight} kg`} textColor={TEXT} mutedColor={MUTED} />
                       <ResultDetail
                         label="Concentration"
-                        value={
-                          concentration < 0.1
-                            ? `${(concentration * 1000).toFixed(2)} mcg/mL`
-                            : concentration >= 1
-                              ? `${(concentration * 1000).toFixed(0)} mcg/mL`
-                              : `${concentration.toFixed(4)} mg/mL`
-                        }
+                        value={(() => {
+                          const mcg = concentration * 1000;
+                          return concentration >= 1
+                            ? `${mcg.toFixed(0)} mcg/mL`
+                            : mcg < 1
+                              ? `${mcg.toFixed(2)} mcg/mL`
+                              : `${mcg.toFixed(0)} mcg/mL`;
+                        })()}
                         textColor={TEXT}
                         mutedColor={MUTED}
                       />
