@@ -36,7 +36,7 @@ type SyringeSize = typeof SYRINGE_SIZES[number];
 
 const INFUSION_CATS = [
   { key: "all",        label: "All",         color: "#0EA5E9", match: [] as string[] },
-  { key: "inotrope",  label: "Inotropes",    color: "#E53E3E", match: ["Inotrope", "Vasopressor", "Inodilator"] },
+  { key: "inotrope",  label: "Inotropes",    color: "#7C3AED", match: ["Inotrope", "Vasopressor", "Inodilator"] },
   { key: "sedation",  label: "Sedation",     color: "#805AD5", match: ["Sedative", "Opioid", "Analgosedative", "Analgesic"] },
   { key: "resp",      label: "Respiratory",  color: "#38A169", match: ["Bronchodilator", "Respiratory"] },
   { key: "cardiac",   label: "Cardiac",      color: "#DD6B20", match: ["Antiarrhythmic", "Vasodilator", "Antihypertensive", "Diuretic"] },
@@ -240,12 +240,12 @@ export default function InfusionScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   // ── Theme tokens ──
-  const BG   = isDark ? "#080E18" : C.background;
-  const CARD = isDark ? "#0F172A" : C.card;
-  const BORDER = isDark ? "#1E293B" : C.border;
-  const TEXT = isDark ? "#E2E8F0" : C.text;
-  const MUTED = isDark ? "#64748B" : C.textMuted;
-  const SEC  = isDark ? "#94A3B8" : C.textSecondary;
+  const BG   = isDark ? "#060B12" : C.background;
+  const CARD = isDark ? "#0D1521" : C.card;
+  const BORDER = isDark ? "#182232" : C.border;
+  const TEXT = isDark ? "#E8F1FA" : C.text;
+  const MUTED = isDark ? "#4D6680" : C.textMuted;
+  const SEC  = isDark ? "#8AAEC8" : C.textSecondary;
 
   const weightNum = parseFloat(weight) || 0;
   const doseNum = parseFloat(doseInput) || 0;
@@ -350,11 +350,11 @@ export default function InfusionScreen() {
           </View>
           <View style={styles.headerRight}>
             <TouchableOpacity
-              style={[styles.nightBtn, { backgroundColor: isDark ? "#1E293B" : "#EDF2F7" }]}
+              style={[styles.nightBtn, { backgroundColor: isDark ? "#0D1828" : "#E8F4F9" }]}
               onPress={toggleDark}
               activeOpacity={0.8}
             >
-              <Feather name={isDark ? "sun" : "moon"} size={15} color={isDark ? "#F6E05E" : C.textMuted} />
+              <Feather name={isDark ? "sun" : "moon"} size={15} color={isDark ? "#F6E05E" : C.tint} />
             </TouchableOpacity>
             <View style={styles.weightBadge}>
               <Text style={[styles.weightLabel, { color: C.tint }]}>WT (KG)</Text>
@@ -586,16 +586,15 @@ export default function InfusionScreen() {
                 </View>
 
                 {/* Mode tabs */}
-                <View style={styles.modeTabs}>
+                <View style={[styles.modeTabs, { backgroundColor: isDark ? "#0A1220" : "#EBF5FB" }]}>
                   {(["standard", "dilution"] as ConcMode[]).map((mode) => (
                     <TouchableOpacity
                       key={mode}
                       style={[
                         styles.modeTab,
-                        { borderColor: BORDER, backgroundColor: BG },
+                        { backgroundColor: "transparent" },
                         concMode === mode && {
                           backgroundColor: selectedDrug.color,
-                          borderColor: selectedDrug.color,
                         },
                       ]}
                       onPress={() => setConcMode(mode)}
@@ -863,19 +862,17 @@ export default function InfusionScreen() {
                   </View>
 
                   {/* Syringe size selector */}
-                  <View style={styles.syringeRow}>
+                  <View style={[styles.syringeRow, { backgroundColor: isDark ? "#0A1220" : "#EBF5FB" }]}>
                     {SYRINGE_SIZES.map((ml) => (
                       <TouchableOpacity
                         key={ml}
                         style={[
                           styles.syringeBtn,
                           {
-                            borderColor: BORDER,
-                            backgroundColor: BG,
+                            backgroundColor: "transparent",
                           },
                           syringeML === ml && {
                             backgroundColor: selectedDrug.color,
-                            borderColor: selectedDrug.color,
                           },
                         ]}
                         onPress={() => setSyringeML(ml)}
@@ -884,7 +881,7 @@ export default function InfusionScreen() {
                         <Text
                           style={[
                             styles.syringeBtnText,
-                            { color: SEC },
+                            { color: MUTED },
                             syringeML === ml && { color: "#fff", fontWeight: "800" },
                           ]}
                         >
@@ -1130,13 +1127,13 @@ const styles = StyleSheet.create({
   section: {
     marginHorizontal: 14,
     marginTop: 12,
-    borderRadius: 18,
-    padding: 16,
-    borderWidth: 1,
+    borderRadius: 20,
+    padding: 18,
+    borderWidth: 0,
     ...Platform.select({
-      ios: { shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.06, shadowRadius: 8 },
-      android: { elevation: 2 },
-      web: { boxShadow: "0 2px 10px rgba(0,0,0,0.06)" },
+      ios: { shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.10, shadowRadius: 16 },
+      android: { elevation: 4 },
+      web: { boxShadow: "0 4px 20px rgba(0,0,0,0.08)" },
     }),
   },
   stepRow: {
@@ -1218,7 +1215,7 @@ const styles = StyleSheet.create({
   unitChipText: { fontSize: 13, fontWeight: "600" },
 
   // Concentration modes
-  modeTabs: { flexDirection: "row", gap: 8, marginBottom: 14 },
+  modeTabs: { flexDirection: "row", gap: 6, marginBottom: 14, borderRadius: 100, padding: 4 },
   modeTab: {
     flex: 1,
     flexDirection: "row",
@@ -1226,16 +1223,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 6,
     paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1.5,
+    borderRadius: 100,
+    borderWidth: 0,
   },
   modeTabText: { fontSize: 13, fontWeight: "700" },
 
   standardConcList: { gap: 10 },
   standardConcItem: {
-    borderWidth: 1.5,
-    borderRadius: 12,
-    padding: 12,
+    borderWidth: 0,
+    borderRadius: 14,
+    padding: 14,
+    ...Platform.select({
+      ios: { shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.07, shadowRadius: 8 },
+      android: { elevation: 2 },
+      web: { boxShadow: "0 2px 10px rgba(0,0,0,0.07)" },
+    }),
   },
   radioRow: { flexDirection: "row", alignItems: "flex-start", gap: 10 },
   radioOuter: {
@@ -1292,13 +1294,13 @@ const styles = StyleSheet.create({
   concSummaryText: { fontSize: 13 },
 
   // Syringe size
-  syringeRow: { flexDirection: "row", gap: 6, marginBottom: 12 },
+  syringeRow: { flexDirection: "row", gap: 6, marginBottom: 12, padding: 4, borderRadius: 100 },
   syringeBtn: {
     flex: 1,
-    paddingVertical: 11,
-    borderRadius: 10,
-    borderWidth: 1.5,
+    paddingVertical: 10,
+    borderRadius: 100,
     alignItems: "center",
+    borderWidth: 0,
   },
   syringeBtnText: { fontSize: 13, fontWeight: "700" },
 
@@ -1339,10 +1341,15 @@ const styles = StyleSheet.create({
 
   // Recipe card
   recipeCard: {
-    borderWidth: 1.5,
-    borderRadius: 16,
-    padding: 14,
+    borderWidth: 0,
+    borderRadius: 18,
+    padding: 16,
     gap: 12,
+    ...Platform.select({
+      ios: { shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 14 },
+      android: { elevation: 4 },
+      web: { boxShadow: "0 4px 18px rgba(0,0,0,0.10)" },
+    }),
   },
   recipeHeader: { flexDirection: "row", alignItems: "center", gap: 7 },
   recipeTitle: { fontSize: 14, fontWeight: "700" },
@@ -1390,13 +1397,13 @@ const styles = StyleSheet.create({
   resultBox: {
     margin: 14,
     marginTop: 12,
-    borderRadius: 22,
-    padding: 22,
-    borderWidth: 1,
+    borderRadius: 24,
+    padding: 24,
+    borderWidth: 0,
     ...Platform.select({
-      ios: { shadowColor: "#000", shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.14, shadowRadius: 16 },
-      android: { elevation: 6 },
-      web: { boxShadow: "0 6px 24px rgba(0,0,0,0.1)" },
+      ios: { shadowColor: "#0891B2", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.20, shadowRadius: 24 },
+      android: { elevation: 8 },
+      web: { boxShadow: "0 8px 32px rgba(8,145,178,0.18)" },
     }),
   },
   resultHeader: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 6 },

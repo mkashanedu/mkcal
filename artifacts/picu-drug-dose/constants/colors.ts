@@ -1,42 +1,42 @@
-const primary = "#0077B6";
-const primaryDark = "#023E8A";
-const primaryLight = "#00B4D8";
-const accent = "#F77F00";
-const danger = "#D62828";
-const safe = "#2DC653";
-const surface = "#F8FAFD";
+const primary = "#0891B2";
+const primaryDark = "#0E7490";
+const primaryLight = "#22D3EE";
+const accent = "#F59E0B";
+const danger = "#DC2626";
+const safe = "#16A34A";
+const surface = "#F7FBFD";
 
 export default {
   light: {
     text: "#0A1628",
-    textSecondary: "#3D5166",
-    textMuted: "#7E9AB5",
+    textSecondary: "#374B5C",
+    textMuted: "#7A95AA",
     background: surface,
     backgroundSecondary: "#FFFFFF",
     card: "#FFFFFF",
-    border: "#DDE6F0",
+    border: "#E4EDF4",
     tint: primary,
     tintDark: primaryDark,
     tintLight: primaryLight,
     accent,
     danger,
     safe,
-    tabIconDefault: "#7E9AB5",
+    tabIconDefault: "#94A8B8",
     tabIconSelected: primary,
 
     categoryColors: {
-      analgesic: "#6B2FA0",
-      sedative: "#1A4F7A",
-      inotrope: "#B5171A",
-      antibiotic: "#146B35",
-      antiepileptic: "#A05C00",
-      emergency: "#C1121F",
-      fluid: "#0077B6",
-      respiratory: "#0C7B5C",
-      cardiovascular: "#6B2D8E",
-      antifungal: "#445566",
-      steroid: "#C06000",
-      vitamin: "#1A7A40",
+      analgesic: "#7C3AED",
+      sedative: "#1D4ED8",
+      inotrope: "#6D28D9",
+      antibiotic: "#047857",
+      antiepileptic: "#B45309",
+      emergency: "#DC2626",
+      fluid: "#0891B2",
+      respiratory: "#0D9488",
+      cardiovascular: "#7C3AED",
+      antifungal: "#475569",
+      steroid: "#C2410C",
+      vitamin: "#15803D",
     },
   },
 };

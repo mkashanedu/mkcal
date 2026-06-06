@@ -88,8 +88,8 @@ export default function DrugListScreen() {
         style={[
           styles.categoryPill,
           {
-            backgroundColor: isActive ? item.color : isDark ? "#1E2D3D" : "#F0F4F8",
-            borderColor: isActive ? item.color : "transparent",
+            backgroundColor: isActive ? item.color : isDark ? "#0D1928" : "#EBF5FB",
+            borderColor: "transparent",
           },
         ]}
       >
@@ -97,7 +97,7 @@ export default function DrugListScreen() {
           style={[
             styles.categoryPillText,
             {
-              color: isActive ? "#fff" : isDark ? "#8A9BB0" : "#4A5568",
+              color: isActive ? "#fff" : isDark ? "#5A8099" : "#374B5C",
               fontFamily: isActive ? "Inter_600SemiBold" : "Inter_400Regular",
             },
           ]}
@@ -117,7 +117,7 @@ export default function DrugListScreen() {
         style={({ pressed }) => [
           styles.drugCard,
           {
-            backgroundColor: isDark ? "#0F1E2E" : "#FFFFFF",
+            backgroundColor: isDark ? "#0D1521" : "#FFFFFF",
             opacity: pressed ? 0.85 : 1,
             transform: [{ scale: pressed ? 0.99 : 1 }],
           },
@@ -175,14 +175,14 @@ export default function DrugListScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: isDark ? "#080E16" : "#F0F4F8" }]}>
+    <View style={[styles.container, { backgroundColor: isDark ? "#060B12" : "#F0F9FF" }]}>
       {/* Header */}
       <View
         style={[
           styles.header,
           {
             paddingTop: topPadding + 12,
-            backgroundColor: isDark ? "#0A1520" : "#FFFFFF",
+            backgroundColor: isDark ? "#0A1522" : "#FFFFFF",
           },
         ]}
       >
@@ -211,13 +211,13 @@ export default function DrugListScreen() {
           {/* Dark mode toggle */}
           <TouchableOpacity
             onPress={toggleDark}
-            style={[styles.darkToggle, { backgroundColor: isDark ? "#1E2D3D" : "#F0F4F8" }]}
+            style={[styles.darkToggle, { backgroundColor: isDark ? "#0D1928" : "#E8F4FA" }]}
             activeOpacity={0.7}
           >
             <Feather
               name={isDark ? "sun" : "moon"}
               size={16}
-              color={isDark ? "#FFD700" : "#4A5568"}
+              color={isDark ? "#FFD700" : Colors.light.tint}
             />
           </TouchableOpacity>
 
@@ -236,8 +236,8 @@ export default function DrugListScreen() {
                 style={[
                   styles.weightInput,
                   {
-                    color: weightWarning ? "#E53E3E" : isDark ? "#E8F0FE" : "#0D1B2A",
-                    backgroundColor: isDark ? "#1E2D3D" : "#F0F4F8",
+                    color: weightWarning ? "#E53E3E" : isDark ? "#E8F1FA" : "#0A1628",
+                    backgroundColor: isDark ? "#0D1928" : "#EBF5FB",
                     fontFamily: "Inter_700Bold",
                     borderColor: weightWarning ? "#E53E3E" : "transparent",
                     borderWidth: weightWarning ? 1.5 : 0,
@@ -251,7 +251,7 @@ export default function DrugListScreen() {
               />
               <TouchableOpacity
                 onPress={handleReset}
-                style={[styles.resetBtn, { backgroundColor: isDark ? "#1E2D3D" : "#E2E8F0" }]}
+                style={[styles.resetBtn, { backgroundColor: isDark ? "#0D1928" : "#D9EDF8" }]}
                 activeOpacity={0.7}
               >
                 <Feather name="x" size={13} color={isDark ? "#5A7A96" : "#4A5568"} />
@@ -267,10 +267,10 @@ export default function DrugListScreen() {
         <View
           style={[
             styles.searchBar,
-            { backgroundColor: isDark ? "#1E2D3D" : "#F0F4F8" },
+            { backgroundColor: isDark ? "#0D1928" : "#EBF5FB" },
           ]}
         >
-          <Feather name="search" size={16} color={isDark ? "#5A7A96" : "#8A9BB0"} />
+          <Feather name="search" size={16} color={isDark ? "#4D6E88" : Colors.light.tint} />
           <TextInput
             style={[
               styles.searchInput,
@@ -404,23 +404,23 @@ const styles = StyleSheet.create({
   searchDivider: { width: 1, height: 16, backgroundColor: "#CBD5E0", marginHorizontal: 2 },
   pillList: { paddingBottom: 8, gap: 8 },
   categoryPill: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1.5,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 100,
+    borderWidth: 0,
   },
   categoryPillText: { fontSize: 12 },
   listContent: { padding: 12, gap: 8 },
   drugCard: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 14,
+    borderRadius: 16,
     padding: 14,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 3,
     gap: 12,
   },
   categoryDot: {

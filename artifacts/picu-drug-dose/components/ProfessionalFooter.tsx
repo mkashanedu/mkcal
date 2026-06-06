@@ -13,76 +13,63 @@ export function ProfessionalFooter() {
       style={[
         styles.container,
         {
-          borderTopColor: isDark ? "#1E2D3D" : C.border,
-          backgroundColor: isDark ? "#080E18" : "#EDF2F7",
+          backgroundColor: isDark ? "#0C1420" : "#F0F9FF",
         },
       ]}
     >
       <View style={styles.logoRow}>
-        <Feather name="heart" size={14} color="#AE2012" />
-        <View style={[styles.dividerDot, { backgroundColor: isDark ? "#2D3748" : C.border }]} />
-        <Feather name="activity" size={14} color={C.tint} />
+        <View style={[styles.iconPill, { backgroundColor: C.tint + "20" }]}>
+          <Feather name="activity" size={13} color={C.tint} />
+        </View>
+        <View style={[styles.iconPill, { backgroundColor: "#DC262620" }]}>
+          <Feather name="heart" size={13} color="#DC2626" />
+        </View>
       </View>
-      <Text style={[styles.name, { color: isDark ? "#E2E8F0" : C.text }]}>
+      <Text style={[styles.name, { color: isDark ? "#E2EDF8" : "#0A1628", fontFamily: "Inter_700Bold" }]}>
         Prepared by Staff Kashan Peads ICU
       </Text>
-      <View style={[styles.disclaimerBox, { borderColor: isDark ? "#2D3748" : C.border }]}>
-        <Feather name="shield" size={10} color={isDark ? "#4A6580" : C.textMuted} />
-        <Text style={[styles.disclaimer, { color: isDark ? "#4A6580" : C.textMuted }]}>
-          All doses based on Harriet Lane Handbook 23e · PALS 2025 · SSC Pediatric 2024.
-          Clinical responsibility rests with the prescribing clinician. Verify against institutional protocols.
-        </Text>
-      </View>
+      <Text style={[styles.disclaimer, { color: isDark ? "#4A6580" : "#7A95AA", fontFamily: "Inter_400Regular" }]}>
+        Harriet Lane 23e · PALS 2025 · SSC Pediatric 2024
+      </Text>
+      <Text style={[styles.disclaimer, { color: isDark ? "#334D66" : "#A0B4C4", fontFamily: "Inter_400Regular" }]}>
+        Clinical responsibility rests with the prescribing clinician.
+      </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 20,
-    marginHorizontal: 14,
+    marginTop: 24,
+    marginHorizontal: 12,
     marginBottom: 8,
-    paddingTop: 18,
-    paddingBottom: 22,
-    paddingHorizontal: 16,
-    borderTopWidth: 1,
-    borderRadius: 16,
+    paddingTop: 20,
+    paddingBottom: 24,
+    paddingHorizontal: 20,
+    borderRadius: 20,
     alignItems: "center",
-    gap: 4,
+    gap: 6,
   },
   logoRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    marginBottom: 8,
+    gap: 8,
+    marginBottom: 10,
   },
-  dividerDot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
+  iconPill: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
   },
   name: {
     fontSize: 14,
-    fontWeight: "800",
-    letterSpacing: 0.2,
-  },
-  title: {
-    fontSize: 12,
-    fontWeight: "500",
-    marginBottom: 10,
-  },
-  disclaimerBox: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 6,
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 10,
-    marginTop: 4,
+    letterSpacing: 0.1,
   },
   disclaimer: {
-    flex: 1,
-    fontSize: 10,
-    lineHeight: 15,
+    fontSize: 11,
+    lineHeight: 16,
+    textAlign: "center",
   },
 });

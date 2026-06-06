@@ -1,0 +1,1 @@
+- [Design System](design-system.md) — Medical Teal primary #0891B2; Red #DC2626 strictly for emergency/high-alert only; inotrope category uses violet #7C3AED not red

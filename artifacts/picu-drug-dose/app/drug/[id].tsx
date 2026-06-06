@@ -28,7 +28,7 @@ export default function DrugDetailScreen() {
 
   if (!drug) {
     return (
-      <View style={[styles.container, { backgroundColor: isDark ? "#080E16" : "#F0F4F8", justifyContent: "center", alignItems: "center" }]}>
+      <View style={[styles.container, { backgroundColor: isDark ? "#060B12" : "#F0F9FF", justifyContent: "center", alignItems: "center" }]}>
         <Text style={{ color: isDark ? "#E8F0FE" : "#0D1B2A", fontFamily: "Inter_500Medium", fontSize: 16 }}>
           Drug not found
         </Text>
@@ -41,7 +41,7 @@ export default function DrugDetailScreen() {
   const topOffset = Platform.OS === "web" ? 67 : insets.top;
 
   return (
-    <View style={[styles.container, { backgroundColor: isDark ? "#080E16" : "#F0F4F8" }]}>
+    <View style={[styles.container, { backgroundColor: isDark ? "#060B12" : "#F0F9FF" }]}>
       {/* Custom Header */}
       <View
         style={[
@@ -94,7 +94,7 @@ export default function DrugDetailScreen() {
         <View
           style={[
             styles.weightBanner,
-            { backgroundColor: isDark ? "#0F1E2E" : "#FFFFFF" },
+            { backgroundColor: isDark ? "#0D1521" : "#FFFFFF" },
           ]}
         >
           <Feather name="user" size={16} color={colors.tint} />
@@ -118,7 +118,7 @@ export default function DrugDetailScreen() {
 
         {/* Doses */}
         <SectionHeader title="Dosing" icon="activity" color={cat.color} isDark={isDark} />
-        <View style={[styles.card, { backgroundColor: isDark ? "#0F1E2E" : "#FFFFFF" }]}>
+        <View style={[styles.card, { backgroundColor: isDark ? "#0D1521" : "#FFFFFF" }]}>
           {drug.doses.map((dose, i) => {
             const calc = calculateDose(dose, weight);
             return (
@@ -128,7 +128,7 @@ export default function DrugDetailScreen() {
                   styles.doseBlock,
                   {
                     borderTopWidth: i === 0 ? 0 : 1,
-                    borderTopColor: isDark ? "#1E2D3D" : "#F0F4F8",
+                    borderTopColor: isDark ? "#131E2C" : "#EBF5FB",
                   },
                 ]}
               >
@@ -169,7 +169,7 @@ export default function DrugDetailScreen() {
                   )}
                 </View>
                 {dose.notes && (
-                  <View style={[styles.noteBox, { backgroundColor: isDark ? "#1E2D3D" : "#F8FAFC" }]}>
+                  <View style={[styles.noteBox, { backgroundColor: isDark ? "#131E2C" : "#F4F9FC" }]}>
                     <Feather name="info" size={12} color={isDark ? "#5A7A96" : "#8A9BB0"} />
                     <Text style={[styles.noteText, { color: isDark ? "#8A9BB0" : "#4A5568", fontFamily: "Inter_400Regular" }]}>
                       {dose.notes}
@@ -183,9 +183,9 @@ export default function DrugDetailScreen() {
 
         {/* Indications */}
         <SectionHeader title="Indications" icon="check-circle" color={cat.color} isDark={isDark} />
-        <View style={[styles.card, { backgroundColor: isDark ? "#0F1E2E" : "#FFFFFF" }]}>
+        <View style={[styles.card, { backgroundColor: isDark ? "#0D1521" : "#FFFFFF" }]}>
           {drug.indications.map((ind, i) => (
-            <View key={i} style={[styles.listRow, { borderTopWidth: i === 0 ? 0 : 1, borderTopColor: isDark ? "#1E2D3D" : "#F0F4F8" }]}>
+            <View key={i} style={[styles.listRow, { borderTopWidth: i === 0 ? 0 : 1, borderTopColor: isDark ? "#131E2C" : "#EBF5FB" }]}>
               <View style={[styles.listDot, { backgroundColor: cat.color }]} />
               <Text style={[styles.listText, { color: isDark ? "#C8D8E8" : "#0D1B2A", fontFamily: "Inter_400Regular" }]}>
                 {ind}
@@ -198,9 +198,9 @@ export default function DrugDetailScreen() {
         {drug.contraindications && drug.contraindications.length > 0 && (
           <>
             <SectionHeader title="Contraindications" icon="x-circle" color={colors.danger} isDark={isDark} />
-            <View style={[styles.card, { backgroundColor: isDark ? "#0F1E2E" : "#FFFFFF" }]}>
+            <View style={[styles.card, { backgroundColor: isDark ? "#0D1521" : "#FFFFFF" }]}>
               {drug.contraindications.map((c, i) => (
-                <View key={i} style={[styles.listRow, { borderTopWidth: i === 0 ? 0 : 1, borderTopColor: isDark ? "#1E2D3D" : "#F0F4F8" }]}>
+                <View key={i} style={[styles.listRow, { borderTopWidth: i === 0 ? 0 : 1, borderTopColor: isDark ? "#131E2C" : "#EBF5FB" }]}>
                   <View style={[styles.listDot, { backgroundColor: colors.danger }]} />
                   <Text style={[styles.listText, { color: isDark ? "#C8D8E8" : "#0D1B2A", fontFamily: "Inter_400Regular" }]}>
                     {c}
@@ -215,9 +215,9 @@ export default function DrugDetailScreen() {
         {drug.warnings && drug.warnings.length > 0 && (
           <>
             <SectionHeader title="Warnings" icon="alert-triangle" color="#E67E22" isDark={isDark} />
-            <View style={[styles.card, { backgroundColor: isDark ? "#0F1E2E" : "#FFFFFF" }]}>
+            <View style={[styles.card, { backgroundColor: isDark ? "#0D1521" : "#FFFFFF" }]}>
               {drug.warnings.map((w, i) => (
-                <View key={i} style={[styles.listRow, { borderTopWidth: i === 0 ? 0 : 1, borderTopColor: isDark ? "#1E2D3D" : "#F0F4F8" }]}>
+                <View key={i} style={[styles.listRow, { borderTopWidth: i === 0 ? 0 : 1, borderTopColor: isDark ? "#131E2C" : "#EBF5FB" }]}>
                   <Feather name="alert-triangle" size={14} color="#E67E22" />
                   <Text style={[styles.listText, { color: isDark ? "#C8D8E8" : "#0D1B2A", fontFamily: "Inter_400Regular" }]}>
                     {w}
@@ -232,10 +232,10 @@ export default function DrugDetailScreen() {
         {drug.formulations && drug.formulations.length > 0 && (
           <>
             <SectionHeader title="Formulations" icon="package" color={isDark ? "#5A7A96" : "#8A9BB0"} isDark={isDark} />
-            <View style={[styles.card, { backgroundColor: isDark ? "#0F1E2E" : "#FFFFFF" }]}>
+            <View style={[styles.card, { backgroundColor: isDark ? "#0D1521" : "#FFFFFF" }]}>
               <View style={styles.formulationsRow}>
                 {drug.formulations.map((f, i) => (
-                  <View key={i} style={[styles.formulationTag, { backgroundColor: isDark ? "#1E2D3D" : "#F0F4F8" }]}>
+                  <View key={i} style={[styles.formulationTag, { backgroundColor: isDark ? "#131E2C" : "#EBF5FB" }]}>
                     <Text style={[styles.formulationText, { color: isDark ? "#8A9BB0" : "#4A5568", fontFamily: "Inter_400Regular" }]}>
                       {f}
                     </Text>
@@ -250,7 +250,7 @@ export default function DrugDetailScreen() {
         {drug.renalAdjustment && drug.renalAdjustment.length > 0 && (
           <>
             <SectionHeader title="Renal Dose Adjustment" icon="filter" color="#0C7B9C" isDark={isDark} />
-            <View style={[styles.card, { backgroundColor: isDark ? "#0F1E2E" : "#FFFFFF", overflow: "visible" }]}>
+            <View style={[styles.card, { backgroundColor: isDark ? "#0D1521" : "#FFFFFF", overflow: "visible" }]}>
               <View style={[styles.renalHeader, { backgroundColor: "#0C7B9C" + "18", borderBottomWidth: 1, borderBottomColor: isDark ? "#1E2D3D" : "#E8F4F8" }]}>
                 <Text style={[styles.renalHeaderCell, { color: "#0C7B9C", flex: 1, fontFamily: "Inter_600SemiBold" }]}>GFR (mL/min/1.73m²)</Text>
                 <Text style={[styles.renalHeaderCell, { color: "#0C7B9C", flex: 2, fontFamily: "Inter_600SemiBold" }]}>Adjustment</Text>
@@ -260,7 +260,7 @@ export default function DrugDetailScreen() {
                   key={i}
                   style={[
                     styles.renalRow,
-                    { borderTopWidth: i === 0 ? 0 : 1, borderTopColor: isDark ? "#1E2D3D" : "#F0F4F8" },
+                    { borderTopWidth: i === 0 ? 0 : 1, borderTopColor: isDark ? "#131E2C" : "#EBF5FB" },
                   ]}
                 >
                   <View style={[styles.renalGfrBox, { flex: 1 }]}>
@@ -281,9 +281,9 @@ export default function DrugDetailScreen() {
         {drug.monitoring && drug.monitoring.length > 0 && (
           <>
             <SectionHeader title="Monitoring" icon="eye" color="#6B2D8E" isDark={isDark} />
-            <View style={[styles.card, { backgroundColor: isDark ? "#0F1E2E" : "#FFFFFF" }]}>
+            <View style={[styles.card, { backgroundColor: isDark ? "#0D1521" : "#FFFFFF" }]}>
               {drug.monitoring.map((m, i) => (
-                <View key={i} style={[styles.listRow, { borderTopWidth: i === 0 ? 0 : 1, borderTopColor: isDark ? "#1E2D3D" : "#F0F4F8" }]}>
+                <View key={i} style={[styles.listRow, { borderTopWidth: i === 0 ? 0 : 1, borderTopColor: isDark ? "#131E2C" : "#EBF5FB" }]}>
                   <Feather name="check" size={14} color="#6B2D8E" />
                   <Text style={[styles.listText, { color: isDark ? "#C8D8E8" : "#0D1B2A", fontFamily: "Inter_400Regular" }]}>
                     {m}
