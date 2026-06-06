@@ -26,9 +26,6 @@ export function ProfessionalFooter() {
       <Text style={[styles.name, { color: isDark ? "#E2E8F0" : C.text }]}>
         Prepared by Staff Kashan Peads ICU
       </Text>
-      <Text style={[styles.title, { color: isDark ? "#718096" : C.textMuted }]}>
-        (03+ Years Clinical Experience)
-      </Text>
       <View style={[styles.disclaimerBox, { borderColor: isDark ? "#2D3748" : C.border }]}>
         <Feather name="shield" size={10} color={isDark ? "#4A6580" : C.textMuted} />
         <Text style={[styles.disclaimer, { color: isDark ? "#4A6580" : C.textMuted }]}>

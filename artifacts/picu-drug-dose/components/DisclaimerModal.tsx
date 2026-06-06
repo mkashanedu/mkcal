@@ -94,9 +94,6 @@ export function DisclaimerModal() {
             <Text style={[styles.attributionName, { color: "#0EA5E9" }]}>
               Staff Kashan Peads ICU
             </Text>
-            <Text style={[styles.attributionRole, { color: MUTED }]}>
-              (03+ Years Clinical Experience)
-            </Text>
           </View>
 
           {/* Accept */}
