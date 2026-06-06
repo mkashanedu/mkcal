@@ -809,7 +809,11 @@ export default function InfusionScreen() {
                             Calculated Concentration
                           </Text>
                           <Text style={[styles.dilutionResultValue, { color: selectedDrug.color }]}>
-                            {dilutionConc.toFixed(4)} mg/mL
+                            {dilutionConc < 0.1
+                              ? (dilutionConc * 1000).toFixed(2) + " mcg/mL"
+                              : dilutionConc >= 1
+                                ? (dilutionConc * 1000).toFixed(0) + " mcg/mL"
+                                : dilutionConc.toFixed(4) + " mg/mL"}
                           </Text>
                           <Text style={[styles.dilutionResultSub, { color: MUTED }]}>
                             {parseFloat(dilutionDrug_mg).toFixed(1)} mg in{" "}
@@ -837,7 +841,9 @@ export default function InfusionScreen() {
                       <Text style={{ color: selectedDrug.color, fontWeight: "800" }}>
                         {concentration < 0.1
                           ? (concentration * 1000).toFixed(2) + " mcg/mL"
-                          : concentration.toFixed(4) + " mg/mL"}
+                          : concentration >= 1
+                            ? (concentration * 1000).toFixed(0) + " mcg/mL"
+                            : concentration.toFixed(4) + " mg/mL"}
                       </Text>
                     </Text>
                   </View>
@@ -970,7 +976,9 @@ export default function InfusionScreen() {
                         value={
                           concentration < 0.1
                             ? `${(concentration * 1000).toFixed(2)} mcg/mL`
-                            : `${concentration.toFixed(4)} mg/mL`
+                            : concentration >= 1
+                              ? `${(concentration * 1000).toFixed(0)} mcg/mL`
+                              : `${concentration.toFixed(4)} mg/mL`
                         }
                         textColor={TEXT}
                         mutedColor={MUTED}
