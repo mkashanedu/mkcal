@@ -231,14 +231,14 @@ function SectionHeader({
       activeOpacity={0.75}
       style={[
         styles.sectionHeader,
-        { backgroundColor: isDark ? "#0F1F2E" : "#FFFFFF", borderColor: isDark ? "#1E2D3D" : "#E2E8F0" },
+        { backgroundColor: isDark ? "#112240" : "#FFFFFF", borderColor: isDark ? "#233554" : "#E2E8F0" },
       ]}
     >
       <View style={[styles.sectionIcon, { backgroundColor: color + "1A" }]}>
         <Feather name={icon as any} size={18} color={color} />
       </View>
-      <Text style={[styles.sectionTitle, { color: isDark ? "#E2E8F0" : "#0D1B2A" }]}>{title}</Text>
-      <Feather name={open ? "chevron-up" : "chevron-down"} size={20} color={isDark ? "#5A7A96" : "#8A9BB0"} />
+      <Text style={[styles.sectionTitle, { color: isDark ? "#CCD6F6" : "#0D1B2A" }]}>{title}</Text>
+      <Feather name={open ? "chevron-up" : "chevron-down"} size={20} color={isDark ? "#8892B0" : "#8A9BB0"} />
     </TouchableOpacity>
   );
 }
@@ -246,8 +246,8 @@ function SectionHeader({
 function Row({ label, value, isDark }: { label: string; value: string; isDark: boolean }) {
   return (
     <View style={styles.tableRow}>
-      <Text style={[styles.tableCell, { color: isDark ? "#94A3B8" : "#64748B" }]}>{label}</Text>
-      <Text style={[styles.tableCellVal, { color: isDark ? "#E2E8F0" : "#0D1B2A" }]}>{value}</Text>
+      <Text style={[styles.tableCell, { color: isDark ? "#8892B0" : "#64748B" }]}>{label}</Text>
+      <Text style={[styles.tableCellVal, { color: isDark ? "#CCD6F6" : "#0D1B2A" }]}>{value}</Text>
     </View>
   );
 }
@@ -278,7 +278,7 @@ function GCSOption({
                   : isDark
                   ? "#0F1F2E"
                   : "#F8FAFC",
-              borderColor: selected === o.val ? C.tint : isDark ? "#1E2D3D" : "#E2E8F0",
+              borderColor: selected === o.val ? C.tint : isDark ? "#233554" : "#E2E8F0",
             },
           ]}
         >
@@ -301,12 +301,12 @@ function Chip({ label, color, selected, onPress, isDark }: {
       style={[
         styles.chip,
         {
-          backgroundColor: selected ? color : isDark ? "#1A2D3E" : "#F1F5F9",
+          backgroundColor: selected ? color : isDark ? "#0A192F" : "#F1F5F9",
           borderColor: selected ? color : isDark ? "#2D4456" : "#CBD5E1",
         },
       ]}
     >
-      <Text style={[styles.chipText, { color: selected ? "#FFF" : isDark ? "#94A3B8" : "#64748B" }]}>{label}</Text>
+      <Text style={[styles.chipText, { color: selected ? "#FFF" : isDark ? "#8892B0" : "#64748B" }]}>{label}</Text>
     </TouchableOpacity>
   );
 }
@@ -379,17 +379,17 @@ export default function ToolsScreen() {
   const vapPct = Math.round((vapChecked.filter(Boolean).length / VAP_BUNDLE.length) * 100);
   const clabsiPct = Math.round((clabsiChecked.filter(Boolean).length / CLABSI_BUNDLE.length) * 100);
 
-  const bg = isDark ? "#080E18" : "#F0F4F8";
-  const cardBg = isDark ? "#0F1F2E" : "#FFFFFF";
-  const border = isDark ? "#1E2D3D" : "#E2E8F0";
-  const textPrimary = isDark ? "#E2E8F0" : "#0D1B2A";
-  const textMuted = isDark ? "#64748B" : "#8A9BB0";
-  const inputBg = isDark ? "#0D1B2A" : "#F8FAFC";
+  const bg = isDark ? "#0B132B" : "#F0F4F8";
+  const cardBg = isDark ? "#112240" : "#FFFFFF";
+  const border = isDark ? "#233554" : "#E2E8F0";
+  const textPrimary = isDark ? "#CCD6F6" : "#0D1B2A";
+  const textMuted = isDark ? "#8892B0" : "#8A9BB0";
+  const inputBg = isDark ? "#0A192F" : "#F8FAFC";
 
   return (
     <View style={[styles.container, { backgroundColor: bg }]}>
       {/* Header */}
-      <View style={[styles.header, { paddingTop: topPadding + 12, backgroundColor: isDark ? "#0A1520" : "#FFFFFF" }]}>
+      <View style={[styles.header, { paddingTop: topPadding + 12, backgroundColor: isDark ? "#0A192F" : "#FFFFFF" }]}>
         <View style={styles.headerRow}>
           <View style={{ flex: 1 }}>
             <Text style={[styles.headerTitle, { color: textPrimary }]}>Clinical Tools</Text>
@@ -399,7 +399,7 @@ export default function ToolsScreen() {
           </View>
           <TouchableOpacity
             onPress={toggleDark}
-            style={[styles.nightToggle, { backgroundColor: isDark ? "#1E2D3D" : "#F0F4F8" }]}
+            style={[styles.nightToggle, { backgroundColor: isDark ? "#233554" : "#F0F4F8" }]}
           >
             <Feather name={isDark ? "sun" : "moon"} size={18} color={isDark ? "#FFD700" : "#4A5568"} />
           </TouchableOpacity>
@@ -474,7 +474,7 @@ export default function ToolsScreen() {
               )}
 
               {/* HC reference */}
-              <View style={[styles.infoBox, { backgroundColor: isDark ? "#0D2035" : "#EFF6FF", borderColor: isDark ? "#1E3A5F" : "#BFDBFE" }]}>
+              <View style={[styles.infoBox, { backgroundColor: isDark ? "#0A192F" : "#EFF6FF", borderColor: isDark ? "#233554" : "#BFDBFE" }]}>
                 <Text style={[styles.infoTitle, { color: "#3B82F6" }]}>Head Circumference Reference (WHO)</Text>
                 <Text style={[styles.infoText, { color: textMuted }]}>
                   {"Birth: 34 cm  ·  3 mo: 40 cm  ·  6 mo: 43 cm\n12 mo: 46 cm  ·  2 yr: 48 cm  ·  Adult: ~57 cm\nMicrocephaly <2SD below mean  ·  Macrocephaly >98th %ile"}
@@ -535,7 +535,7 @@ export default function ToolsScreen() {
               </View>
 
               {/* Normal Vitals Table */}
-              <View style={[styles.infoBox, { backgroundColor: isDark ? "#0D2035" : "#EFF6FF", borderColor: isDark ? "#1E3A5F" : "#BFDBFE", marginTop: 14 }]}>
+              <View style={[styles.infoBox, { backgroundColor: isDark ? "#0A192F" : "#EFF6FF", borderColor: isDark ? "#233554" : "#BFDBFE", marginTop: 14 }]}>
                 <Text style={[styles.infoTitle, { color: "#3B82F6" }]}>Normal Vitals by Age</Text>
                 <View style={[styles.tableHeaderRow, { borderBottomColor: border }]}>
                   {["Age Group", "HR", "SBP", "RR", "MAP"].map((h) => (
@@ -576,7 +576,7 @@ export default function ToolsScreen() {
               {bundleTab === "vap" ? (
                 <>
                   <Text style={[styles.bundleTitle, { color: "#E53E3E" }]}>Ventilator-Associated Pneumonia (VAP) Prevention</Text>
-                  <View style={[styles.progressBar, { backgroundColor: isDark ? "#1E2D3D" : "#E2E8F0" }]}>
+                  <View style={[styles.progressBar, { backgroundColor: isDark ? "#233554" : "#E2E8F0" }]}>
                     <View style={[styles.progressFill, { width: `${vapPct}%` as any, backgroundColor: vapPct === 100 ? "#16A34A" : "#E53E3E" }]} />
                   </View>
                   <Text style={[styles.progressLabel, { color: textMuted }]}>{vapChecked.filter(Boolean).length} / {VAP_BUNDLE.length} complete</Text>
@@ -606,7 +606,7 @@ export default function ToolsScreen() {
               ) : (
                 <>
                   <Text style={[styles.bundleTitle, { color: "#7C3AED" }]}>CLABSI Prevention (Central Line Bundle)</Text>
-                  <View style={[styles.progressBar, { backgroundColor: isDark ? "#1E2D3D" : "#E2E8F0" }]}>
+                  <View style={[styles.progressBar, { backgroundColor: isDark ? "#233554" : "#E2E8F0" }]}>
                     <View style={[styles.progressFill, { width: `${clabsiPct}%` as any, backgroundColor: clabsiPct === 100 ? "#16A34A" : "#7C3AED" }]} />
                   </View>
                   <Text style={[styles.progressLabel, { color: textMuted }]}>{clabsiChecked.filter(Boolean).length} / {CLABSI_BUNDLE.length} complete</Text>
@@ -705,7 +705,7 @@ export default function ToolsScreen() {
                     </Text>
                   </View>
 
-                  <View style={[styles.infoBox, { backgroundColor: isDark ? "#0D2035" : "#EFF6FF", borderColor: isDark ? "#1E3A5F" : "#BFDBFE" }]}>
+                  <View style={[styles.infoBox, { backgroundColor: isDark ? "#0A192F" : "#EFF6FF", borderColor: isDark ? "#233554" : "#BFDBFE" }]}>
                     <Text style={[styles.infoTitle, { color: "#3B82F6" }]}>Fluid Selection Guide (Nelson)</Text>
                     <Text style={[styles.infoText, { color: textMuted }]}>
                       {"• Maintenance: 0.9% NaCl + 5% Dextrose or 0.45% NaCl + KCl 20 mEq/L\n• Isotonic resuscitation: 0.9% NS or Ringer's Lactate 10–20 mL/kg bolus\n• Hyponatraemia: correct Na slowly <0.5 mEq/L/hr\n• Hypernatraemic dehydration: correct over 48–72 hours\n• Add KCl to maintenance once urine output confirmed"}
@@ -813,7 +813,7 @@ export default function ToolsScreen() {
 
                   <Text style={[styles.gcsLabel, { color: textPrimary, marginTop: 12 }]}>Drug Adjustments in Renal Failure</Text>
                   {RENAL_DRUGS.map((d) => (
-                    <View key={d.drug} style={[styles.drugAdjRow, { borderLeftColor: d.alert === "high" ? "#DC2626" : d.alert === "moderate" ? "#D97706" : "#16A34A", backgroundColor: isDark ? "#0A1825" : "#F8FAFC" }]}>
+                    <View key={d.drug} style={[styles.drugAdjRow, { borderLeftColor: d.alert === "high" ? "#DC2626" : d.alert === "moderate" ? "#D97706" : "#16A34A", backgroundColor: isDark ? "#0A192F" : "#F8FAFC" }]}>
                       <View style={styles.drugAdjHeader}>
                         <Text style={[styles.drugAdjName, { color: textPrimary }]}>{d.drug}</Text>
                         <View style={[styles.alertBadge, { backgroundColor: d.alert === "high" ? "#DC262620" : d.alert === "moderate" ? "#D9770620" : "#16A34A20" }]}>
@@ -838,7 +838,7 @@ export default function ToolsScreen() {
                   </View>
                   <Text style={[styles.gcsLabel, { color: textPrimary, marginTop: 12 }]}>Drug Adjustments in Hepatic Failure</Text>
                   {HEPATIC_DRUGS.map((d) => (
-                    <View key={d.drug} style={[styles.drugAdjRow, { borderLeftColor: d.alert === "high" ? "#DC2626" : "#D97706", backgroundColor: isDark ? "#0A1825" : "#F8FAFC" }]}>
+                    <View key={d.drug} style={[styles.drugAdjRow, { borderLeftColor: d.alert === "high" ? "#DC2626" : "#D97706", backgroundColor: isDark ? "#0A192F" : "#F8FAFC" }]}>
                       <View style={styles.drugAdjHeader}>
                         <Text style={[styles.drugAdjName, { color: textPrimary }]}>{d.drug}</Text>
                         <View style={[styles.alertBadge, { backgroundColor: d.alert === "high" ? "#DC262620" : "#D9770620" }]}>

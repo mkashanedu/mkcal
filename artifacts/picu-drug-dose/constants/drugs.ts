@@ -60,7 +60,7 @@ export const CATEGORIES: Record<
   analgesic: { label: "Analgesics", icon: "activity", color: "#6B2FA0" },
   sedative: { label: "Sedatives", icon: "moon", color: "#1A4F7A" },
   nmbd: { label: "NMBDs / RSI", icon: "zap-off", color: "#7B2D8E" },
-  inotrope: { label: "Inotropes", icon: "heart", color: "#B5171A" },
+  inotrope: { label: "Inotropes", icon: "heart", color: "#7C3AED" },
   antibiotic: { label: "Antibiotics", icon: "shield", color: "#146B35" },
   antiepileptic: { label: "Antiepileptics", icon: "zap", color: "#A05C00" },
   fluid: { label: "Fluids / Electrolytes", icon: "droplet", color: "#0077B6" },

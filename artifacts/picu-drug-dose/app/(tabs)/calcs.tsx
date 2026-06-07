@@ -26,12 +26,12 @@ function SectionHeader({ title, icon, color, open, onToggle, isDark }: {
 }) {
   return (
     <TouchableOpacity onPress={onToggle} activeOpacity={0.75}
-      style={[sh.header, { backgroundColor: isDark ? "#0F1F2E" : "#FFF", borderColor: isDark ? "#1E2D3D" : "#E2E8F0" }]}>
+      style={[sh.header, { backgroundColor: isDark ? "#112240" : "#FFF", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
       <View style={[sh.icon, { backgroundColor: color + "1A" }]}>
         <Feather name={icon as any} size={18} color={color} />
       </View>
-      <Text style={[sh.title, { color: isDark ? "#E2E8F0" : "#0D1B2A" }]}>{title}</Text>
-      <Feather name={open ? "chevron-up" : "chevron-down"} size={20} color={isDark ? "#5A7A96" : "#8A9BB0"} />
+      <Text style={[sh.title, { color: isDark ? "#CCD6F6" : "#0D1B2A" }]}>{title}</Text>
+      <Feather name={open ? "chevron-up" : "chevron-down"} size={20} color={isDark ? "#8892B0" : "#8A9BB0"} />
     </TouchableOpacity>
   );
 }
@@ -40,10 +40,10 @@ function InputField({ label, value, onChange, placeholder, unit, isDark }: {
   label: string; value: string; onChange: (t: string) => void;
   placeholder?: string; unit?: string; isDark: boolean;
 }) {
-  const border = isDark ? "#1E2D3D" : "#E2E8F0";
-  const bg = isDark ? "#0D1B2A" : "#F8FAFC";
-  const text = isDark ? "#E2E8F0" : "#0D1B2A";
-  const muted = isDark ? "#64748B" : "#8A9BB0";
+  const border = isDark ? "#233554" : "#E2E8F0";
+  const bg = isDark ? "#0A192F" : "#F8FAFC";
+  const text = isDark ? "#CCD6F6" : "#0D1B2A";
+  const muted = isDark ? "#8892B0" : "#8A9BB0";
   return (
     <View style={sh.inputWrap}>
       <Text style={[sh.label, { color: muted }]}>{label}</Text>
@@ -80,7 +80,7 @@ function InfoBox({ color, title, text, isDark }: { color: string; title: string;
   return (
     <View style={[sh.infoBox, { backgroundColor: color + "10", borderColor: color + "30" }]}>
       <Text style={[sh.infoTitle, { color }]}>{title}</Text>
-      <Text style={[sh.infoText, { color: isDark ? "#94A3B8" : "#475569" }]}>{text}</Text>
+      <Text style={[sh.infoText, { color: isDark ? "#8892B0" : "#475569" }]}>{text}</Text>
     </View>
   );
 }
@@ -170,11 +170,11 @@ export default function CalcsScreen() {
   const [openSection, setOpenSection] = useState<string | null>(null);
   const toggle = (key: string) => setOpenSection((p) => (p === key ? null : key));
 
-  const bg = isDark ? "#080E18" : "#F0F4F8";
-  const cardBg = isDark ? "#0F1F2E" : "#FFF";
-  const border = isDark ? "#1E2D3D" : "#E2E8F0";
-  const textPrimary = isDark ? "#E2E8F0" : "#0D1B2A";
-  const textMuted = isDark ? "#64748B" : "#8A9BB0";
+  const bg = isDark ? "#0B132B" : "#F0F4F8";
+  const cardBg = isDark ? "#112240" : "#FFF";
+  const border = isDark ? "#233554" : "#E2E8F0";
+  const textPrimary = isDark ? "#CCD6F6" : "#0D1B2A";
+  const textMuted = isDark ? "#8892B0" : "#8A9BB0";
 
   // ── 1. Electrolyte state ──────────────────────────────────────────────────
   const [eWt, setEWt] = useState(ctxWeight > 0 ? ctxWeight.toString() : "");
@@ -308,7 +308,7 @@ export default function CalcsScreen() {
   return (
     <View style={[sh.container, { backgroundColor: bg }]}>
       {/* Header */}
-      <View style={[sh.topHeader, { paddingTop: topPadding + 12, backgroundColor: isDark ? "#0A1520" : "#FFF" }]}>
+      <View style={[sh.topHeader, { paddingTop: topPadding + 12, backgroundColor: isDark ? "#0A192F" : "#FFF" }]}>
         <View style={sh.topHeaderRow}>
           <View style={{ flex: 1 }}>
             <Text style={[sh.headerTitle, { color: textPrimary }]}>Clinical Protocols</Text>
@@ -317,7 +317,7 @@ export default function CalcsScreen() {
             </Text>
           </View>
           <TouchableOpacity onPress={toggleDark}
-            style={[sh.nightBtn, { backgroundColor: isDark ? "#1E2D3D" : "#F0F4F8" }]}>
+            style={[sh.nightBtn, { backgroundColor: isDark ? "#233554" : "#F0F4F8" }]}>
             <Feather name={isDark ? "sun" : "moon"} size={18} color={isDark ? "#FFD700" : "#4A5568"} />
           </TouchableOpacity>
         </View>
@@ -564,15 +564,15 @@ export default function CalcsScreen() {
               {/* Timer */}
               <View style={[sh.timerBox, { backgroundColor: elapsed >= 900 ? "#DC262618" : elapsed >= 300 ? "#D9770618" : "#16A34A18", borderColor: elapsed >= 900 ? "#DC2626" : elapsed >= 300 ? "#D97706" : "#16A34A" }]}>
                 <Text style={[sh.timerTime, { color: elapsed >= 900 ? "#DC2626" : elapsed >= 300 ? "#D97706" : "#16A34A" }]}>{fmtTime(elapsed)}</Text>
-                <Text style={[sh.timerStep, { color: isDark ? "#94A3B8" : "#475569" }]}>
+                <Text style={[sh.timerStep, { color: isDark ? "#8892B0" : "#475569" }]}>
                   {elapsed < 300 ? "STEP 1 — Benzodiazepines" : elapsed < 900 ? "STEP 2 — Phenytoin / Phenobarbitone" : "STEP 3 — RSI / Anaesthetic agent"}
                 </Text>
                 <View style={sh.timerBtns}>
                   {!running
                     ? <TouchableOpacity onPress={start} style={[sh.timerBtn, { backgroundColor: "#16A34A" }]}><Text style={sh.timerBtnText}>▶ Start</Text></TouchableOpacity>
                     : <TouchableOpacity onPress={pause} style={[sh.timerBtn, { backgroundColor: "#D97706" }]}><Text style={sh.timerBtnText}>⏸ Pause</Text></TouchableOpacity>}
-                  <TouchableOpacity onPress={reset} style={[sh.timerBtn, { backgroundColor: isDark ? "#1E2D3D" : "#E2E8F0" }]}>
-                    <Text style={[sh.timerBtnText, { color: isDark ? "#E2E8F0" : "#0D1B2A" }]}>↺ Reset</Text>
+                  <TouchableOpacity onPress={reset} style={[sh.timerBtn, { backgroundColor: isDark ? "#233554" : "#E2E8F0" }]}>
+                    <Text style={[sh.timerBtnText, { color: isDark ? "#CCD6F6" : "#0D1B2A" }]}>↺ Reset</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -608,7 +608,7 @@ export default function CalcsScreen() {
                   ].map((s) => (
                     <View key={s.step} style={[sh.seStep, {
                       borderLeftColor: s.color,
-                      backgroundColor: s.active ? s.color + "15" : isDark ? "#0A1825" : "#F8FAFC",
+                      backgroundColor: s.active ? s.color + "15" : isDark ? "#0A192F" : "#F8FAFC",
                       opacity: !s.active && elapsed > 0 ? 0.6 : 1,
                     }]}>
                       <Text style={[sh.seStepTitle, { color: s.color }]}>STEP {s.step} · {s.time}</Text>

@@ -117,14 +117,14 @@ export default function CalculatorScreen() {
   const categories = Object.entries(CATEGORIES) as [DrugCategory, typeof CATEGORIES[DrugCategory]][];
 
   return (
-    <View style={[styles.container, { backgroundColor: isDark ? "#080E16" : "#F0F4F8" }]}>
+    <View style={[styles.container, { backgroundColor: isDark ? "#0B132B" : "#F0F4F8" }]}>
       {/* Header */}
       <View
         style={[
           styles.header,
           {
             paddingTop: topPadding + 12,
-            backgroundColor: isDark ? "#0A1520" : "#FFFFFF",
+            backgroundColor: isDark ? "#0A192F" : "#FFFFFF",
           },
         ]}
       >
@@ -133,7 +133,7 @@ export default function CalculatorScreen() {
             <Text
               style={[
                 styles.headerTitle,
-                { color: isDark ? "#E8F0FE" : "#0D1B2A", fontFamily: "Inter_700Bold" },
+                { color: isDark ? "#FFFFFF" : "#0D1B2A", fontFamily: "Inter_700Bold" },
               ]}
               numberOfLines={1}
             >
@@ -142,7 +142,7 @@ export default function CalculatorScreen() {
             <Text
               style={[
                 styles.headerSubtitle,
-                { color: isDark ? "#5A7A96" : "#8A9BB0", fontFamily: "Inter_400Regular" },
+                { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" },
               ]}
             >
               Enter patient weight to calculate doses
@@ -152,7 +152,7 @@ export default function CalculatorScreen() {
             onPress={toggleDark}
             style={[
               styles.nightToggle,
-              { backgroundColor: isDark ? "#1E2D3D" : "#F0F4F8" },
+              { backgroundColor: isDark ? "#233554" : "#F0F4F8" },
             ]}
             activeOpacity={0.7}
           >
@@ -176,7 +176,7 @@ export default function CalculatorScreen() {
         <View
           style={[
             styles.weightSection,
-            { backgroundColor: isDark ? "#1E2D3D" : "#F8FAFC" },
+            { backgroundColor: isDark ? "#233554" : "#F8FAFC" },
           ]}
         >
           {/* Unit toggle */}
@@ -185,12 +185,12 @@ export default function CalculatorScreen() {
             <Text
               style={[
                 styles.weightLabel,
-                { color: isDark ? "#E8F0FE" : "#0D1B2A", fontFamily: "Inter_500Medium" },
+                { color: isDark ? "#FFFFFF" : "#0D1B2A", fontFamily: "Inter_500Medium" },
               ]}
             >
               Patient Weight
             </Text>
-            <View style={[styles.unitToggleWrap, { backgroundColor: isDark ? "#0D1B2A" : "#E8EDF2" }]}>
+            <View style={[styles.unitToggleWrap, { backgroundColor: isDark ? "#0A192F" : "#E8EDF2" }]}>
               {(["kg", "lbs"] as const).map((u) => (
                 <TouchableOpacity
                   key={u}
@@ -204,7 +204,7 @@ export default function CalculatorScreen() {
                     style={[
                       styles.unitToggleBtnText,
                       {
-                        color: weightUnit === u ? "#fff" : isDark ? "#8A9BB0" : "#4A5568",
+                        color: weightUnit === u ? "#fff" : isDark ? "#8892B0" : "#4A5568",
                         fontFamily: "Inter_600SemiBold",
                       },
                     ]}
@@ -222,8 +222,8 @@ export default function CalculatorScreen() {
                 style={[
                   styles.weightInput,
                   {
-                    color: weightWarning ? "#E53E3E" : isDark ? "#E8F0FE" : "#0D1B2A",
-                    backgroundColor: isDark ? "#0D1B2A" : "#FFFFFF",
+                    color: weightWarning ? "#E53E3E" : isDark ? "#FFFFFF" : "#0D1B2A",
+                    backgroundColor: isDark ? "#0A192F" : "#FFFFFF",
                     fontFamily: "Inter_700Bold",
                     borderColor: weightWarning ? "#E53E3E" : "transparent",
                     borderWidth: weightWarning ? 2 : 0,
@@ -248,11 +248,11 @@ export default function CalculatorScreen() {
             {/* Reset button */}
             <TouchableOpacity
               onPress={handleReset}
-              style={[styles.resetBtn, { backgroundColor: isDark ? "#0D1B2A" : "#E2E8F0" }]}
+              style={[styles.resetBtn, { backgroundColor: isDark ? "#0A192F" : "#E2E8F0" }]}
               activeOpacity={0.7}
             >
-              <Feather name="rotate-ccw" size={14} color={isDark ? "#5A7A96" : "#4A5568"} />
-              <Text style={[styles.resetText, { color: isDark ? "#5A7A96" : "#4A5568", fontFamily: "Inter_500Medium" }]}>
+              <Feather name="rotate-ccw" size={14} color={isDark ? "#8892B0" : "#4A5568"} />
+              <Text style={[styles.resetText, { color: isDark ? "#8892B0" : "#4A5568", fontFamily: "Inter_500Medium" }]}>
                 Reset
               </Text>
             </TouchableOpacity>
@@ -299,7 +299,7 @@ export default function CalculatorScreen() {
                         : isDark
                         ? "#0D1B2A"
                         : "#FFFFFF",
-                    borderColor: weight === w ? colors.tint : isDark ? "#1E2D3D" : "#E2E8F0",
+                    borderColor: weight === w ? colors.tint : isDark ? "#233554" : "#E2E8F0",
                   },
                 ]}
               >
@@ -307,7 +307,7 @@ export default function CalculatorScreen() {
                   style={[
                     styles.quickWeightText,
                     {
-                      color: weight === w ? "#FFFFFF" : isDark ? "#8A9BB0" : "#4A5568",
+                      color: weight === w ? "#FFFFFF" : isDark ? "#8892B0" : "#4A5568",
                       fontFamily: weight === w ? "Inter_600SemiBold" : "Inter_400Regular",
                     },
                   ]}
@@ -330,7 +330,7 @@ export default function CalculatorScreen() {
             style={[
               styles.catChip,
               {
-                backgroundColor: selectedCategory === null ? colors.tint : isDark ? "#1E2D3D" : "#F0F4F8",
+                backgroundColor: selectedCategory === null ? colors.tint : isDark ? "#233554" : "#F0F4F8",
               },
             ]}
           >
@@ -338,7 +338,7 @@ export default function CalculatorScreen() {
               style={[
                 styles.catChipText,
                 {
-                  color: selectedCategory === null ? "#fff" : isDark ? "#8A9BB0" : "#4A5568",
+                  color: selectedCategory === null ? "#fff" : isDark ? "#8892B0" : "#4A5568",
                   fontFamily: "Inter_500Medium",
                 },
               ]}
@@ -354,7 +354,7 @@ export default function CalculatorScreen() {
                 styles.catChip,
                 {
                   backgroundColor:
-                    selectedCategory === key ? val.color : isDark ? "#1E2D3D" : "#F0F4F8",
+                    selectedCategory === key ? val.color : isDark ? "#233554" : "#F0F4F8",
                 },
               ]}
             >
@@ -362,7 +362,7 @@ export default function CalculatorScreen() {
                 style={[
                   styles.catChipText,
                   {
-                    color: selectedCategory === key ? "#fff" : isDark ? "#8A9BB0" : "#4A5568",
+                    color: selectedCategory === key ? "#fff" : isDark ? "#8892B0" : "#4A5568",
                     fontFamily: "Inter_500Medium",
                   },
                 ]}
@@ -383,31 +383,31 @@ export default function CalculatorScreen() {
         showsVerticalScrollIndicator={false}
       >
         {/* ── Emergency Calculators ── */}
-        <View style={[styles.emergencyCalcCard, { backgroundColor: isDark ? "#0F1E2E" : "#FFFFFF" }]}>
+        <View style={[styles.emergencyCalcCard, { backgroundColor: isDark ? "#112240" : "#FFFFFF" }]}>
           <View style={styles.emergencyCalcHeader}>
             <Feather name="zap" size={16} color="#E53E3E" />
-            <Text style={[styles.emergencyCalcTitle, { color: isDark ? "#E8F0FE" : "#0D1B2A", fontFamily: "Inter_700Bold" }]}>
+            <Text style={[styles.emergencyCalcTitle, { color: isDark ? "#FFFFFF" : "#0D1B2A", fontFamily: "Inter_700Bold" }]}>
               Emergency Calculators
             </Text>
-            <Text style={[styles.emergencyCalcSub, { color: isDark ? "#5A7A96" : "#8A9BB0", fontFamily: "Inter_400Regular" }]}>
+            <Text style={[styles.emergencyCalcSub, { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" }]}>
               PALS 2025 · Harriet Lane 23e
             </Text>
           </View>
 
           {/* ET Tube section */}
-          <View style={[styles.calcSection, { borderTopColor: isDark ? "#1E2D3D" : "#F0F4F8" }]}>
+          <View style={[styles.calcSection, { borderTopColor: isDark ? "#233554" : "#F0F4F8" }]}>
             <View style={styles.calcSectionHeader}>
-              <Text style={[styles.calcSectionTitle, { color: isDark ? "#94A3B8" : "#64748B", fontFamily: "Inter_600SemiBold" }]}>
+              <Text style={[styles.calcSectionTitle, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_600SemiBold" }]}>
                 ET Tube Size
               </Text>
               <View style={styles.ageInputWrap}>
-                <Text style={[styles.ageLabel, { color: isDark ? "#5A7A96" : "#8A9BB0", fontFamily: "Inter_400Regular" }]}>
+                <Text style={[styles.ageLabel, { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" }]}>
                   Age (yrs):
                 </Text>
                 <TextInput
                   style={[styles.ageInput, {
-                    color: isDark ? "#E8F0FE" : "#0D1B2A",
-                    backgroundColor: isDark ? "#1E2D3D" : "#F0F4F8",
+                    color: isDark ? "#FFFFFF" : "#0D1B2A",
+                    backgroundColor: isDark ? "#233554" : "#F0F4F8",
                     fontFamily: "Inter_700Bold",
                   }]}
                   value={ageYearsInput}
@@ -416,7 +416,7 @@ export default function CalculatorScreen() {
                   selectTextOnFocus
                   maxLength={4}
                   placeholder="0"
-                  placeholderTextColor={isDark ? "#5A7A96" : "#8A9BB0"}
+                  placeholderTextColor={isDark ? "#8892B0" : "#8A9BB0"}
                 />
               </View>
             </View>
@@ -443,8 +443,8 @@ export default function CalculatorScreen() {
           </View>
 
           {/* Defibrillator section */}
-          <View style={[styles.calcSection, { borderTopColor: isDark ? "#1E2D3D" : "#F0F4F8" }]}>
-            <Text style={[styles.calcSectionTitle, { color: isDark ? "#94A3B8" : "#64748B", fontFamily: "Inter_600SemiBold", marginBottom: 10 }]}>
+          <View style={[styles.calcSection, { borderTopColor: isDark ? "#233554" : "#F0F4F8" }]}>
+            <Text style={[styles.calcSectionTitle, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_600SemiBold", marginBottom: 10 }]}>
               Defibrillator Energy — {weight} kg
             </Text>
             <View style={styles.defibGrid}>
@@ -493,7 +493,7 @@ export default function CalculatorScreen() {
               key={drug.id}
               style={[
                 styles.drugBlock,
-                { backgroundColor: isDark ? "#0F1E2E" : "#FFFFFF" },
+                { backgroundColor: isDark ? "#112240" : "#FFFFFF" },
               ]}
             >
               <View style={styles.drugBlockHeader}>
@@ -503,7 +503,7 @@ export default function CalculatorScreen() {
                     <Text
                       style={[
                         styles.drugBlockName,
-                        { color: isDark ? "#E8F0FE" : "#0D1B2A", fontFamily: "Inter_600SemiBold" },
+                        { color: isDark ? "#FFFFFF" : "#0D1B2A", fontFamily: "Inter_600SemiBold" },
                       ]}
                     >
                       {drug.name}
@@ -518,7 +518,7 @@ export default function CalculatorScreen() {
                     <Text
                       style={[
                         styles.drugBlockGeneric,
-                        { color: isDark ? "#5A7A96" : "#8A9BB0", fontFamily: "Inter_400Regular" },
+                        { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" },
                       ]}
                     >
                       {drug.genericName}
@@ -541,7 +541,7 @@ export default function CalculatorScreen() {
                     style={[
                       styles.doseRow,
                       {
-                        borderTopColor: isDark ? "#1E2D3D" : "#F0F4F8",
+                        borderTopColor: isDark ? "#233554" : "#F0F4F8",
                         borderTopWidth: i === 0 ? 0 : 1,
                       },
                     ]}
@@ -552,7 +552,7 @@ export default function CalculatorScreen() {
                           styles.routeBadge,
                           isIN
                             ? { backgroundColor: "#FF6B0022" }
-                            : { backgroundColor: isDark ? "#1E2D3D" : "#F0F4F8" },
+                            : { backgroundColor: isDark ? "#233554" : "#F0F4F8" },
                         ]}
                       >
                         {isIN && (
@@ -574,7 +574,7 @@ export default function CalculatorScreen() {
                         <Text
                           style={[
                             styles.freqText,
-                            { color: isDark ? "#5A7A96" : "#8A9BB0", fontFamily: "Inter_400Regular" },
+                            { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" },
                           ]}
                         >
                           {dose.frequency}
@@ -584,7 +584,7 @@ export default function CalculatorScreen() {
                         <Text
                           style={[
                             styles.noteText,
-                            { color: isDark ? "#4A6A88" : "#94A8C0", fontFamily: "Inter_400Regular" },
+                            { color: isDark ? "#8892B0" : "#94A8C0", fontFamily: "Inter_400Regular" },
                           ]}
                           numberOfLines={2}
                         >
@@ -606,7 +606,7 @@ export default function CalculatorScreen() {
                       <Text
                         style={[
                           styles.doseRange,
-                          { color: isDark ? "#5A7A96" : "#8A9BB0", fontFamily: "Inter_400Regular" },
+                          { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" },
                         ]}
                         numberOfLines={1}
                       >

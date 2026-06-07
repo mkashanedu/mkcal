@@ -29,10 +29,10 @@ export function DisclaimerModal() {
     setVisible(false);
   }
 
-  const BG    = isDark ? "#0F172A" : "#FFFFFF";
-  const TEXT  = isDark ? "#E2E8F0" : "#0D1B2A";
-  const MUTED = isDark ? "#94A3B8" : "#475569";
-  const BORDER = isDark ? "#1E293B" : "#E2E8F0";
+  const BG    = isDark ? "#0B132B" : "#FFFFFF";
+  const TEXT  = isDark ? "#FFFFFF" : "#0D1B2A";
+  const MUTED = isDark ? "#8892B0" : "#475569";
+  const BORDER = isDark ? "#233554" : "#E2E8F0";
 
   return (
     <Modal
@@ -67,8 +67,8 @@ export function DisclaimerModal() {
               . It is a clinical reference tool designed to assist in pediatric drug dose calculations.
             </Text>
 
-            <View style={[styles.alertBox, { backgroundColor: "#FEF3C7", borderColor: "#F59E0B" }]}>
-              <Text style={[styles.alertText, { color: "#92400E" }]}>
+            <View style={[styles.alertBox, { backgroundColor: isDark ? "#FF4C6020" : "#FEF3C7", borderColor: isDark ? "#FF4C60" : "#F59E0B" }]}>
+              <Text style={[styles.alertText, { color: isDark ? "#FF4C60" : "#92400E" }]}>
                 ⚠️  This tool does NOT replace professional medical judgment, institutional protocols,
                 or direct patient assessment.
               </Text>
@@ -82,7 +82,7 @@ export function DisclaimerModal() {
               The developers and contributors assume no liability for clinical decisions made
               based on information provided by this application.
               {"\n\n"}
-              <Text style={[styles.italic, { color: isDark ? "#64748B" : "#94A3B8" }]}>
+              <Text style={[styles.italic, { color: isDark ? "#8892B0" : "#94A3B8" }]}>
                 Doses are based on Harriet Lane Handbook 23rd Edition and PALS 2025 Guidelines.
               </Text>
             </Text>

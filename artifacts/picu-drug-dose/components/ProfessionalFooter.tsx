@@ -1,38 +1,35 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import { View, Text, StyleSheet, Platform } from "react-native";
 import { useTheme } from "@/context/ThemeContext";
-import Colors from "@/constants/colors";
-
-const C = Colors.light;
 
 export function ProfessionalFooter() {
   const { isDark } = useTheme();
+  const D = isDark;
+
   return (
     <View
       style={[
         styles.container,
         {
-          backgroundColor: isDark ? "#0C1420" : "#F0F9FF",
+          backgroundColor: D ? "#112240" : "#F0F9FF",
+          borderColor: D ? "#233554" : "#E4EDF4",
+          borderLeftWidth: D ? 4 : 0,
+          borderLeftColor: D ? "#FF4C60" : "transparent",
+          borderWidth: D ? 1 : 0,
         },
       ]}
     >
-      <View style={styles.logoRow}>
-        <View style={[styles.iconPill, { backgroundColor: C.tint + "20" }]}>
-          <Feather name="activity" size={13} color={C.tint} />
-        </View>
-        <View style={[styles.iconPill, { backgroundColor: "#DC262620" }]}>
-          <Feather name="heart" size={13} color="#DC2626" />
-        </View>
-      </View>
-      <Text style={[styles.name, { color: isDark ? "#E2EDF8" : "#0A1628", fontFamily: "Inter_700Bold" }]}>
-        Prepared by Staff Kashan Peads ICU
+      <Text style={[styles.line1, { color: D ? "#8892B0" : "#64748B" }]}>
+        PICU CLINICAL REFERENCE V1.2
       </Text>
-      <Text style={[styles.disclaimer, { color: isDark ? "#4A6580" : "#7A95AA", fontFamily: "Inter_400Regular" }]}>
-        Harriet Lane 23e · PALS 2025 · SSC Pediatric 2024
+      <Text style={[styles.line2, { color: D ? "#FFFFFF" : "#0F172A" }]}>
+        Prepared By: M. Kashan
       </Text>
-      <Text style={[styles.disclaimer, { color: isDark ? "#334D66" : "#A0B4C4", fontFamily: "Inter_400Regular" }]}>
-        Clinical responsibility rests with the prescribing clinician.
+      <Text style={[styles.line3, { color: D ? "#00B48A" : "#0D9488" }]}>
+        Peads ICU & Cardiac Specialist
+      </Text>
+      <Text style={[styles.line4, { color: D ? "#5A7094" : "#94A3B8" }]}>
+        Disclaimer: For educational/reference purposes only. Always verify doses.
       </Text>
     </View>
   );
@@ -41,35 +38,43 @@ export function ProfessionalFooter() {
 const styles = StyleSheet.create({
   container: {
     marginTop: 24,
-    marginHorizontal: 12,
-    marginBottom: 8,
-    paddingTop: 20,
-    paddingBottom: 24,
+    marginHorizontal: 14,
+    marginBottom: 12,
+    paddingTop: 18,
+    paddingBottom: 20,
     paddingHorizontal: 20,
-    borderRadius: 20,
+    borderRadius: 14,
     alignItems: "center",
-    gap: 6,
+    gap: 4,
+    ...Platform.select({
+      ios: { shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.12, shadowRadius: 12 },
+      android: { elevation: 4 },
+      web: { boxShadow: "0 4px 16px rgba(0,0,0,0.10)" },
+    }),
   },
-  logoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 10,
-  },
-  iconPill: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  name: {
-    fontSize: 14,
-    letterSpacing: 0.1,
-  },
-  disclaimer: {
+  line1: {
     fontSize: 11,
-    lineHeight: 16,
+    fontWeight: "600",
+    letterSpacing: 1,
+    textTransform: "uppercase",
+  },
+  line2: {
+    fontSize: 14,
+    fontWeight: "800",
+    letterSpacing: 0.2,
+    marginTop: 2,
+  },
+  line3: {
+    fontSize: 12,
+    fontWeight: "500",
+    letterSpacing: 0.2,
+    marginTop: 1,
+  },
+  line4: {
+    fontSize: 10,
+    fontStyle: "italic",
+    lineHeight: 14,
     textAlign: "center",
+    marginTop: 4,
   },
 });

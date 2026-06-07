@@ -88,7 +88,7 @@ export default function DrugListScreen() {
         style={[
           styles.categoryPill,
           {
-            backgroundColor: isActive ? item.color : isDark ? "#0D1928" : "#EBF5FB",
+            backgroundColor: isActive ? item.color : isDark ? "#0A192F" : "#EBF5FB",
             borderColor: "transparent",
           },
         ]}
@@ -117,7 +117,7 @@ export default function DrugListScreen() {
         style={({ pressed }) => [
           styles.drugCard,
           {
-            backgroundColor: isDark ? "#0D1521" : "#FFFFFF",
+            backgroundColor: isDark ? "#112240" : "#FFFFFF",
             opacity: pressed ? 0.85 : 1,
             transform: [{ scale: pressed ? 0.99 : 1 }],
           },
@@ -129,7 +129,7 @@ export default function DrugListScreen() {
             <Text
               style={[
                 styles.drugName,
-                { color: isDark ? "#E8F0FE" : "#0D1B2A", fontFamily: "Inter_600SemiBold" },
+                { color: isDark ? "#FFFFFF" : "#0D1B2A", fontFamily: "Inter_600SemiBold" },
               ]}
             >
               {item.name}
@@ -144,7 +144,7 @@ export default function DrugListScreen() {
             <Text
               style={[
                 styles.genericName,
-                { color: isDark ? "#8A9BB0" : "#4A5568", fontFamily: "Inter_400Regular" },
+                { color: isDark ? "#8892B0" : "#4A5568", fontFamily: "Inter_400Regular" },
               ]}
             >
               {item.genericName}
@@ -153,7 +153,7 @@ export default function DrugListScreen() {
           <Text
             style={[
               styles.indication,
-              { color: isDark ? "#5A7A96" : "#8A9BB0", fontFamily: "Inter_400Regular" },
+              { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" },
             ]}
             numberOfLines={1}
           >
@@ -175,14 +175,14 @@ export default function DrugListScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: isDark ? "#060B12" : "#F0F9FF" }]}>
+    <View style={[styles.container, { backgroundColor: isDark ? "#0B132B" : "#F0F9FF" }]}>
       {/* Header */}
       <View
         style={[
           styles.header,
           {
             paddingTop: topPadding + 12,
-            backgroundColor: isDark ? "#0A1522" : "#FFFFFF",
+            backgroundColor: isDark ? "#0A192F" : "#FFFFFF",
           },
         ]}
       >
@@ -192,7 +192,7 @@ export default function DrugListScreen() {
             <Text
               style={[
                 styles.headerTitle,
-                { color: isDark ? "#E8F0FE" : "#0D1B2A", fontFamily: "Inter_700Bold" },
+                { color: isDark ? "#FFFFFF" : "#0D1B2A", fontFamily: "Inter_700Bold" },
               ]}
               numberOfLines={1}
             >
@@ -201,7 +201,7 @@ export default function DrugListScreen() {
             <Text
               style={[
                 styles.headerSubtitle,
-                { color: isDark ? "#5A7A96" : "#8A9BB0", fontFamily: "Inter_400Regular" },
+                { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" },
               ]}
             >
               Harriet Lane · {DRUGS.length} drugs
@@ -211,7 +211,7 @@ export default function DrugListScreen() {
           {/* Dark mode toggle */}
           <TouchableOpacity
             onPress={toggleDark}
-            style={[styles.darkToggle, { backgroundColor: isDark ? "#0D1928" : "#E8F4FA" }]}
+            style={[styles.darkToggle, { backgroundColor: isDark ? "#0A192F" : "#E8F4FA" }]}
             activeOpacity={0.7}
           >
             <Feather
@@ -236,8 +236,8 @@ export default function DrugListScreen() {
                 style={[
                   styles.weightInput,
                   {
-                    color: weightWarning ? "#E53E3E" : isDark ? "#E8F1FA" : "#0A1628",
-                    backgroundColor: isDark ? "#0D1928" : "#EBF5FB",
+                    color: weightWarning ? "#E53E3E" : isDark ? "#FFFFFF" : "#0A1628",
+                    backgroundColor: isDark ? "#0A192F" : "#EBF5FB",
                     fontFamily: "Inter_700Bold",
                     borderColor: weightWarning ? "#E53E3E" : "transparent",
                     borderWidth: weightWarning ? 1.5 : 0,
@@ -254,7 +254,7 @@ export default function DrugListScreen() {
                 style={[styles.resetBtn, { backgroundColor: isDark ? "#0D1928" : "#D9EDF8" }]}
                 activeOpacity={0.7}
               >
-                <Feather name="x" size={13} color={isDark ? "#5A7A96" : "#4A5568"} />
+                <Feather name="x" size={13} color={isDark ? "#8892B0" : "#4A5568"} />
               </TouchableOpacity>
             </View>
             {weightWarning && (
@@ -267,7 +267,7 @@ export default function DrugListScreen() {
         <View
           style={[
             styles.searchBar,
-            { backgroundColor: isDark ? "#0D1928" : "#EBF5FB" },
+            { backgroundColor: isDark ? "#0A192F" : "#EBF5FB" },
           ]}
         >
           <Feather name="search" size={16} color={isDark ? "#4D6E88" : Colors.light.tint} />
@@ -275,18 +275,18 @@ export default function DrugListScreen() {
             style={[
               styles.searchInput,
               {
-                color: isDark ? "#E8F0FE" : "#0D1B2A",
+                color: isDark ? "#FFFFFF" : "#0D1B2A",
                 fontFamily: "Inter_400Regular",
               },
             ]}
             placeholder="Search drugs, indications..."
-            placeholderTextColor={isDark ? "#5A7A96" : "#8A9BB0"}
+            placeholderTextColor={isDark ? "#8892B0" : "#8A9BB0"}
             value={search}
             onChangeText={setSearch}
           />
           {search.length > 0 && (
             <Pressable onPress={() => setSearch("")}>
-              <Feather name="x" size={16} color={isDark ? "#5A7A96" : "#8A9BB0"} />
+              <Feather name="x" size={16} color={isDark ? "#8892B0" : "#8A9BB0"} />
             </Pressable>
           )}
           <View style={styles.searchDivider} />
@@ -294,7 +294,7 @@ export default function DrugListScreen() {
             <Feather
               name="bookmark"
               size={16}
-              color={showFavoritesOnly ? colors.accent : isDark ? "#5A7A96" : "#8A9BB0"}
+              color={showFavoritesOnly ? colors.accent : isDark ? "#8892B0" : "#8A9BB0"}
             />
           </Pressable>
         </View>
@@ -323,11 +323,11 @@ export default function DrugListScreen() {
         scrollEnabled={!!filtered.length}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Feather name="search" size={40} color={isDark ? "#1E2D3D" : "#E2E8F0"} />
+            <Feather name="search" size={40} color={isDark ? "#233554" : "#E2E8F0"} />
             <Text
               style={[
                 styles.emptyText,
-                { color: isDark ? "#5A7A96" : "#8A9BB0", fontFamily: "Inter_500Medium" },
+                { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_500Medium" },
               ]}
             >
               No drugs found

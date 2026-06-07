@@ -221,7 +221,7 @@ export default function EmergencyScreen() {
   }, [weight]);
 
   return (
-    <View style={[styles.container, { backgroundColor: isDark ? "#080E16" : "#F0F4F8" }]}>
+    <View style={[styles.container, { backgroundColor: isDark ? "#0B132B" : "#F0F4F8" }]}>
       {/* Header */}
       <View
         style={[
@@ -288,8 +288,11 @@ export default function EmergencyScreen() {
             style={[
               styles.emergencyCard,
               {
-                backgroundColor: isDark ? "#0F1E2E" : "#FFFFFF",
+                backgroundColor: isDark ? "#112240" : "#FFFFFF",
                 borderLeftColor: item.color,
+                borderWidth: isDark ? 1 : 0,
+                borderColor: isDark ? "#233554" : "transparent",
+                borderLeftWidth: 4,
               },
             ]}
           >
@@ -300,16 +303,18 @@ export default function EmergencyScreen() {
                     <View
                       style={[
                         styles.criticalBadge,
-                        { backgroundColor: item.color + "22" },
+                        {
+                          backgroundColor: isDark ? "#FF4C6020" : item.color + "22",
+                        },
                       ]}
                     >
                       <Text
                         style={[
                           styles.criticalText,
-                          { color: item.color, fontFamily: "Inter_700Bold" },
+                          { color: isDark ? "#FF4C60" : item.color, fontFamily: "Inter_700Bold" },
                         ]}
                       >
-                        CRITICAL
+                        CODE BLUE READY
                       </Text>
                     </View>
                   )}
@@ -326,7 +331,7 @@ export default function EmergencyScreen() {
                   style={[
                     styles.cardLabel,
                     {
-                      color: isDark ? "#E8F0FE" : "#0D1B2A",
+                      color: isDark ? "#FFFFFF" : "#0D1B2A",
                       fontFamily: "Inter_600SemiBold",
                     },
                   ]}
@@ -351,14 +356,24 @@ export default function EmergencyScreen() {
               </View>
             </View>
 
-            <Text
-              style={[
-                styles.cardDose,
-                { color: item.color, fontFamily: "Inter_700Bold" },
-              ]}
-            >
-              {item.dose}
-            </Text>
+            <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6 }}>
+              <Text
+                style={[
+                  styles.cardDose,
+                  { color: item.color, fontFamily: "Inter_800ExtraBold" },
+                ]}
+              >
+                {item.dose.split(" ").slice(0, -1).join(" ") || item.dose}
+              </Text>
+              <Text
+                style={[
+                  styles.cardDoseUnit,
+                  { color: item.color, fontFamily: "Inter_600SemiBold" },
+                ]}
+              >
+                {item.dose.split(" ").pop()}
+              </Text>
+            </View>
 
             {/* Adult max dose red alert */}
             {item.exceedsAdultMax && (
@@ -374,7 +389,7 @@ export default function EmergencyScreen() {
               style={[
                 styles.cardNotes,
                 {
-                  color: isDark ? "#5A7A96" : "#8A9BB0",
+                  color: isDark ? "#8892B0" : "#8A9BB0",
                   fontFamily: "Inter_400Regular",
                 },
               ]}
@@ -389,8 +404,8 @@ export default function EmergencyScreen() {
           style={[
             styles.palsBanner,
             {
-              backgroundColor: isDark ? "#0A1520" : "#FFFFFF",
-              borderColor: isDark ? "#1E2D3D" : "#E2E8F0",
+              backgroundColor: isDark ? "#0A192F" : "#FFFFFF",
+              borderColor: isDark ? "#233554" : "#E2E8F0",
             },
           ]}
         >
@@ -434,14 +449,14 @@ export default function EmergencyScreen() {
               key={ref.label}
               style={[
                 styles.refRow,
-                { borderBottomColor: isDark ? "#1E2D3D" : "#F0F4F8" },
+                { borderBottomColor: isDark ? "#233554" : "#F0F4F8" },
               ]}
             >
               <Text
                 style={[
                   styles.refLabel,
                   {
-                    color: isDark ? "#8A9BB0" : "#4A5568",
+                    color: isDark ? "#8892B0" : "#4A5568",
                     fontFamily: "Inter_400Regular",
                   },
                 ]}
@@ -555,7 +570,8 @@ const styles = StyleSheet.create({
   cardLabel: { fontSize: 14, flex: 1 },
   routeTag: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
   routeTagText: { fontSize: 11 },
-  cardDose: { fontSize: 22, letterSpacing: -0.5 },
+  cardDose: { fontSize: 32, letterSpacing: -0.5 },
+  cardDoseUnit: { fontSize: 20 },
   adultMaxAlert: {
     flexDirection: "row",
     alignItems: "center",

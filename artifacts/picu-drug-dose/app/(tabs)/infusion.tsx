@@ -119,11 +119,11 @@ function RecipeCard({
   vialLabel: string;
   isDark: boolean;
 }) {
-  const CARD_BG = isDark ? "#0F172A" : "#FFFFFF";
-  const MUTED = isDark ? "#64748B" : C.textMuted;
-  const SEC = isDark ? "#94A3B8" : C.textSecondary;
-  const TEXT = isDark ? "#E2E8F0" : C.text;
-  const BORDER = isDark ? "#1E293B" : C.border;
+  const CARD_BG = isDark ? "#0B132B" : "#FFFFFF";
+  const MUTED = isDark ? "#8892B0" : C.textMuted;
+  const SEC = isDark ? "#8892B0" : C.textSecondary;
+  const TEXT = isDark ? "#CCD6F6" : C.text;
+  const BORDER = isDark ? "#233554" : C.border;
 
   const drugMLStr =
     recipe.drugML < 0.1
@@ -183,7 +183,7 @@ function RecipeCard({
         </View>
 
         {/* Total */}
-        <View style={[styles.recipeItem, { backgroundColor: isDark ? "#1E293B" : "#F8FAFD", borderColor: BORDER }]}>
+        <View style={[styles.recipeItem, { backgroundColor: isDark ? "#0A192F" : "#F8FAFD", borderColor: BORDER }]}>
           <Feather name="circle" size={11} color={SEC} />
           <Text style={[styles.recipeItemLabel, { color: TEXT }]}>Total</Text>
           <Text style={[styles.recipeItemSub, { color: MUTED }]}>(syringe)</Text>
@@ -240,12 +240,12 @@ export default function InfusionScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   // ── Theme tokens ──
-  const BG   = isDark ? "#060B12" : C.background;
-  const CARD = isDark ? "#0D1521" : C.card;
-  const BORDER = isDark ? "#182232" : C.border;
-  const TEXT = isDark ? "#E8F1FA" : C.text;
-  const MUTED = isDark ? "#4D6680" : C.textMuted;
-  const SEC  = isDark ? "#8AAEC8" : C.textSecondary;
+  const BG   = isDark ? "#0B132B" : C.background;
+  const CARD = isDark ? "#112240" : C.card;
+  const BORDER = isDark ? "#233554" : C.border;
+  const TEXT = isDark ? "#FFFFFF" : C.text;
+  const MUTED = isDark ? "#8892B0" : C.textMuted;
+  const SEC  = isDark ? "#CCD6F6" : C.textSecondary;
 
   const weightNum = parseFloat(weight) || 0;
   const doseNum = parseFloat(doseInput) || 0;
@@ -350,7 +350,7 @@ export default function InfusionScreen() {
           </View>
           <View style={styles.headerRight}>
             <TouchableOpacity
-              style={[styles.nightBtn, { backgroundColor: isDark ? "#0D1828" : "#E8F4F9" }]}
+              style={[styles.nightBtn, { backgroundColor: isDark ? "#0A192F" : "#E8F4F9" }]}
               onPress={toggleDark}
               activeOpacity={0.8}
             >
@@ -409,7 +409,7 @@ export default function InfusionScreen() {
                     style={[
                       styles.catChip,
                       {
-                        backgroundColor: isActive ? cat.color : isDark ? "#1E293B" : "#F1F5F9",
+                        backgroundColor: isActive ? cat.color : isDark ? "#233554" : "#F1F5F9",
                         borderColor: isActive ? cat.color : "transparent",
                       },
                     ]}
@@ -586,7 +586,7 @@ export default function InfusionScreen() {
                 </View>
 
                 {/* Mode tabs */}
-                <View style={[styles.modeTabs, { backgroundColor: isDark ? "#0A1220" : "#EBF5FB" }]}>
+                <View style={[styles.modeTabs, { backgroundColor: isDark ? "#0A192F" : "#EBF5FB" }]}>
                   {(["standard", "dilution"] as ConcMode[]).map((mode) => (
                     <TouchableOpacity
                       key={mode}
@@ -868,7 +868,7 @@ export default function InfusionScreen() {
                   </View>
 
                   {/* Syringe size selector */}
-                  <View style={[styles.syringeRow, { backgroundColor: isDark ? "#0A1220" : "#EBF5FB" }]}>
+                  <View style={[styles.syringeRow, { backgroundColor: isDark ? "#0A192F" : "#EBF5FB" }]}>
                     {SYRINGE_SIZES.map((ml) => (
                       <TouchableOpacity
                         key={ml}
