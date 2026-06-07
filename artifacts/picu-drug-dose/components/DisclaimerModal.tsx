@@ -67,8 +67,8 @@ export function DisclaimerModal() {
               . It is a clinical reference tool designed to assist in pediatric drug dose calculations.
             </Text>
 
-            <View style={[styles.alertBox, { backgroundColor: isDark ? "#FF4C6020" : "#FEF3C7", borderColor: isDark ? "#FF4C60" : "#F59E0B" }]}>
-              <Text style={[styles.alertText, { color: isDark ? "#FF4C60" : "#92400E" }]}>
+            <View style={[styles.alertBox, { backgroundColor: isDark ? "#6366F120" : "#FEF3C7", borderColor: isDark ? "#6366F1" : "#F59E0B" }]}>
+              <Text style={[styles.alertText, { color: isDark ? "#6366F1" : "#92400E" }]}>
                 ⚠️  This tool does NOT replace professional medical judgment, institutional protocols,
                 or direct patient assessment.
               </Text>

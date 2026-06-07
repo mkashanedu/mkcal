@@ -171,7 +171,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
     maxDose: 1.0,
     typicalDose: 0.1,
     doseStep: 0.01,
-    color: "#AE2012",
+    color: "#6366F1",
     indication: "Refractory shock, post-cardiac arrest ROSC, anaphylaxis",
     vialConc_per_mL: 1,
     vialLabel: "1 mg/mL ampoule (Adrenaline)",

@@ -14,7 +14,7 @@ export function ProfessionalFooter() {
           backgroundColor: D ? "#112240" : "#F0F9FF",
           borderColor: D ? "#233554" : "#E4EDF4",
           borderLeftWidth: D ? 4 : 0,
-          borderLeftColor: D ? "#FF4C60" : "transparent",
+          borderLeftColor: D ? "#6366F1" : "transparent",
           borderWidth: D ? 1 : 0,
         },
       ]}

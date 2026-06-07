@@ -56,7 +56,7 @@ export const CATEGORIES: Record<
   DrugCategory,
   { label: string; icon: string; color: string }
 > = {
-  emergency: { label: "Emergency", icon: "alert-circle", color: "#C1121F" },
+  emergency: { label: "Emergency", icon: "alert-circle", color: "#6366F1" },
   analgesic: { label: "Analgesics", icon: "activity", color: "#6B2FA0" },
   sedative: { label: "Sedatives", icon: "moon", color: "#1A4F7A" },
   nmbd: { label: "NMBDs / RSI", icon: "zap-off", color: "#7B2D8E" },

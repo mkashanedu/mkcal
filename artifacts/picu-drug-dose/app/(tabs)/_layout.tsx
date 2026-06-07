@@ -148,13 +148,13 @@ function ClassicTabLayout() {
         name="emergency"
         options={{
           title: "Emergency",
-          tabBarActiveTintColor: "#AE2012",
-          tabBarInactiveTintColor: "#C0392B",
+          tabBarActiveTintColor: "#6366F1",
+          tabBarInactiveTintColor: "#818CF8",
           tabBarIcon: () =>
             isIOS ? (
-              <SymbolView name="cross.circle.fill" tintColor="#AE2012" size={24} />
+              <SymbolView name="cross.circle.fill" tintColor="#6366F1" size={24} />
             ) : (
-              <Feather name="alert-circle" size={22} color="#AE2012" />
+              <Feather name="alert-circle" size={22} color="#6366F1" />
             ),
         }}
       />

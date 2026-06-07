@@ -46,7 +46,7 @@ export default function EmergencyScreen() {
         dose: calc.dose,
         route: "IV / IO",
         notes: `0.1 mL/kg of 1:10,000 = ${+(0.1 * weight).toFixed(1)} mL`,
-        color: "#AE2012",
+        color: "#6366F1",
         warning: true,
         exceedsAdultMax: calc.exceedsAdultMax,
         adultMaxLabel: calc.adultMaxLabel,
@@ -58,7 +58,7 @@ export default function EmergencyScreen() {
         dose: calcIM.dose,
         route: "IM · IN (0.01 mg/kg)",
         notes: "IM: 1:1,000 solution · IN: use atomiser, both nostrils",
-        color: "#AE2012",
+        color: "#6366F1",
         warning: true,
         exceedsAdultMax: calcIM.exceedsAdultMax,
         adultMaxLabel: calcIM.adultMaxLabel,
@@ -74,7 +74,7 @@ export default function EmergencyScreen() {
         dose: calc.dose,
         route: "IV / IO",
         notes: "Minimum 0.1 mg; max 0.5 mg child / 3 mg adolescent",
-        color: "#E67E22",
+        color: "#6366F1",
         exceedsAdultMax: calc.exceedsAdultMax,
         adultMaxLabel: calc.adultMaxLabel,
       });
@@ -90,7 +90,7 @@ export default function EmergencyScreen() {
         dose: calc.dose,
         route: "IV rapid push",
         notes: `2nd dose: ${dose2} mg (max 12 mg) — rapid flush!`,
-        color: "#8E44AD",
+        color: "#6366F1",
         exceedsAdultMax: calc.exceedsAdultMax,
         adultMaxLabel: calc.adultMaxLabel,
       });
@@ -105,7 +105,7 @@ export default function EmergencyScreen() {
         dose: calc.dose,
         route: "IV",
         notes: "For severe metabolic acidosis",
-        color: "#2E86AB",
+        color: "#6366F1",
         exceedsAdultMax: calc.exceedsAdultMax,
         adultMaxLabel: calc.adultMaxLabel,
       });
@@ -120,7 +120,7 @@ export default function EmergencyScreen() {
         dose: calcResult.dose,
         route: "IV",
         notes: "Infuse slowly with cardiac monitoring",
-        color: "#1A5276",
+        color: "#6366F1",
         exceedsAdultMax: calcResult.exceedsAdultMax,
         adultMaxLabel: calcResult.adultMaxLabel,
       });
@@ -136,7 +136,7 @@ export default function EmergencyScreen() {
         dose: `D10: ${d10} mL · D25: ${d25} mL · D50: ${d50} mL`,
         route: "IV",
         notes: "Neonates: D10 only",
-        color: "#27AE60",
+        color: "#6366F1",
       });
     }
 
@@ -149,7 +149,7 @@ export default function EmergencyScreen() {
         dose: calc.dose,
         route: "IV · IM · IN",
         notes: "IN: use 4 mg/mL atomiser · may repeat every 2–3 min",
-        color: "#7B2D8B",
+        color: "#6366F1",
         exceedsAdultMax: calc.exceedsAdultMax,
         adultMaxLabel: calc.adultMaxLabel,
       });
@@ -164,7 +164,7 @@ export default function EmergencyScreen() {
         dose: calc.dose,
         route: "IV / IO",
         notes: "Max 300 mg per dose — dilute in D5W only",
-        color: "#C0392B",
+        color: "#6366F1",
         warning: true,
         exceedsAdultMax: calc.exceedsAdultMax,
         adultMaxLabel: calc.adultMaxLabel,
@@ -180,7 +180,7 @@ export default function EmergencyScreen() {
         dose: calc.dose,
         route: "IV",
         notes: "Max 4 mg; may repeat once after 5 min",
-        color: "#B7770D",
+        color: "#6366F1",
         exceedsAdultMax: calc.exceedsAdultMax,
         adultMaxLabel: calc.adultMaxLabel,
       });
@@ -196,7 +196,7 @@ export default function EmergencyScreen() {
         dose: `${cappedDose} mg`,
         route: "Intranasal (IN)",
         notes: "0.3 mg/kg via atomiser · divide equally between nostrils · max 10 mg",
-        color: "#B7770D",
+        color: "#6366F1",
         exceedsAdultMax: exceeded,
         adultMaxLabel: exceeded ? "Adult max: 10 mg — dose capped" : undefined,
       });
@@ -211,7 +211,7 @@ export default function EmergencyScreen() {
         dose: calc.dose,
         route: "Intranasal (IN)",
         notes: "Use atomiser · max 0.5 mL per nostril · max 200 mcg total",
-        color: "#6B2FA0",
+        color: "#6366F1",
         exceedsAdultMax: calc.exceedsAdultMax,
         adultMaxLabel: calc.adultMaxLabel,
       });
@@ -228,7 +228,7 @@ export default function EmergencyScreen() {
           styles.header,
           {
             paddingTop: topPadding + 12,
-            backgroundColor: "#AE2012",
+            backgroundColor: "#6366F1",
           },
         ]}
       >
@@ -304,14 +304,14 @@ export default function EmergencyScreen() {
                       style={[
                         styles.criticalBadge,
                         {
-                          backgroundColor: isDark ? "#FF4C6020" : item.color + "22",
+                          backgroundColor: isDark ? "#6366F120" : item.color + "22",
                         },
                       ]}
                     >
                       <Text
                         style={[
                           styles.criticalText,
-                          { color: isDark ? "#FF4C60" : item.color, fontFamily: "Inter_700Bold" },
+                          { color: isDark ? "#6366F1" : item.color, fontFamily: "Inter_700Bold" },
                         ]}
                       >
                         CODE BLUE READY
@@ -422,27 +422,27 @@ export default function EmergencyScreen() {
             {
               label: "CPR Rate",
               value: "100–120 compressions/min",
-              color: "#AE2012",
+              color: "#6366F1",
             },
             {
               label: "Compression Depth",
               value: "≥ 1/3 AP chest depth",
-              color: "#AE2012",
+              color: "#6366F1",
             },
             {
               label: "Defibrillation",
               value: `${2 * weight} J (2 J/kg) → ${4 * weight} J (4 J/kg)`,
-              color: "#E67E22",
+              color: "#6366F1",
             },
             {
               label: "ET Tube Size",
               value: `~${Math.round((weight / 4 + 4) * 10) / 10} mm (uncuffed)`,
-              color: "#1A5276",
+              color: "#6366F1",
             },
             {
               label: "ETT Depth (oral)",
               value: `~${Math.round((weight / 2 + 12) * 10) / 10} cm at lip`,
-              color: "#1A5276",
+              color: "#6366F1",
             },
           ].map((ref) => (
             <View
@@ -566,7 +566,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 4,
   },
-  inBadgeText: { fontSize: 9, color: "#D4500A", letterSpacing: 0.5 },
+  inBadgeText: { fontSize: 9, color: "#6366F1", letterSpacing: 0.5 },
   cardLabel: { fontSize: 14, flex: 1 },
   routeTag: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
   routeTagText: { fontSize: 11 },
