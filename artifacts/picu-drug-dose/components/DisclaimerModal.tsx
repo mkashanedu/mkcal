@@ -14,18 +14,32 @@ import { useTheme } from "@/context/ThemeContext";
 
 const DISCLAIMER_KEY = "picu_disclaimer_v2";
 
+function getItem(key: string) {
+  if (Platform.OS === "web" && typeof localStorage !== "undefined") {
+    return Promise.resolve(localStorage.getItem(key));
+  }
+  return AsyncStorage.getItem(key);
+}
+function setItem(key: string, value: string) {
+  if (Platform.OS === "web" && typeof localStorage !== "undefined") {
+    localStorage.setItem(key, value);
+    return Promise.resolve();
+  }
+  return AsyncStorage.setItem(key, value);
+}
+
 export function DisclaimerModal() {
   const { isDark } = useTheme();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    AsyncStorage.getItem(DISCLAIMER_KEY).then((val) => {
+    getItem(DISCLAIMER_KEY).then((val) => {
       if (!val) setVisible(true);
     });
   }, []);
 
   function accept() {
-    AsyncStorage.setItem(DISCLAIMER_KEY, "accepted");
+    setItem(DISCLAIMER_KEY, "accepted");
     setVisible(false);
   }
 

@@ -1,10 +1,11 @@
 import { Feather } from "@expo/vector-icons";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Platform,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -15,6 +16,28 @@ import { DRUGS, calculateDose } from "@/constants/drugs";
 import { useTheme } from "@/context/ThemeContext";
 import { useWeight } from "@/context/WeightContext";
 import { ProfessionalFooter } from "@/components/ProfessionalFooter";
+
+// ── ET Tube & Defibrillation formulas (Harriet Lane 23e · PALS 2025) ─────
+function calcETTube(ageYears: number) {
+  if (ageYears < 1) {
+    return { uncuffed: "3.0–3.5", cuffed: "3.0 (premature–3.0)", depth: "9–10 cm at lip" };
+  }
+  const uncuffed = +(ageYears / 4 + 4).toFixed(1);
+  const cuffed   = +(ageYears / 4 + 3.5).toFixed(1);
+  const depth    = +(ageYears / 2 + 12).toFixed(1);
+  return {
+    uncuffed: `${uncuffed} mm`,
+    cuffed:   `${cuffed} mm`,
+    depth:    `${depth} cm at lip`,
+  };
+}
+
+function calcDefib(weightKg: number) {
+  const initial    = Math.min(+(2 * weightKg).toFixed(0), 200);
+  const subsequent = Math.min(+(4 * weightKg).toFixed(0), 360);
+  const maximum    = Math.min(+(10 * weightKg).toFixed(0), 360);
+  return { initial, subsequent, maximum };
+}
 
 interface EmergencyItem {
   label: string;
@@ -33,6 +56,11 @@ export default function EmergencyScreen() {
   const colors = Colors.light;
   const { weight } = useWeight();
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
+
+  const [ageYearsInput, setAgeYearsInput] = useState("2");
+  const ageYears = Math.max(0, parseFloat(ageYearsInput) || 0);
+  const ettube = calcETTube(ageYears);
+  const defib = calcDefib(weight);
 
   const emergencyCards = useMemo((): EmergencyItem[] => {
     const results: EmergencyItem[] = [];
@@ -411,7 +439,7 @@ export default function EmergencyScreen() {
           </View>
         ))}
 
-        {/* PALS Quick Reference */}
+        {/* Emergency Calculators — ET Tube & Defibrillation */}
         <View
           style={[
             styles.palsBanner,
@@ -427,64 +455,107 @@ export default function EmergencyScreen() {
               { color: colors.tint, fontFamily: "Inter_700Bold" },
             ]}
           >
-            PALS Quick Reference
+            Emergency Calculators
           </Text>
 
-          {[
-            {
-              label: "CPR Rate",
-              value: "100–120 compressions/min",
-              color: "#6366F1",
-            },
-            {
-              label: "Compression Depth",
-              value: "≥ 1/3 AP chest depth",
-              color: "#6366F1",
-            },
-            {
-              label: "Defibrillation",
-              value: `${2 * weight} J (2 J/kg) → ${4 * weight} J (4 J/kg)`,
-              color: "#6366F1",
-            },
-            {
-              label: "ET Tube Size",
-              value: `~${Math.round((weight / 4 + 4) * 10) / 10} mm (uncuffed)`,
-              color: "#6366F1",
-            },
-            {
-              label: "ETT Depth (oral)",
-              value: `~${Math.round((weight / 2 + 12) * 10) / 10} cm at lip`,
-              color: "#6366F1",
-            },
-          ].map((ref) => (
-            <View
-              key={ref.label}
-              style={[
-                styles.refRow,
-                { borderBottomColor: isDark ? "#233554" : "#F0F4F8" },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.refLabel,
-                  {
-                    color: isDark ? "#8892B0" : "#4A5568",
-                    fontFamily: "Inter_400Regular",
-                  },
-                ]}
-              >
-                {ref.label}
+          <Text
+            style={[
+              styles.calcSource,
+              { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_400Regular" },
+            ]}
+          >
+            PALS 2025 · Harriet Lane 23e
+          </Text>
+
+          {/* ET Tube section */}
+          <View style={[styles.calcSection, { borderTopColor: isDark ? "#233554" : "#F0F4F8" }]}>
+            <View style={styles.calcSectionHeader}>
+              <Text style={[styles.calcSectionTitle, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_600SemiBold" }]}>
+                ET Tube Size
               </Text>
-              <Text
-                style={[
-                  styles.refValue,
-                  { color: ref.color, fontFamily: "Inter_600SemiBold" },
-                ]}
-              >
-                {ref.value}
-              </Text>
+              <View style={styles.ageInputWrap}>
+                <Text style={[styles.ageLabel, { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" }]}>
+                  Age (yrs):
+                </Text>
+                <TextInput
+                  style={[styles.ageInput, {
+                    color: isDark ? "#FFFFFF" : "#0D1B2A",
+                    backgroundColor: isDark ? "#233554" : "#F0F4F8",
+                    fontFamily: "Inter_700Bold",
+                  }]}
+                  value={ageYearsInput}
+                  onChangeText={setAgeYearsInput}
+                  keyboardType="decimal-pad"
+                  selectTextOnFocus
+                  maxLength={4}
+                  placeholder="0"
+                  placeholderTextColor={isDark ? "#8892B0" : "#8A9BB0"}
+                />
+              </View>
             </View>
-          ))}
+            <View style={styles.ettGrid}>
+              <View style={[styles.ettBox, { backgroundColor: isDark ? "#112240" : "#EBF8FF", borderColor: isDark ? "#1A4F7A" : "#EBF8FF" }]}>
+                <Text style={[styles.ettLabel, { color: isDark ? "#5A8FC0" : "#1A4F7A", fontFamily: "Inter_500Medium" }]}>Uncuffed</Text>
+                <Text style={[styles.ettValue, { color: isDark ? "#93C5FD" : "#1A4F7A", fontFamily: "Inter_700Bold" }]}>
+                  {ettube.uncuffed}
+                </Text>
+              </View>
+              <View style={[styles.ettBox, { backgroundColor: isDark ? "#112240" : "#F0FFF4", borderColor: isDark ? "#146B35" : "#F0FFF4" }]}>
+                <Text style={[styles.ettLabel, { color: isDark ? "#6FCF97" : "#146B35", fontFamily: "Inter_500Medium" }]}>Cuffed</Text>
+                <Text style={[styles.ettValue, { color: isDark ? "#86EFAC" : "#146B35", fontFamily: "Inter_700Bold" }]}>
+                  {ettube.cuffed}
+                </Text>
+              </View>
+              <View style={[styles.ettBox, { backgroundColor: isDark ? "#112240" : "#FEE2E2", borderColor: isDark ? "#DC2626" : "#FEE2E2" }]}>
+                <Text style={[styles.ettLabel, { color: isDark ? "#FCA5A5" : "#991B1B", fontFamily: "Inter_500Medium" }]}>Depth at lip</Text>
+                <Text style={[styles.ettValue, { color: isDark ? "#FECACA" : "#DC2626", fontFamily: "Inter_700Bold" }]}>
+                  {ettube.depth}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Defibrillator section */}
+          <View style={[styles.calcSection, { borderTopColor: isDark ? "#233554" : "#F0F4F8" }]}>
+            <Text style={[styles.calcSectionTitle, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_600SemiBold", marginBottom: 10 }]}>
+              Defibrillator Energy — {weight} kg
+            </Text>
+            <View style={styles.defibGrid}>
+              <View style={[styles.defibBox, { backgroundColor: isDark ? "#112240" : "#FEF3C7", borderColor: isDark ? "#D97706" : "#F59E0B" }]}>
+                <Text style={[styles.defibLabel, { color: isDark ? "#FCD34D" : "#92400E", fontFamily: "Inter_500Medium" }]}>
+                  1st Shock
+                </Text>
+                <Text style={[styles.defibJoules, { color: isDark ? "#FDE047" : "#B45309", fontFamily: "Inter_700Bold" }]}>
+                  {defib.initial} J
+                </Text>
+                <Text style={[styles.defibFormula, { color: isDark ? "#F59E0B" : "#D97706", fontFamily: "Inter_400Regular" }]}>
+                  2 J/kg
+                </Text>
+              </View>
+              <View style={[styles.defibBox, { backgroundColor: isDark ? "#112240" : "#FEE2E2", borderColor: isDark ? "#DC2626" : "#F87171" }]}>
+                <Text style={[styles.defibLabel, { color: isDark ? "#FCA5A5" : "#991B1B", fontFamily: "Inter_500Medium" }]}>
+                  Subsequent
+                </Text>
+                <Text style={[styles.defibJoules, { color: isDark ? "#FECACA" : "#B91C1C", fontFamily: "Inter_700Bold" }]}>
+                  {defib.subsequent} J
+                </Text>
+                <Text style={[styles.defibFormula, { color: isDark ? "#F87171" : "#DC2626", fontFamily: "Inter_400Regular" }]}>
+                  4 J/kg
+                </Text>
+              </View>
+              <View style={[styles.defibBox, { backgroundColor: isDark ? "#112240" : "#FCE7F3", borderColor: isDark ? "#DB2777" : "#F9A8D4" }]}>
+                <Text style={[styles.defibLabel, { color: isDark ? "#F9A8D4" : "#831843", fontFamily: "Inter_500Medium" }]}>
+                  Maximum
+                </Text>
+                <Text style={[styles.defibJoules, { color: isDark ? "#FBCFE8" : "#9D174D", fontFamily: "Inter_700Bold" }]}>
+                  {defib.maximum} J
+                </Text>
+                <Text style={[styles.defibFormula, { color: isDark ? "#F472B6" : "#BE185D", fontFamily: "Inter_400Regular" }]}>
+                  10 J/kg (max 360)
+                </Text>
+              </View>
+            </View>
+          </View>
         </View>
         <ProfessionalFooter />
       </ScrollView>
@@ -612,6 +683,54 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   palsTitle: { fontSize: 16, marginBottom: 12 },
+  calcSource: { fontSize: 11, marginBottom: 12, marginTop: -8, letterSpacing: 0.3 },
+  calcSection: {
+    borderTopWidth: 1,
+    marginTop: 10,
+    paddingTop: 10,
+  },
+  calcSectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  calcSectionTitle: { fontSize: 13, letterSpacing: 0.3 },
+  ageInputWrap: { flexDirection: "row", alignItems: "center", gap: 6 },
+  ageLabel: { fontSize: 13 },
+  ageInput: {
+    width: 52,
+    height: 32,
+    borderRadius: 8,
+    paddingHorizontal: 6,
+    fontSize: 16,
+    textAlign: "center",
+  },
+  ettGrid: { flexDirection: "row", gap: 8 },
+  ettBox: {
+    flex: 1,
+    borderRadius: 10,
+    padding: 10,
+    alignItems: "center",
+    gap: 4,
+    borderWidth: 1,
+  },
+  ettLabel: { fontSize: 10 },
+  ettValue: { fontSize: 15, textAlign: "center" },
+
+  defibGrid: { flexDirection: "row", gap: 8 },
+  defibBox: {
+    flex: 1,
+    borderRadius: 10,
+    padding: 10,
+    alignItems: "center",
+    borderWidth: 1,
+    gap: 2,
+  },
+  defibLabel: { fontSize: 10 },
+  defibJoules: { fontSize: 18 },
+  defibFormula: { fontSize: 9, textAlign: "center" },
+
   refRow: {
     flexDirection: "row",
     justifyContent: "space-between",

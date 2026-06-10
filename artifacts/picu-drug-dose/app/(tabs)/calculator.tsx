@@ -423,21 +423,21 @@ export default function CalculatorScreen() {
               </View>
             </View>
             <View style={styles.ettGrid}>
-              <View style={[styles.ettBox, { backgroundColor: "#EBF8FF" }]}>
-                <Text style={[styles.ettLabel, { fontFamily: "Inter_500Medium" }]}>Uncuffed</Text>
-                <Text style={[styles.ettValue, { color: "#1A4F7A", fontFamily: "Inter_700Bold" }]}>
+              <View style={[styles.ettBox, { backgroundColor: isDark ? "#112240" : "#EBF8FF", borderColor: isDark ? "#1A4F7A" : "#EBF8FF" }]}>
+                <Text style={[styles.ettLabel, { color: isDark ? "#5A8FC0" : "#1A4F7A", fontFamily: "Inter_500Medium" }]}>Uncuffed</Text>
+                <Text style={[styles.ettValue, { color: isDark ? "#93C5FD" : "#1A4F7A", fontFamily: "Inter_700Bold" }]}>
                   {ettube.uncuffed}
                 </Text>
               </View>
-              <View style={[styles.ettBox, { backgroundColor: "#F0FFF4" }]}>
-                <Text style={[styles.ettLabel, { fontFamily: "Inter_500Medium" }]}>Cuffed</Text>
-                <Text style={[styles.ettValue, { color: "#146B35", fontFamily: "Inter_700Bold" }]}>
+              <View style={[styles.ettBox, { backgroundColor: isDark ? "#112240" : "#F0FFF4", borderColor: isDark ? "#146B35" : "#F0FFF4" }]}>
+                <Text style={[styles.ettLabel, { color: isDark ? "#6FCF97" : "#146B35", fontFamily: "Inter_500Medium" }]}>Cuffed</Text>
+                <Text style={[styles.ettValue, { color: isDark ? "#86EFAC" : "#146B35", fontFamily: "Inter_700Bold" }]}>
                   {ettube.cuffed}
                 </Text>
               </View>
-              <View style={[styles.ettBox, { backgroundColor: "#FFFBEB" }]}>
-                <Text style={[styles.ettLabel, { fontFamily: "Inter_500Medium" }]}>Depth at lip</Text>
-                <Text style={[styles.ettValue, { color: "#92400E", fontFamily: "Inter_700Bold" }]}>
+              <View style={[styles.ettBox, { backgroundColor: isDark ? "#112240" : "#FEE2E2", borderColor: isDark ? "#DC2626" : "#FEE2E2" }]}>
+                <Text style={[styles.ettLabel, { color: isDark ? "#FCA5A5" : "#991B1B", fontFamily: "Inter_500Medium" }]}>Depth at lip</Text>
+                <Text style={[styles.ettValue, { color: isDark ? "#FECACA" : "#DC2626", fontFamily: "Inter_700Bold" }]}>
                   {ettube.depth}
                 </Text>
               </View>
@@ -450,36 +450,36 @@ export default function CalculatorScreen() {
               Defibrillator Energy — {weight} kg
             </Text>
             <View style={styles.defibGrid}>
-              <View style={[styles.defibBox, { backgroundColor: "#FEF3C7", borderColor: "#F59E0B" }]}>
-                <Text style={[styles.defibLabel, { color: "#92400E", fontFamily: "Inter_500Medium" }]}>
+              <View style={[styles.defibBox, { backgroundColor: isDark ? "#112240" : "#FEF3C7", borderColor: isDark ? "#D97706" : "#F59E0B" }]}>
+                <Text style={[styles.defibLabel, { color: isDark ? "#FCD34D" : "#92400E", fontFamily: "Inter_500Medium" }]}>
                   1st Shock
                 </Text>
-                <Text style={[styles.defibJoules, { color: "#B45309", fontFamily: "Inter_700Bold" }]}>
+                <Text style={[styles.defibJoules, { color: isDark ? "#FDE047" : "#B45309", fontFamily: "Inter_700Bold" }]}>
                   {defib.initial} J
                 </Text>
-                <Text style={[styles.defibFormula, { color: "#D97706", fontFamily: "Inter_400Regular" }]}>
+                <Text style={[styles.defibFormula, { color: isDark ? "#F59E0B" : "#D97706", fontFamily: "Inter_400Regular" }]}>
                   2 J/kg
                 </Text>
               </View>
-              <View style={[styles.defibBox, { backgroundColor: "#FEE2E2", borderColor: "#F87171" }]}>
-                <Text style={[styles.defibLabel, { color: "#991B1B", fontFamily: "Inter_500Medium" }]}>
+              <View style={[styles.defibBox, { backgroundColor: isDark ? "#112240" : "#FEE2E2", borderColor: isDark ? "#DC2626" : "#F87171" }]}>
+                <Text style={[styles.defibLabel, { color: isDark ? "#FCA5A5" : "#991B1B", fontFamily: "Inter_500Medium" }]}>
                   Subsequent
                 </Text>
-                <Text style={[styles.defibJoules, { color: "#B91C1C", fontFamily: "Inter_700Bold" }]}>
+                <Text style={[styles.defibJoules, { color: isDark ? "#FECACA" : "#B91C1C", fontFamily: "Inter_700Bold" }]}>
                   {defib.subsequent} J
                 </Text>
-                <Text style={[styles.defibFormula, { color: "#DC2626", fontFamily: "Inter_400Regular" }]}>
+                <Text style={[styles.defibFormula, { color: isDark ? "#F87171" : "#DC2626", fontFamily: "Inter_400Regular" }]}>
                   4 J/kg
                 </Text>
               </View>
-              <View style={[styles.defibBox, { backgroundColor: "#FCE7F3", borderColor: "#F9A8D4" }]}>
-                <Text style={[styles.defibLabel, { color: "#831843", fontFamily: "Inter_500Medium" }]}>
+              <View style={[styles.defibBox, { backgroundColor: isDark ? "#112240" : "#FCE7F3", borderColor: isDark ? "#DB2777" : "#F9A8D4" }]}>
+                <Text style={[styles.defibLabel, { color: isDark ? "#F9A8D4" : "#831843", fontFamily: "Inter_500Medium" }]}>
                   Maximum
                 </Text>
-                <Text style={[styles.defibJoules, { color: "#9D174D", fontFamily: "Inter_700Bold" }]}>
+                <Text style={[styles.defibJoules, { color: isDark ? "#FBCFE8" : "#9D174D", fontFamily: "Inter_700Bold" }]}>
                   {defib.maximum} J
                 </Text>
-                <Text style={[styles.defibFormula, { color: "#BE185D", fontFamily: "Inter_400Regular" }]}>
+                <Text style={[styles.defibFormula, { color: isDark ? "#F472B6" : "#BE185D", fontFamily: "Inter_400Regular" }]}>
                   10 J/kg (max 360)
                 </Text>
               </View>
