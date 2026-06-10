@@ -15,10 +15,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { CATEGORIES, DRUGS, DrugCategory, calculateDose } from "@/constants/drugs";
 import { useTheme } from "@/context/ThemeContext";
-import { MAX_WEIGHT_KG, useWeight } from "@/context/WeightContext";
+import { MAX_WEIGHT_KG, MIN_WEIGHT_KG, useWeight } from "@/context/WeightContext";
 import { ProfessionalFooter } from "@/components/ProfessionalFooter";
 
-const QUICK_WEIGHTS = [3, 5, 8, 10, 15, 20, 25, 30, 40];
+const QUICK_WEIGHTS = [0.5, 1, 2, 3, 5, 8, 10, 15, 20, 25, 30, 40, 50, 70, 100, 150];
 const LBS_TO_KG = 0.453592;
 
 // ── ET Tube & Defibrillation formulas (Harriet Lane 23e · PALS 2025) ──────
@@ -73,6 +73,8 @@ export default function CalculatorScreen() {
         if (num > MAX_WEIGHT_KG) {
           setWeight(MAX_WEIGHT_KG);
           setWeightWarning(true);
+        } else if (num < MIN_WEIGHT_KG) {
+          setWeightWarning(true);
         } else {
           setWeight(num);
           setWeightWarning(false);
@@ -85,10 +87,10 @@ export default function CalculatorScreen() {
       const lbs = parseFloat(text);
       if (!isNaN(lbs) && lbs > 0) {
         const kg = +(lbs * LBS_TO_KG).toFixed(1);
-        const capped = Math.min(kg, MAX_WEIGHT_KG);
-        setWeight(capped);
-        setWeightInput(capped.toString());
-        setWeightWarning(kg > MAX_WEIGHT_KG);
+        const clamped = Math.min(Math.max(kg, MIN_WEIGHT_KG), MAX_WEIGHT_KG);
+        setWeight(clamped);
+        setWeightInput(clamped.toString());
+        setWeightWarning(kg > MAX_WEIGHT_KG || kg < MIN_WEIGHT_KG);
       }
     }
   }
@@ -145,7 +147,7 @@ export default function CalculatorScreen() {
                 { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" },
               ]}
             >
-              Enter patient weight to calculate doses
+              Weight-based dosing for all ages
             </Text>
           </View>
           <TouchableOpacity
@@ -269,7 +271,7 @@ export default function CalculatorScreen() {
 
           {weightWarning && (
             <Text style={styles.weightWarning}>
-              ⚠ PICU max weight: {MAX_WEIGHT_KG} kg — dose capped
+              ⚠ Weight range: {MIN_WEIGHT_KG}–{MAX_WEIGHT_KG} kg — dose capped
             </Text>
           )}
 
@@ -707,10 +709,10 @@ const styles = StyleSheet.create({
   },
   weightInputContainer: { flexDirection: "row", alignItems: "center", gap: 6 },
   weightInput: {
-    width: 80,
+    width: 96,
     height: 42,
     borderRadius: 10,
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     fontSize: 22,
     textAlign: "center",
     shadowColor: "#000",

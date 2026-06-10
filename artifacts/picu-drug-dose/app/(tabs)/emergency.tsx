@@ -39,29 +39,41 @@ export default function EmergencyScreen() {
 
     const epinephrine = DRUGS.find((d) => d.id === "epinephrine");
     if (epinephrine) {
-      const d = epinephrine.doses[0];
-      const calc = calculateDose(d, weight);
+      const iv = epinephrine.doses[0];
+      const calcIV = calculateDose(iv, weight);
       results.push({
-        label: "Epinephrine (Cardiac Arrest)",
-        dose: calc.dose,
+        label: "Epinephrine (Cardiac Arrest / Bradycardia)",
+        dose: calcIV.dose,
         route: "IV / IO",
-        notes: `0.1 mL/kg of 1:10,000 = ${+(0.1 * weight).toFixed(1)} mL`,
+        notes: `0.1 mL/kg of 1:10,000 = ${+(0.1 * weight).toFixed(1)} mL. Repeat every 3-5 min.`,
         color: "#6366F1",
         warning: true,
-        exceedsAdultMax: calc.exceedsAdultMax,
-        adultMaxLabel: calc.adultMaxLabel,
+        exceedsAdultMax: calcIV.exceedsAdultMax,
+        adultMaxLabel: calcIV.adultMaxLabel,
       });
-      const anaph = epinephrine.doses[1];
-      const calcIM = calculateDose(anaph, weight);
+      const im = epinephrine.doses[1];
+      const calcIM = calculateDose(im, weight);
       results.push({
         label: "Epinephrine (Anaphylaxis)",
         dose: calcIM.dose,
-        route: "IM · IN (0.01 mg/kg)",
-        notes: "IM: 1:1,000 solution · IN: use atomiser, both nostrils",
+        route: "IM Anterolateral thigh",
+        notes: "Use 1:1,000 solution. May repeat after 5-15 min.",
         color: "#6366F1",
         warning: true,
         exceedsAdultMax: calcIM.exceedsAdultMax,
         adultMaxLabel: calcIM.adultMaxLabel,
+      });
+      const inf = epinephrine.doses[2];
+      const calcInf = calculateDose(inf, weight);
+      results.push({
+        label: "Epinephrine (Continuous Infusion)",
+        dose: calcInf.dose,
+        route: "IV infusion (Central)",
+        notes: "Titrate to effect.",
+        color: "#6366F1",
+        warning: false,
+        exceedsAdultMax: calcInf.exceedsAdultMax,
+        adultMaxLabel: calcInf.adultMaxLabel,
       });
     }
 

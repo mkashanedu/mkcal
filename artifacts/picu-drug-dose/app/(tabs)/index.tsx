@@ -16,7 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { CATEGORIES, DRUGS, Drug, DrugCategory } from "@/constants/drugs";
 import { useTheme } from "@/context/ThemeContext";
-import { MAX_WEIGHT_KG, useWeight } from "@/context/WeightContext";
+import { MAX_WEIGHT_KG, MIN_WEIGHT_KG, useWeight } from "@/context/WeightContext";
 
 const ALL = "all" as const;
 type FilterTab = DrugCategory | typeof ALL;
@@ -64,6 +64,8 @@ export default function DrugListScreen() {
     if (!isNaN(num) && num > 0) {
       if (num > MAX_WEIGHT_KG) {
         setWeight(MAX_WEIGHT_KG);
+        setWeightWarning(true);
+      } else if (num < MIN_WEIGHT_KG) {
         setWeightWarning(true);
       } else {
         setWeight(num);
@@ -196,7 +198,7 @@ export default function DrugListScreen() {
               ]}
               numberOfLines={1}
             >
-              PICU Drug Guide
+              PeadsCal
             </Text>
             <Text
               style={[
@@ -204,7 +206,7 @@ export default function DrugListScreen() {
                 { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" },
               ]}
             >
-              Harriet Lane · {DRUGS.length} drugs
+              Neonatal, Pediatric & Adult · {DRUGS.length} drugs
             </Text>
           </View>
 
@@ -247,7 +249,7 @@ export default function DrugListScreen() {
                 onChangeText={handleWeightChange}
                 keyboardType="decimal-pad"
                 selectTextOnFocus
-                maxLength={5}
+                maxLength={6}
               />
               <TouchableOpacity
                 onPress={handleReset}
@@ -258,7 +260,7 @@ export default function DrugListScreen() {
               </TouchableOpacity>
             </View>
             {weightWarning && (
-              <Text style={styles.weightWarning}>Max {MAX_WEIGHT_KG} kg</Text>
+              <Text style={styles.weightWarning}>Weight: {MIN_WEIGHT_KG}–{MAX_WEIGHT_KG} kg</Text>
             )}
           </View>
         </View>
@@ -371,10 +373,10 @@ const styles = StyleSheet.create({
   weightLabel: { fontSize: 10, marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 },
   weightInputRow: { flexDirection: "row", alignItems: "center", gap: 4 },
   weightInput: {
-    width: 64,
+    width: 72,
     height: 36,
     borderRadius: 8,
-    paddingHorizontal: 8,
+    paddingHorizontal: 6,
     fontSize: 18,
     textAlign: "center",
   },

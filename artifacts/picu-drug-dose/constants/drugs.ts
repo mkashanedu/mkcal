@@ -83,9 +83,9 @@ export const DRUGS: Drug[] = [
     highAlert: true,
     indications: ["Cardiac arrest", "Anaphylaxis", "Severe bradycardia"],
     doses: [
-      { value: 10, unit: "mic/kg", perKg: true, route: "IV/IO", maxDose: "1000 mic", frequency: "Every 3–5 min", label: "Cardiac Arrest", notes: "= 0.1 mL/kg of 1:10,000 solution", adultMaxDose_num: 1000 },
-      { min: 10, max: 500, unit: "mic/kg", perKg: true, route: "IM Anterolateral thigh", maxDose: "500 mic", label: "Anaphylaxis", notes: "Use 1:1,000 solution; may repeat after 5–15 min", adultMaxDose_num: 500 },
-      { min: 0.01, max: 1.0, unit: "mic/kg/min", perKg: true, route: "IV infusion (Central)", label: "Vasopressor infusion", notes: "Titrate to effect" },
+      { value: 10, unit: "mic/kg", perKg: true, route: "IV/IO", maxDose: "1000 mic", frequency: "Every 3–5 min", label: "Cardiac Arrest / Bradycardia", notes: "= 0.1 mL/kg of 1:10,000 solution. Repeat every 3-5 min.", adultMaxDose_num: 1000 },
+      { value: 10, unit: "mic/kg", perKg: true, route: "IM Anterolateral thigh", maxDose: "500 mic", frequency: "May repeat after 5–15 min", label: "Anaphylaxis", notes: "Use 1:1,000 solution; may repeat after 5-15 min.", adultMaxDose_num: 500 },
+      { min: 0.1, max: 1.0, unit: "mic/kg/min", perKg: true, route: "IV infusion (Central)", label: "Continuous infusion", notes: "Titrate to effect." },
     ],
     warnings: ["PALS 2025: IO route equally effective as IV", "Tissue necrosis with peripheral extravasation", "Ensure adequate IO/IV access before use"],
     formulations: ["1:1,000 (1 mg/mL) — Anaphylaxis IM", "1:10,000 (0.1 mg/mL) — Cardiac arrest IV"],
@@ -1477,11 +1477,9 @@ export function calculateDose(
     const calc = +(doseRange.value * weightKg).toFixed(3);
     const exceedsAdultMax =
       doseRange.adultMaxDose_num !== undefined && calc > doseRange.adultMaxDose_num;
-    const displayDose = exceedsAdultMax
-      ? `${doseRange.adultMaxDose_num} ${unitStr}`
-      : `${calc} ${unitStr}`;
+    const cappedDose = exceedsAdultMax ? doseRange.adultMaxDose_num : calc;
     return {
-      dose: displayDose,
+      dose: `${cappedDose} ${unitStr}`,
       range: `(${doseRange.value} ${doseRange.unit})`,
       exceedsAdultMax,
       adultMaxLabel: exceedsAdultMax

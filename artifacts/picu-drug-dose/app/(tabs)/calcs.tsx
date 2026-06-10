@@ -559,7 +559,7 @@ export default function CalcsScreen() {
             open={openSection === "seiz"} onToggle={() => toggle("seiz")} isDark={isDark} />
           {openSection === "seiz" && (
             <Body>
-              <InputField label="Weight (kg, max 40)" value={seWt} onChange={setSeWt} placeholder="e.g. 18" isDark={isDark} />
+              <InputField label="Weight (kg, 0.5–150)" value={seWt} onChange={setSeWt} placeholder="e.g. 18" isDark={isDark} />
 
               {/* Timer */}
               <View style={[sh.timerBox, { backgroundColor: elapsed >= 900 ? "#DC262618" : elapsed >= 300 ? "#D9770618" : "#16A34A18", borderColor: elapsed >= 900 ? "#DC2626" : elapsed >= 300 ? "#D97706" : "#16A34A" }]}>

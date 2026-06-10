@@ -64,7 +64,7 @@ export function DisclaimerModal() {
               <Text style={[styles.bold, { color: TEXT }]}>
                 qualified healthcare professionals only
               </Text>
-              . It is a clinical reference tool designed to assist in pediatric drug dose calculations.
+              . It is a clinical reference tool for neonatal, pediatric and adult drug dose calculations.
             </Text>
 
             <View style={[styles.alertBox, { backgroundColor: isDark ? "#6366F120" : "#FEF3C7", borderColor: isDark ? "#6366F1" : "#F59E0B" }]}>
@@ -76,14 +76,14 @@ export function DisclaimerModal() {
 
             <Text style={[styles.body, { color: MUTED }]}>
               Always verify every dose against current formularies and confirm with an attending
-              physician before administration. Drug dosing in critically ill children requires
+              physician before administration. Drug dosing in critically ill patients requires
               expert clinical assessment.
               {"\n\n"}
               The developers and contributors assume no liability for clinical decisions made
               based on information provided by this application.
               {"\n\n"}
               <Text style={[styles.italic, { color: isDark ? "#8892B0" : "#94A3B8" }]}>
-                Doses are based on Harriet Lane Handbook 23rd Edition and PALS 2025 Guidelines.
+                Doses based on Harriet Lane Handbook 23rd Edition, PALS 2025 and WHO Guidelines.
               </Text>
             </Text>
           </ScrollView>

@@ -1,7 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 
-export const MAX_WEIGHT_KG = 40;
+export const MIN_WEIGHT_KG = 0.5;
+export const MAX_WEIGHT_KG = 150;
 
 interface WeightContextValue {
   weight: number;
@@ -26,9 +27,9 @@ export function WeightProvider({ children }: { children: React.ReactNode }) {
       if (val) {
         const num = parseFloat(val);
         if (!isNaN(num)) {
-          const capped = Math.min(num, MAX_WEIGHT_KG);
-          setWeightState(capped);
-          setWeightInput(capped.toString());
+          const clamped = Math.min(Math.max(num, MIN_WEIGHT_KG), MAX_WEIGHT_KG);
+          setWeightState(clamped);
+          setWeightInput(clamped.toString());
         }
       }
     });
@@ -42,9 +43,9 @@ export function WeightProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setWeight = useCallback((w: number) => {
-    const capped = Math.min(w, MAX_WEIGHT_KG);
-    setWeightState(capped);
-    AsyncStorage.setItem("picu_weight", capped.toString());
+    const clamped = Math.min(Math.max(w, MIN_WEIGHT_KG), MAX_WEIGHT_KG);
+    setWeightState(clamped);
+    AsyncStorage.setItem("picu_weight", clamped.toString());
   }, []);
 
   const resetWeight = useCallback(() => {

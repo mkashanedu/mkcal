@@ -1,6 +1,6 @@
 kind = "mobile"
 previewPath = "/"
-title = "PICU Drug Dose Calculator"
+title = "PeadsCal \u2014 Neonatal, Pediatric & Adult Dose Calculator"
 version = "1.0.0"
 id = "artifacts/picu-drug-dose"
 router = "expo-domain"
