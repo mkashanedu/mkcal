@@ -209,6 +209,110 @@ const CLABSI_BUNDLE = [
   "Document insertion bundle compliance in medical record",
 ];
 
+// ─── Advanced ICU Care Bundles (4 checklists) ─────────────────────────────────
+const FASTHUG_BUNDLE = [
+  "Feeding — Enteral nutrition initiated within 24–48h if hemodynamically stable",
+  "Analgesia — Assess pain (FLACC / VAS) every 4 hours; treat before sedation",
+  "Sedation — Target RASS goal; avoid oversedation; daily SAT when feasible",
+  "Thromboembolic prophylaxis — DVT prophylaxis (pharmacologic + mechanical) per protocol",
+  "Head of Bed (HOB) elevation — 30–45° for all intubated patients",
+  "Ulcer prophylaxis — Stress ulcer prophylaxis for high-risk patients (mechanical ventilation + coagulopathy)",
+  "Glycemic control — Target 140–180 mg/dL; avoid hypoglycemia (<70 mg/dL)",
+];
+
+const VAP_BUNDLE_UPDATED = [
+  "Head of bed elevated 30–45°",
+  "Daily sedation interruption (SAT) and assess readiness to extubate",
+  "Daily spontaneous breathing trial (SBT) when SAT successful",
+  "Peptic ulcer disease (PUD) prophylaxis — PPI or H2 blocker per protocol",
+  "DVT prophylaxis — SCDs + pharmacologic if no contraindication",
+  "Oral care with chlorhexidine 0.12% every 4–6 hours",
+  "Subglottic secretion suctioning (if ETT with subglottic port available)",
+  "Ventilator circuit: do NOT change routinely (change if soiled or malfunction)",
+  "Hand hygiene before and after any airway manipulation",
+  "Cuff pressure maintained 20–30 cmH₂O; verify daily",
+];
+
+const CLABSI_BUNDLE_UPDATED = [
+  "Daily review of line necessity — remove central line as soon as no longer needed",
+  "Hand hygiene with soap or alcohol gel before accessing line or changing dressing",
+  "Strict aseptic technique for dressing changes — mask, sterile gloves, large drape",
+  "Hub scrub — disinfect needleless connectors / hubs with 70% alcohol for ≥15 seconds",
+  "Maximal sterile barrier precautions during insertion",
+  "Chlorhexidine skin antisepsis (>0.5% CHG in 70% alcohol)",
+  "Optimal catheter site selection (avoid femoral if possible; prefer subclavian)",
+  "Change IV tubing every 96 hours (blood / lipid lines: 24 hours)",
+  "Sterile dressing changed every 5–7 days or when soiled / loose",
+  "No routine guidewire exchanges for suspected infection",
+];
+
+const CAUTI_BUNDLE = [
+  "Daily assessment of catheter need — remove urinary catheter at earliest opportunity",
+  "Maintain closed sterile drainage system — do not break circuit unless necessary",
+  "Keep drainage bag below bladder level at all times",
+  "Proper securement to prevent movement / traction — avoid urethral trauma",
+  "Ensure unobstructed urine flow and prevent kinking of tubing",
+  "Hand hygiene before and after any catheter manipulation",
+  "Use aseptic technique for insertion and maintenance",
+  "Consider alternatives (condom catheter, intermittent catheterization) when appropriate",
+];
+
+// ─── Advanced ICU Scores constants ─────────────────────────────────────────────
+// FOUR Score options
+const FOUR_EYE = [
+  { label: "4 — Eyelids open, tracking, blinking to command", value: 4 },
+  { label: "3 — Eyelids open but not tracking", value: 3 },
+  { label: "2 — Eyelids closed, open to loud voice", value: 2 },
+  { label: "1 — Eyelids closed, open to pain", value: 1 },
+  { label: "0 — Eyelids remain closed with pain", value: 0 },
+];
+const FOUR_MOTOR = [
+  { label: "4 — Thumbs-up, fist, or peace sign to command", value: 4 },
+  { label: "3 — Localizing to pain", value: 3 },
+  { label: "2 — Flexion response to pain", value: 2 },
+  { label: "1 — Extension response to pain", value: 1 },
+  { label: "0 — No response to pain or generalized myoclonus", value: 0 },
+];
+const FOUR_BRAINSTEM = [
+  { label: "4 — Pupil and corneal reflexes present", value: 4 },
+  { label: "3 — One pupil wide and fixed", value: 3 },
+  { label: "2 — Pupil or corneal reflexes absent", value: 2 },
+  { label: "1 — Pupil and corneal reflexes absent", value: 1 },
+  { label: "0 — Absent pupil, corneal, and cough reflexes", value: 0 },
+];
+const FOUR_RESP = [
+  { label: "4 — Not intubated, regular breathing pattern", value: 4 },
+  { label: "3 — Not intubated, Cheyne-Stokes breathing pattern", value: 3 },
+  { label: "2 — Not intubated, irregular breathing", value: 2 },
+  { label: "1 — Breathes above ventilator rate", value: 1 },
+  { label: "0 — Breathes at ventilator rate or apnea", value: 0 },
+];
+
+// SIPA age thresholds
+function sipaThreshold(ageMonths: number) {
+  if (ageMonths <= 12) return 1.0;          // 0–12 mo
+  if (ageMonths <= 24) return 0.9;          // 1–2 yr
+  if (ageMonths <= 48) return 0.85;         // 3–4 yr
+  if (ageMonths <= 72) return 0.75;         // 5–6 yr
+  if (ageMonths <= 144) return 0.7;         // 7–12 yr
+  return 0.6;                               // ≥13 yr
+}
+
+// WAT-1 items
+const WAT1_ITEMS = [
+  { label: "Loose or watery stools", section: "past12" },
+  { label: "Vomiting / retching / gagging", section: "past12" },
+  { label: "Temperature ≥ 37.8°C", section: "past12" },
+  { label: "Temperature ≤ 36.5°C", section: "past12" },
+  { label: "Sweating / perspiring (not environmental)", section: "past12" },
+  { label: "Tremor (not startling)", section: "obs2min" },
+  { label: "Frequent yawning / sneezing", section: "obs2min" },
+  { label: "Increased muscle tone", section: "obs2min" },
+  { label: "Irritable / fussy (not consolable)", section: "obs2min" },
+  { label: "High-pitched cry / inconsolable crying", section: "obs2min" },
+  { label: "Frantic / sucking fist / rooting (after stimulus)", section: "stimulus" },
+];
+
 // ─── Helper components ────────────────────────────────────────────────────────
 function SectionHeader({
   title,
@@ -448,12 +552,49 @@ export default function ToolsScreen() {
     return { label: "Kidney Failure — adjust all renally-cleared drugs", color: "#DC2626" };
   }
 
-  // ── Bundle state ──
-  const [vapChecked, setVapChecked] = useState<boolean[]>(VAP_BUNDLE.map(() => false));
-  const [clabsiChecked, setClabsiChecked] = useState<boolean[]>(CLABSI_BUNDLE.map(() => false));
-  const [bundleTab, setBundleTab] = useState<"vap" | "clabsi">("vap");
-  const vapPct = Math.round((vapChecked.filter(Boolean).length / VAP_BUNDLE.length) * 100);
-  const clabsiPct = Math.round((clabsiChecked.filter(Boolean).length / CLABSI_BUNDLE.length) * 100);
+  // ── Bundle state (4 checklists) ──
+  const [bundleTab, setBundleTab] = useState<"fasthug" | "vap" | "clabsi" | "cauti">("fasthug");
+  const [fasthugChecked, setFasthugChecked] = useState<boolean[]>(FASTHUG_BUNDLE.map(() => false));
+  const [vapChecked, setVapChecked] = useState<boolean[]>(VAP_BUNDLE_UPDATED.map(() => false));
+  const [clabsiChecked, setClabsiChecked] = useState<boolean[]>(CLABSI_BUNDLE_UPDATED.map(() => false));
+  const [cautiChecked, setCautiChecked] = useState<boolean[]>(CAUTI_BUNDLE.map(() => false));
+  const fasthugPct = Math.round((fasthugChecked.filter(Boolean).length / FASTHUG_BUNDLE.length) * 100);
+  const vapPct = Math.round((vapChecked.filter(Boolean).length / VAP_BUNDLE_UPDATED.length) * 100);
+  const clabsiPct = Math.round((clabsiChecked.filter(Boolean).length / CLABSI_BUNDLE_UPDATED.length) * 100);
+  const cautiPct = Math.round((cautiChecked.filter(Boolean).length / CAUTI_BUNDLE.length) * 100);
+
+  // ── Advanced ICU Scores state ──
+  // FOUR Score
+  const [fourEye, setFourEye] = useState(4);
+  const [fourMotor, setFourMotor] = useState(4);
+  const [fourBrainstem, setFourBrainstem] = useState(4);
+  const [fourResp, setFourResp] = useState(4);
+  const fourTotal = fourEye + fourMotor + fourBrainstem + fourResp;
+  const fourInterpret = fourTotal >= 13 ? { label: "Awake / Coma recovery", color: "#16A34A" } : fourTotal >= 7 ? { label: "Coma — moderate brainstem involvement", color: "#D97706" } : { label: "Coma — severe brainstem involvement", color: "#DC2626" };
+  // OSI
+  const [osiMap, setOsiMap] = useState("");
+  const [osiFio2, setOsiFio2] = useState("");
+  const [osiSpo2, setOsiSpo2] = useState("");
+  const osiVal = osiMap && osiFio2 && osiSpo2 ? +((parseFloat(osiMap) || 0) * (parseFloat(osiFio2) || 0) / (parseFloat(osiSpo2) || 1)).toFixed(2) : null;
+  const osiInterp = osiVal === null ? null : osiVal >= 12.4 ? { label: "Severe ARDS (OSI ≥ 12.4)", color: "#DC2626" } : osiVal >= 7.5 ? { label: "Moderate ARDS (OSI 7.5–12.3)", color: "#D97706" } : osiVal >= 5 ? { label: "Mild ARDS (OSI 5.0–7.4)", color: "#F59E0B" } : { label: "Normal (OSI < 5)", color: "#16A34A" };
+  // SIPA
+  const [sipaAge, setSipaAge] = useState("");
+  const [sipaAgeUnit, setSipaAgeUnit] = useState<"months" | "years">("years");
+  const [sipaHR, setSipaHR] = useState("");
+  const [sipaSBP, setSipaSBP] = useState("");
+  const sipaAgeMonths = sipaAgeUnit === "years" ? (parseFloat(sipaAge) || 0) * 12 : parseFloat(sipaAge) || 0;
+  const sipaHrNum = parseFloat(sipaHR) || 0;
+  const sipaSbpNum = parseFloat(sipaSBP) || 0;
+  const sipaSi = sipaSbpNum > 0 ? +(sipaHrNum / sipaSbpNum).toFixed(2) : null;
+  const sipaThresholdVal = sipaAgeMonths > 0 ? sipaThreshold(sipaAgeMonths) : 0.6;
+  const sipaAlert = sipaSi !== null && sipaSi > sipaThresholdVal;
+  // WAT-1
+  const [wat1Checked, setWat1Checked] = useState<boolean[]>(WAT1_ITEMS.map(() => false));
+  const wat1Score = wat1Checked.filter(Boolean).length;
+  const wat1Alert = wat1Score >= 3;
+
+  // ── Score tab selector ──
+  const [scoreTab, setScoreTab] = useState<"four" | "osi" | "sipa" | "wat1">("four");
 
   const bg = isDark ? "#0B132B" : "#F0F4F8";
   const cardBg = isDark ? "#112240" : "#FFFFFF";
@@ -470,7 +611,7 @@ export default function ToolsScreen() {
           <View style={{ flex: 1 }}>
             <Text style={[styles.headerTitle, { color: textPrimary }]}>Clinical Tools</Text>
             <Text style={[styles.headerSub, { color: textMuted }]}>
-              Growth · VIS · Bundles · Fluids · GCS · Renal
+              Growth · VIS · Bundles · Fluids · GCS · Scores · Renal
             </Text>
           </View>
           <TouchableOpacity
@@ -644,72 +785,118 @@ export default function ToolsScreen() {
           />
           {openSection === "bundles" && (
             <View style={[styles.sectionBody, { backgroundColor: cardBg, borderColor: border }]}>
+              {/* 4-tab chip selector */}
               <View style={styles.chipRow}>
-                <Chip label={`VAP Bundle (${vapPct}%)`} color="#E53E3E" selected={bundleTab === "vap"} onPress={() => setBundleTab("vap")} isDark={isDark} />
-                <Chip label={`CLABSI Bundle (${clabsiPct}%)`} color="#7C3AED" selected={bundleTab === "clabsi"} onPress={() => setBundleTab("clabsi")} isDark={isDark} />
+                <Chip label={`FASTHUG (${fasthugPct}%)`} color="#0891B2" selected={bundleTab === "fasthug"} onPress={() => setBundleTab("fasthug")} isDark={isDark} />
+                <Chip label={`VAP (${vapPct}%)`} color="#E53E3E" selected={bundleTab === "vap"} onPress={() => setBundleTab("vap")} isDark={isDark} />
+                <Chip label={`CLABSI (${clabsiPct}%)`} color="#7C3AED" selected={bundleTab === "clabsi"} onPress={() => setBundleTab("clabsi")} isDark={isDark} />
+                <Chip label={`CAUTI (${cautiPct}%)`} color="#F59E0B" selected={bundleTab === "cauti"} onPress={() => setBundleTab("cauti")} isDark={isDark} />
               </View>
 
-              {bundleTab === "vap" ? (
+              {/* FASTHUG */}
+              {bundleTab === "fasthug" && (
                 <>
-                  <Text style={[styles.bundleTitle, { color: "#E53E3E" }]}>Ventilator-Associated Pneumonia (VAP) Prevention</Text>
+                  <Text style={[styles.bundleTitle, { color: "#0891B2" }]}>FASTHUG (Daily ICU Checklist)</Text>
                   <View style={[styles.progressBar, { backgroundColor: isDark ? "#233554" : "#E2E8F0" }]}>
-                    <View style={[styles.progressFill, { width: `${vapPct}%` as any, backgroundColor: vapPct === 100 ? "#16A34A" : "#E53E3E" }]} />
+                    <View style={[styles.progressFill, { width: `${fasthugPct}%` as any, backgroundColor: fasthugPct === 100 ? "#16A34A" : "#0891B2" }]} />
                   </View>
-                  <Text style={[styles.progressLabel, { color: textMuted }]}>{vapChecked.filter(Boolean).length} / {VAP_BUNDLE.length} complete</Text>
-                  {VAP_BUNDLE.map((item, i) => (
-                    <TouchableOpacity
-                      key={i}
-                      onPress={() => setVapChecked((prev) => prev.map((v, j) => j === i ? !v : v))}
-                      style={styles.checkItem}
-                    >
-                      <View style={[styles.checkbox, {
-                        backgroundColor: vapChecked[i] ? "#16A34A" : "transparent",
-                        borderColor: vapChecked[i] ? "#16A34A" : isDark ? "#3D5470" : "#CBD5E1",
-                      }]}>
-                        {vapChecked[i] && <Feather name="check" size={12} color="#FFF" />}
+                  <Text style={[styles.progressLabel, { color: textMuted }]}>{fasthugChecked.filter(Boolean).length} / {FASTHUG_BUNDLE.length} complete</Text>
+                  {FASTHUG_BUNDLE.map((item, i) => (
+                    <TouchableOpacity key={i} onPress={() => setFasthugChecked((prev) => prev.map((v, j) => j === i ? !v : v))} style={styles.checkItem}>
+                      <View style={[styles.checkbox, { backgroundColor: fasthugChecked[i] ? "#16A34A" : "transparent", borderColor: fasthugChecked[i] ? "#16A34A" : isDark ? "#3D5470" : "#CBD5E1" }]}>
+                        {fasthugChecked[i] && <Feather name="check" size={12} color="#FFF" />}
                       </View>
-                      <Text style={[styles.checkLabel, {
-                        color: vapChecked[i] ? textMuted : textPrimary,
-                        textDecorationLine: vapChecked[i] ? "line-through" : "none",
-                      }]}>{item}</Text>
+                      <Text style={[styles.checkLabel, { color: fasthugChecked[i] ? textMuted : textPrimary, textDecorationLine: fasthugChecked[i] ? "line-through" : "none" }]}>{item}</Text>
                     </TouchableOpacity>
                   ))}
-                  <TouchableOpacity onPress={() => setVapChecked(VAP_BUNDLE.map(() => false))} style={styles.resetBundleBtn}>
-                    <Feather name="rotate-ccw" size={14} color={textMuted} />
-                    <Text style={[styles.resetBundleText, { color: textMuted }]}>Reset checklist</Text>
-                  </TouchableOpacity>
-                </>
-              ) : (
-                <>
-                  <Text style={[styles.bundleTitle, { color: "#7C3AED" }]}>CLABSI Prevention (Central Line Bundle)</Text>
-                  <View style={[styles.progressBar, { backgroundColor: isDark ? "#233554" : "#E2E8F0" }]}>
-                    <View style={[styles.progressFill, { width: `${clabsiPct}%` as any, backgroundColor: clabsiPct === 100 ? "#16A34A" : "#7C3AED" }]} />
-                  </View>
-                  <Text style={[styles.progressLabel, { color: textMuted }]}>{clabsiChecked.filter(Boolean).length} / {CLABSI_BUNDLE.length} complete</Text>
-                  {CLABSI_BUNDLE.map((item, i) => (
-                    <TouchableOpacity
-                      key={i}
-                      onPress={() => setClabsiChecked((prev) => prev.map((v, j) => j === i ? !v : v))}
-                      style={styles.checkItem}
-                    >
-                      <View style={[styles.checkbox, {
-                        backgroundColor: clabsiChecked[i] ? "#16A34A" : "transparent",
-                        borderColor: clabsiChecked[i] ? "#16A34A" : isDark ? "#3D5470" : "#CBD5E1",
-                      }]}>
-                        {clabsiChecked[i] && <Feather name="check" size={12} color="#FFF" />}
-                      </View>
-                      <Text style={[styles.checkLabel, {
-                        color: clabsiChecked[i] ? textMuted : textPrimary,
-                        textDecorationLine: clabsiChecked[i] ? "line-through" : "none",
-                      }]}>{item}</Text>
-                    </TouchableOpacity>
-                  ))}
-                  <TouchableOpacity onPress={() => setClabsiChecked(CLABSI_BUNDLE.map(() => false))} style={styles.resetBundleBtn}>
+                  <TouchableOpacity onPress={() => setFasthugChecked(FASTHUG_BUNDLE.map(() => false))} style={styles.resetBundleBtn}>
                     <Feather name="rotate-ccw" size={14} color={textMuted} />
                     <Text style={[styles.resetBundleText, { color: textMuted }]}>Reset checklist</Text>
                   </TouchableOpacity>
                 </>
               )}
+
+              {/* VAP */}
+              {bundleTab === "vap" && (
+                <>
+                  <Text style={[styles.bundleTitle, { color: "#E53E3E" }]}>Ventilator-Associated Pneumonia (VAP) Prevention</Text>
+                  <View style={[styles.progressBar, { backgroundColor: isDark ? "#233554" : "#E2E8F0" }]}>
+                    <View style={[styles.progressFill, { width: `${vapPct}%` as any, backgroundColor: vapPct === 100 ? "#16A34A" : "#E53E3E" }]} />
+                  </View>
+                  <Text style={[styles.progressLabel, { color: textMuted }]}>{vapChecked.filter(Boolean).length} / {VAP_BUNDLE_UPDATED.length} complete</Text>
+                  {VAP_BUNDLE_UPDATED.map((item, i) => (
+                    <TouchableOpacity key={i} onPress={() => setVapChecked((prev) => prev.map((v, j) => j === i ? !v : v))} style={styles.checkItem}>
+                      <View style={[styles.checkbox, { backgroundColor: vapChecked[i] ? "#16A34A" : "transparent", borderColor: vapChecked[i] ? "#16A34A" : isDark ? "#3D5470" : "#CBD5E1" }]}>
+                        {vapChecked[i] && <Feather name="check" size={12} color="#FFF" />}
+                      </View>
+                      <Text style={[styles.checkLabel, { color: vapChecked[i] ? textMuted : textPrimary, textDecorationLine: vapChecked[i] ? "line-through" : "none" }]}>{item}</Text>
+                    </TouchableOpacity>
+                  ))}
+                  <TouchableOpacity onPress={() => setVapChecked(VAP_BUNDLE_UPDATED.map(() => false))} style={styles.resetBundleBtn}>
+                    <Feather name="rotate-ccw" size={14} color={textMuted} />
+                    <Text style={[styles.resetBundleText, { color: textMuted }]}>Reset checklist</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+
+              {/* CLABSI */}
+              {bundleTab === "clabsi" && (
+                <>
+                  <Text style={[styles.bundleTitle, { color: "#7C3AED" }]}>CLABSI Prevention (Central Line Bundle)</Text>
+                  <View style={[styles.progressBar, { backgroundColor: isDark ? "#233554" : "#E2E8F0" }]}>
+                    <View style={[styles.progressFill, { width: `${clabsiPct}%` as any, backgroundColor: clabsiPct === 100 ? "#16A34A" : "#7C3AED" }]} />
+                  </View>
+                  <Text style={[styles.progressLabel, { color: textMuted }]}>{clabsiChecked.filter(Boolean).length} / {CLABSI_BUNDLE_UPDATED.length} complete</Text>
+                  {CLABSI_BUNDLE_UPDATED.map((item, i) => (
+                    <TouchableOpacity key={i} onPress={() => setClabsiChecked((prev) => prev.map((v, j) => j === i ? !v : v))} style={styles.checkItem}>
+                      <View style={[styles.checkbox, { backgroundColor: clabsiChecked[i] ? "#16A34A" : "transparent", borderColor: clabsiChecked[i] ? "#16A34A" : isDark ? "#3D5470" : "#CBD5E1" }]}>
+                        {clabsiChecked[i] && <Feather name="check" size={12} color="#FFF" />}
+                      </View>
+                      <Text style={[styles.checkLabel, { color: clabsiChecked[i] ? textMuted : textPrimary, textDecorationLine: clabsiChecked[i] ? "line-through" : "none" }]}>{item}</Text>
+                    </TouchableOpacity>
+                  ))}
+                  <TouchableOpacity onPress={() => setClabsiChecked(CLABSI_BUNDLE_UPDATED.map(() => false))} style={styles.resetBundleBtn}>
+                    <Feather name="rotate-ccw" size={14} color={textMuted} />
+                    <Text style={[styles.resetBundleText, { color: textMuted }]}>Reset checklist</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+
+              {/* CAUTI */}
+              {bundleTab === "cauti" && (
+                <>
+                  <Text style={[styles.bundleTitle, { color: "#F59E0B" }]}>CAUTI Prevention (Urinary Catheter Bundle)</Text>
+                  <View style={[styles.progressBar, { backgroundColor: isDark ? "#233554" : "#E2E8F0" }]}>
+                    <View style={[styles.progressFill, { width: `${cautiPct}%` as any, backgroundColor: cautiPct === 100 ? "#16A34A" : "#F59E0B" }]} />
+                  </View>
+                  <Text style={[styles.progressLabel, { color: textMuted }]}>{cautiChecked.filter(Boolean).length} / {CAUTI_BUNDLE.length} complete</Text>
+                  {CAUTI_BUNDLE.map((item, i) => (
+                    <TouchableOpacity key={i} onPress={() => setCautiChecked((prev) => prev.map((v, j) => j === i ? !v : v))} style={styles.checkItem}>
+                      <View style={[styles.checkbox, { backgroundColor: cautiChecked[i] ? "#16A34A" : "transparent", borderColor: cautiChecked[i] ? "#16A34A" : isDark ? "#3D5470" : "#CBD5E1" }]}>
+                        {cautiChecked[i] && <Feather name="check" size={12} color="#FFF" />}
+                      </View>
+                      <Text style={[styles.checkLabel, { color: cautiChecked[i] ? textMuted : textPrimary, textDecorationLine: cautiChecked[i] ? "line-through" : "none" }]}>{item}</Text>
+                    </TouchableOpacity>
+                  ))}
+                  <TouchableOpacity onPress={() => setCautiChecked(CAUTI_BUNDLE.map(() => false))} style={styles.resetBundleBtn}>
+                    <Feather name="rotate-ccw" size={14} color={textMuted} />
+                    <Text style={[styles.resetBundleText, { color: textMuted }]}>Reset checklist</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+
+              {/* Reset All */}
+              <TouchableOpacity
+                onPress={() => {
+                  setFasthugChecked(FASTHUG_BUNDLE.map(() => false));
+                  setVapChecked(VAP_BUNDLE_UPDATED.map(() => false));
+                  setClabsiChecked(CLABSI_BUNDLE_UPDATED.map(() => false));
+                  setCautiChecked(CAUTI_BUNDLE.map(() => false));
+                }}
+                style={[styles.resetBundleBtn, { justifyContent: "center", paddingTop: 14 }]}>
+                <Feather name="rotate-ccw" size={14} color="#DC2626" />
+                <Text style={[styles.resetBundleText, { color: "#DC2626", fontWeight: "700" }]}>Reset All Bundles</Text>
+              </TouchableOpacity>
             </View>
           )}
         </View>
@@ -914,6 +1101,207 @@ export default function ToolsScreen() {
                 <Feather name="rotate-ccw" size={14} color={textMuted} />
                 <Text style={[styles.resetBundleText, { color: textMuted }]}>Reset GCS</Text>
               </TouchableOpacity>
+            </View>
+          )}
+        </View>
+
+        {/* ──────────────── MODULE 8.5: ADVANCED ICU SCORES ──────────────── */}
+        <View style={styles.sectionWrap}>
+          <SectionHeader
+            title="Advanced ICU Scores (FOUR, OSI, SIPA, WAT-1)"
+            icon="activity"
+            color="#FF4C60"
+            open={openSection === "scores"}
+            onToggle={() => toggle("scores")}
+            isDark={isDark}
+          />
+          {openSection === "scores" && (
+            <View style={[styles.sectionBody, { backgroundColor: cardBg, borderColor: border }]}>
+              {/* Score selector */}
+              <View style={styles.chipRow}>
+                {[
+                  { key: "four", label: "FOUR Score", color: "#0891B2" },
+                  { key: "osi", label: "OSI", color: "#0EA5E9" },
+                  { key: "sipa", label: "SIPA", color: "#D97706" },
+                  { key: "wat1", label: "WAT-1", color: "#FF4C60" },
+                ].map((s) => (
+                  <Chip key={s.key} label={s.label} color={s.color} selected={scoreTab === (s.key as any)} onPress={() => setScoreTab(s.key as any)} isDark={isDark} />
+                ))}
+              </View>
+
+              {/* FOUR Score */}
+              {scoreTab === "four" && (
+                <>
+                  <Text style={[styles.refText, { color: textMuted }]}>Full Outline of UnResponsiveness (Wijdicks et al. 2005). Range 0–16.</Text>
+                  {[
+                    { label: "Eye Response", options: FOUR_EYE, value: fourEye, setter: setFourEye },
+                    { label: "Motor Response", options: FOUR_MOTOR, value: fourMotor, setter: setFourMotor },
+                    { label: "Brainstem Reflexes", options: FOUR_BRAINSTEM, value: fourBrainstem, setter: setFourBrainstem },
+                    { label: "Respiration", options: FOUR_RESP, value: fourResp, setter: setFourResp },
+                  ].map((section) => (
+                    <View key={section.label} style={{ marginTop: 8 }}>
+                      <Text style={[styles.gcsLabel, { color: textPrimary }]}>{section.label} — selected: {section.value}</Text>
+                      <View style={styles.gcsGroup}>
+                        {section.options.map((opt) => (
+                          <TouchableOpacity
+                            key={opt.value}
+                            onPress={() => section.setter(opt.value)}
+                            style={[styles.gcsOption, { borderColor: section.value === opt.value ? section.value === 4 ? "#16A34A" : "#0891B2" : border, backgroundColor: section.value === opt.value ? (isDark ? "#0891B220" : "#E0F2FE") : "transparent" }]}
+                          >
+                            <View style={[styles.gcsRadio, { borderColor: section.value === opt.value ? "#0891B2" : textMuted }]}>
+                              {section.value === opt.value && <View style={[styles.gcsRadioDot, { backgroundColor: "#0891B2" }]} />}
+                            </View>
+                            <Text style={[styles.gcsOptionText, { color: section.value === opt.value ? textPrimary : textMuted }]}>{opt.label}</Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    </View>
+                  ))}
+                  <View style={[styles.resultBox, { backgroundColor: fourInterpret.color + "15", borderColor: fourInterpret.color + "40" }]}>
+                    <Text style={[styles.resultLabel, { color: fourInterpret.color, fontSize: 22 }]}>FOUR = {fourTotal} / 16</Text>
+                    <Text style={[styles.resultNote, { color: fourInterpret.color, fontWeight: "700" }]}>{fourInterpret.label}</Text>
+                  </View>
+                  <TouchableOpacity onPress={() => { setFourEye(4); setFourMotor(4); setFourBrainstem(4); setFourResp(4); }} style={[styles.resetBundleBtn, { justifyContent: "center" }]}>
+                    <Feather name="rotate-ccw" size={14} color={textMuted} />
+                    <Text style={[styles.resetBundleText, { color: textMuted }]}>Reset FOUR Score</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+
+              {/* OSI */}
+              {scoreTab === "osi" && (
+                <>
+                  <Text style={[styles.refText, { color: textMuted }]}>
+                    Oxygen Saturation Index (OSI) — Severe et al. 2014{"\n"}
+                    Formula: OSI = (MAP × FiO₂%) / SpO₂%
+                  </Text>
+                  <View style={styles.inputRow}>
+                    <View style={[styles.inputWrap, { flex: 1, marginRight: 6 }]}>
+                      <Text style={[styles.inputLabel, { color: textMuted }]}>MAP (mmHg)</Text>
+                      <TextInput style={[styles.input, { color: textPrimary, backgroundColor: inputBg, borderColor: border }]} value={osiMap} onChangeText={setOsiMap} keyboardType="decimal-pad" placeholder="e.g. 70" placeholderTextColor={textMuted} />
+                    </View>
+                    <View style={[styles.inputWrap, { flex: 1, marginRight: 6 }]}>
+                      <Text style={[styles.inputLabel, { color: textMuted }]}>FiO₂ (%)</Text>
+                      <TextInput style={[styles.input, { color: textPrimary, backgroundColor: inputBg, borderColor: border }]} value={osiFio2} onChangeText={setOsiFio2} keyboardType="decimal-pad" placeholder="e.g. 40" placeholderTextColor={textMuted} />
+                    </View>
+                    <View style={[styles.inputWrap, { flex: 1 }]}>
+                      <Text style={[styles.inputLabel, { color: textMuted }]}>SpO₂ (%)</Text>
+                      <TextInput style={[styles.input, { color: textPrimary, backgroundColor: inputBg, borderColor: border }]} value={osiSpo2} onChangeText={setOsiSpo2} keyboardType="decimal-pad" placeholder="e.g. 95" placeholderTextColor={textMuted} />
+                    </View>
+                  </View>
+                  {osiVal !== null && osiInterp && (
+                    <View style={[styles.resultBox, { backgroundColor: osiInterp.color + "15", borderColor: osiInterp.color + "40" }]}>
+                      <Text style={[styles.resultLabel, { color: osiInterp.color }]}>OSI = {osiVal}</Text>
+                      <Text style={[styles.resultNote, { color: osiInterp.color, fontWeight: "700" }]}>{osiInterp.label}</Text>
+                    </View>
+                  )}
+                </>
+              )}
+
+              {/* SIPA */}
+              {scoreTab === "sipa" && (
+                <>
+                  <Text style={[styles.refText, { color: textMuted }]}>
+                    Pediatric Age-Adjusted Shock Index (SIPA){"\n"}
+                    SI = HR / SBP · Compare to age-specific threshold
+                  </Text>
+                  <View style={styles.inputRow}>
+                    <View style={[styles.inputWrap, { flex: 1, marginRight: 6 }]}>
+                      <Text style={[styles.inputLabel, { color: textMuted }]}>Age</Text>
+                      <TextInput style={[styles.input, { color: textPrimary, backgroundColor: inputBg, borderColor: border }]} value={sipaAge} onChangeText={setSipaAge} keyboardType="decimal-pad" placeholder="e.g. 5" placeholderTextColor={textMuted} />
+                    </View>
+                    <View style={[styles.inputWrap, { flex: 1, marginRight: 6 }]}>
+                      <Text style={[styles.inputLabel, { color: textMuted }]}>HR (bpm)</Text>
+                      <TextInput style={[styles.input, { color: textPrimary, backgroundColor: inputBg, borderColor: border }]} value={sipaHR} onChangeText={setSipaHR} keyboardType="decimal-pad" placeholder="e.g. 140" placeholderTextColor={textMuted} />
+                    </View>
+                    <View style={[styles.inputWrap, { flex: 1 }]}>
+                      <Text style={[styles.inputLabel, { color: textMuted }]}>SBP (mmHg)</Text>
+                      <TextInput style={[styles.input, { color: textPrimary, backgroundColor: inputBg, borderColor: border }]} value={sipaSBP} onChangeText={setSipaSBP} keyboardType="decimal-pad" placeholder="e.g. 80" placeholderTextColor={textMuted} />
+                    </View>
+                  </View>
+                  <View style={styles.chipRow}>
+                    <Chip label="Years" color="#D97706" selected={sipaAgeUnit === "years"} onPress={() => setSipaAgeUnit("years")} isDark={isDark} />
+                    <Chip label="Months" color="#D97706" selected={sipaAgeUnit === "months"} onPress={() => setSipaAgeUnit("months")} isDark={isDark} />
+                  </View>
+                  {sipaSi !== null && (
+                    <>
+                      <View style={[styles.resultBox, { backgroundColor: sipaAlert ? "#FEE2E2" : "#DCFCE715", borderColor: sipaAlert ? "#FCA5A5" : "#86EFAC40" }]}>
+                        <Text style={[styles.resultLabel, { color: sipaAlert ? "#DC2626" : "#16A34A" }]}>SIPA = {sipaSi} (threshold: {sipaThresholdVal})</Text>
+                        <Text style={[styles.resultNote, { color: sipaAlert ? "#DC2626" : "#16A34A", fontWeight: "700" }]}>
+                          {sipaAlert ? "SIPA ABOVE threshold — possible shock" : "SIPA within normal limits"}
+                        </Text>
+                      </View>
+                    </>
+                  )}
+                </>
+              )}
+
+              {/* WAT-1 */}
+              {scoreTab === "wat1" && (
+                <>
+                  <Text style={[styles.refText, { color: textMuted }]}>
+                    Withdrawal Assessment Tool-1 (WAT-1) — Franck et al. 2012{"\n"}
+                    Score each item present as 1 point. Total 0–12. Score ≥3 = significant withdrawal.
+                  </Text>
+                  {/* Past 12h */}
+                  <Text style={[styles.gcsLabel, { color: textPrimary, marginTop: 6 }]}>Past 12 Hours Record</Text>
+                  {WAT1_ITEMS.filter((i) => i.section === "past12").map((item, idx) => {
+                    const globalIdx = WAT1_ITEMS.findIndex((x) => x.label === item.label);
+                    return (
+                      <TouchableOpacity key={item.label} onPress={() => setWat1Checked((prev) => prev.map((v, j) => j === globalIdx ? !v : v))} style={styles.checkItem}>
+                        <View style={[styles.checkbox, { backgroundColor: wat1Checked[globalIdx] ? "#FF4C60" : "transparent", borderColor: wat1Checked[globalIdx] ? "#FF4C60" : isDark ? "#3D5470" : "#CBD5E1" }]}>
+                          {wat1Checked[globalIdx] && <Feather name="check" size={12} color="#FFF" />}
+                        </View>
+                        <Text style={[styles.checkLabel, { color: wat1Checked[globalIdx] ? textMuted : textPrimary, textDecorationLine: wat1Checked[globalIdx] ? "line-through" : "none" }]}>{item.label}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                  {/* 2-min observation */}
+                  <Text style={[styles.gcsLabel, { color: textPrimary, marginTop: 6 }]}>2-Minute Observation</Text>
+                  {WAT1_ITEMS.filter((i) => i.section === "obs2min").map((item) => {
+                    const globalIdx = WAT1_ITEMS.findIndex((x) => x.label === item.label);
+                    return (
+                      <TouchableOpacity key={item.label} onPress={() => setWat1Checked((prev) => prev.map((v, j) => j === globalIdx ? !v : v))} style={styles.checkItem}>
+                        <View style={[styles.checkbox, { backgroundColor: wat1Checked[globalIdx] ? "#FF4C60" : "transparent", borderColor: wat1Checked[globalIdx] ? "#FF4C60" : isDark ? "#3D5470" : "#CBD5E1" }]}>
+                          {wat1Checked[globalIdx] && <Feather name="check" size={12} color="#FFF" />}
+                        </View>
+                        <Text style={[styles.checkLabel, { color: wat1Checked[globalIdx] ? textMuted : textPrimary, textDecorationLine: wat1Checked[globalIdx] ? "line-through" : "none" }]}>{item.label}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                  {/* Stimulus observation */}
+                  <Text style={[styles.gcsLabel, { color: textPrimary, marginTop: 6 }]}>Stimulus Observation</Text>
+                  {WAT1_ITEMS.filter((i) => i.section === "stimulus").map((item) => {
+                    const globalIdx = WAT1_ITEMS.findIndex((x) => x.label === item.label);
+                    return (
+                      <TouchableOpacity key={item.label} onPress={() => setWat1Checked((prev) => prev.map((v, j) => j === globalIdx ? !v : v))} style={styles.checkItem}>
+                        <View style={[styles.checkbox, { backgroundColor: wat1Checked[globalIdx] ? "#FF4C60" : "transparent", borderColor: wat1Checked[globalIdx] ? "#FF4C60" : isDark ? "#3D5470" : "#CBD5E1" }]}>
+                          {wat1Checked[globalIdx] && <Feather name="check" size={12} color="#FFF" />}
+                        </View>
+                        <Text style={[styles.checkLabel, { color: wat1Checked[globalIdx] ? textMuted : textPrimary, textDecorationLine: wat1Checked[globalIdx] ? "line-through" : "none" }]}>{item.label}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+
+                  {/* WAT-1 Total */}
+                  <View style={[styles.resultBox, { backgroundColor: wat1Alert ? "#FF4C6015" : "#16A34A15", borderColor: wat1Alert ? "#FF4C6040" : "#16A34A40" }]}>
+                    <Text style={[styles.resultLabel, { color: wat1Alert ? "#FF4C60" : "#16A34A" }]}>WAT-1 Score = {wat1Score} / 12</Text>
+                    {wat1Alert && (
+                      <Text style={[styles.resultNote, { color: "#FF4C60", fontWeight: "700" }]}>
+                        Significant withdrawal detected. Consider weaning adjustment.
+                      </Text>
+                    )}
+                    <Text style={[styles.refText, { color: textMuted, marginTop: 4 }]}>
+                      {wat1Score < 3 ? "Score < 3 — withdrawal unlikely" : "Score ≥ 3 — monitor closely and adjust sedation/analgesia"}
+                    </Text>
+                  </View>
+
+                  <TouchableOpacity onPress={() => setWat1Checked(WAT1_ITEMS.map(() => false))} style={[styles.resetBundleBtn, { justifyContent: "center" }]}>
+                    <Feather name="rotate-ccw" size={14} color={textMuted} />
+                    <Text style={[styles.resetBundleText, { color: textMuted }]}>Reset WAT-1</Text>
+                  </TouchableOpacity>
+                </>
+              )}
             </View>
           )}
         </View>

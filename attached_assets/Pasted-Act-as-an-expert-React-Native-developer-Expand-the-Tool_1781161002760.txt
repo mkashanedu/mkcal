@@ -1,0 +1,18 @@
+Act as an expert React Native developer. Expand the 'Tools' and 'Bundles' sections in the 'PeadsCal' app to include advanced PICU scoring, With Drawal assessments, and complete Nursing Infection Control Bundles. Maintain the premium Dark Mode card-based UI and ensure state management does not break existing calculators.
+
+Implement the following two major modules:
+
+1. ADVANCED ICU CARE BUNDLES (Interactive Checklists):
+- Upgrade the "PICU Care Bundles" screen to use a tabbed or accordion layout separating four distinct checklists:
+  a) FASTHUG: Feeding, Analgesia, Sedation, Thromboembolic, HOB Elevation, Ulcer Prophylaxis, Glycemic Control.
+  b) VAP Bundle: HOB 30-45°, Daily Sedation Interruption, Peptic Ulcer Prophylaxis, DVT Prophylaxis, Oral Care with Chlorhexidine.
+  c) CLABSI Bundle: Daily review of line necessity, Hand hygiene before handling, Strict aseptic technique for dressing, Hub scrub (15 seconds).
+  d) CAUTI Bundle: Daily assessment of catheter need, Maintain closed sterile drainage system, Keep drainage bag below bladder level, Proper securement to prevent movement.
+- Add a "Reset All" button to clear all checklists.
+
+2. ADVANCED ICU SCORES (New Section in Tools Tab):
+- Create a new module card in the Tools screen named "Advanced ICU Scores (FOUR, OSI, SIPA, WAT-1)". Inside, implement four interactive calculators:
+  a) FOUR Score: Render 4 sections (Eye, Motor, Brainstem, Respiration) with scores 0-4. Calculate the total (0-16).
+  b) Oxygen Saturation Index (OSI): Inputs for MAP, FiO2 (%), and SpO2 (%). Formula: (MAP * FiO2) / SpO2. Alerts: 5 - 7.4 (Mild), 7.5 - 12.3 (Moderate), >= 12.4 (Severe).
+  c) Pediatric Age-Adjusted Shock Index (SIPA): Inputs for Age, Heart Rate, and Systolic BP. Calculate SI = HR/SBP. Display alert if SI exceeds age-specific threshold.
+  d) WAT-1 (With Drawal Assessment Tool-1): Create an interactive 11-item scoring checklist to monitor iatrogenic With Drawal in pediatric patients. Include sections for Past 12 hours record, 2-minute observation, and Stimulus observation. Auto-calculate total score (0-12). Alert: If score >= 3, highlight in Neon Red (#FF4C60) with subtext "⚠️ Significant With Drawal detected. Consider weaning adjustment."
