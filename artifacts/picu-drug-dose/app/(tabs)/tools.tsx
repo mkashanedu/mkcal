@@ -596,6 +596,13 @@ export default function ToolsScreen() {
   // ── Score tab selector ──
   const [scoreTab, setScoreTab] = useState<"four" | "osi" | "sipa" | "wat1">("four");
 
+  // ── PEWS ──
+  const [pewsB, setPewsB] = useState("");
+  const [pewsCv, setPewsCv] = useState("");
+  const [pewsR, setPewsR] = useState("");
+  const pewsSum = (parseInt(pewsB) || 0) + (parseInt(pewsCv) || 0) + (parseInt(pewsR) || 0);
+  const pewsAlert = pewsSum >= 5;
+
   const bg = isDark ? "#0B132B" : "#F0F4F8";
   const cardBg = isDark ? "#112240" : "#FFFFFF";
   const border = isDark ? "#233554" : "#E2E8F0";
@@ -1390,6 +1397,28 @@ export default function ToolsScreen() {
                   ))}
                 </>
               )}
+            </View>
+          )}
+        </View>
+
+        {/* ──────────────── PEWS ──────────────── */}
+        <View style={styles.sectionWrap}>
+          <SectionHeader title="PEWS Score" icon="activity" color="#FF4C60" open={openSection === "pews"} onToggle={() => toggle("pews")} isDark={isDark} />
+          {openSection === "pews" && (
+            <View style={[styles.sectionBody, { backgroundColor: cardBg, borderColor: border }]}>
+              <Text style={[styles.refText, { color: textMuted }]}>Pediatric Early Warning Score (PEWS) — 3 categories 0–3 each. Total 0–9.</Text>
+              {[{ l: "Behavior", v: pewsB, s: setPewsB }, { l: "Cardiovascular", v: pewsCv, s: setPewsCv }, { l: "Respiratory", v: pewsR, s: setPewsR }].map((x) => (
+                <View key={x.l} style={styles.inputWrap}>
+                  <Text style={[styles.inputLabel, { color: textMuted }]}>{x.l} (0–3)</Text>
+                  <TextInput style={[styles.input, { color: textPrimary, backgroundColor: inputBg, borderColor: border }]} value={x.v} onChangeText={x.s} keyboardType="decimal-pad" placeholder="0" placeholderTextColor={textMuted} />
+                </View>
+              ))}
+              <View style={[styles.resultBox, { backgroundColor: pewsAlert ? "#FF4C6015" : "#16A34A15", borderColor: pewsAlert ? "#FF4C6040" : "#16A34A40" }]}>
+                <Text style={[styles.resultLabel, { color: pewsAlert ? "#FF4C60" : "#16A34A" }]}>PEWS = {pewsSum} / 9</Text>
+                <Text style={[styles.resultNote, { color: pewsAlert ? "#FF4C60" : "#16A34A", fontWeight: "700" }]}>
+                  {pewsAlert ? "\u26a0 Urgent: Activate Rapid Response" : "Routine monitoring"}
+                </Text>
+              </View>
             </View>
           )}
         </View>

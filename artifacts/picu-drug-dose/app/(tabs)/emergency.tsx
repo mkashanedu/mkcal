@@ -62,6 +62,19 @@ export default function EmergencyScreen() {
   const ettube = calcETTube(ageYears);
   const defib = calcDefib(weight);
 
+  const [apgarA, setApgarA] = useState("");
+  const [apgarP, setApgarP] = useState("");
+  const [apgarG, setApgarG] = useState("");
+  const [apgarAc, setApgarAc] = useState("");
+  const [apgarR, setApgarR] = useState("");
+  const apgarTotal = (parseInt(apgarA) || 0) + (parseInt(apgarP) || 0) + (parseInt(apgarG) || 0) + (parseInt(apgarAc) || 0) + (parseInt(apgarR) || 0);
+
+  const [emBurnWt, setEmBurnWt] = useState("");
+  const [emBurnBsa, setEmBurnBsa] = useState("");
+  const emBurnTotal = Math.round(3 * (parseFloat(emBurnWt) || 0) * (parseFloat(emBurnBsa) || 0));
+  const emBurnFirst8 = Math.round(emBurnTotal / 2);
+  const emBurnNext16 = Math.round(emBurnTotal / 2);
+
   const emergencyCards = useMemo((): EmergencyItem[] => {
     const results: EmergencyItem[] = [];
 
@@ -557,6 +570,49 @@ export default function EmergencyScreen() {
             </View>
           </View>
         </View>
+          {/* APGAR Score */}
+          <View style={[styles.calcSection, { borderTopColor: isDark ? "#233554" : "#F0F4F8" }]}>
+            <Text style={[styles.calcSectionTitle, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_600SemiBold", marginBottom: 10 }]}>APGAR Score (1 & 5 min)</Text>
+            <View style={styles.ettGrid}>
+              {[{ l: "Appearance", s: setApgarA, v: apgarA }, { l: "Pulse", s: setApgarP, v: apgarP }, { l: "Grimace", s: setApgarG, v: apgarG }, { l: "Activity", s: setApgarAc, v: apgarAc }, { l: "Respiration", s: setApgarR, v: apgarR }].map((x) => (
+                <View key={x.l} style={[styles.ettBox, { backgroundColor: isDark ? "#112240" : "#F0F4F8", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
+                  <Text style={[styles.ettLabel, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_500Medium" }]}>{x.l}</Text>
+                  <TextInput style={[styles.ageInput, { color: isDark ? "#FFFFFF" : "#0D1B2A", backgroundColor: isDark ? "#0A192F" : "#FFFFFF", fontFamily: "Inter_700Bold", borderWidth: 1, borderColor: isDark ? "#233554" : "#E2E8F0" }]} value={x.v} onChangeText={x.s} keyboardType="decimal-pad" maxLength={1} placeholder="0" placeholderTextColor={isDark ? "#8892B0" : "#8A9BB0"} />
+                </View>
+              ))}
+            </View>
+            <View style={[styles.resultBox, { backgroundColor: apgarTotal >= 7 ? "#16A34A15" : apgarTotal >= 4 ? "#F59E0B15" : "#FEE2E2", borderColor: apgarTotal >= 7 ? "#16A34A40" : apgarTotal >= 4 ? "#F59E0B40" : "#FCA5A5", marginTop: 10 }]}>
+              <Text style={[styles.resultLabel, { color: apgarTotal >= 7 ? "#16A34A" : apgarTotal >= 4 ? "#F59E0B" : "#DC2626" }]}>APGAR = {apgarTotal} / 10</Text>
+              <Text style={[styles.resultNote, { color: apgarTotal >= 7 ? "#16A34A" : apgarTotal >= 4 ? "#F59E0B" : "#DC2626", fontWeight: "700" }]}>
+                {apgarTotal >= 7 ? "Normal" : apgarTotal >= 4 ? "Moderately depressed" : "Severely depressed"}
+              </Text>
+              <Text style={[styles.refText, { color: isDark ? "#8892B0" : "#64748B", marginTop: 4 }]}>
+                {apgarTotal < 7 ? "If HR < 100: PPV. If HR < 60: CPR + Epi" : ""}
+              </Text>
+            </View>
+          </View>
+
+          {/* Parkland Burns (Emergency) */}
+          <View style={[styles.calcSection, { borderTopColor: isDark ? "#233554" : "#F0F4F8" }]}>
+            <Text style={[styles.calcSectionTitle, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_600SemiBold", marginBottom: 10 }]}>Parkland Burns (Emergency Resuscitation)</Text>
+            <View style={styles.inputRow}>
+              <View style={[styles.inputWrap, { flex: 1, marginRight: 6 }]}>
+                <Text style={[styles.inputLabel, { color: isDark ? "#8892B0" : "#64748B" }]}>Weight (kg)</Text>
+                <TextInput style={[styles.input, { color: isDark ? "#FFFFFF" : "#0D1B2A", backgroundColor: isDark ? "#0A192F" : "#FFFFFF", borderColor: isDark ? "#233554" : "#E2E8F0" }]} value={emBurnWt} onChangeText={setEmBurnWt} keyboardType="decimal-pad" placeholder="e.g. 20" placeholderTextColor={isDark ? "#8892B0" : "#8A9BB0"} />
+              </View>
+              <View style={[styles.inputWrap, { flex: 1 }]}>
+                <Text style={[styles.inputLabel, { color: isDark ? "#8892B0" : "#64748B" }]}>% TBSA</Text>
+                <TextInput style={[styles.input, { color: isDark ? "#FFFFFF" : "#0D1B2A", backgroundColor: isDark ? "#0A192F" : "#FFFFFF", borderColor: isDark ? "#233554" : "#E2E8F0" }]} value={emBurnBsa} onChangeText={setEmBurnBsa} keyboardType="decimal-pad" placeholder="e.g. 30" placeholderTextColor={isDark ? "#8892B0" : "#8A9BB0"} />
+              </View>
+            </View>
+            {emBurnTotal > 0 && (
+              <View style={[styles.resultBox, { backgroundColor: "#B4530915", borderColor: "#B4530940", marginTop: 10 }]}>
+                <Text style={[styles.resultLabel, { color: "#B45309" }]}>Total: {emBurnTotal} mL RL</Text>
+                <Text style={[styles.resultNote, { color: "#B45309" }]}>1st 8hrs: {emBurnFirst8} mL · Next 16hrs: {emBurnNext16} mL</Text>
+                <Text style={[styles.refText, { color: isDark ? "#8892B0" : "#64748B" }]}>Parkland: 3 × wt × %TBSA. Add maintenance in children.</Text>
+              </View>
+            )}
+          </View>
         <ProfessionalFooter />
       </ScrollView>
     </View>
@@ -731,6 +787,20 @@ const styles = StyleSheet.create({
   defibJoules: { fontSize: 18 },
   defibFormula: { fontSize: 9, textAlign: "center" },
 
+  inputRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  inputWrap: { flex: 1 },
+  inputLabel: { fontSize: 12, fontWeight: "600" },
+  input: {
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  resultBox: { borderWidth: 1, borderRadius: 12, padding: 12, gap: 6, marginTop: 4 },
+  resultLabel: { fontSize: 13, fontWeight: "700" },
+  resultNote: { fontSize: 12, fontWeight: "700" },
   refRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -740,4 +810,5 @@ const styles = StyleSheet.create({
   },
   refLabel: { fontSize: 13, flex: 1 },
   refValue: { fontSize: 14, textAlign: "right", flex: 1 },
+  refText: { fontSize: 11, lineHeight: 16 },
 });

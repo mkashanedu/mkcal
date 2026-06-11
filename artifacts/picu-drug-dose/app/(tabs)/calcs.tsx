@@ -743,6 +743,31 @@ export default function CalcsScreen() {
           )}
         </View>
 
+        {/* ══ 11. BLOODS / LYTES REFERENCE ═══════════════════════════════ */}
+        <View style={sh.sWrap}>
+          <SectionHeader title="Bloods & Lytes Reference" icon="droplet" color="#DC2626"
+            open={openSection === "bloods"} onToggle={() => toggle("bloods")} isDark={isDark} />
+          {openSection === "bloods" && (
+            <Body>
+              <View style={sh.resultBox}>
+                {[
+                  { label: "Packed Red Blood Cells", val: "10–15 mL/kg" },
+                  { label: "FFP / Platelets", val: "10–20 mL/kg" },
+                  { label: "10% Calcium Gluconate", val: "50–100 mg/kg IV" },
+                  { label: "KCl (IV replacement)", val: "0.5–1 mEq/kg IV" },
+                ].map((r) => (
+                  <View key={r.label} style={sh.resultRow}>
+                    <Text style={[sh.resultLabel, { color: textPrimary }]}>{r.label}</Text>
+                    <Text style={[sh.resultValue, { color: "#DC2626" }]}>{r.val}</Text>
+                  </View>
+                ))}
+              </View>
+              <InfoBox color="#DC2626" title="Transfusion Safety" isDark={isDark}
+                text={"• Verify blood type & crossmatch before transfusion\n• KCl must be given slowly with cardiac monitoring\n• Monitor calcium levels when using citrate-containing products\n• Platelets: single donor preferred in children\n• PRBCs: volume-restricted in cardiac patients"} />
+            </Body>
+          )}
+        </View>
+
         <ProfessionalFooter />
       </ScrollView>
     </View>
