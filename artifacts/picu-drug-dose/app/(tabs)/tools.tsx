@@ -311,6 +311,72 @@ function Chip({ label, color, selected, onPress, isDark }: {
   );
 }
 
+// ─── Scenario-based fluid recommendation panel ───────────────────────────────
+function ScenarioFluidPanel({
+  scenario,
+  kCl,
+  isDark,
+  textMuted,
+  textPrimary,
+}: {
+  scenario: string;
+  kCl: boolean;
+  isDark: boolean;
+  textMuted: string;
+  textPrimary: string;
+}) {
+  const data: Record<string, { fluid: string; alert: string; alertColor: string; bg: string; border: string }> = {
+    neonatal: {
+      fluid: "D10W or D10 0.2% NaCl",
+      alert: "Monitor blood glucose periodically.",
+      alertColor: "#7C3AED",
+      bg: isDark ? "#1A0A2E" : "#F3E8FF",
+      border: isDark ? "#7C3AED" : "#D8B4FE",
+    },
+    maintenance: {
+      fluid: `D5 0.45% NaCl or D5 0.9% NaCl${kCl ? " + 20 mEq/L KCl" : ""}`,
+      alert: "",
+      alertColor: "#0EA5E9",
+      bg: isDark ? "#0A192F" : "#EFF6FF",
+      border: isDark ? "#0EA5E9" : "#BFDBFE",
+    },
+    dehydration: {
+      fluid: `D5 0.45% NaCl or D5 0.9% NaCl${kCl ? " + 20 mEq/L KCl" : ""}`,
+      alert: "",
+      alertColor: "#0EA5E9",
+      bg: isDark ? "#0A192F" : "#EFF6FF",
+      border: isDark ? "#0EA5E9" : "#BFDBFE",
+    },
+    resuscitation: {
+      fluid: "0.9% NaCl or Ringer's Lactate (10–20 mL/kg bolus)",
+      alert: "Caution: Check Serum Calcium if massive transfusion or blood products are running with RL.",
+      alertColor: "#DC2626",
+      bg: isDark ? "#450A0A" : "#FEE2E2",
+      border: isDark ? "#DC2626" : "#FCA5A5",
+    },
+    dka: {
+      fluid: "0.9% NaCl",
+      alert: "Avoid Dextrose initially.",
+      alertColor: "#DC2626",
+      bg: isDark ? "#450A0A" : "#FEE2E2",
+      border: isDark ? "#DC2626" : "#FCA5A5",
+    },
+  };
+  const d = data[scenario] || data.maintenance;
+  return (
+    <View style={[styles.scenarioBox, { backgroundColor: d.bg, borderColor: d.border }]}>
+      <Text style={[styles.scenarioLabel, { color: textMuted }]}>Recommended Fluid</Text>
+      <Text style={[styles.scenarioFluid, { color: d.alertColor }]}>{d.fluid}</Text>
+      {d.alert ? (
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 6 }}>
+          <Feather name="alert-triangle" size={14} color={d.alertColor} />
+          <Text style={[styles.scenarioAlert, { color: d.alertColor }]}>{d.alert}</Text>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 // ─── MAIN SCREEN ───────────────────────────────────────────────────────────────
 export default function ToolsScreen() {
   const insets = useSafeAreaInsets();
@@ -342,8 +408,18 @@ export default function ToolsScreen() {
   // ── Fluids state ──
   const [fluidWt, setFluidWt] = useState(weight > 0 ? weight.toString() : "");
   const [dehydPct, setDehydPct] = useState<5 | 10 | 15>(5);
+  const [maintTarget, setMaintTarget] = useState<100 | 75 | 66 | 50>(100);
+  const [scenario, setScenario] = useState<"maintenance" | "neonatal" | "dehydration" | "resuscitation" | "dka">("maintenance");
+  const [kClToggle, setKClToggle] = useState(false);
   const fluidWtNum = Math.min(parseFloat(fluidWt) || 0, 60);
-  const maintenance = fluidWtNum > 0 ? hollidaySegar(fluidWtNum) : null;
+  const rawMaintenance = fluidWtNum > 0 ? hollidaySegar(fluidWtNum) : null;
+  const multiplier = maintTarget / 100;
+  const maintenance = rawMaintenance
+    ? {
+        daily: Math.round(rawMaintenance.daily * multiplier),
+        hourly: +(rawMaintenance.hourly * multiplier).toFixed(1),
+      }
+    : null;
   const deficit = fluidWtNum > 0 ? Math.round((dehydPct / 100) * fluidWtNum * 1000) : 0;
   const total48h = maintenance ? Math.round(maintenance.daily + deficit / 2) : 0;
 
@@ -641,7 +717,7 @@ export default function ToolsScreen() {
         {/* ──────────────── MODULE 7: IV FLUIDS ──────────────── */}
         <View style={styles.sectionWrap}>
           <SectionHeader
-            title="IV Fluids & Dehydration (Nelson)"
+            title="IV Fluids & Dehydration — Clinical Decision Support"
             icon="droplet"
             color="#0EA5E9"
             open={openSection === "fluids"}
@@ -651,7 +727,7 @@ export default function ToolsScreen() {
           {openSection === "fluids" && (
             <View style={[styles.sectionBody, { backgroundColor: cardBg, borderColor: border }]}>
               <Text style={[styles.refText, { color: textMuted }]}>
-                Holliday-Segar method: 100/50/20 rule (max 60 kg applied)
+                Holliday-Segar · Harriet Lane 23e · Nelson 22e
               </Text>
               <View style={styles.inputWrap}>
                 <Text style={[styles.inputLabel, { color: textMuted }]}>Patient Weight (kg)</Text>
@@ -665,18 +741,69 @@ export default function ToolsScreen() {
                 />
               </View>
 
+              {/* Clinical Scenario selector */}
+              <Text style={[styles.inputLabel, { color: textMuted, marginTop: 4 }]}>Clinical Scenario</Text>
+              <View style={styles.chipRow}>
+                {[
+                  { key: "maintenance", label: "Maintenance Only" },
+                  { key: "neonatal", label: "Neonatal" },
+                  { key: "dehydration", label: "Dehydration" },
+                  { key: "resuscitation", label: "Resuscitation" },
+                  { key: "dka", label: "DKA / Metabolic" },
+                ].map((s) => (
+                  <Chip
+                    key={s.key}
+                    label={s.label}
+                    color={s.key === "resuscitation" || s.key === "dka" ? "#DC2626" : s.key === "neonatal" ? "#7C3AED" : "#0EA5E9"}
+                    selected={scenario === (s.key as any)}
+                    onPress={() => setScenario(s.key as any)}
+                    isDark={isDark}
+                  />
+                ))}
+              </View>
+
+              {/* Maintenance Target multiplier */}
+              <Text style={[styles.inputLabel, { color: textMuted, marginTop: 4 }]}>Maintenance Target</Text>
+              <View style={styles.chipRow}>
+                {[
+                  { key: 100, label: "100% (Full)" },
+                  { key: 75, label: "75% (3/4)" },
+                  { key: 66, label: "66% (2/3)" },
+                  { key: 50, label: "50% (1/2)" },
+                ].map((m) => (
+                  <Chip
+                    key={m.key}
+                    label={m.label}
+                    color="#0891B2"
+                    selected={maintTarget === (m.key as any)}
+                    onPress={() => setMaintTarget(m.key as any)}
+                    isDark={isDark}
+                  />
+                ))}
+              </View>
+              {maintTarget < 100 && (
+                <View style={[styles.alertBanner, { backgroundColor: isDark ? "#451A03" : "#FEF3C7", borderColor: isDark ? "#92400E" : "#F59E0B" }]}>
+                  <Feather name="info" size={14} color={isDark ? "#FCD34D" : "#92400E"} />
+                  <Text style={[styles.alertBannerText, { color: isDark ? "#FCD34D" : "#92400E" }]}>
+                    Note: Fluid restriction applied. Monitor hemodynamics.
+                  </Text>
+                </View>
+              )}
+
               {maintenance && (
                 <>
                   <View style={[styles.resultBox, { backgroundColor: "#0EA5E915", borderColor: "#0EA5E940" }]}>
-                    <Text style={[styles.resultLabel, { color: "#0EA5E9" }]}>Maintenance Fluids</Text>
+                    <Text style={[styles.resultLabel, { color: "#0EA5E9" }]}>
+                      Maintenance Fluids {maintTarget < 100 ? `(${maintTarget}% of Holliday-Segar)` : ""}
+                    </Text>
                     <Row label="24-hour total" value={`${maintenance.daily} mL/day`} isDark={isDark} />
                     <Row label="Hourly rate" value={`${maintenance.hourly} mL/hr`} isDark={isDark} />
                     <Text style={[styles.refText, { color: textMuted, marginTop: 6 }]}>
                       {fluidWtNum <= 10
-                        ? `${fluidWtNum} kg × 100 = ${maintenance.daily} mL/day`
+                        ? `${fluidWtNum} kg × 100 = ${rawMaintenance!.daily} mL/day × ${multiplier} = ${maintenance.daily} mL/day`
                         : fluidWtNum <= 20
-                        ? `1000 + (${fluidWtNum - 10} × 50) = ${maintenance.daily} mL/day`
-                        : `1500 + (${fluidWtNum - 20} × 20) = ${maintenance.daily} mL/day`}
+                        ? `1000 + (${fluidWtNum - 10} × 50) = ${rawMaintenance!.daily} mL/day × ${multiplier} = ${maintenance.daily} mL/day`
+                        : `1500 + (${fluidWtNum - 20} × 20) = ${rawMaintenance!.daily} mL/day × ${multiplier} = ${maintenance.daily} mL/day`}
                     </Text>
                   </View>
 
@@ -705,12 +832,35 @@ export default function ToolsScreen() {
                     </Text>
                   </View>
 
-                  <View style={[styles.infoBox, { backgroundColor: isDark ? "#0A192F" : "#EFF6FF", borderColor: isDark ? "#233554" : "#BFDBFE" }]}>
-                    <Text style={[styles.infoTitle, { color: "#3B82F6" }]}>Fluid Selection Guide (Nelson)</Text>
-                    <Text style={[styles.infoText, { color: textMuted }]}>
-                      {"• Maintenance: 0.9% NaCl + 5% Dextrose or 0.45% NaCl + KCl 20 mEq/L\n• Isotonic resuscitation: 0.9% NS or Ringer's Lactate 10–20 mL/kg bolus\n• Hyponatraemia: correct Na slowly <0.5 mEq/L/hr\n• Hypernatraemic dehydration: correct over 48–72 hours\n• Add KCl to maintenance once urine output confirmed"}
-                    </Text>
-                  </View>
+                  {/* KCl toggle — Maintenance & Dehydration only */}
+                  {(scenario === "maintenance" || scenario === "dehydration") && (
+                    <View style={[styles.kClRow, { marginTop: 8 }]}>
+                      <TouchableOpacity
+                        onPress={() => setKClToggle(!kClToggle)}
+                        style={[styles.kClToggle, { backgroundColor: kClToggle ? (isDark ? "#16A34A" : "#16A34A") : (isDark ? "#0A192F" : "#F8FAFC"), borderColor: kClToggle ? "#16A34A" : border }]}
+                      >
+                        <Feather name={kClToggle ? "check-square" : "square"} size={16} color={kClToggle ? "#FFF" : textMuted} />
+                        <Text style={[styles.kClToggleText, { color: kClToggle ? "#FFF" : textPrimary }]}>+20 mEq/L KCl</Text>
+                      </TouchableOpacity>
+                      {kClToggle && (
+                        <View style={[styles.alertBanner, { backgroundColor: isDark ? "#450A0A" : "#FEE2E2", borderColor: isDark ? "#DC2626" : "#F87171" }]}>
+                          <Feather name="alert-triangle" size={14} color="#DC2626" />
+                          <Text style={[styles.alertBannerText, { color: "#DC2626" }]}>
+                            ⚠ MUST confirm adequate urine output before KCl addition.
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  )}
+
+                  {/* Scenario-based fluid recommendation + alerts */}
+                  <ScenarioFluidPanel
+                    scenario={scenario}
+                    kCl={kClToggle}
+                    isDark={isDark}
+                    textMuted={textMuted}
+                    textPrimary={textPrimary}
+                  />
                 </>
               )}
             </View>
@@ -920,4 +1070,23 @@ const styles = StyleSheet.create({
   alertBadge: { paddingHorizontal: 7, paddingVertical: 2, borderRadius: 6 },
   alertBadgeText: { fontSize: 10, fontWeight: "800", letterSpacing: 0.3 },
   drugAdjText: { fontSize: 12, lineHeight: 17 },
+  alertBanner: {
+    flexDirection: "row", alignItems: "center", gap: 8,
+    borderRadius: 10, padding: 10, borderWidth: 1,
+  },
+  alertBannerText: { fontSize: 12, fontWeight: "700", flex: 1, lineHeight: 16 },
+  kClRow: { gap: 6 },
+  kClToggle: {
+    flexDirection: "row", alignItems: "center", gap: 8,
+    paddingHorizontal: 12, paddingVertical: 8,
+    borderRadius: 10, borderWidth: 1, alignSelf: "flex-start",
+  },
+  kClToggleText: { fontSize: 13, fontWeight: "700" },
+  scenarioBox: {
+    borderWidth: 1, borderRadius: 12, padding: 12, gap: 4,
+    marginTop: 8,
+  },
+  scenarioLabel: { fontSize: 12, fontWeight: "600" },
+  scenarioFluid: { fontSize: 14, fontWeight: "700" },
+  scenarioAlert: { fontSize: 12, fontWeight: "700", flex: 1, lineHeight: 16 },
 });
