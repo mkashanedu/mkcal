@@ -95,30 +95,53 @@ function Chip({ label, selected, color, onPress }: { label: string; selected: bo
 }
 
 // ─── ABG Interpretation ───────────────────────────────────────────────────────
-function interpretABG(pH: number, pco2: number, hco3: number) {
+function interpretABG(
+  pH: number, pco2: number, hco3: number, source: "arterial" | "venous" | "capillary" = "arterial",
+  na: number, cl: number, bd: number, wt: number
+) {
   if (!pH || !pco2 || !hco3) return null;
-  const acidBase = pH < 7.35 ? "Acidosis" : pH > 7.45 ? "Alkalosis" : "Normal pH";
+  const base = {
+    arterial: { phMin: 7.35, phMax: 7.45, pco2Min: 35, pco2Max: 45, pco2Normal: 40 },
+    venous: { phMin: 7.31, phMax: 7.41, pco2Min: 40, pco2Max: 50, pco2Normal: 45 },
+    capillary: { phMin: 7.35, phMax: 7.45, pco2Min: 35, pco2Max: 45, pco2Normal: 40 },
+  };
+  const b = base[source];
+  const acidBase = pH < b.phMin ? "Acidosis" : pH > b.phMax ? "Alkalosis" : "Normal pH";
   let primary = "";
   let compensation = "";
   let color = "#16A34A";
+  let ag: number | null = null;
+  let agLabel = "";
+  let mixed = "";
+  let bicarbDose: number | null = null;
+  let kWarning = "";
+  let critical = "";
 
-  if (pH < 7.35) {
+  if (pH < b.phMin) {
     color = "#DC2626";
-    if (pco2 > 45) {
+    if (pco2 > b.pco2Max) {
       primary = "Respiratory Acidosis";
-      const expHCO3 = 24 + (pco2 - 40) * 0.1;
+      const expHCO3 = 24 + (pco2 - b.pco2Normal) * 0.1;
       compensation = Math.abs(hco3 - expHCO3) < 3 ? "Appropriate acute compensation" : hco3 > expHCO3 + 3 ? "± Metabolic alkalosis" : "± Metabolic acidosis";
     } else {
       primary = "Metabolic Acidosis";
       const expPCO2 = 1.5 * hco3 + 8;
-      compensation = Math.abs(pco2 - expPCO2) < 2 ? "Appropriate compensation (Winter's formula)" : pco2 > expPCO2 + 2 ? "Inadequate resp. compensation" : "Over-compensation — mixed disorder";
+      if (Math.abs(pco2 - expPCO2) < 2) compensation = "Appropriate compensation (Winter's formula)";
+      else if (pco2 > expPCO2 + 2) { compensation = "Inadequate resp. compensation"; mixed = "Mixed: Metabolic Acidosis + Respiratory Acidosis"; }
+      else { compensation = "Over-compensation"; mixed = "Mixed: Metabolic Acidosis + Respiratory Alkalosis"; }
+      if (na > 0 && cl > 0) {
+        ag = Math.round(na - (cl + hco3));
+        agLabel = ag > 14 ? `High Anion Gap (HAGMA) = ${ag}` : `Normal Anion Gap (NAGMA) = ${ag}`;
+      }
+      if (wt > 0 && bd > 0) bicarbDose = +(0.3 * wt * bd).toFixed(1);
+      kWarning = "Serum K\u207a drops as acidosis corrects. Monitor for hypokalemia.";
       color = "#E53E3E";
     }
-  } else if (pH > 7.45) {
+  } else if (pH > b.phMax) {
     color = "#D97706";
-    if (pco2 < 35) {
+    if (pco2 < b.pco2Min) {
       primary = "Respiratory Alkalosis";
-      const expHCO3 = 24 - (40 - pco2) * 0.2;
+      const expHCO3 = 24 - (b.pco2Normal - pco2) * 0.2;
       compensation = Math.abs(hco3 - expHCO3) < 3 ? "Appropriate acute compensation" : "Chronic or mixed disorder";
     } else {
       primary = "Metabolic Alkalosis";
@@ -129,8 +152,10 @@ function interpretABG(pH: number, pco2: number, hco3: number) {
     primary = "Normal acid-base status";
   }
 
-  const hypoxia = !isNaN(pH) ? (pco2 > 50 ? "Hypercapnia present" : pco2 < 35 ? "Hypocapnia present" : "pCO₂ normal") : "";
-  return { acidBase, primary, compensation, color, hypoxia };
+  if (pH < 7.20 || pH > 7.60) critical = "CRITICAL: Severe Acid-Base Derangement. Immediate intervention required.";
+
+  const hypoxia = pco2 > 50 ? "Hypercapnia present" : pco2 < b.pco2Min ? "Hypocapnia present" : "pCO\u2082 normal";
+  return { acidBase, primary, compensation, color, hypoxia, ag, agLabel, mixed, bicarbDose, kWarning, critical };
 }
 
 // ─── Status Epilepticus timer ──────────────────────────────────────────────────
@@ -193,7 +218,12 @@ export default function CalcsScreen() {
   const [abgPH, setAbgPH] = useState("");
   const [abgPCO2, setAbgPCO2] = useState("");
   const [abgHCO3, setAbgHCO3] = useState("");
-  const abgResult = interpretABG(parseFloat(abgPH), parseFloat(abgPCO2), parseFloat(abgHCO3));
+  const [abgSource, setAbgSource] = useState<"arterial" | "venous" | "capillary">("arterial");
+  const [abgNa, setAbgNa] = useState("");
+  const [abgCl, setAbgCl] = useState("");
+  const [abgBD, setAbgBD] = useState("");
+  const [abgWt, setAbgWt] = useState(ctxWeight > 0 ? ctxWeight.toString() : "");
+  const abgResult = interpretABG(parseFloat(abgPH), parseFloat(abgPCO2), parseFloat(abgHCO3), abgSource, parseFloat(abgNa), parseFloat(abgCl), parseFloat(abgBD), parseFloat(abgWt));
 
   // ── 3. Osmotherapy state ──────────────────────────────────────────────────
   const [osmoWt, setOsmoWt] = useState(ctxWeight > 0 ? ctxWeight.toString() : "");
@@ -375,30 +405,74 @@ export default function CalcsScreen() {
             open={openSection === "abg"} onToggle={() => toggle("abg")} isDark={isDark} />
           {openSection === "abg" && (
             <Body>
-              <Text style={[sh.refText, { color: textMuted }]}>Normal: pH 7.35–7.45 · pCO₂ 35–45 · HCO₃ 22–26</Text>
+              <Text style={[sh.refText, { color: textMuted }]}>
+                {abgSource === "arterial" ? "Normal: pH 7.35–7.45 · pCO₂ 35–45 · HCO₃ 22–26" :
+                 abgSource === "venous" ? "Normal VBG: pH 7.31–7.41 · pCO₂ 40–50 · HCO₃ 22–26" :
+                 "Normal: pH 7.35–7.45 · pCO₂ 35–45 · HCO₃ 22–26"}
+              </Text>
+              <View style={sh.chipRow}>
+                {(["arterial", "venous", "capillary"] as const).map((s) => (
+                  <Chip key={s} label={s[0].toUpperCase() + s.slice(1)} color="#7C3AED" selected={abgSource === s} onPress={() => setAbgSource(s)} />
+                ))}
+              </View>
               <View style={sh.triRow}>
                 <View style={{ flex: 1 }}>
-                  <InputField label="pH" value={abgPH} onChange={setAbgPH} placeholder="7.35" isDark={isDark} />
+                  <InputField label="pH" value={abgPH} onChange={setAbgPH} placeholder={abgSource === "venous" ? "7.36" : "7.35"} isDark={isDark} />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <InputField label="pCO₂ (mmHg)" value={abgPCO2} onChange={setAbgPCO2} placeholder="40" isDark={isDark} />
+                  <InputField label="pCO₂ (mmHg)" value={abgPCO2} onChange={setAbgPCO2} placeholder={abgSource === "venous" ? "45" : "40"} isDark={isDark} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <InputField label="HCO₃ (mEq/L)" value={abgHCO3} onChange={setAbgHCO3} placeholder="24" isDark={isDark} />
                 </View>
               </View>
+              <View style={sh.triRow}>
+                <View style={{ flex: 1 }}>
+                  <InputField label="Na⁺ (mEq/L)" value={abgNa} onChange={setAbgNa} placeholder="140" isDark={isDark} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <InputField label="Cl⁻ (mEq/L)" value={abgCl} onChange={setAbgCl} placeholder="100" isDark={isDark} />
+                </View>
+              </View>
+              <View style={sh.triRow}>
+                <View style={{ flex: 1 }}>
+                  <InputField label="Base Deficit (mEq/L)" value={abgBD} onChange={setAbgBD} placeholder="e.g. 5" isDark={isDark} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <InputField label="Weight (kg)" value={abgWt} onChange={setAbgWt} placeholder="e.g. 15" isDark={isDark} />
+                </View>
+              </View>
               {abgResult && (
-                <ResultBox color={abgResult.color}>
-                  <ResultRow label="Status" value={abgResult.acidBase} color={abgResult.color} large />
-                  <ResultRow label="Primary disorder" value={abgResult.primary} color={abgResult.color} />
-                  {abgResult.compensation ? (
-                    <ResultRow label="Compensation" value={abgResult.compensation} color={abgResult.color} />
+                <>
+                  {abgResult.critical ? (
+                    <View style={[sh.resultBox, { backgroundColor: "#FF4C6015", borderColor: "#FF4C6040", marginBottom: 6 }]}>
+                      <Text style={[sh.resultValue, { color: "#FF4C60", fontSize: 14 }]}>⚠ {abgResult.critical}</Text>
+                    </View>
                   ) : null}
-                  <ResultRow label="CO₂ note" value={abgResult.hypoxia} color={abgResult.color} />
-                </ResultBox>
+                  <ResultBox color={abgResult.color}>
+                    <ResultRow label="Status" value={abgResult.acidBase} color={abgResult.color} large />
+                    <ResultRow label="Primary disorder" value={abgResult.agLabel ? `${abgResult.primary} — ${abgResult.agLabel}` : abgResult.primary} color={abgResult.color} />
+                    {abgResult.mixed ? <ResultRow label="Mixed disorder" value={abgResult.mixed} color={abgResult.color} /> : null}
+                    {abgResult.compensation ? (
+                      <ResultRow label="Compensation" value={abgResult.compensation} color={abgResult.color} />
+                    ) : null}
+                    <ResultRow label="CO₂ note" value={abgResult.hypoxia} color={abgResult.color} />
+                  </ResultBox>
+                  {abgResult.bicarbDose !== null ? (
+                    <View style={[sh.resultBox, { backgroundColor: "#7C3AED15", borderColor: "#7C3AED40" }]}>
+                      <Text style={[sh.resultValue, { color: "#7C3AED", fontSize: 14 }]}>ℹ Bicarbonate Replacement: Consider {abgResult.bicarbDose} mEq (or mL of 8.4% NaHCO₃) slow IV infusion</Text>
+                    </View>
+                  ) : null}
+                  {abgResult.kWarning ? (
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 4 }}>
+                      <Feather name="alert-triangle" size={12} color="#D97706" />
+                      <Text style={[sh.refText, { color: "#D97706" }]}>⚠ {abgResult.kWarning}</Text>
+                    </View>
+                  ) : null}
+                </>
               )}
               <InfoBox color="#7C3AED" title="Stepwise ABG Interpretation" isDark={isDark}
-                text={"1. pH → Acidosis (<7.35) or Alkalosis (>7.45)\n2. pCO₂ → Primary if matches pH direction\n3. HCO₃ → Primary if matches pH direction\n4. Winter's formula: Expected pCO₂ = 1.5×HCO₃ + 8 (±2)\n5. Assess for mixed disorders and oxygenation"} />
+                text={"1. pH → Acidosis or Alkalosis (source-adjusted)\n2. pCO₂ → Primary if matches pH direction\n3. HCO₃ → Primary if matches pH direction\n4. Anion Gap = Na – (Cl + HCO₃) · Normal ~12 (±2)\n5. Winter's formula: Expected pCO₂ = 1.5×HCO₃ + 8 (±2)\n6. Assess mixed disorders · Bicarbonate only if pH < 7.15"} />
             </Body>
           )}
         </View>

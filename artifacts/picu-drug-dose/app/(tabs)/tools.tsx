@@ -182,33 +182,6 @@ const HEPATIC_DRUGS = [
   { drug: "Fluconazole", adj: "Use with caution — hepatotoxic in high doses. Reduce dose in severe dysfunction.", alert: "moderate" },
 ];
 
-// ─── Care Bundle checklists ───────────────────────────────────────────────────
-const VAP_BUNDLE = [
-  "Head of bed elevated 30–45°",
-  "Daily spontaneous awakening trial (SAT)",
-  "Daily spontaneous breathing trial (SBT)",
-  "Venous thromboembolism (VTE) prophylaxis",
-  "Peptic ulcer disease (PUD) prophylaxis",
-  "Oral care with chlorhexidine 0.12% every 6 hours",
-  "Subglottic secretion suctioning (if available)",
-  "Ventilator circuit: do NOT change routinely (≤7 days)",
-  "Hand hygiene before and after any airway manipulation",
-  "Cuff pressure maintained 20–30 cmH₂O",
-];
-
-const CLABSI_BUNDLE = [
-  "Hand hygiene with soap or alcohol gel before access",
-  "Maximal sterile barrier precautions during insertion",
-  "Chlorhexidine skin antisepsis (>0.5% in 70% alcohol)",
-  "Optimal catheter site selection (avoid femoral if possible)",
-  "Daily review of line necessity — remove if not needed",
-  "Change IV tubing every 96 hours (blood/lipid lines: 24h)",
-  "Sterile dressing changed every 5–7 days or when soiled",
-  "Disinfect needleless connectors with 70% alcohol scrub for 15 s",
-  "No routine guidewire exchanges for suspected infection",
-  "Document insertion bundle compliance in medical record",
-];
-
 // ─── Advanced ICU Care Bundles (4 checklists) ─────────────────────────────────
 const FASTHUG_BUNDLE = [
   "Feeding — Enteral nutrition initiated within 24–48h if hemodynamically stable",
