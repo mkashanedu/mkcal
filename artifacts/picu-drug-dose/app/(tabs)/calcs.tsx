@@ -289,18 +289,18 @@ export default function CalcsScreen() {
     label: string;
     color: string;
   }[] = [
-    { key: "nac", label: "Paracetamol (NAC)", color: "#0369A1" },
-    { key: "naloxone", label: "Naloxone (Opioids)", color: "#16A34A" },
-    { key: "flumazenil", label: "Flumazenil (Benzodiazepines)", color: "#7C3AED" },
-    { key: "charcoal", label: "Activated Charcoal (GI Decon)", color: "#374151" },
-    { key: "atropine", label: "Atropine (Organophosphates)", color: "#DC2626" },
-    { key: "calcium-gluconate", label: "Calcium Gluconate 10% (CCB OD)", color: "#0891B2" },
-    { key: "glucagon", label: "Glucagon (Beta-Blocker OD)", color: "#D97706" },
-    { key: "deferoxamine", label: "Deferoxamine (Iron Toxicity)", color: "#7C3AED" },
-    { key: "bicarbonate", label: "Sodium Bicarbonate (TCA OD)", color: "#0891B2" },
-    { key: "intralipid", label: "Intralipid 20% (Local Anesthetic)", color: "#F59E0B" },
-    { key: "pyridoxine", label: "Pyridoxine (Isoniazid Seizures)", color: "#16A34A" },
-    { key: "edta", label: "CaNa2 EDTA (Lead Toxicity)", color: "#475569" },
+    { key: "nac", label: "Paracetamol OD (N-Acetylcysteine)", color: "#0369A1" },
+    { key: "naloxone", label: "Opioids OD (Naloxone)", color: "#16A34A" },
+    { key: "flumazenil", label: "Benzodiazepines OD (Flumazenil)", color: "#7C3AED" },
+    { key: "charcoal", label: "GI Poisoning / Decon (Activated Charcoal)", color: "#374151" },
+    { key: "atropine", label: "Organophosphates (Atropine)", color: "#DC2626" },
+    { key: "calcium-gluconate", label: "Calcium Channel Blocker OD (Calcium Gluconate)", color: "#0891B2" },
+    { key: "glucagon", label: "Beta-Blocker OD (Glucagon)", color: "#D97706" },
+    { key: "deferoxamine", label: "Iron Toxicity (Deferoxamine)", color: "#7C3AED" },
+    { key: "bicarbonate", label: "TCA Overdose (Sodium Bicarbonate)", color: "#0891B2" },
+    { key: "intralipid", label: "Local Anesthetic Toxicity (Intralipid 20%)", color: "#F59E0B" },
+    { key: "pyridoxine", label: "Isoniazid / INH Seizures (Pyridoxine)", color: "#16A34A" },
+    { key: "edta", label: "Lead Toxicity (CaNa2 EDTA)", color: "#475569" },
   ];
   const toxLabel = toxOptions.find((o) => o.key === toxDrug)?.label || "Select";
 
