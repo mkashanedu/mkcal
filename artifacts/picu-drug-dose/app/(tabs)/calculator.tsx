@@ -15,8 +15,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { CATEGORIES, DRUGS, DrugCategory, calculateDose } from "@/constants/drugs";
 import { useTheme } from "@/context/ThemeContext";
+import { useFavorites } from "@/context/FavoritesContext";
 import { MAX_WEIGHT_KG, MIN_WEIGHT_KG, useWeight } from "@/context/WeightContext";
 import { ProfessionalFooter } from "@/components/ProfessionalFooter";
+import { StarButton } from "@/components/StarButton";
 
 const QUICK_WEIGHTS = [0.5, 1, 2, 3, 5, 8, 10, 15, 20, 25, 30, 40, 50, 70, 100, 150];
 const LBS_TO_KG = 0.453592;
@@ -53,6 +55,7 @@ export default function CalculatorScreen() {
   const { isDark, toggleDark } = useTheme();
   const colors = Colors.light;
   const { weight, setWeight, weightInput, setWeightInput, resetWeight } = useWeight();
+  const { isFav, toggleFav } = useFavorites();
 
   const [selectedCategory, setSelectedCategory] = useState<DrugCategory | null>(null);
   const [weightUnit, setWeightUnit] = useState<"kg" | "lbs">("kg");
@@ -532,6 +535,20 @@ export default function CalculatorScreen() {
                     {cat.label}
                   </Text>
                 </View>
+                <StarButton
+                  isFav={isFav(drug.id)}
+                  onToggle={() =>
+                    toggleFav({
+                      id: drug.id,
+                      type: "drug",
+                      label: drug.name,
+                      color: cat.color,
+                      category: cat.label,
+                    })
+                  }
+                  size={18}
+                  color={cat.color}
+                />
               </View>
 
               {drug.doses.map((dose, i) => {

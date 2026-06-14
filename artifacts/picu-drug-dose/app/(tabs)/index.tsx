@@ -15,8 +15,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Colors from "@/constants/colors";
 import { CATEGORIES, DRUGS, Drug, DrugCategory } from "@/constants/drugs";
+import { useFavorites } from "@/context/FavoritesContext";
 import { useTheme } from "@/context/ThemeContext";
 import { MAX_WEIGHT_KG, MIN_WEIGHT_KG, useWeight } from "@/context/WeightContext";
+import { StarButton } from "@/components/StarButton";
 
 const ALL = "all" as const;
 type FilterTab = DrugCategory | typeof ALL;
@@ -25,7 +27,8 @@ export default function DrugListScreen() {
   const insets = useSafeAreaInsets();
   const { isDark, toggleDark } = useTheme();
   const colors = Colors.light;
-  const { weight, setWeight, weightInput, setWeightInput, resetWeight, favorites } = useWeight();
+  const { weight, setWeight, weightInput, setWeightInput, resetWeight } = useWeight();
+  const { isFav, toggleFav } = useFavorites();
 
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<FilterTab>(ALL);
@@ -53,10 +56,10 @@ export default function DrugListScreen() {
         d.indications.some((i) =>
           i.toLowerCase().includes(search.toLowerCase())
         );
-      const matchFav = !showFavoritesOnly || favorites.includes(d.id);
+      const matchFav = !showFavoritesOnly || isFav(d.id);
       return matchCat && matchSearch && matchFav;
     });
-  }, [search, activeCategory, showFavoritesOnly, favorites]);
+  }, [search, activeCategory, showFavoritesOnly, isFav]);
 
   function handleWeightChange(text: string) {
     setWeightInput(text);
@@ -112,7 +115,7 @@ export default function DrugListScreen() {
 
   function renderDrugItem({ item }: { item: Drug }) {
     const cat = CATEGORIES[item.category];
-    const isFav = favorites.includes(item.id);
+    const f = isFav(item.id);
     return (
       <Pressable
         onPress={() => router.push({ pathname: "/drug/[id]", params: { id: item.id } })}
@@ -168,9 +171,21 @@ export default function DrugListScreen() {
               {cat.label}
             </Text>
           </View>
-          {isFav && (
-            <Feather name="bookmark" size={14} color={colors.accent} style={{ marginTop: 6 }} />
-          )}
+          <StarButton
+            isFav={f}
+            onToggle={() =>
+              toggleFav({
+                id: item.id,
+                type: "drug",
+                label: item.name,
+                color: cat.color,
+                category: cat.label,
+                notes: item.indications.slice(0, 2).join(" · "),
+              })
+            }
+            size={18}
+            color={cat.color}
+          />
         </View>
       </Pressable>
     );

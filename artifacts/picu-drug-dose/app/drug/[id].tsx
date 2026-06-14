@@ -15,6 +15,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { CATEGORIES, DRUGS, calculateDose } from "@/constants/drugs";
 import { useWeight } from "@/context/WeightContext";
+import { useFavorites } from "@/context/FavoritesContext";
+import { StarButton } from "@/components/StarButton";
 
 export default function DrugDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -22,7 +24,8 @@ export default function DrugDetailScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const colors = Colors.light;
-  const { weight, toggleFavorite, isFavorite } = useWeight();
+  const { weight } = useWeight();
+  const { isFav, toggleFav } = useFavorites();
 
   const drug = DRUGS.find((d) => d.id === id);
 
@@ -37,7 +40,7 @@ export default function DrugDetailScreen() {
   }
 
   const cat = CATEGORIES[drug.category];
-  const isBookmarked = isFavorite(drug.id);
+  const f = isFav(drug.id);
   const topOffset = Platform.OS === "web" ? 67 : insets.top;
 
   return (
@@ -57,11 +60,23 @@ export default function DrugDetailScreen() {
             <Feather name="arrow-left" size={22} color="#FFFFFF" />
           </Pressable>
           <View style={{ flex: 1 }} />
-          <Pressable onPress={() => toggleFavorite(drug.id)} style={styles.backBtn}>
+          <Pressable
+            onPress={() =>
+              toggleFav({
+                id: drug.id,
+                type: "drug",
+                label: drug.name,
+                color: cat.color,
+                category: cat.label,
+                notes: drug.indications.slice(0, 2).join(" · "),
+              })
+            }
+            style={styles.backBtn}
+          >
             <Feather
-              name={isBookmarked ? "bookmark" : "bookmark"}
+              name={f ? "star" : "star"}
               size={22}
-              color={isBookmarked ? colors.accent : "rgba(255,255,255,0.7)"}
+              color={f ? "#F59E0B" : "rgba(255,255,255,0.7)"}
             />
           </Pressable>
         </View>

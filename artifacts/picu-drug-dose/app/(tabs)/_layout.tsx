@@ -38,6 +38,10 @@ function NativeTabLayout() {
         <Icon sf={{ default: "cross.circle", selected: "cross.circle.fill" }} />
         <Label>Emergency</Label>
       </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="favorites">
+        <Icon sf={{ default: "star", selected: "star.fill" }} />
+        <Label>Favorites</Label>
+      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }
@@ -155,6 +159,18 @@ function ClassicTabLayout() {
               <SymbolView name="cross.circle.fill" tintColor="#6366F1" size={24} />
             ) : (
               <Feather name="alert-circle" size={22} color="#6366F1" />
+            ),
+        }}
+      />
+      <Tabs.Screen
+        name="favorites"
+        options={{
+          title: "Favorites",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="star" tintColor={color} size={24} />
+            ) : (
+              <Feather name="star" size={22} color={color} />
             ),
         }}
       />

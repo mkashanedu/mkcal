@@ -14,8 +14,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { DRUGS, calculateDose } from "@/constants/drugs";
 import { useTheme } from "@/context/ThemeContext";
+import { useFavorites } from "@/context/FavoritesContext";
 import { useWeight } from "@/context/WeightContext";
 import { ProfessionalFooter } from "@/components/ProfessionalFooter";
+import { StarButton } from "@/components/StarButton";
 
 // ── ET Tube & Defibrillation formulas (Harriet Lane 23e · PALS 2025) ─────
 function calcETTube(ageYears: number) {
@@ -55,6 +57,7 @@ export default function EmergencyScreen() {
   const { isDark, toggleDark } = useTheme();
   const colors = Colors.light;
   const { weight } = useWeight();
+  const { isFav, toggleFav } = useFavorites();
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
 
   const [ageYearsInput, setAgeYearsInput] = useState("2");
@@ -392,20 +395,36 @@ export default function EmergencyScreen() {
                   {item.label}
                 </Text>
               </View>
-              <View
-                style={[
-                  styles.routeTag,
-                  { backgroundColor: item.color + "22" },
-                ]}
-              >
-                <Text
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <View
                   style={[
-                    styles.routeTagText,
-                    { color: item.color, fontFamily: "Inter_600SemiBold" },
+                    styles.routeTag,
+                    { backgroundColor: item.color + "22" },
                   ]}
                 >
-                  {item.route}
-                </Text>
+                  <Text
+                    style={[
+                      styles.routeTagText,
+                      { color: item.color, fontFamily: "Inter_600SemiBold" },
+                    ]}
+                  >
+                    {item.route}
+                  </Text>
+                </View>
+                <StarButton
+                  isFav={isFav(`emergency-${idx}`)}
+                  onToggle={() =>
+                    toggleFav({
+                      id: `emergency-${idx}`,
+                      type: "drug",
+                      label: item.label,
+                      color: item.color,
+                      notes: item.route,
+                    })
+                  }
+                  size={18}
+                  color={item.color}
+                />
               </View>
             </View>
 

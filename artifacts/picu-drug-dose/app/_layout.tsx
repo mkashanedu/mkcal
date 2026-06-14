@@ -16,6 +16,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { DisclaimerModal } from "@/components/DisclaimerModal";
+import { FavoritesProvider } from "@/context/FavoritesContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { WeightProvider } from "@/context/WeightContext";
 
@@ -65,12 +66,14 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>
             <WeightProvider>
-              <GestureHandlerRootView>
+              <FavoritesProvider>
+                <GestureHandlerRootView>
                 <KeyboardProvider>
                   <RootLayoutNav />
                   <DisclaimerModal />
                 </KeyboardProvider>
               </GestureHandlerRootView>
+              </FavoritesProvider>
             </WeightProvider>
           </ThemeProvider>
         </QueryClientProvider>

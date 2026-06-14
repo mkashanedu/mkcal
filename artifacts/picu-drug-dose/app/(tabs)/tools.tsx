@@ -15,7 +15,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { useTheme } from "@/context/ThemeContext";
 import { useWeight } from "@/context/WeightContext";
+import { useFavorites } from "@/context/FavoritesContext";
 import { ProfessionalFooter } from "@/components/ProfessionalFooter";
+import { StarButton } from "@/components/StarButton";
 
 const C = Colors.light;
 
@@ -459,6 +461,7 @@ export default function ToolsScreen() {
   const insets = useSafeAreaInsets();
   const { isDark, toggleDark } = useTheme();
   const { weight } = useWeight();
+  const { isFav, toggleFav } = useFavorites();
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
 
   const [openSection, setOpenSection] = useState<string | null>(null);
@@ -619,6 +622,9 @@ export default function ToolsScreen() {
           />
           {openSection === "growth" && (
             <View style={[styles.sectionBody, { backgroundColor: cardBg, borderColor: border }]}>
+              <View style={{ flexDirection: "row", justifyContent: "flex-end", marginBottom: 4 }}>
+                <StarButton isFav={isFav("tool-growth")} onToggle={() => toggleFav({ id: "tool-growth", type: "tool", label: "Growth Charts", color: "#0D9488" })} size={18} color="#0D9488" />
+              </View>
               <Text style={[styles.refText, { color: textMuted }]}>WHO (0–24 mo) · CDC (2–18 yr) — Weight-for-Age percentile estimate</Text>
 
               {/* Sex selector */}
@@ -697,6 +703,9 @@ export default function ToolsScreen() {
           />
           {openSection === "vis" && (
             <View style={[styles.sectionBody, { backgroundColor: cardBg, borderColor: border }]}>
+              <View style={{ flexDirection: "row", justifyContent: "flex-end", marginBottom: 4 }}>
+                <StarButton isFav={isFav("tool-vis")} onToggle={() => toggleFav({ id: "tool-vis", type: "tool", label: "VIS / Cardiac", color: "#E53E3E" })} size={18} color="#E53E3E" />
+              </View>
               <Text style={[styles.refText, { color: textMuted }]}>
                 Vasoactive-Inotropic Score (Wernovsky et al. 1995){"\n"}
                 VIS = Dopa + Dobu + 100×Epi + 10×Milrinone + 10000×Vaso + 100×Norepi
@@ -893,6 +902,9 @@ export default function ToolsScreen() {
           />
           {openSection === "fluids" && (
             <View style={[styles.sectionBody, { backgroundColor: cardBg, borderColor: border }]}>
+              <View style={{ flexDirection: "row", justifyContent: "flex-end", marginBottom: 4 }}>
+                <StarButton isFav={isFav("tool-fluids")} onToggle={() => toggleFav({ id: "tool-fluids", type: "tool", label: "IV Fluids", color: "#0EA5E9" })} size={18} color="#0EA5E9" />
+              </View>
               <Text style={[styles.refText, { color: textMuted }]}>
                 Holliday-Segar · Harriet Lane 23e · Nelson 22e
               </Text>
@@ -1046,6 +1058,9 @@ export default function ToolsScreen() {
           />
           {openSection === "gcs" && (
             <View style={[styles.sectionBody, { backgroundColor: cardBg, borderColor: border }]}>
+              <View style={{ flexDirection: "row", justifyContent: "flex-end", marginBottom: 4 }}>
+                <StarButton isFav={isFav("tool-gcs")} onToggle={() => toggleFav({ id: "tool-gcs", type: "tool", label: "Pediatric GCS", color: "#16A34A" })} size={18} color="#16A34A" />
+              </View>
               <Text style={[styles.refText, { color: textMuted }]}>
                 Modified GCS for verbal children and infants (Reilly et al. 1988 / PALS 2025).
                 Score range: 3 (deep coma) – 15 (normal).
@@ -1379,6 +1394,9 @@ export default function ToolsScreen() {
           <SectionHeader title="PEWS Score" icon="activity" color="#FF4C60" open={openSection === "pews"} onToggle={() => toggle("pews")} isDark={isDark} />
           {openSection === "pews" && (
             <View style={[styles.sectionBody, { backgroundColor: cardBg, borderColor: border }]}>
+              <View style={{ flexDirection: "row", justifyContent: "flex-end", marginBottom: 4 }}>
+                <StarButton isFav={isFav("tool-pews")} onToggle={() => toggleFav({ id: "tool-pews", type: "tool", label: "PEWS Score", color: "#FF4C60" })} size={18} color="#FF4C60" />
+              </View>
               <Text style={[styles.refText, { color: textMuted }]}>Pediatric Early Warning Score (PEWS) — 3 categories 0–3 each. Total 0–9.</Text>
               {[{ l: "Behavior", v: pewsB, s: setPewsB }, { l: "Cardiovascular", v: pewsCv, s: setPewsCv }, { l: "Respiratory", v: pewsR, s: setPewsR }].map((x) => (
                 <View key={x.l} style={styles.inputWrap}>

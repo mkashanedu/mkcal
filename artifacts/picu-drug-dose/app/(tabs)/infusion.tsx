@@ -16,6 +16,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useWeight } from "@/context/WeightContext";
 import { useTheme } from "@/context/ThemeContext";
+import { useFavorites } from "@/context/FavoritesContext";
+import { StarButton } from "@/components/StarButton";
 import {
   INFUSION_DRUGS,
   InfusionDrug,
@@ -224,6 +226,7 @@ type ConcMode = "standard" | "dilution";
 export default function InfusionScreen() {
   const { weightInput: weight, setWeightInput: setWeight } = useWeight();
   const { isDark, toggleDark } = useTheme();
+  const { isFav, toggleFav } = useFavorites();
 
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
@@ -386,6 +389,21 @@ export default function InfusionScreen() {
                 <Text style={styles.stepNumber}>1</Text>
               </View>
               <Text style={[styles.stepLabel, { color: TEXT }]}>Select Drug</Text>
+              {selectedDrug && (
+                <StarButton
+                  isFav={isFav(selectedDrug.id)}
+                  onToggle={() =>
+                    toggleFav({
+                      id: selectedDrug.id,
+                      type: "infusion",
+                      label: selectedDrug.name,
+                      color: selectedDrug.color,
+                    })
+                  }
+                  size={18}
+                  color={selectedDrug.color}
+                />
+              )}
               <Text style={[styles.stepHint, { color: MUTED }]}>{filteredDrugs.length} available</Text>
             </View>
 
