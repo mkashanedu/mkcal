@@ -1,5 +1,5 @@
 import { Feather } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import {
   Platform,
   Pressable,
@@ -465,6 +465,21 @@ export default function ToolsScreen() {
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
 
   const [openSection, setOpenSection] = useState<string | null>(null);
+  const scrollRef = useRef<ScrollView>(null);
+  const sectionRefs = useRef<Record<string, View | null>>({});
+  const scrollToSection = useCallback((key: string) => {
+    setOpenSection(key);
+    requestAnimationFrame(() => {
+      const node = sectionRefs.current[key];
+      if (node && scrollRef.current) {
+        node.measureLayout(
+          scrollRef.current.getInnerViewNode(),
+          (x, y) => scrollRef.current?.scrollTo({ y: y - 120, animated: true }),
+          () => {}
+        );
+      }
+    });
+  }, []);
   const toggle = (key: string) => setOpenSection((prev) => (prev === key ? null : key));
 
   // ── Growth state ──
@@ -593,9 +608,7 @@ export default function ToolsScreen() {
         <View style={styles.headerRow}>
           <View style={{ flex: 1 }}>
             <Text style={[styles.headerTitle, { color: textPrimary }]}>Clinical Tools</Text>
-            <Text style={[styles.headerSub, { color: textMuted }]}>
-              Growth · VIS · Bundles · Fluids · GCS · Scores · Renal
-            </Text>
+            <Text style={[styles.headerSub, { color: textMuted }]}>Quick-access ICU utilities</Text>
           </View>
           <TouchableOpacity
             onPress={toggleDark}
@@ -606,12 +619,46 @@ export default function ToolsScreen() {
         </View>
       </View>
 
+      {/* Scrollable chip nav */}
       <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 12, paddingVertical: 8, gap: 8 }}
+        style={[styles.chipNav, { backgroundColor: isDark ? "#0A192F" : "#FFFFFF" }]}
+      >
+        {[
+          { key: "growth", label: "Growth", color: "#0D9488" },
+          { key: "vis", label: "VIS", color: "#E53E3E" },
+          { key: "bundles", label: "Bundles", color: "#7C3AED" },
+          { key: "fluids", label: "Fluids", color: "#0EA5E9" },
+          { key: "gcs", label: "GCS", color: "#16A34A" },
+          { key: "scores", label: "Scores", color: "#FF4C60" },
+          { key: "renal", label: "Renal", color: "#DC2626" },
+          { key: "pews", label: "PEWS", color: "#F59E0B" },
+        ].map((chip) => (
+          <TouchableOpacity
+            key={chip.key}
+            onPress={() => scrollToSection(chip.key)}
+            style={[
+              styles.navChip,
+              {
+                backgroundColor: openSection === chip.key ? chip.color + "20" : isDark ? "#112240" : "#F1F5F9",
+                borderColor: openSection === chip.key ? chip.color : isDark ? "#233554" : "#E2E8F0",
+              },
+            ]}
+          >
+            <Text style={[styles.navChipText, { color: openSection === chip.key ? chip.color : textMuted }]}>{chip.label}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      <ScrollView
+        ref={scrollRef}
         contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}
         keyboardShouldPersistTaps="handled"
       >
         {/* ──────────────── MODULE 3: GROWTH CHARTS ──────────────── */}
-        <View style={styles.sectionWrap}>
+        <View style={styles.sectionWrap} ref={(el) => { sectionRefs.current["growth"] = el; }}>
           <SectionHeader
             title="Growth Charts (WHO/CDC)"
             icon="bar-chart-2"
@@ -692,7 +739,7 @@ export default function ToolsScreen() {
         </View>
 
         {/* ──────────────── MODULE 5: VIS / CARDIAC ──────────────── */}
-        <View style={styles.sectionWrap}>
+        <View style={styles.sectionWrap} ref={(el) => { sectionRefs.current["vis"] = el; }}>
           <SectionHeader
             title="VIS / Cardiac & Haemodynamic"
             icon="heart"
@@ -763,7 +810,7 @@ export default function ToolsScreen() {
         </View>
 
         {/* ──────────────── MODULE 6: CARE BUNDLES ──────────────── */}
-        <View style={styles.sectionWrap}>
+        <View style={styles.sectionWrap} ref={(el) => { sectionRefs.current["bundles"] = el; }}>
           <SectionHeader
             title="PICU Care Bundles"
             icon="check-square"
@@ -891,7 +938,7 @@ export default function ToolsScreen() {
         </View>
 
         {/* ──────────────── MODULE 7: IV FLUIDS ──────────────── */}
-        <View style={styles.sectionWrap}>
+        <View style={styles.sectionWrap} ref={(el) => { sectionRefs.current["fluids"] = el; }}>
           <SectionHeader
             title="IV Fluids & Dehydration — Clinical Decision Support"
             icon="droplet"
@@ -1047,7 +1094,7 @@ export default function ToolsScreen() {
         </View>
 
         {/* ──────────────── MODULE 8: pGCS ──────────────── */}
-        <View style={styles.sectionWrap}>
+        <View style={styles.sectionWrap} ref={(el) => { sectionRefs.current["gcs"] = el; }}>
           <SectionHeader
             title="Pediatric GCS (pGCS)"
             icon="activity"
@@ -1101,7 +1148,7 @@ export default function ToolsScreen() {
         </View>
 
         {/* ──────────────── MODULE 8.5: ADVANCED ICU SCORES ──────────────── */}
-        <View style={styles.sectionWrap}>
+        <View style={styles.sectionWrap} ref={(el) => { sectionRefs.current["scores"] = el; }}>
           <SectionHeader
             title="Advanced ICU Scores (FOUR, OSI, SIPA, WAT-1)"
             icon="activity"
@@ -1302,7 +1349,7 @@ export default function ToolsScreen() {
         </View>
 
         {/* ──────────────── MODULE 9: RENAL / HEPATIC ──────────────── */}
-        <View style={styles.sectionWrap}>
+        <View style={styles.sectionWrap} ref={(el) => { sectionRefs.current["renal"] = el; }}>
           <SectionHeader
             title="Renal & Hepatic Dose Adjustments"
             icon="shield"
@@ -1390,7 +1437,7 @@ export default function ToolsScreen() {
         </View>
 
         {/* ──────────────── PEWS ──────────────── */}
-        <View style={styles.sectionWrap}>
+        <View style={styles.sectionWrap} ref={(el) => { sectionRefs.current["pews"] = el; }}>
           <SectionHeader title="PEWS Score" icon="activity" color="#FF4C60" open={openSection === "pews"} onToggle={() => toggle("pews")} isDark={isDark} />
           {openSection === "pews" && (
             <View style={[styles.sectionBody, { backgroundColor: cardBg, borderColor: border }]}>
@@ -1398,10 +1445,30 @@ export default function ToolsScreen() {
                 <StarButton isFav={isFav("tool-pews")} onToggle={() => toggleFav({ id: "tool-pews", type: "tool", label: "PEWS Score", color: "#FF4C60" })} size={18} color="#FF4C60" />
               </View>
               <Text style={[styles.refText, { color: textMuted }]}>Pediatric Early Warning Score (PEWS) — 3 categories 0–3 each. Total 0–9.</Text>
-              {[{ l: "Behavior", v: pewsB, s: setPewsB }, { l: "Cardiovascular", v: pewsCv, s: setPewsCv }, { l: "Respiratory", v: pewsR, s: setPewsR }].map((x) => (
-                <View key={x.l} style={styles.inputWrap}>
+              {[
+                { l: "Behavior", v: pewsB, s: setPewsB },
+                { l: "Cardiovascular", v: pewsCv, s: setPewsCv },
+                { l: "Respiratory", v: pewsR, s: setPewsR },
+              ].map((x) => (
+                <View key={x.l} style={{ marginTop: 8 }}>
                   <Text style={[styles.inputLabel, { color: textMuted }]}>{x.l} (0–3)</Text>
-                  <TextInput style={[styles.input, { color: textPrimary, backgroundColor: inputBg, borderColor: border }]} value={x.v} onChangeText={x.s} keyboardType="decimal-pad" placeholder="0" placeholderTextColor={textMuted} />
+                  <View style={styles.pillRow}>
+                    {[0, 1, 2, 3].map((n) => (
+                      <TouchableOpacity
+                        key={n}
+                        onPress={() => x.s(n.toString())}
+                        style={[
+                          styles.pillBtn,
+                          {
+                            backgroundColor: x.v === n.toString() ? "#FF4C60" : isDark ? "#0A192F" : "#F8FAFC",
+                            borderColor: x.v === n.toString() ? "#FF4C60" : border,
+                          },
+                        ]}
+                      >
+                        <Text style={[styles.pillText, { color: x.v === n.toString() ? "#FFFFFF" : textMuted }]}>{n}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
                 </View>
               ))}
               <View style={[styles.resultBox, { backgroundColor: pewsAlert ? "#FF4C6015" : "#16A34A15", borderColor: pewsAlert ? "#FF4C6040" : "#16A34A40" }]}>
@@ -1497,4 +1564,12 @@ const styles = StyleSheet.create({
   scenarioLabel: { fontSize: 12, fontWeight: "600" },
   scenarioFluid: { fontSize: 14, fontWeight: "700" },
   scenarioAlert: { fontSize: 12, fontWeight: "700", flex: 1, lineHeight: 16 },
+  // Chip nav styles
+  chipNav: { borderBottomWidth: 1, borderBottomColor: "#1E2D3D" },
+  navChip: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, borderWidth: 1.5 },
+  navChipText: { fontSize: 13, fontWeight: "700" },
+  // Pill selector styles
+  pillRow: { flexDirection: "row", gap: 8, marginTop: 4 },
+  pillBtn: { flex: 1, paddingVertical: 10, borderRadius: 10, borderWidth: 1, alignItems: "center", justifyContent: "center" },
+  pillText: { fontSize: 15, fontWeight: "700" },
 });
