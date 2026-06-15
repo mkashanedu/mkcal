@@ -273,19 +273,27 @@ function sipaThreshold(ageMonths: number) {
   return 0.6;                               // ≥13 yr
 }
 
-// WAT-1 items
-const WAT1_ITEMS = [
-  { label: "Loose or watery stools", section: "past12" },
-  { label: "Vomiting / retching / gagging", section: "past12" },
-  { label: "Temperature ≥ 37.8°C", section: "past12" },
-  { label: "Temperature ≤ 36.5°C", section: "past12" },
-  { label: "Sweating / perspiring (not environmental)", section: "past12" },
-  { label: "Tremor (not startling)", section: "obs2min" },
-  { label: "Frequent yawning / sneezing", section: "obs2min" },
-  { label: "Increased muscle tone", section: "obs2min" },
-  { label: "Irritable / fussy (not consolable)", section: "obs2min" },
-  { label: "High-pitched cry / inconsolable crying", section: "obs2min" },
-  { label: "Frantic / sucking fist / rooting (after stimulus)", section: "stimulus" },
+// WAT-1 validated 11-item protocol (Franck et al. 2012)
+const WAT1_PAST12 = [
+  { label: "Loose/watery stools", points: 1 },
+  { label: "Vomiting / retching / gagging", points: 1 },
+  { label: "Temperature > 37.8°C", points: 1 },
+];
+const WAT1_OBS2MIN = [
+  { label: "State: Awake and distressed", points: 1 },
+  { label: "Tremor", points: 1 },
+  { label: "Sweating", points: 1 },
+  { label: "Uncoordinated or repetitive movements", points: 1 },
+  { label: "Yawning or sneezing > 1 time", points: 1 },
+];
+const WAT1_STIMULUS = [
+  { label: "Startle to touch", points: 1 },
+  { label: "Muscle tone increased", points: 1 },
+];
+const WAT1_CALM_TIME = [
+  { label: "< 2 min", points: 0 },
+  { label: "2 – 5 min", points: 1 },
+  { label: "> 5 min", points: 2 },
 ];
 
 // ─── Helper components ────────────────────────────────────────────────────────
@@ -580,9 +588,19 @@ export default function ToolsScreen() {
   const sipaThresholdVal = sipaAgeMonths > 0 ? sipaThreshold(sipaAgeMonths) : 0.6;
   const sipaAlert = sipaSi !== null && sipaSi > sipaThresholdVal;
   // WAT-1
-  const [wat1Checked, setWat1Checked] = useState<boolean[]>(WAT1_ITEMS.map(() => false));
-  const wat1Score = wat1Checked.filter(Boolean).length;
-  const wat1Alert = wat1Score >= 3;
+  const [wat1Past12, setWat1Past12] = useState<boolean[]>(WAT1_PAST12.map(() => false));
+  const [wat1Obs2, setWat1Obs2] = useState<boolean[]>(WAT1_OBS2MIN.map(() => false));
+  const [wat1Stim, setWat1Stim] = useState<boolean[]>(WAT1_STIMULUS.map(() => false));
+  const [wat1CalmTime, setWat1CalmTime] = useState<number>(0);
+  const wat1Score =
+    wat1Past12.filter(Boolean).length +
+    wat1Obs2.filter(Boolean).length +
+    wat1Stim.filter(Boolean).length +
+    wat1CalmTime;
+  const wat1Interpret =
+    wat1Score <= 2
+      ? { label: "Minimal / No Withdrawal", color: "#16A34A" }
+      : { label: "Significant Withdrawal \u2014 Intervention may be needed", color: "#FF4C60" };
 
   // ── Score tab selector ──
   const [scoreTab, setScoreTab] = useState<"four" | "osi" | "sipa" | "wat1">("four");
@@ -1283,62 +1301,102 @@ export default function ToolsScreen() {
                 <>
                   <Text style={[styles.refText, { color: textMuted }]}>
                     Withdrawal Assessment Tool-1 (WAT-1) — Franck et al. 2012{"\n"}
-                    Score each item present as 1 point. Total 0–12. Score ≥3 = significant withdrawal.
+                    Standard 11-item protocol. Range 0–12. Score ≥3 = significant withdrawal.
                   </Text>
-                  {/* Past 12h */}
-                  <Text style={[styles.gcsLabel, { color: textPrimary, marginTop: 6 }]}>Past 12 Hours Record</Text>
-                  {WAT1_ITEMS.filter((i) => i.section === "past12").map((item, idx) => {
-                    const globalIdx = WAT1_ITEMS.findIndex((x) => x.label === item.label);
-                    return (
-                      <TouchableOpacity key={item.label} onPress={() => setWat1Checked((prev) => prev.map((v, j) => j === globalIdx ? !v : v))} style={styles.checkItem}>
-                        <View style={[styles.checkbox, { backgroundColor: wat1Checked[globalIdx] ? "#FF4C60" : "transparent", borderColor: wat1Checked[globalIdx] ? "#FF4C60" : isDark ? "#3D5470" : "#CBD5E1" }]}>
-                          {wat1Checked[globalIdx] && <Feather name="check" size={12} color="#FFF" />}
-                        </View>
-                        <Text style={[styles.checkLabel, { color: wat1Checked[globalIdx] ? textMuted : textPrimary, textDecorationLine: wat1Checked[globalIdx] ? "line-through" : "none" }]}>{item.label}</Text>
+
+                  {/* Section 1: Past 12 Hours */}
+                  <Text style={[styles.gcsLabel, { color: textPrimary, marginTop: 6 }]}>Section 1: Past 12 Hours</Text>
+                  {WAT1_PAST12.map((item, i) => (
+                    <TouchableOpacity
+                      key={item.label}
+                      onPress={() => setWat1Past12((prev) => prev.map((v, j) => (j === i ? !v : v)))}
+                      style={styles.checkItem}
+                    >
+                      <View style={[styles.checkbox, { backgroundColor: wat1Past12[i] ? "#FF4C60" : "transparent", borderColor: wat1Past12[i] ? "#FF4C60" : isDark ? "#3D5470" : "#CBD5E1" }]}>
+                        {wat1Past12[i] && <Feather name="check" size={12} color="#FFF" />}
+                      </View>
+                      <Text style={[styles.checkLabel, { color: wat1Past12[i] ? textMuted : textPrimary, textDecorationLine: wat1Past12[i] ? "line-through" : "none" }]}>
+                        {item.label} <Text style={{ color: textMuted, fontWeight: "700" }}>(+{item.points})</Text>
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+
+                  {/* Section 2: 2-Minute Observation */}
+                  <Text style={[styles.gcsLabel, { color: textPrimary, marginTop: 6 }]}>Section 2: 2-Minute Observation</Text>
+                  {WAT1_OBS2MIN.map((item, i) => (
+                    <TouchableOpacity
+                      key={item.label}
+                      onPress={() => setWat1Obs2((prev) => prev.map((v, j) => (j === i ? !v : v)))}
+                      style={styles.checkItem}
+                    >
+                      <View style={[styles.checkbox, { backgroundColor: wat1Obs2[i] ? "#FF4C60" : "transparent", borderColor: wat1Obs2[i] ? "#FF4C60" : isDark ? "#3D5470" : "#CBD5E1" }]}>
+                        {wat1Obs2[i] && <Feather name="check" size={12} color="#FFF" />}
+                      </View>
+                      <Text style={[styles.checkLabel, { color: wat1Obs2[i] ? textMuted : textPrimary, textDecorationLine: wat1Obs2[i] ? "line-through" : "none" }]}>
+                        {item.label} <Text style={{ color: textMuted, fontWeight: "700" }}>(+{item.points})</Text>
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+
+                  {/* Section 3: Stimulus Observation */}
+                  <Text style={[styles.gcsLabel, { color: textPrimary, marginTop: 6 }]}>Section 3: Stimulus Observation</Text>
+                  {WAT1_STIMULUS.map((item, i) => (
+                    <TouchableOpacity
+                      key={item.label}
+                      onPress={() => setWat1Stim((prev) => prev.map((v, j) => (j === i ? !v : v)))}
+                      style={styles.checkItem}
+                    >
+                      <View style={[styles.checkbox, { backgroundColor: wat1Stim[i] ? "#FF4C60" : "transparent", borderColor: wat1Stim[i] ? "#FF4C60" : isDark ? "#3D5470" : "#CBD5E1" }]}>
+                        {wat1Stim[i] && <Feather name="check" size={12} color="#FFF" />}
+                      </View>
+                      <Text style={[styles.checkLabel, { color: wat1Stim[i] ? textMuted : textPrimary, textDecorationLine: wat1Stim[i] ? "line-through" : "none" }]}>
+                        {item.label} <Text style={{ color: textMuted, fontWeight: "700" }}>(+{item.points})</Text>
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+
+                  {/* Time to calm state — pill selector */}
+                  <Text style={[styles.gcsLabel, { color: textPrimary, marginTop: 6 }]}>Time to gain calm state</Text>
+                  <View style={styles.pillRow}>
+                    {WAT1_CALM_TIME.map((opt) => (
+                      <TouchableOpacity
+                        key={opt.label}
+                        onPress={() => setWat1CalmTime(opt.points)}
+                        style={[
+                          styles.pillBtn,
+                          {
+                            backgroundColor: wat1CalmTime === opt.points ? "#FF4C60" : isDark ? "#0A192F" : "#F8FAFC",
+                            borderColor: wat1CalmTime === opt.points ? "#FF4C60" : border,
+                          },
+                        ]}
+                      >
+                        <Text style={[styles.pillText, { color: wat1CalmTime === opt.points ? "#FFFFFF" : textMuted }]}>
+                          {opt.label} ({opt.points > 0 ? `+${opt.points}` : opt.points})
+                        </Text>
                       </TouchableOpacity>
-                    );
-                  })}
-                  {/* 2-min observation */}
-                  <Text style={[styles.gcsLabel, { color: textPrimary, marginTop: 6 }]}>2-Minute Observation</Text>
-                  {WAT1_ITEMS.filter((i) => i.section === "obs2min").map((item) => {
-                    const globalIdx = WAT1_ITEMS.findIndex((x) => x.label === item.label);
-                    return (
-                      <TouchableOpacity key={item.label} onPress={() => setWat1Checked((prev) => prev.map((v, j) => j === globalIdx ? !v : v))} style={styles.checkItem}>
-                        <View style={[styles.checkbox, { backgroundColor: wat1Checked[globalIdx] ? "#FF4C60" : "transparent", borderColor: wat1Checked[globalIdx] ? "#FF4C60" : isDark ? "#3D5470" : "#CBD5E1" }]}>
-                          {wat1Checked[globalIdx] && <Feather name="check" size={12} color="#FFF" />}
-                        </View>
-                        <Text style={[styles.checkLabel, { color: wat1Checked[globalIdx] ? textMuted : textPrimary, textDecorationLine: wat1Checked[globalIdx] ? "line-through" : "none" }]}>{item.label}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                  {/* Stimulus observation */}
-                  <Text style={[styles.gcsLabel, { color: textPrimary, marginTop: 6 }]}>Stimulus Observation</Text>
-                  {WAT1_ITEMS.filter((i) => i.section === "stimulus").map((item) => {
-                    const globalIdx = WAT1_ITEMS.findIndex((x) => x.label === item.label);
-                    return (
-                      <TouchableOpacity key={item.label} onPress={() => setWat1Checked((prev) => prev.map((v, j) => j === globalIdx ? !v : v))} style={styles.checkItem}>
-                        <View style={[styles.checkbox, { backgroundColor: wat1Checked[globalIdx] ? "#FF4C60" : "transparent", borderColor: wat1Checked[globalIdx] ? "#FF4C60" : isDark ? "#3D5470" : "#CBD5E1" }]}>
-                          {wat1Checked[globalIdx] && <Feather name="check" size={12} color="#FFF" />}
-                        </View>
-                        <Text style={[styles.checkLabel, { color: wat1Checked[globalIdx] ? textMuted : textPrimary, textDecorationLine: wat1Checked[globalIdx] ? "line-through" : "none" }]}>{item.label}</Text>
-                      </TouchableOpacity>
-                    );
-                  })}
+                    ))}
+                  </View>
 
                   {/* WAT-1 Total */}
-                  <View style={[styles.resultBox, { backgroundColor: wat1Alert ? "#FF4C6015" : "#16A34A15", borderColor: wat1Alert ? "#FF4C6040" : "#16A34A40" }]}>
-                    <Text style={[styles.resultLabel, { color: wat1Alert ? "#FF4C60" : "#16A34A" }]}>WAT-1 Score = {wat1Score} / 12</Text>
-                    {wat1Alert && (
-                      <Text style={[styles.resultNote, { color: "#FF4C60", fontWeight: "700" }]}>
-                        Significant withdrawal detected. Consider weaning adjustment.
-                      </Text>
-                    )}
+                  <View style={[styles.resultBox, { backgroundColor: wat1Interpret.color + "15", borderColor: wat1Interpret.color + "40" }]}>
+                    <Text style={[styles.resultLabel, { color: wat1Interpret.color, fontSize: 22 }]}>WAT-1 Score = {wat1Score} / 12</Text>
+                    <Text style={[styles.resultNote, { color: wat1Interpret.color, fontWeight: "700" }]}>
+                      {wat1Interpret.label}
+                    </Text>
                     <Text style={[styles.refText, { color: textMuted, marginTop: 4 }]}>
-                      {wat1Score < 3 ? "Score < 3 — withdrawal unlikely" : "Score ≥ 3 — monitor closely and adjust sedation/analgesia"}
+                      {wat1Score <= 2 ? "Routine monitoring" : "Consider weaning / sedation adjustment"}
                     </Text>
                   </View>
 
-                  <TouchableOpacity onPress={() => setWat1Checked(WAT1_ITEMS.map(() => false))} style={[styles.resetBundleBtn, { justifyContent: "center" }]}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setWat1Past12(WAT1_PAST12.map(() => false));
+                      setWat1Obs2(WAT1_OBS2MIN.map(() => false));
+                      setWat1Stim(WAT1_STIMULUS.map(() => false));
+                      setWat1CalmTime(0);
+                    }}
+                    style={[styles.resetBundleBtn, { justifyContent: "center" }]}
+                  >
                     <Feather name="rotate-ccw" size={14} color={textMuted} />
                     <Text style={[styles.resetBundleText, { color: textMuted }]}>Reset WAT-1</Text>
                   </TouchableOpacity>
