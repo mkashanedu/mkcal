@@ -1,5 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import React, { useMemo, useState } from "react";
+
 import {
   Platform,
   ScrollView,
@@ -19,19 +20,15 @@ import { useWeight } from "@/context/WeightContext";
 import { ProfessionalFooter } from "@/components/ProfessionalFooter";
 import { StarButton } from "@/components/StarButton";
 
-// ── ET Tube & Defibrillation formulas (Harriet Lane 23e · PALS 2025) ─────
+// ── ET Tube, Airway, Defibrillation formulas (Harriet Lane 23e · PALS 2025) ───
 function calcETTube(ageYears: number) {
   if (ageYears < 1) {
-    return { uncuffed: "3.0–3.5", cuffed: "3.0 (premature–3.0)", depth: "9–10 cm at lip" };
+    return { uncuffed: "3.0–3.5", cuffed: "3.0 (premature–3.0)", depth: "9–10 cm at lip", cuffedNum: 3.0 };
   }
   const uncuffed = +(ageYears / 4 + 4).toFixed(1);
   const cuffed   = +(ageYears / 4 + 3.5).toFixed(1);
   const depth    = +(ageYears / 2 + 12).toFixed(1);
-  return {
-    uncuffed: `${uncuffed} mm`,
-    cuffed:   `${cuffed} mm`,
-    depth:    `${depth} cm at lip`,
-  };
+  return { uncuffed: `${uncuffed} mm`, cuffed: `${cuffed} mm`, depth: `${depth} cm at lip`, cuffedNum: cuffed };
 }
 
 function calcDefib(weightKg: number) {
@@ -40,6 +37,47 @@ function calcDefib(weightKg: number) {
   const maximum    = Math.min(+(10 * weightKg).toFixed(0), 360);
   return { initial, subsequent, maximum };
 }
+
+// Suction catheter: Cuffed tube size × 2, round to nearest even French
+function calcSuctionCatheter(cuffedMm: number) {
+  const raw = cuffedMm * 2;
+  return Math.round(raw / 2) * 2;
+}
+
+// Laryngoscope blade by age (PALS 2025)
+function calcBlade(ageYears: number) {
+  if (ageYears < 0.08) return "Miller 00";
+  if (ageYears < 1)   return "Miller 0";
+  if (ageYears < 6)   return "Miller 1";
+  if (ageYears < 12)  return "Miller 2 / Mac 2";
+  return "Mac 3";
+}
+
+// LMA size by weight (kg)
+function calcLMA(weightKg: number) {
+  if (weightKg <= 5)    return "1";
+  if (weightKg <= 10)   return "1.5";
+  if (weightKg <= 20)   return "2";
+  if (weightKg <= 30)   return "2.5";
+  if (weightKg <= 50)   return "3";
+  if (weightKg <= 70)   return "4";
+  return "5";
+}
+
+// PALS Hs & Ts
+const Hs = [
+  "Hypovolemia",
+  "Hypoxia",
+  "Hydrogen ion (Acidosis)",
+  "Hypo- / Hyperkalemia",
+  "Hypothermia",
+];
+const Ts = [
+  "Tension pneumothorax",
+  "Tamponade (cardiac)",
+  "Toxins",
+  "Thrombosis (pulmonary / coronary)",
+];
 
 interface EmergencyItem {
   label: string;
@@ -64,6 +102,10 @@ export default function EmergencyScreen() {
   const ageYears = Math.max(0, parseFloat(ageYearsInput) || 0);
   const ettube = calcETTube(ageYears);
   const defib = calcDefib(weight);
+  const suctionFr = calcSuctionCatheter(ettube.cuffedNum);
+  const blade = calcBlade(ageYears);
+  const lma = calcLMA(weight);
+  const [hsTsOpen, setHsTsOpen] = useState(false);
 
   const [apgarA, setApgarA] = useState("");
   const [apgarP, setApgarP] = useState("");
@@ -545,6 +587,21 @@ export default function EmergencyScreen() {
                 </Text>
               </View>
             </View>
+            {/* Airway equipment row */}
+            <View style={styles.airwayRow}>
+              <View style={[styles.airwayBadge, { backgroundColor: isDark ? "#1A1F3D" : "#F0F4F8", borderColor: isDark ? "#3D4770" : "#E2E8F0" }]}>
+                <Text style={[styles.airwayBadgeLabel, { color: isDark ? "#8892B0" : "#64748B" }]}>Suction</Text>
+                <Text style={[styles.airwayBadgeValue, { color: isDark ? "#FFD700" : "#B45309" }]}>{suctionFr} Fr</Text>
+              </View>
+              <View style={[styles.airwayBadge, { backgroundColor: isDark ? "#1A1F3D" : "#F0F4F8", borderColor: isDark ? "#3D4770" : "#E2E8F0" }]}>
+                <Text style={[styles.airwayBadgeLabel, { color: isDark ? "#8892B0" : "#64748B" }]}>Blade</Text>
+                <Text style={[styles.airwayBadgeValue, { color: isDark ? "#FFD700" : "#B45309" }]}>{blade}</Text>
+              </View>
+              <View style={[styles.airwayBadge, { backgroundColor: isDark ? "#1A1F3D" : "#F0F4F8", borderColor: isDark ? "#3D4770" : "#E2E8F0" }]}>
+                <Text style={[styles.airwayBadgeLabel, { color: isDark ? "#8892B0" : "#64748B" }]}>LMA</Text>
+                <Text style={[styles.airwayBadgeValue, { color: isDark ? "#FFD700" : "#B45309" }]}>Size {lma}</Text>
+              </View>
+            </View>
           </View>
 
           {/* Defibrillator section */}
@@ -629,6 +686,44 @@ export default function EmergencyScreen() {
                 <Text style={[styles.resultLabel, { color: "#B45309" }]}>Total: {emBurnTotal} mL RL</Text>
                 <Text style={[styles.resultNote, { color: "#B45309" }]}>1st 8hrs: {emBurnFirst8} mL · Next 16hrs: {emBurnNext16} mL</Text>
                 <Text style={[styles.refText, { color: isDark ? "#8892B0" : "#64748B" }]}>Parkland: 3 × wt × %TBSA. Add maintenance in children.</Text>
+              </View>
+            )}
+          </View>
+
+          {/* Hs & Ts — Reversible Causes */}
+          <View style={[styles.calcSection, { borderTopColor: isDark ? "#233554" : "#F0F4F8" }]}>
+            <TouchableOpacity
+              onPress={() => setHsTsOpen(!hsTsOpen)}
+              style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 }}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.calcSectionTitle, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_600SemiBold" }]}>
+                Reversible Causes (Hs & Ts)
+              </Text>
+              <Feather name={hsTsOpen ? "chevron-up" : "chevron-down"} size={18} color={isDark ? "#8892B0" : "#64748B"} />
+            </TouchableOpacity>
+            {hsTsOpen && (
+              <View style={{ marginTop: 10, gap: 10 }}>
+                {/* Hs */}
+                <View style={[styles.htBlock, { backgroundColor: isDark ? "#112240" : "#F0F4F8", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
+                  <Text style={[styles.htTitle, { color: isDark ? "#93C5FD" : "#1E40AF" }]}>Hs — Hypo / Hypo</Text>
+                  {Hs.map((h, i) => (
+                    <View key={i} style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 4 }}>
+                      <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: isDark ? "#93C5FD" : "#1E40AF" }} />
+                      <Text style={[styles.htItem, { color: isDark ? "#CCD6F6" : "#0D1B2A" }]}>{h}</Text>
+                    </View>
+                  ))}
+                </View>
+                {/* Ts */}
+                <View style={[styles.htBlock, { backgroundColor: isDark ? "#112240" : "#F0F4F8", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
+                  <Text style={[styles.htTitle, { color: isDark ? "#FCA5A5" : "#991B1B" }]}>Ts — Tension / Toxins</Text>
+                  {Ts.map((t, i) => (
+                    <View key={i} style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 4 }}>
+                      <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: isDark ? "#FCA5A5" : "#991B1B" }} />
+                      <Text style={[styles.htItem, { color: isDark ? "#CCD6F6" : "#0D1B2A" }]}>{t}</Text>
+                    </View>
+                  ))}
+                </View>
               </View>
             )}
           </View>
@@ -830,4 +925,15 @@ const styles = StyleSheet.create({
   refLabel: { fontSize: 13, flex: 1 },
   refValue: { fontSize: 14, textAlign: "right", flex: 1 },
   refText: { fontSize: 11, lineHeight: 16 },
+  // Airway equipment row
+  airwayRow: { flexDirection: "row", gap: 6, marginTop: 8 },
+  airwayBadge: {
+    flex: 1, borderRadius: 8, borderWidth: 1, paddingVertical: 8, paddingHorizontal: 4, alignItems: "center",
+  },
+  airwayBadgeLabel: { fontSize: 10, fontWeight: "600", marginBottom: 2 },
+  airwayBadgeValue: { fontSize: 13, fontWeight: "700" },
+  // Hs & Ts blocks
+  htBlock: { borderRadius: 10, borderWidth: 1, padding: 10 },
+  htTitle: { fontSize: 12, fontWeight: "700", marginBottom: 4 },
+  htItem: { fontSize: 12, lineHeight: 16 },
 });
