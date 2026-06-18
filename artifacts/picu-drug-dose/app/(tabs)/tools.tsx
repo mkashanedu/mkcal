@@ -605,13 +605,65 @@ export default function ToolsScreen() {
   // ── Score tab selector ──
   const [scoreTab, setScoreTab] = useState<"four" | "osi" | "sipa" | "wat1">("four");
 
-  // ── APGAR ──
-  const [apgarA, setApgarA] = useState("");
-  const [apgarP, setApgarP] = useState("");
-  const [apgarG, setApgarG] = useState("");
-  const [apgarAc, setApgarAc] = useState("");
-  const [apgarR, setApgarR] = useState("");
-  const apgarTotal = (parseInt(apgarA) || 0) + (parseInt(apgarP) || 0) + (parseInt(apgarG) || 0) + (parseInt(apgarAc) || 0) + (parseInt(apgarR) || 0);
+  // ── APGAR (interactive 0–2 per category) ──
+  const [apgarA, setApgarA] = useState<number | null>(null);
+  const [apgarP, setApgarP] = useState<number | null>(null);
+  const [apgarG, setApgarG] = useState<number | null>(null);
+  const [apgarAc, setApgarAc] = useState<number | null>(null);
+  const [apgarR, setApgarR] = useState<number | null>(null);
+  const apgarTotal = (apgarA ?? 0) + (apgarP ?? 0) + (apgarG ?? 0) + (apgarAc ?? 0) + (apgarR ?? 0);
+  const apgarItems = [
+    {
+      key: "Appearance",
+      setter: setApgarA,
+      value: apgarA,
+      options: [
+        { score: 0, label: "Pale / Blue" },
+        { score: 1, label: "Pink body, Blue extremities" },
+        { score: 2, label: "Completely Pink" },
+      ],
+    },
+    {
+      key: "Pulse",
+      setter: setApgarP,
+      value: apgarP,
+      options: [
+        { score: 0, label: "Absent" },
+        { score: 1, label: "< 100 bpm" },
+        { score: 2, label: "> 100 bpm" },
+      ],
+    },
+    {
+      key: "Grimace",
+      setter: setApgarG,
+      value: apgarG,
+      options: [
+        { score: 0, label: "No response" },
+        { score: 1, label: "Grimace / feeble cry" },
+        { score: 2, label: "Cry, sneeze, cough" },
+      ],
+    },
+    {
+      key: "Activity",
+      setter: setApgarAc,
+      value: apgarAc,
+      options: [
+        { score: 0, label: "Flaccid / Limp" },
+        { score: 1, label: "Some flexion" },
+        { score: 2, label: "Active movement" },
+      ],
+    },
+    {
+      key: "Respiration",
+      setter: setApgarR,
+      value: apgarR,
+      options: [
+        { score: 0, label: "Absent" },
+        { score: 1, label: "Weak / irregular / gasping" },
+        { score: 2, label: "Good, strong cry" },
+      ],
+    },
+  ];
 
   // ── PEWS ──
   const [pewsB, setPewsB] = useState("");
@@ -1566,29 +1618,38 @@ export default function ToolsScreen() {
               <Text style={[styles.refText, { color: textMuted }]}>
                 Neonatal assessment at 1 and 5 minutes. Score range: 0–10.
               </Text>
-              <View style={styles.ettGrid}>
-                {[
-                  { l: "Appearance", s: setApgarA, v: apgarA },
-                  { l: "Pulse", s: setApgarP, v: apgarP },
-                  { l: "Grimace", s: setApgarG, v: apgarG },
-                  { l: "Activity", s: setApgarAc, v: apgarAc },
-                  { l: "Respiration", s: setApgarR, v: apgarR },
-                ].map((x) => (
-                  <View key={x.l} style={[styles.ettBox, { backgroundColor: isDark ? "#0A192F" : "#F8FAFC", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
-                    <Text style={[styles.ettLabel, { color: textMuted, fontFamily: "Inter_500Medium" }]}>{x.l}</Text>
-                    <TextInput
-                      style={[styles.ageInput, { color: textPrimary, backgroundColor: inputBg, borderColor: border, fontFamily: "Inter_700Bold" }]}
-                      value={x.v}
-                      onChangeText={x.s}
-                      keyboardType="decimal-pad"
-                      maxLength={1}
-                      placeholder="0"
-                      placeholderTextColor={textMuted}
-                    />
+
+              {apgarItems.map((item) => (
+                <View key={item.key} style={{ marginTop: 10 }}>
+                  <Text style={[styles.gcsLabel, { color: textPrimary }]}>
+                    {item.key} — <Text style={{ color: textMuted, fontWeight: "400" }}>selected: {item.value ?? "—"}</Text>
+                  </Text>
+                  <View style={styles.pillRow}>
+                    {item.options.map((opt) => (
+                      <TouchableOpacity
+                        key={opt.score}
+                        onPress={() => item.setter(opt.score)}
+                        style={[
+                          styles.pillBtn,
+                          {
+                            backgroundColor: item.value === opt.score ? "#EC4899" : isDark ? "#0A192F" : "#F8FAFC",
+                            borderColor: item.value === opt.score ? "#EC4899" : border,
+                          },
+                        ]}
+                      >
+                        <Text style={[styles.pillText, { color: item.value === opt.score ? "#FFFFFF" : textMuted }]}>
+                          {opt.score}
+                        </Text>
+                        <Text style={{ fontSize: 10, color: item.value === opt.score ? "#FFFFFF" : textMuted, marginTop: 2, fontWeight: "500" }}>
+                          {opt.label}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
                   </View>
-                ))}
-              </View>
-              <View style={[styles.resultBox, { backgroundColor: apgarTotal >= 7 ? "#16A34A15" : apgarTotal >= 4 ? "#F59E0B15" : "#FEE2E2", borderColor: apgarTotal >= 7 ? "#16A34A40" : apgarTotal >= 4 ? "#F59E0B40" : "#FCA5A5", marginTop: 10 }]}>
+                </View>
+              ))}
+
+              <View style={[styles.resultBox, { backgroundColor: apgarTotal >= 7 ? "#16A34A15" : apgarTotal >= 4 ? "#F59E0B15" : "#FEE2E2", borderColor: apgarTotal >= 7 ? "#16A34A40" : apgarTotal >= 4 ? "#F59E0B40" : "#FCA5A5", marginTop: 14 }]}>
                 <Text style={[styles.resultLabel, { color: apgarTotal >= 7 ? "#16A34A" : apgarTotal >= 4 ? "#F59E0B" : "#DC2626" }]}>APGAR = {apgarTotal} / 10</Text>
                 <Text style={[styles.resultNote, { color: apgarTotal >= 7 ? "#16A34A" : apgarTotal >= 4 ? "#F59E0B" : "#DC2626", fontWeight: "700" }]}>
                   {apgarTotal >= 7 ? "Normal" : apgarTotal >= 4 ? "Moderately depressed" : "Severely depressed"}
@@ -1598,7 +1659,7 @@ export default function ToolsScreen() {
                 </Text>
               </View>
               <TouchableOpacity
-                onPress={() => { setApgarA(""); setApgarP(""); setApgarG(""); setApgarAc(""); setApgarR(""); }}
+                onPress={() => { setApgarA(null); setApgarP(null); setApgarG(null); setApgarAc(null); setApgarR(null); }}
                 style={[styles.resetBundleBtn, { justifyContent: "center" }]}
               >
                 <Feather name="rotate-ccw" size={14} color={textMuted} />

@@ -82,6 +82,7 @@ const Ts = [
 interface EmergencyItem {
   label: string;
   dose: string;
+  doseSub?: string;
   route: string;
   notes: string;
   color: string;
@@ -110,46 +111,42 @@ export default function EmergencyScreen() {
   const emergencyCards = useMemo((): EmergencyItem[] => {
     const results: EmergencyItem[] = [];
 
-    const epinephrine = DRUGS.find((d) => d.id === "epinephrine");
-    if (epinephrine) {
-      const iv = epinephrine.doses[0];
-      const calcIV = calculateDose(iv, weight);
-      results.push({
-        label: "Epinephrine (Cardiac Arrest / Bradycardia)",
-        dose: calcIV.dose,
-        route: "IV / IO",
-        notes: `0.1 mL/kg of 1:10,000 = ${+(0.1 * weight).toFixed(1)} mL. Repeat every 3-5 min.`,
-        color: "#6366F1",
-        warning: true,
-        exceedsAdultMax: calcIV.exceedsAdultMax,
-        adultMaxLabel: calcIV.adultMaxLabel,
-      });
-      const im = epinephrine.doses[1];
-      const calcIM = calculateDose(im, weight);
-      results.push({
-        label: "Epinephrine (Anaphylaxis)",
-        dose: calcIM.dose,
-        route: "IM Anterolateral thigh",
-        notes: "Use 1:1,000 solution. May repeat after 5-15 min.",
-        color: "#6366F1",
-        warning: true,
-        exceedsAdultMax: calcIM.exceedsAdultMax,
-        adultMaxLabel: calcIM.adultMaxLabel,
-      });
-      const inf = epinephrine.doses[2];
-      const calcInf = calculateDose(inf, weight);
-      results.push({
-        label: "Epinephrine (Continuous Infusion)",
-        dose: calcInf.dose,
-        route: "IV infusion (Central)",
-        notes: "Titrate to effect.",
-        color: "#6366F1",
-        warning: false,
-        exceedsAdultMax: calcInf.exceedsAdultMax,
-        adultMaxLabel: calcInf.adultMaxLabel,
-      });
-    }
+    // Epinephrine (Cardiac Arrest / Bradycardia) — 0.01 mg/kg = 10 mcg/kg
+    const epiMg = +(0.01 * weight).toFixed(2);
+    const epiMcg = Math.round(10 * weight);
+    const epiMl = +(0.1 * weight).toFixed(1);
+    results.push({
+      label: "Epinephrine (Cardiac Arrest / Bradycardia)",
+      dose: `${epiMg} mg`,
+      doseSub: `(or ${epiMcg} mcg)`,
+      route: "IV / IO",
+      notes: `0.01 mg/kg — Give ${epiMl} mL of 1:10,000. Repeat every 3–5 min.`,
+      color: "#6366F1",
+      warning: true,
+    });
+    // Epinephrine (Anaphylaxis)
+    const epiImMg = +(0.01 * weight).toFixed(2);
+    const epiImMcg = Math.round(10 * weight);
+    results.push({
+      label: "Epinephrine (Anaphylaxis)",
+      dose: `${epiImMg} mg`,
+      doseSub: `(or ${epiImMcg} mcg)`,
+      route: "IM Anterolateral thigh",
+      notes: "Use 1:1,000 solution. May repeat after 5–15 min.",
+      color: "#6366F1",
+      warning: true,
+    });
+    // Epinephrine (Continuous Infusion) — hardcoded therapeutic range
+    results.push({
+      label: "Epinephrine (Continuous Infusion)",
+      dose: "0.03 – 1",
+      doseSub: "mcg/kg/min",
+      route: "IV infusion (Central)",
+      notes: "Titrate to effect.",
+      color: "#6366F1",
+    });
 
+    // Atropine — mg
     const atropine = DRUGS.find((d) => d.id === "atropine");
     if (atropine) {
       const d = atropine.doses[0];
@@ -165,6 +162,7 @@ export default function EmergencyScreen() {
       });
     }
 
+    // Adenosine — mg
     const adenosine = DRUGS.find((d) => d.id === "adenosine");
     if (adenosine) {
       const d = adenosine.doses[0];
@@ -181,6 +179,7 @@ export default function EmergencyScreen() {
       });
     }
 
+    // Sodium Bicarbonate — mEq
     const bicarb = DRUGS.find((d) => d.id === "sodium-bicarbonate");
     if (bicarb) {
       const d = bicarb.doses[0];
@@ -189,13 +188,14 @@ export default function EmergencyScreen() {
         label: "Sodium Bicarbonate",
         dose: calc.dose,
         route: "IV",
-        notes: "For severe metabolic acidosis",
+        notes: "1–2 mEq/kg for severe metabolic acidosis",
         color: "#6366F1",
         exceedsAdultMax: calc.exceedsAdultMax,
         adultMaxLabel: calc.adultMaxLabel,
       });
     }
 
+    // Calcium Gluconate — mg
     const calcGluc = DRUGS.find((d) => d.id === "calcium-gluconate");
     if (calcGluc) {
       const d = calcGluc.doses[0];
@@ -211,6 +211,7 @@ export default function EmergencyScreen() {
       });
     }
 
+    // Dextrose — mL
     const dextrose = DRUGS.find((d) => d.id === "dextrose");
     if (dextrose) {
       const d10 = +(4 * weight).toFixed(0);
@@ -225,6 +226,7 @@ export default function EmergencyScreen() {
       });
     }
 
+    // Naloxone — mcg
     const naloxone = DRUGS.find((d) => d.id === "naloxone");
     if (naloxone) {
       const d = naloxone.doses[0];
@@ -240,6 +242,7 @@ export default function EmergencyScreen() {
       });
     }
 
+    // Amiodarone — mg
     const amiodarone = DRUGS.find((d) => d.id === "amiodarone");
     if (amiodarone) {
       const d = amiodarone.doses[0];
@@ -256,6 +259,7 @@ export default function EmergencyScreen() {
       });
     }
 
+    // Lorazepam — mg
     const lorazepam = DRUGS.find((d) => d.id === "lorazepam");
     if (lorazepam) {
       const d = lorazepam.doses[0];
@@ -271,6 +275,7 @@ export default function EmergencyScreen() {
       });
     }
 
+    // Midazolam — mg
     const midazolam = DRUGS.find((d) => d.id === "midazolam");
     if (midazolam) {
       const inDose = +(0.3 * weight).toFixed(2);
@@ -287,6 +292,7 @@ export default function EmergencyScreen() {
       });
     }
 
+    // Fentanyl — mcg
     const fentanyl = DRUGS.find((d) => d.id === "fentanyl");
     if (fentanyl) {
       const d = fentanyl.doses[2];
@@ -630,23 +636,25 @@ export default function EmergencyScreen() {
               </View>
             </View>
 
-            <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6 }}>
+            <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6, flexWrap: "wrap" }}>
               <Text
                 style={[
                   styles.cardDose,
                   { color: item.color, fontFamily: "Inter_800ExtraBold" },
                 ]}
               >
-                {item.dose.split(" ").slice(0, -1).join(" ") || item.dose}
+                {item.dose}
               </Text>
-              <Text
-                style={[
-                  styles.cardDoseUnit,
-                  { color: item.color, fontFamily: "Inter_600SemiBold" },
-                ]}
-              >
-                {item.dose.split(" ").pop()}
-              </Text>
+              {item.doseSub && (
+                <Text
+                  style={[
+                    styles.cardDoseUnit,
+                    { color: item.color, fontFamily: "Inter_600SemiBold" },
+                  ]}
+                >
+                  {item.doseSub}
+                </Text>
+              )}
             </View>
 
             {/* Adult max dose red alert */}
