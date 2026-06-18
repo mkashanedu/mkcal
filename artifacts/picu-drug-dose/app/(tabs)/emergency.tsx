@@ -32,10 +32,24 @@ function calcETTube(ageYears: number) {
 }
 
 function calcDefib(weightKg: number) {
-  const initial    = Math.min(+(2 * weightKg).toFixed(0), 200);
-  const subsequent = Math.min(+(4 * weightKg).toFixed(0), 360);
-  const maximum    = Math.min(+(10 * weightKg).toFixed(0), 360);
-  return { initial, subsequent, maximum };
+  const unsync1st = Math.min(+(2 * weightKg).toFixed(0), 200);
+  const unsyncSub = Math.min(+(4 * weightKg).toFixed(0), 360);
+  const unsyncMax = Math.min(+(10 * weightKg).toFixed(0), 360);
+  const sync1st   = Math.min(+(0.5 * weightKg).toFixed(0), 50);
+  const syncSub   = Math.min(+(2 * weightKg).toFixed(0), 100);
+  return { unsync1st, unsyncSub, unsyncMax, sync1st, syncSub };
+}
+
+// Target vitals post-ROSC (PALS 2025)
+function calcTargetVitals(ageYears: number) {
+  let minHR: number, maxHR: number;
+  if (ageYears < 1)       { minHR = 100; maxHR = 160; }
+  else if (ageYears < 2)  { minHR = 90;  maxHR = 150; }
+  else if (ageYears < 6)  { minHR = 80;  maxHR = 140; }
+  else if (ageYears < 12) { minHR = 70;  maxHR = 120; }
+  else                    { minHR = 60;  maxHR = 100; }
+  const minSBP = ageYears < 1 ? 60 : 70 + Math.round(2 * ageYears);
+  return { minHR, maxHR, minSBP };
 }
 
 // Suction catheter: Cuffed tube size × 2, round to nearest even French
@@ -64,19 +78,24 @@ function calcLMA(weightKg: number) {
   return "5";
 }
 
-// PALS Hs & Ts
-const Hs = [
-  "Hypovolemia",
-  "Hypoxia",
-  "Hydrogen ion (Acidosis)",
-  "Hypo- / Hyperkalemia",
-  "Hypothermia",
+interface HsTsItem {
+  label: string;
+  action: string;
+}
+
+const HsItems: HsTsItem[] = [
+  { label: "Hypovolemia", action: "20 mL/kg NS/RL Bolus" },
+  { label: "Hypoxia", action: "100% O2, verify ET Tube / DOPE" },
+  { label: "Hydrogen Ion (Acidosis)", action: "Ensure ventilation, consider NaBicarb" },
+  { label: "Hypo- / Hyperkalemia", action: "CaGluconate for HyperK, Insulin+Dextrose" },
+  { label: "Hypothermia", action: "Active warming" },
 ];
-const Ts = [
-  "Tension pneumothorax",
-  "Tamponade (cardiac)",
-  "Toxins",
-  "Thrombosis (pulmonary / coronary)",
+
+const TsItems: HsTsItem[] = [
+  { label: "Tension pneumothorax", action: "Needle decompression" },
+  { label: "Tamponade (cardiac)", action: "Pericardiocentesis" },
+  { label: "Toxins", action: "Identify antidote" },
+  { label: "Thrombosis (pulmonary / coronary)", action: "Thrombolytics / Consult" },
 ];
 
 interface EmergencyItem {
@@ -106,7 +125,13 @@ export default function EmergencyScreen() {
   const suctionFr = calcSuctionCatheter(ettube.cuffedNum);
   const blade = calcBlade(ageYears);
   const lma = calcLMA(weight);
-  const [hsTsOpen, setHsTsOpen] = useState(false);
+  const targetVitals = calcTargetVitals(ageYears);
+
+  // Hs & Ts interactive checklist
+  const [hsChecked, setHsChecked] = useState<boolean[]>(HsItems.map(() => false));
+  const [tsChecked, setTsChecked] = useState<boolean[]>(TsItems.map(() => false));
+  const toggleH = (i: number) => setHsChecked((prev) => { const c = [...prev]; c[i] = !c[i]; return c; });
+  const toggleT = (i: number) => setTsChecked((prev) => { const c = [...prev]; c[i] = !c[i]; return c; });
 
   const emergencyCards = useMemo((): EmergencyItem[] => {
     const results: EmergencyItem[] = [];
@@ -354,6 +379,9 @@ export default function EmergencyScreen() {
         <Text style={[styles.headerSubtitle, { fontFamily: "Inter_400Regular" }]}>
           Weight: {weight} kg · All doses weight-based · Capped at adult max
         </Text>
+        <Text style={[styles.headerSubtitle, { fontFamily: "Inter_400Regular", fontSize: 11, marginTop: 0, marginBottom: 8, opacity: 0.8 }]}>
+          Target HR: {targetVitals.minHR}–{targetVitals.maxHR} bpm · Min SBP: {targetVitals.minSBP} mmHg
+        </Text>
         <View style={styles.warningBanner}>
           <Feather name="alert-triangle" size={14} color="#FFFFFF" />
           <Text style={[styles.warningText, { fontFamily: "Inter_500Medium" }]}>
@@ -462,6 +490,11 @@ export default function EmergencyScreen() {
                 <Text style={[styles.airwayBadgeValue, { color: isDark ? "#FFD700" : "#B45309" }]}>Size {lma}</Text>
               </View>
             </View>
+            {/* DOPE mnemonic */}
+            <View style={[styles.dopeStrip, { backgroundColor: isDark ? "#1A1F3D" : "#F0F4F8", borderColor: isDark ? "#3D4770" : "#E2E8F0" }]}>
+              <Text style={[styles.dopeLabel, { color: isDark ? "#8892B0" : "#64748B" }]}>DOPE Check</Text>
+              <Text style={[styles.dopeText, { color: isDark ? "#8892B0" : "#64748B" }]}>Displacement · Obstruction · Pneumothorax · Equipment failure</Text>
+            </View>
           </View>
 
           {/* Defibrillator section */}
@@ -469,79 +502,125 @@ export default function EmergencyScreen() {
             <Text style={[styles.calcSectionTitle, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_600SemiBold", marginBottom: 10 }]}>
               Defibrillator Energy — {weight} kg
             </Text>
-            <View style={styles.defibGrid}>
-              <View style={[styles.defibBox, { backgroundColor: isDark ? "#112240" : "#FEF3C7", borderColor: isDark ? "#D97706" : "#F59E0B" }]}>
-                <Text style={[styles.defibLabel, { color: isDark ? "#FCD34D" : "#92400E", fontFamily: "Inter_500Medium" }]}>
-                  1st Shock
-                </Text>
-                <Text style={[styles.defibJoules, { color: isDark ? "#FDE047" : "#B45309", fontFamily: "Inter_700Bold" }]}>
-                  {defib.initial} J
-                </Text>
-                <Text style={[styles.defibFormula, { color: isDark ? "#F59E0B" : "#D97706", fontFamily: "Inter_400Regular" }]}>
-                  2 J/kg
-                </Text>
+            <View style={{ gap: 8 }}>
+              {/* Unsynchronized (VF/pVT) */}
+              <View style={[styles.shockBox, { backgroundColor: isDark ? "#112240" : "#FEE2E2", borderColor: isDark ? "#DC2626" : "#FCA5A5" }]}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                  <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: "#DC2626" }} />
+                  <Text style={[styles.shockType, { color: isDark ? "#FCA5A5" : "#991B1B" }]}>
+                    Unsynchronized — VF / pVT
+                  </Text>
+                </View>
+                <View style={{ flexDirection: "row", gap: 12, alignItems: "baseline" }}>
+                  <View>
+                    <Text style={[styles.shockJoules, { color: isDark ? "#FECACA" : "#DC2626" }]}>{defib.unsync1st} J</Text>
+                    <Text style={[styles.shockFormula, { color: isDark ? "#F87171" : "#991B1B" }]}>1st: 2 J/kg</Text>
+                  </View>
+                  <View>
+                    <Text style={[styles.shockJoules, { color: isDark ? "#FECACA" : "#DC2626" }]}>{defib.unsyncSub} J</Text>
+                    <Text style={[styles.shockFormula, { color: isDark ? "#F87171" : "#991B1B" }]}>Subsequent: 4 J/kg</Text>
+                  </View>
+                  <View>
+                    <Text style={[styles.shockJoules, { color: isDark ? "#FECACA" : "#DC2626" }]}>{defib.unsyncMax} J</Text>
+                    <Text style={[styles.shockFormula, { color: isDark ? "#F87171" : "#991B1B" }]}>Max: 10 J/kg</Text>
+                  </View>
+                </View>
               </View>
-              <View style={[styles.defibBox, { backgroundColor: isDark ? "#112240" : "#FEE2E2", borderColor: isDark ? "#DC2626" : "#F87171" }]}>
-                <Text style={[styles.defibLabel, { color: isDark ? "#FCA5A5" : "#991B1B", fontFamily: "Inter_500Medium" }]}>
-                  Subsequent
-                </Text>
-                <Text style={[styles.defibJoules, { color: isDark ? "#FECACA" : "#B91C1C", fontFamily: "Inter_700Bold" }]}>
-                  {defib.subsequent} J
-                </Text>
-                <Text style={[styles.defibFormula, { color: isDark ? "#F87171" : "#DC2626", fontFamily: "Inter_400Regular" }]}>
-                  4 J/kg
-                </Text>
-              </View>
-              <View style={[styles.defibBox, { backgroundColor: isDark ? "#112240" : "#FCE7F3", borderColor: isDark ? "#DB2777" : "#F9A8D4" }]}>
-                <Text style={[styles.defibLabel, { color: isDark ? "#F9A8D4" : "#831843", fontFamily: "Inter_500Medium" }]}>
-                  Maximum
-                </Text>
-                <Text style={[styles.defibJoules, { color: isDark ? "#FBCFE8" : "#9D174D", fontFamily: "Inter_700Bold" }]}>
-                  {defib.maximum} J
-                </Text>
-                <Text style={[styles.defibFormula, { color: isDark ? "#F472B6" : "#BE185D", fontFamily: "Inter_400Regular" }]}>
-                  10 J/kg (max 360)
-                </Text>
+              {/* Synchronized (SVT/VT with pulse) */}
+              <View style={[styles.shockBox, { backgroundColor: isDark ? "#112240" : "#FEF3C7", borderColor: isDark ? "#D97706" : "#FCD34D" }]}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                  <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: "#D97706" }} />
+                  <Text style={[styles.shockType, { color: isDark ? "#FCD34D" : "#92400E" }]}>
+                    Synchronized — SVT / VT with pulse
+                  </Text>
+                </View>
+                <View style={{ flexDirection: "row", gap: 12, alignItems: "baseline" }}>
+                  <View>
+                    <Text style={[styles.shockJoules, { color: isDark ? "#FDE047" : "#B45309" }]}>{defib.sync1st} J</Text>
+                    <Text style={[styles.shockFormula, { color: isDark ? "#F59E0B" : "#92400E" }]}>1st: 0.5–1 J/kg</Text>
+                  </View>
+                  <View>
+                    <Text style={[styles.shockJoules, { color: isDark ? "#FDE047" : "#B45309" }]}>{defib.syncSub} J</Text>
+                    <Text style={[styles.shockFormula, { color: isDark ? "#F59E0B" : "#92400E" }]}>Subsequent: 2 J/kg</Text>
+                  </View>
+                </View>
               </View>
             </View>
           </View>
 
-          {/* Hs & Ts — Reversible Causes */}
+          {/* Hs & Ts — Interactive Reversible Causes Checklist */}
           <View style={[styles.calcSection, { borderTopColor: isDark ? "#233554" : "#F0F4F8" }]}>
-            <TouchableOpacity
-              onPress={() => setHsTsOpen(!hsTsOpen)}
-              style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 }}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.calcSectionTitle, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_600SemiBold" }]}>
-                Reversible Causes (Hs & Ts)
-              </Text>
-              <Feather name={hsTsOpen ? "chevron-up" : "chevron-down"} size={18} color={isDark ? "#8892B0" : "#64748B"} />
-            </TouchableOpacity>
-            {hsTsOpen && (
-              <View style={{ marginTop: 10, gap: 10 }}>
-                {/* Hs */}
-                <View style={[styles.htBlock, { backgroundColor: isDark ? "#112240" : "#F0F4F8", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
-                  <Text style={[styles.htTitle, { color: isDark ? "#93C5FD" : "#1E40AF" }]}>Hs — Hypo / Hypo</Text>
-                  {Hs.map((h, i) => (
-                    <View key={i} style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 4 }}>
-                      <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: isDark ? "#93C5FD" : "#1E40AF" }} />
-                      <Text style={[styles.htItem, { color: isDark ? "#CCD6F6" : "#0D1B2A" }]}>{h}</Text>
-                    </View>
-                  ))}
+            <Text style={[styles.calcSectionTitle, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_600SemiBold", marginBottom: 10 }]}>
+              Reversible Causes (Hs & Ts)
+            </Text>
+            <View style={styles.htGrid}>
+              {/* Hs Column */}
+              <View style={[styles.htCol, { backgroundColor: isDark ? "#112240" : "#F0F4F8", borderColor: isDark ? "#1E40AF" : "#93C5FD" }]}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: isDark ? "#93C5FD" : "#1E40AF" }} />
+                  <Text style={[styles.htColTitle, { color: isDark ? "#93C5FD" : "#1E40AF" }]}>Hs</Text>
                 </View>
-                {/* Ts */}
-                <View style={[styles.htBlock, { backgroundColor: isDark ? "#112240" : "#F0F4F8", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
-                  <Text style={[styles.htTitle, { color: isDark ? "#FCA5A5" : "#991B1B" }]}>Ts — Tension / Toxins</Text>
-                  {Ts.map((t, i) => (
-                    <View key={i} style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 4 }}>
-                      <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: isDark ? "#FCA5A5" : "#991B1B" }} />
-                      <Text style={[styles.htItem, { color: isDark ? "#CCD6F6" : "#0D1B2A" }]}>{t}</Text>
-                    </View>
-                  ))}
-                </View>
+                {HsItems.map((h, i) => {
+                  const checked = hsChecked[i];
+                  return (
+                    <TouchableOpacity
+                      key={i}
+                      onPress={() => toggleH(i)}
+                      activeOpacity={0.7}
+                      style={[styles.htRow, { opacity: checked ? 0.45 : 1 }]}>
+                      <View style={{ width: 18, alignItems: "center" }}>
+                        {checked ? (
+                          <Feather name="check-square" size={14} color={isDark ? "#93C5FD" : "#1E40AF"} />
+                        ) : (
+                          <View style={{ width: 14, height: 14, borderRadius: 3, borderWidth: 1.5, borderColor: isDark ? "#93C5FD" : "#1E40AF" }} />
+                        )}
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={[styles.htLabel, { color: isDark ? "#CCD6F6" : "#0D1B2A", textDecorationLine: checked ? "line-through" : "none" }]}>
+                          {h.label}
+                        </Text>
+                        <Text style={[styles.htAction, { color: isDark ? "#93C5FD" : "#1E40AF" }]}>
+                          Action: {h.action}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
-            )}
+              {/* Ts Column */}
+              <View style={[styles.htCol, { backgroundColor: isDark ? "#112240" : "#F0F4F8", borderColor: isDark ? "#FCA5A5" : "#991B1B" }]}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 6 }}>
+                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: isDark ? "#FCA5A5" : "#991B1B" }} />
+                  <Text style={[styles.htColTitle, { color: isDark ? "#FCA5A5" : "#991B1B" }]}>Ts</Text>
+                </View>
+                {TsItems.map((t, i) => {
+                  const checked = tsChecked[i];
+                  return (
+                    <TouchableOpacity
+                      key={i}
+                      onPress={() => toggleT(i)}
+                      activeOpacity={0.7}
+                      style={[styles.htRow, { opacity: checked ? 0.45 : 1 }]}>
+                      <View style={{ width: 18, alignItems: "center" }}>
+                        {checked ? (
+                          <Feather name="check-square" size={14} color={isDark ? "#FCA5A5" : "#991B1B"} />
+                        ) : (
+                          <View style={{ width: 14, height: 14, borderRadius: 3, borderWidth: 1.5, borderColor: isDark ? "#FCA5A5" : "#991B1B" }} />
+                        )}
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={[styles.htLabel, { color: isDark ? "#CCD6F6" : "#0D1B2A", textDecorationLine: checked ? "line-through" : "none" }]}>
+                          {t.label}
+                        </Text>
+                        <Text style={[styles.htAction, { color: isDark ? "#FCA5A5" : "#991B1B" }]}>
+                          Action: {t.action}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
           </View>
         </View>
 
@@ -842,18 +921,6 @@ const styles = StyleSheet.create({
   ettLabel: { fontSize: 10 },
   ettValue: { fontSize: 15, textAlign: "center" },
 
-  defibGrid: { flexDirection: "row", gap: 8 },
-  defibBox: {
-    flex: 1,
-    borderRadius: 10,
-    padding: 10,
-    alignItems: "center",
-    borderWidth: 1,
-    gap: 2,
-  },
-  defibLabel: { fontSize: 10 },
-  defibJoules: { fontSize: 18 },
-  defibFormula: { fontSize: 9, textAlign: "center" },
 
   inputRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   inputWrap: { flex: 1 },
@@ -886,8 +953,46 @@ const styles = StyleSheet.create({
   },
   airwayBadgeLabel: { fontSize: 10, fontWeight: "600", marginBottom: 2 },
   airwayBadgeValue: { fontSize: 13, fontWeight: "700" },
-  // Hs & Ts blocks
-  htBlock: { borderRadius: 10, borderWidth: 1, padding: 10 },
-  htTitle: { fontSize: 12, fontWeight: "700", marginBottom: 4 },
-  htItem: { fontSize: 12, lineHeight: 16 },
+  // DOPE strip
+  dopeStrip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    marginTop: 8,
+    flexWrap: "wrap",
+  },
+  dopeLabel: { fontSize: 10, fontWeight: "700" },
+  dopeText: { fontSize: 10, fontWeight: "500" },
+  // Defibrillator shock boxes
+  shockBox: {
+    borderRadius: 10,
+    borderWidth: 1,
+    padding: 10,
+    gap: 2,
+  },
+  shockType: { fontSize: 12, fontWeight: "700" },
+  shockJoules: { fontSize: 18, fontWeight: "700" },
+  shockFormula: { fontSize: 10, fontWeight: "500" },
+  // Hs & Ts interactive grid
+  htGrid: { flexDirection: "row", gap: 8 },
+  htCol: {
+    flex: 1,
+    borderRadius: 10,
+    borderWidth: 1,
+    padding: 10,
+    gap: 6,
+  },
+  htColTitle: { fontSize: 12, fontWeight: "700" },
+  htRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 6,
+    paddingVertical: 2,
+  },
+  htLabel: { fontSize: 11, fontWeight: "600", lineHeight: 15 },
+  htAction: { fontSize: 9, fontWeight: "500", lineHeight: 13, marginTop: 1 },
 });
