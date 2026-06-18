@@ -645,7 +645,46 @@ export default function EmergencyScreen() {
               </View>
             </View>
           </View>
+
+          {/* Hs & Ts — Reversible Causes */}
+          <View style={[styles.calcSection, { borderTopColor: isDark ? "#233554" : "#F0F4F8" }]}>
+            <TouchableOpacity
+              onPress={() => setHsTsOpen(!hsTsOpen)}
+              style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 }}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.calcSectionTitle, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_600SemiBold" }]}>
+                Reversible Causes (Hs & Ts)
+              </Text>
+              <Feather name={hsTsOpen ? "chevron-up" : "chevron-down"} size={18} color={isDark ? "#8892B0" : "#64748B"} />
+            </TouchableOpacity>
+            {hsTsOpen && (
+              <View style={{ marginTop: 10, gap: 10 }}>
+                {/* Hs */}
+                <View style={[styles.htBlock, { backgroundColor: isDark ? "#112240" : "#F0F4F8", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
+                  <Text style={[styles.htTitle, { color: isDark ? "#93C5FD" : "#1E40AF" }]}>Hs — Hypo / Hypo</Text>
+                  {Hs.map((h, i) => (
+                    <View key={i} style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 4 }}>
+                      <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: isDark ? "#93C5FD" : "#1E40AF" }} />
+                      <Text style={[styles.htItem, { color: isDark ? "#CCD6F6" : "#0D1B2A" }]}>{h}</Text>
+                    </View>
+                  ))}
+                </View>
+                {/* Ts */}
+                <View style={[styles.htBlock, { backgroundColor: isDark ? "#112240" : "#F0F4F8", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
+                  <Text style={[styles.htTitle, { color: isDark ? "#FCA5A5" : "#991B1B" }]}>Ts — Tension / Toxins</Text>
+                  {Ts.map((t, i) => (
+                    <View key={i} style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 4 }}>
+                      <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: isDark ? "#FCA5A5" : "#991B1B" }} />
+                      <Text style={[styles.htItem, { color: isDark ? "#CCD6F6" : "#0D1B2A" }]}>{t}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            )}
+          </View>
         </View>
+
           {/* APGAR Score */}
           <View style={[styles.calcSection, { borderTopColor: isDark ? "#233554" : "#F0F4F8" }]}>
             <Text style={[styles.calcSectionTitle, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_600SemiBold", marginBottom: 10 }]}>APGAR Score (1 & 5 min)</Text>
@@ -690,43 +729,6 @@ export default function EmergencyScreen() {
             )}
           </View>
 
-          {/* Hs & Ts — Reversible Causes */}
-          <View style={[styles.calcSection, { borderTopColor: isDark ? "#233554" : "#F0F4F8" }]}>
-            <TouchableOpacity
-              onPress={() => setHsTsOpen(!hsTsOpen)}
-              style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 }}
-              activeOpacity={0.7}
-            >
-              <Text style={[styles.calcSectionTitle, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_600SemiBold" }]}>
-                Reversible Causes (Hs & Ts)
-              </Text>
-              <Feather name={hsTsOpen ? "chevron-up" : "chevron-down"} size={18} color={isDark ? "#8892B0" : "#64748B"} />
-            </TouchableOpacity>
-            {hsTsOpen && (
-              <View style={{ marginTop: 10, gap: 10 }}>
-                {/* Hs */}
-                <View style={[styles.htBlock, { backgroundColor: isDark ? "#112240" : "#F0F4F8", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
-                  <Text style={[styles.htTitle, { color: isDark ? "#93C5FD" : "#1E40AF" }]}>Hs — Hypo / Hypo</Text>
-                  {Hs.map((h, i) => (
-                    <View key={i} style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 4 }}>
-                      <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: isDark ? "#93C5FD" : "#1E40AF" }} />
-                      <Text style={[styles.htItem, { color: isDark ? "#CCD6F6" : "#0D1B2A" }]}>{h}</Text>
-                    </View>
-                  ))}
-                </View>
-                {/* Ts */}
-                <View style={[styles.htBlock, { backgroundColor: isDark ? "#112240" : "#F0F4F8", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
-                  <Text style={[styles.htTitle, { color: isDark ? "#FCA5A5" : "#991B1B" }]}>Ts — Tension / Toxins</Text>
-                  {Ts.map((t, i) => (
-                    <View key={i} style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 4 }}>
-                      <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: isDark ? "#FCA5A5" : "#991B1B" }} />
-                      <Text style={[styles.htItem, { color: isDark ? "#CCD6F6" : "#0D1B2A" }]}>{t}</Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
-            )}
-          </View>
         <ProfessionalFooter />
       </ScrollView>
     </View>
