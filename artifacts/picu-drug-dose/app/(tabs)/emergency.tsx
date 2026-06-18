@@ -107,19 +107,6 @@ export default function EmergencyScreen() {
   const lma = calcLMA(weight);
   const [hsTsOpen, setHsTsOpen] = useState(false);
 
-  const [apgarA, setApgarA] = useState("");
-  const [apgarP, setApgarP] = useState("");
-  const [apgarG, setApgarG] = useState("");
-  const [apgarAc, setApgarAc] = useState("");
-  const [apgarR, setApgarR] = useState("");
-  const apgarTotal = (parseInt(apgarA) || 0) + (parseInt(apgarP) || 0) + (parseInt(apgarG) || 0) + (parseInt(apgarAc) || 0) + (parseInt(apgarR) || 0);
-
-  const [emBurnWt, setEmBurnWt] = useState("");
-  const [emBurnBsa, setEmBurnBsa] = useState("");
-  const emBurnTotal = Math.round(3 * (parseFloat(emBurnWt) || 0) * (parseFloat(emBurnBsa) || 0));
-  const emBurnFirst8 = Math.round(emBurnTotal / 2);
-  const emBurnNext16 = Math.round(emBurnTotal / 2);
-
   const emergencyCards = useMemo((): EmergencyItem[] => {
     const results: EmergencyItem[] = [];
 
@@ -369,7 +356,7 @@ export default function EmergencyScreen() {
         </View>
       </View>
 
-      {/* Emergency Cards */}
+      {/* Emergency Scrollable Content */}
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
@@ -380,140 +367,7 @@ export default function EmergencyScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {emergencyCards.map((item, idx) => (
-          <View
-            key={idx}
-            style={[
-              styles.emergencyCard,
-              {
-                backgroundColor: isDark ? "#112240" : "#FFFFFF",
-                borderLeftColor: item.color,
-                borderWidth: isDark ? 1 : 0,
-                borderColor: isDark ? "#233554" : "transparent",
-                borderLeftWidth: 4,
-              },
-            ]}
-          >
-            <View style={styles.cardTop}>
-              <View style={styles.cardTitleRow}>
-                <View style={styles.badgeRow}>
-                  {item.warning && (
-                    <View
-                      style={[
-                        styles.criticalBadge,
-                        {
-                          backgroundColor: isDark ? "#6366F120" : item.color + "22",
-                        },
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.criticalText,
-                          { color: isDark ? "#6366F1" : item.color, fontFamily: "Inter_700Bold" },
-                        ]}
-                      >
-                        CODE BLUE READY
-                      </Text>
-                    </View>
-                  )}
-                  {/* IN route badge for intranasal items */}
-                  {(item.route.includes("IN") || item.route.toLowerCase().includes("intranasal")) && (
-                    <View style={styles.inBadge}>
-                      <Text style={[styles.inBadgeText, { fontFamily: "Inter_700Bold" }]}>
-                        IN
-                      </Text>
-                    </View>
-                  )}
-                </View>
-                <Text
-                  style={[
-                    styles.cardLabel,
-                    {
-                      color: isDark ? "#FFFFFF" : "#0D1B2A",
-                      fontFamily: "Inter_600SemiBold",
-                    },
-                  ]}
-                >
-                  {item.label}
-                </Text>
-              </View>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                <View
-                  style={[
-                    styles.routeTag,
-                    { backgroundColor: item.color + "22" },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.routeTagText,
-                      { color: item.color, fontFamily: "Inter_600SemiBold" },
-                    ]}
-                  >
-                    {item.route}
-                  </Text>
-                </View>
-                <StarButton
-                  isFav={isFav(`emergency-${idx}`)}
-                  onToggle={() =>
-                    toggleFav({
-                      id: `emergency-${idx}`,
-                      type: "drug",
-                      label: item.label,
-                      color: item.color,
-                      notes: item.route,
-                    })
-                  }
-                  size={18}
-                  color={item.color}
-                />
-              </View>
-            </View>
-
-            <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6 }}>
-              <Text
-                style={[
-                  styles.cardDose,
-                  { color: item.color, fontFamily: "Inter_800ExtraBold" },
-                ]}
-              >
-                {item.dose.split(" ").slice(0, -1).join(" ") || item.dose}
-              </Text>
-              <Text
-                style={[
-                  styles.cardDoseUnit,
-                  { color: item.color, fontFamily: "Inter_600SemiBold" },
-                ]}
-              >
-                {item.dose.split(" ").pop()}
-              </Text>
-            </View>
-
-            {/* Adult max dose red alert */}
-            {item.exceedsAdultMax && (
-              <View style={styles.adultMaxAlert}>
-                <Feather name="alert-octagon" size={13} color="#fff" />
-                <Text style={[styles.adultMaxAlertText, { fontFamily: "Inter_700Bold" }]}>
-                  RED ALERT: {item.adultMaxLabel}
-                </Text>
-              </View>
-            )}
-
-            <Text
-              style={[
-                styles.cardNotes,
-                {
-                  color: isDark ? "#8892B0" : "#8A9BB0",
-                  fontFamily: "Inter_400Regular",
-                },
-              ]}
-            >
-              {item.notes}
-            </Text>
-          </View>
-        ))}
-
-        {/* Emergency Calculators — ET Tube & Defibrillation */}
+        {/* Emergency Calculators — ET Tube, Defibrillator, Hs & Ts */}
         <View
           style={[
             styles.palsBanner,
@@ -685,49 +539,139 @@ export default function EmergencyScreen() {
           </View>
         </View>
 
-          {/* APGAR Score */}
-          <View style={[styles.calcSection, { borderTopColor: isDark ? "#233554" : "#F0F4F8" }]}>
-            <Text style={[styles.calcSectionTitle, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_600SemiBold", marginBottom: 10 }]}>APGAR Score (1 & 5 min)</Text>
-            <View style={styles.ettGrid}>
-              {[{ l: "Appearance", s: setApgarA, v: apgarA }, { l: "Pulse", s: setApgarP, v: apgarP }, { l: "Grimace", s: setApgarG, v: apgarG }, { l: "Activity", s: setApgarAc, v: apgarAc }, { l: "Respiration", s: setApgarR, v: apgarR }].map((x) => (
-                <View key={x.l} style={[styles.ettBox, { backgroundColor: isDark ? "#112240" : "#F0F4F8", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
-                  <Text style={[styles.ettLabel, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_500Medium" }]}>{x.l}</Text>
-                  <TextInput style={[styles.ageInput, { color: isDark ? "#FFFFFF" : "#0D1B2A", backgroundColor: isDark ? "#0A192F" : "#FFFFFF", fontFamily: "Inter_700Bold", borderWidth: 1, borderColor: isDark ? "#233554" : "#E2E8F0" }]} value={x.v} onChangeText={x.s} keyboardType="decimal-pad" maxLength={1} placeholder="0" placeholderTextColor={isDark ? "#8892B0" : "#8A9BB0"} />
+        {/* Emergency Medications */}
+        {emergencyCards.map((item, idx) => (
+          <View
+            key={idx}
+            style={[
+              styles.emergencyCard,
+              {
+                backgroundColor: isDark ? "#112240" : "#FFFFFF",
+                borderLeftColor: item.color,
+                borderWidth: isDark ? 1 : 0,
+                borderColor: isDark ? "#233554" : "transparent",
+                borderLeftWidth: 4,
+              },
+            ]}
+          >
+            <View style={styles.cardTop}>
+              <View style={styles.cardTitleRow}>
+                <View style={styles.badgeRow}>
+                  {item.warning && (
+                    <View
+                      style={[
+                        styles.criticalBadge,
+                        {
+                          backgroundColor: isDark ? "#6366F120" : item.color + "22",
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.criticalText,
+                          { color: isDark ? "#6366F1" : item.color, fontFamily: "Inter_700Bold" },
+                        ]}
+                      >
+                        CODE BLUE READY
+                      </Text>
+                    </View>
+                  )}
+                  {/* IN route badge for intranasal items */}
+                  {(item.route.includes("IN") || item.route.toLowerCase().includes("intranasal")) && (
+                    <View style={styles.inBadge}>
+                      <Text style={[styles.inBadgeText, { fontFamily: "Inter_700Bold" }]}>
+                        IN
+                      </Text>
+                    </View>
+                  )}
                 </View>
-              ))}
+                <Text
+                  style={[
+                    styles.cardLabel,
+                    {
+                      color: isDark ? "#FFFFFF" : "#0D1B2A",
+                      fontFamily: "Inter_600SemiBold",
+                    },
+                  ]}
+                >
+                  {item.label}
+                </Text>
+              </View>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <View
+                  style={[
+                    styles.routeTag,
+                    { backgroundColor: item.color + "22" },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.routeTagText,
+                      { color: item.color, fontFamily: "Inter_600SemiBold" },
+                    ]}
+                  >
+                    {item.route}
+                  </Text>
+                </View>
+                <StarButton
+                  isFav={isFav(`emergency-${idx}`)}
+                  onToggle={() =>
+                    toggleFav({
+                      id: `emergency-${idx}`,
+                      type: "drug",
+                      label: item.label,
+                      color: item.color,
+                      notes: item.route,
+                    })
+                  }
+                  size={18}
+                  color={item.color}
+                />
+              </View>
             </View>
-            <View style={[styles.resultBox, { backgroundColor: apgarTotal >= 7 ? "#16A34A15" : apgarTotal >= 4 ? "#F59E0B15" : "#FEE2E2", borderColor: apgarTotal >= 7 ? "#16A34A40" : apgarTotal >= 4 ? "#F59E0B40" : "#FCA5A5", marginTop: 10 }]}>
-              <Text style={[styles.resultLabel, { color: apgarTotal >= 7 ? "#16A34A" : apgarTotal >= 4 ? "#F59E0B" : "#DC2626" }]}>APGAR = {apgarTotal} / 10</Text>
-              <Text style={[styles.resultNote, { color: apgarTotal >= 7 ? "#16A34A" : apgarTotal >= 4 ? "#F59E0B" : "#DC2626", fontWeight: "700" }]}>
-                {apgarTotal >= 7 ? "Normal" : apgarTotal >= 4 ? "Moderately depressed" : "Severely depressed"}
-              </Text>
-              <Text style={[styles.refText, { color: isDark ? "#8892B0" : "#64748B", marginTop: 4 }]}>
-                {apgarTotal < 7 ? "If HR < 100: PPV. If HR < 60: CPR + Epi" : ""}
-              </Text>
-            </View>
-          </View>
 
-          {/* Parkland Burns (Emergency) */}
-          <View style={[styles.calcSection, { borderTopColor: isDark ? "#233554" : "#F0F4F8" }]}>
-            <Text style={[styles.calcSectionTitle, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_600SemiBold", marginBottom: 10 }]}>Parkland Burns (Emergency Resuscitation)</Text>
-            <View style={styles.inputRow}>
-              <View style={[styles.inputWrap, { flex: 1, marginRight: 6 }]}>
-                <Text style={[styles.inputLabel, { color: isDark ? "#8892B0" : "#64748B" }]}>Weight (kg)</Text>
-                <TextInput style={[styles.input, { color: isDark ? "#FFFFFF" : "#0D1B2A", backgroundColor: isDark ? "#0A192F" : "#FFFFFF", borderColor: isDark ? "#233554" : "#E2E8F0" }]} value={emBurnWt} onChangeText={setEmBurnWt} keyboardType="decimal-pad" placeholder="e.g. 20" placeholderTextColor={isDark ? "#8892B0" : "#8A9BB0"} />
-              </View>
-              <View style={[styles.inputWrap, { flex: 1 }]}>
-                <Text style={[styles.inputLabel, { color: isDark ? "#8892B0" : "#64748B" }]}>% TBSA</Text>
-                <TextInput style={[styles.input, { color: isDark ? "#FFFFFF" : "#0D1B2A", backgroundColor: isDark ? "#0A192F" : "#FFFFFF", borderColor: isDark ? "#233554" : "#E2E8F0" }]} value={emBurnBsa} onChangeText={setEmBurnBsa} keyboardType="decimal-pad" placeholder="e.g. 30" placeholderTextColor={isDark ? "#8892B0" : "#8A9BB0"} />
-              </View>
+            <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6 }}>
+              <Text
+                style={[
+                  styles.cardDose,
+                  { color: item.color, fontFamily: "Inter_800ExtraBold" },
+                ]}
+              >
+                {item.dose.split(" ").slice(0, -1).join(" ") || item.dose}
+              </Text>
+              <Text
+                style={[
+                  styles.cardDoseUnit,
+                  { color: item.color, fontFamily: "Inter_600SemiBold" },
+                ]}
+              >
+                {item.dose.split(" ").pop()}
+              </Text>
             </View>
-            {emBurnTotal > 0 && (
-              <View style={[styles.resultBox, { backgroundColor: "#B4530915", borderColor: "#B4530940", marginTop: 10 }]}>
-                <Text style={[styles.resultLabel, { color: "#B45309" }]}>Total: {emBurnTotal} mL RL</Text>
-                <Text style={[styles.resultNote, { color: "#B45309" }]}>1st 8hrs: {emBurnFirst8} mL · Next 16hrs: {emBurnNext16} mL</Text>
-                <Text style={[styles.refText, { color: isDark ? "#8892B0" : "#64748B" }]}>Parkland: 3 × wt × %TBSA. Add maintenance in children.</Text>
+
+            {/* Adult max dose red alert */}
+            {item.exceedsAdultMax && (
+              <View style={styles.adultMaxAlert}>
+                <Feather name="alert-octagon" size={13} color="#fff" />
+                <Text style={[styles.adultMaxAlertText, { fontFamily: "Inter_700Bold" }]}>
+                  RED ALERT: {item.adultMaxLabel}
+                </Text>
               </View>
             )}
+
+            <Text
+              style={[
+                styles.cardNotes,
+                {
+                  color: isDark ? "#8892B0" : "#8A9BB0",
+                  fontFamily: "Inter_400Regular",
+                },
+              ]}
+            >
+              {item.notes}
+            </Text>
           </View>
+        ))}
 
         <ProfessionalFooter />
       </ScrollView>

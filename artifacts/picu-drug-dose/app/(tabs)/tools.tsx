@@ -605,6 +605,14 @@ export default function ToolsScreen() {
   // ── Score tab selector ──
   const [scoreTab, setScoreTab] = useState<"four" | "osi" | "sipa" | "wat1">("four");
 
+  // ── APGAR ──
+  const [apgarA, setApgarA] = useState("");
+  const [apgarP, setApgarP] = useState("");
+  const [apgarG, setApgarG] = useState("");
+  const [apgarAc, setApgarAc] = useState("");
+  const [apgarR, setApgarR] = useState("");
+  const apgarTotal = (parseInt(apgarA) || 0) + (parseInt(apgarP) || 0) + (parseInt(apgarG) || 0) + (parseInt(apgarAc) || 0) + (parseInt(apgarR) || 0);
+
   // ── PEWS ──
   const [pewsB, setPewsB] = useState("");
   const [pewsCv, setPewsCv] = useState("");
@@ -653,6 +661,7 @@ export default function ToolsScreen() {
           { key: "scores", label: "Scores", color: "#FF4C60" },
           { key: "renal", label: "Renal", color: "#DC2626" },
           { key: "pews", label: "PEWS", color: "#F59E0B" },
+          { key: "apgar", label: "APGAR", color: "#EC4899" },
         ].map((chip) => (
           <TouchableOpacity
             key={chip.key}
@@ -1535,6 +1544,66 @@ export default function ToolsScreen() {
                   {pewsAlert ? "\u26a0 Urgent: Activate Rapid Response" : "Routine monitoring"}
                 </Text>
               </View>
+            </View>
+          )}
+        </View>
+
+        {/* ──────────────── APGAR Score ──────────────── */}
+        <View style={styles.sectionWrap} ref={(el) => { sectionRefs.current["apgar"] = el; }}>
+          <SectionHeader
+            title="APGAR Score (1 & 5 min)"
+            icon="heart"
+            color="#EC4899"
+            open={openSection === "apgar"}
+            onToggle={() => toggle("apgar")}
+            isDark={isDark}
+          />
+          {openSection === "apgar" && (
+            <View style={[styles.sectionBody, { backgroundColor: cardBg, borderColor: border }]}>
+              <View style={{ flexDirection: "row", justifyContent: "flex-end", marginBottom: 4 }}>
+                <StarButton isFav={isFav("tool-apgar")} onToggle={() => toggleFav({ id: "tool-apgar", type: "tool", label: "APGAR Score", color: "#EC4899" })} size={18} color="#EC4899" />
+              </View>
+              <Text style={[styles.refText, { color: textMuted }]}>
+                Neonatal assessment at 1 and 5 minutes. Score range: 0–10.
+              </Text>
+              <View style={styles.ettGrid}>
+                {[
+                  { l: "Appearance", s: setApgarA, v: apgarA },
+                  { l: "Pulse", s: setApgarP, v: apgarP },
+                  { l: "Grimace", s: setApgarG, v: apgarG },
+                  { l: "Activity", s: setApgarAc, v: apgarAc },
+                  { l: "Respiration", s: setApgarR, v: apgarR },
+                ].map((x) => (
+                  <View key={x.l} style={[styles.ettBox, { backgroundColor: isDark ? "#0A192F" : "#F8FAFC", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
+                    <Text style={[styles.ettLabel, { color: textMuted, fontFamily: "Inter_500Medium" }]}>{x.l}</Text>
+                    <TextInput
+                      style={[styles.ageInput, { color: textPrimary, backgroundColor: inputBg, borderColor: border, fontFamily: "Inter_700Bold" }]}
+                      value={x.v}
+                      onChangeText={x.s}
+                      keyboardType="decimal-pad"
+                      maxLength={1}
+                      placeholder="0"
+                      placeholderTextColor={textMuted}
+                    />
+                  </View>
+                ))}
+              </View>
+              <View style={[styles.resultBox, { backgroundColor: apgarTotal >= 7 ? "#16A34A15" : apgarTotal >= 4 ? "#F59E0B15" : "#FEE2E2", borderColor: apgarTotal >= 7 ? "#16A34A40" : apgarTotal >= 4 ? "#F59E0B40" : "#FCA5A5", marginTop: 10 }]}>
+                <Text style={[styles.resultLabel, { color: apgarTotal >= 7 ? "#16A34A" : apgarTotal >= 4 ? "#F59E0B" : "#DC2626" }]}>APGAR = {apgarTotal} / 10</Text>
+                <Text style={[styles.resultNote, { color: apgarTotal >= 7 ? "#16A34A" : apgarTotal >= 4 ? "#F59E0B" : "#DC2626", fontWeight: "700" }]}>
+                  {apgarTotal >= 7 ? "Normal" : apgarTotal >= 4 ? "Moderately depressed" : "Severely depressed"}
+                </Text>
+                <Text style={[styles.refText, { color: textMuted, marginTop: 4 }]}>
+                  {apgarTotal < 7 ? "If HR < 100: PPV. If HR < 60: CPR + Epi" : ""}
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => { setApgarA(""); setApgarP(""); setApgarG(""); setApgarAc(""); setApgarR(""); }}
+                style={[styles.resetBundleBtn, { justifyContent: "center" }]}
+              >
+                <Feather name="rotate-ccw" size={14} color={textMuted} />
+                <Text style={[styles.resetBundleText, { color: textMuted }]}>Reset APGAR</Text>
+              </TouchableOpacity>
             </View>
           )}
         </View>
