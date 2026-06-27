@@ -12,7 +12,8 @@ export type DrugCategory =
   | "cardiovascular"
   | "antifungal"
   | "steroid"
-  | "vitamin";
+  | "vitamin"
+  | "gastrointestinal";
 
 export interface DoseRange {
   min?: number;
@@ -69,6 +70,7 @@ export const CATEGORIES: Record<
   antifungal: { label: "Antifungals", icon: "cpu", color: "#445566" },
   steroid: { label: "Steroids", icon: "sun", color: "#C06000" },
   vitamin: { label: "Vitamins / Minerals", icon: "plus-circle", color: "#1A7A40" },
+  gastrointestinal: { label: "Gastrointestinal", icon: "thermometer", color: "#0E7490" },
 };
 
 export const DRUGS: Drug[] = [
@@ -227,6 +229,39 @@ export const DRUGS: Drug[] = [
     formulations: ["500 mg/mL (50%)", "200 mg/mL (20%)"],
     monitoring: ["Reflexes, RR, BP", "Serum Mg target 2–3.5 mmol/L"],
     reference: "PALS 2025 | Harriet Lane 23e",
+  },
+
+  {
+    id: "tranexamic-acid",
+    name: "Tranexamic Acid",
+    genericName: "TXA",
+    category: "emergency",
+    highAlert: true,
+    indications: ["Major trauma", "Hemorrhage", "Severe post-operative bleeding"],
+    doses: [
+      { value: 15, unit: "mg/kg", perKg: true, route: "IV over 10 min", maxDose: "1000 mg", label: "Loading dose", notes: "Give within 3 hr of injury; administer over 10 min to reduce hypotension risk", adultMaxDose_num: 1000 },
+      { value: 2, unit: "mg/kg/hr", perKg: true, route: "IV infusion", label: "Maintenance infusion", notes: "Run for 8 hr after loading dose" },
+    ],
+    contraindications: ["Active thromboembolic disease", "Subarachnoid hemorrhage"],
+    warnings: ["INCOMPATIBLE with blood products and penicillins — use separate IV line", "Rapid IV push may cause hypotension — always infuse over 10 min"],
+    monitoring: ["BP", "Signs of thrombosis", "Renal function", "Urine output"],
+    formulations: ["100 mg/mL (5 mL and 10 mL vials)"],
+    reference: "Harriet Lane 23e | CRASH-2 / CRASH-3",
+  },
+  {
+    id: "calcium-chloride",
+    name: "Calcium Chloride 10%",
+    category: "emergency",
+    highAlert: true,
+    indications: ["Symptomatic hypocalcemia", "Hyperkalemia with ECG changes", "Calcium channel blocker toxicity"],
+    doses: [
+      { value: 20, unit: "mg/kg (0.2 mL/kg of 10%)", perKg: true, route: "IV slow push (Central)", maxDose: "1000 mg", label: "Acute emergency dose", notes: "= 0.2 mL/kg of 10% solution; infuse slowly over 5–10 min with continuous ECG monitoring", adultMaxDose_num: 1000 },
+    ],
+    contraindications: ["Ventricular fibrillation (unless confirmed hypocalcemia)"],
+    warnings: ["CENTRAL LINE ONLY — vesicant, causes severe tissue necrosis peripherally", "INCOMPATIBLE with Bicarbonate (precipitates)", "3× more elemental calcium than calcium gluconate per mL"],
+    monitoring: ["Continuous ECG", "Ionized calcium", "IV site for extravasation"],
+    formulations: ["100 mg/mL (10% solution, 10 mL vials)"],
+    reference: "Harriet Lane 23e | PALS 2025",
   },
 
   // ════════════════════════════════════════════════════════════
@@ -953,6 +988,26 @@ export const DRUGS: Drug[] = [
     formulations: ["50 mg/mL injection"],
     reference: "Harriet Lane 23e",
   },
+  {
+    id: "sodium-valproate-iv",
+    name: "Sodium Valproate IV",
+    genericName: "Depakote IV / Epilim IV",
+    category: "antiepileptic",
+    highAlert: true,
+    indications: ["Refractory status epilepticus", "Seizure maintenance when oral route unavailable"],
+    doses: [
+      { min: 20, max: 40, unit: "mg/kg", perKg: true, route: "IV over 5–10 min", maxDose: "3000 mg", label: "Loading dose — Status epilepticus", notes: "Infuse at max 6 mg/kg/min; can give at 10 mg/kg/min in emergency under cardiac monitoring", adultMaxDose_num: 3000 },
+      { min: 1, max: 5, unit: "mg/kg/hr", perKg: true, route: "IV infusion", label: "Maintenance infusion", notes: "Start 6 hr after loading; target serum level 50–100 mcg/mL" },
+    ],
+    contraindications: ["Mitochondrial disorders (POLG mutation)", "Hepatic failure", "Urea cycle disorders", "Pregnancy (teratogen)"],
+    warnings: ["INCOMPATIBLE with Meropenem — meropenem dramatically reduces valproate levels (AVOID co-administration)", "Hepatotoxicity risk — monitor LFTs", "Hyperammonemia — check ammonia if encephalopathic"],
+    monitoring: ["Serum valproate levels (50–100 mcg/mL)", "Ammonia", "LFTs", "Platelets (thrombocytopenia)", "ECG during rapid infusion"],
+    formulations: ["100 mg/mL injection (4 mL vial = 400 mg)"],
+    renalAdjustment: [
+      { gfr: "Any", adjustment: "No dose adjustment; monitor free fraction (protein binding decreased in renal failure)" },
+    ],
+    reference: "Harriet Lane 23e | Nelson's Pediatrics 22e",
+  },
 
   // ════════════════════════════════════════════════════════════
   //  STEROIDS
@@ -1002,6 +1057,7 @@ export const DRUGS: Drug[] = [
       { min: 10, max: 30, unit: "mg/kg", perKg: true, route: "IV over 30–60 min", maxDose: "1000 mg", label: "Pulse therapy (autoimmune)", frequency: "Daily × 3 days" },
     ],
     formulations: ["40 mg", "125 mg", "500 mg", "1 g vials"],
+    monitoring: ["Blood glucose every 4–6 hr", "Blood pressure", "Serum electrolytes"],
     renalAdjustment: [
       { gfr: "Any", adjustment: "No dose adjustment; monitor glucose and electrolytes" },
     ],
@@ -1180,7 +1236,7 @@ export const DRUGS: Drug[] = [
       { gfr: "30–50 mL/min/1.73m²", adjustment: "Reduce maintenance dose by 25–35%; check levels" },
       { gfr: "< 30 mL/min/1.73m²", adjustment: "Reduce maintenance dose by 50%; every 36–48 hr; mandatory level monitoring" },
     ],
-    monitoring: ["Digoxin levels 6–8 hr post-dose; ECG; K+, Mg, Ca, renal function"],
+    monitoring: ["ECG (PR interval, ST changes)", "Serum potassium (keep K+ > 3.5 mEq/L)", "Digoxin levels 6–8 hr post-dose (target 0.8–2 ng/mL)", "Mg, Ca, renal function"],
     reference: "Harriet Lane 23e",
   },
   {
@@ -1246,6 +1302,7 @@ export const DRUGS: Drug[] = [
     ],
     warnings: ["Avoid in asthma (bronchospasm)", "Bradycardia, hypotension"],
     formulations: ["5 mg/mL injection (20 mL)", "100 mg tablets", "200 mg tablets"],
+    monitoring: ["Blood pressure (every 5 min during IV bolus)", "Heart rate", "ECG"],
     renalAdjustment: [
       { gfr: "Any", adjustment: "Primarily hepatic metabolism; use with caution in severe hepatic impairment; no renal dose change" },
     ],
@@ -1454,6 +1511,125 @@ export const DRUGS: Drug[] = [
     ],
     formulations: ["400 IU/drop solution", "1000 IU capsules", "50,000 IU weekly tablets"],
     reference: "WHO PF 2024 | Endocrine Society 2024",
+  },
+
+  // ════════════════════════════════════════════════════════════
+  //  GASTROINTESTINAL
+  // ════════════════════════════════════════════════════════════
+  {
+    id: "ondansetron",
+    name: "Ondansetron",
+    genericName: "Zofran",
+    category: "gastrointestinal",
+    indications: ["Post-operative nausea and vomiting (PONV)", "Chemotherapy-induced nausea/vomiting", "Gastroenteritis vomiting (adjunct)"],
+    doses: [
+      { value: 0.15, unit: "mg/kg", perKg: true, route: "IV over 15 min / PO / ODT", maxDose: "8 mg", frequency: "Every 8 hr as needed", label: "Standard antiemetic dose", notes: "Administer IV over 15 min to reduce QTc risk; ODT dissolves on tongue", adultMaxDose_num: 8 },
+    ],
+    contraindications: ["Congenital long QT syndrome", "Concurrent apomorphine use"],
+    warnings: ["QTc prolongation — obtain baseline ECG in high-risk patients (hypokalemia, hypomagnesemia, cardiac disease)", "Serotonin syndrome risk with other serotonergic agents"],
+    monitoring: ["ECG (QTc interval) in high-risk patients", "Electrolytes (K+, Mg)"],
+    formulations: ["2 mg/mL injection (2 mL, 4 mL vials)", "4 mg/5 mL oral solution", "4 mg and 8 mg ODT tablets"],
+    reference: "Harriet Lane 23e | Nelson's Pediatrics 22e",
+  },
+  {
+    id: "pantoprazole-iv",
+    name: "Pantoprazole IV",
+    genericName: "Protonix IV",
+    category: "gastrointestinal",
+    indications: ["Stress ulcer prophylaxis (FASTHUG protocol)", "Upper GI bleeding", "GERD / Erosive esophagitis when oral route unavailable"],
+    doses: [
+      { value: 1, unit: "mg/kg/day", perKg: true, route: "IV over 15 min", maxDose: "40 mg", frequency: "Once daily", label: "Stress ulcer prophylaxis / GERD", notes: "Reconstitute ONLY with NS (10 mL); infuse over minimum 15 min; do not use D5W", adultMaxDose_num: 40 },
+    ],
+    warnings: ["INCOMPATIBLE with Midazolam and Zinc-containing solutions — use separate IV line and flush", "Reconstitute with NS ONLY — precipitates with D5W", "Risk of hypomagnesemia with prolonged use (> 1 month)"],
+    monitoring: ["Magnesium levels (weekly with prolonged use)", "GI symptoms", "pH if monitoring gastric acid suppression"],
+    formulations: ["40 mg powder for injection (single-dose vial)"],
+    renalAdjustment: [
+      { gfr: "Any", adjustment: "No dose adjustment required" },
+    ],
+    reference: "Harriet Lane 23e | Nelson's Pediatrics 22e",
+  },
+
+  // ════════════════════════════════════════════════════════════
+  //  ADDITIONAL NMBDs
+  // ════════════════════════════════════════════════════════════
+  {
+    id: "dantrolene",
+    name: "Dantrolene",
+    category: "nmbd",
+    highAlert: true,
+    indications: ["Malignant hyperthermia (acute treatment)", "Neuroleptic malignant syndrome"],
+    doses: [
+      { min: 1, max: 2.5, unit: "mg/kg", perKg: true, route: "IV rapid push", label: "Malignant hyperthermia — initial bolus", notes: "Repeat every 5–10 min until symptoms resolve; total dose may reach 10 mg/kg or more" },
+      { value: 1, unit: "mg/kg", perKg: true, route: "IV", frequency: "Every 6 hr for 24–48 hr", label: "Post-crisis maintenance", notes: "To prevent recurrence after acute MH episode" },
+    ],
+    warnings: ["Reconstitute each 20 mg vial with 60 mL sterile water — takes time; prepare multiple vials simultaneously in MH crisis", "Hepatotoxicity with prolonged oral use", "Call MH hotline immediately: 1-800-MH-HYPER (in US)"],
+    monitoring: ["Core temperature (target < 38°C)", "Muscle tone and rigidity", "LFTs", "CPK", "ABG (metabolic acidosis)", "Electrolytes"],
+    formulations: ["20 mg vials (lyophilized, reconstitute with 60 mL sterile water for injection)"],
+    reference: "Harriet Lane 23e | Malignant Hyperthermia Association (MHAUS) Guidelines",
+  },
+
+  // ════════════════════════════════════════════════════════════
+  //  ADDITIONAL SEDATIVES
+  // ════════════════════════════════════════════════════════════
+  {
+    id: "glycopyrrolate",
+    name: "Glycopyrrolate",
+    genericName: "Robinul",
+    category: "sedative",
+    indications: ["Secretions reduction prior to ketamine", "NMBD reversal adjunct (with neostigmine)", "Excessive drooling", "Bradycardia prophylaxis"],
+    doses: [
+      { min: 5, max: 10, unit: "mcg/kg", perKg: true, route: "IV", maxDose: "200 mcg", label: "Pre-ketamine / antisecretory", notes: "Give 2–3 min before ketamine to prevent excessive secretions; preferred over atropine (no CNS effects)", adultMaxDose_num: 200 },
+      { value: 10, unit: "mcg/kg", perKg: true, route: "IV", maxDose: "200 mcg", label: "With neostigmine (NMBD reversal)", notes: "Mix 10 mcg/kg glycopyrrolate with 50 mcg/kg neostigmine; give simultaneously" },
+    ],
+    monitoring: ["Heart rate (watch for tachycardia)", "Secretions", "BP"],
+    formulations: ["200 mcg/mL (0.2 mg/mL) injection"],
+    reference: "Harriet Lane 23e | Nelson's Pediatrics 22e",
+  },
+
+  // ════════════════════════════════════════════════════════════
+  //  ADDITIONAL ANTIBIOTICS
+  // ════════════════════════════════════════════════════════════
+  {
+    id: "ceftazidime",
+    name: "Ceftazidime",
+    category: "antibiotic",
+    indications: ["Pseudomonas aeruginosa infections", "Hospital-acquired pneumonia", "Febrile neutropenia", "Gram-negative sepsis"],
+    doses: [
+      { value: 50, unit: "mg/kg/dose", perKg: true, route: "IV over 30 min", maxDose: "2000 mg", frequency: "Every 8 hr", label: "Standard dose", notes: "For CNS infection: 50 mg/kg q8h (max 6 g/day); consider extended infusion (EI) for resistant organisms", adultMaxDose_num: 2000 },
+    ],
+    warnings: ["NOT active against MRSA or Enterococcus", "Consider combination therapy for confirmed Pseudomonas sepsis", "Extended infusion (over 3–4 hr) may improve pharmacodynamic target attainment for resistant strains"],
+    renalAdjustment: [
+      { gfr: "30–50 mL/min/1.73m²", adjustment: "Reduce to 25–50 mg/kg/dose every 12 hr" },
+      { gfr: "10–30 mL/min/1.73m²", adjustment: "Reduce to 25 mg/kg/dose every 12–24 hr" },
+      { gfr: "< 10 mL/min/1.73m²", adjustment: "Reduce to 25 mg/kg/dose every 24–48 hr; supplement post-dialysis" },
+    ],
+    monitoring: ["Renal function (creatinine, BUN)", "Signs of infection resolution", "Drug levels if augmented dosing"],
+    formulations: ["500 mg and 2 g vials for injection"],
+    reference: "Harriet Lane 23e | Nelson's Pediatrics 22e",
+  },
+
+  // ════════════════════════════════════════════════════════════
+  //  ANTICOAGULATION
+  // ════════════════════════════════════════════════════════════
+  {
+    id: "heparin",
+    name: "Heparin (Unfractionated)",
+    category: "cardiovascular",
+    highAlert: true,
+    indications: ["Deep vein thrombosis (DVT) treatment", "Pulmonary embolism", "ECMO / CPB anticoagulation", "Central line flush (prophylaxis)", "Antiphospholipid syndrome"],
+    doses: [
+      { value: 75, unit: "units/kg", perKg: true, route: "IV bolus over 10 min", maxDose: "5000 units", label: "Loading dose (therapeutic)", notes: "Followed immediately by maintenance infusion; adjust based on APTT/Anti-Xa" },
+      { min: 28, max: 20, unit: "units/kg/hr", perKg: true, route: "IV infusion", label: "Maintenance — neonates (28 units/kg/hr) / children (20 units/kg/hr)", notes: "Neonates: start 28 units/kg/hr; children: start 20 units/kg/hr; titrate to target APTT 60–85 sec or Anti-Xa 0.3–0.7 units/mL" },
+      { min: 0.5, max: 1, unit: "units/kg/hr", perKg: true, route: "IV infusion (central line)", label: "Prophylaxis — central line patency", notes: "Low-dose flush protocol; institution-specific" },
+    ],
+    contraindications: ["Active major bleeding", "Heparin-induced thrombocytopenia (HIT)", "Severe thrombocytopenia (platelets < 20×10⁹/L)"],
+    warnings: ["HIGH ALERT — double-check dose calculations; use weight-based protocol", "HIT: suspect if platelets fall > 50% after day 5–10 of therapy — stop immediately, use alternative anticoagulant", "Protamine sulfate antidote: 1 mg per 100 units heparin given in last 2 hr"],
+    monitoring: ["APTT (target 60–85 sec) OR Anti-Xa level (target 0.3–0.7 units/mL)", "Platelet count every 2–3 days from day 4 onwards (HIT surveillance)", "Signs of bleeding", "Fibrinogen if clinical concern"],
+    formulations: ["1000 units/mL", "5000 units/mL", "25,000 units/mL concentrates (dilute before use)"],
+    renalAdjustment: [
+      { gfr: "Any", adjustment: "Primarily hepatic/reticuloendothelial clearance; monitor APTT/Anti-Xa closely in renal failure — effect may be prolonged" },
+    ],
+    reference: "Harriet Lane 23e | Nelson's Pediatrics 22e | ASH 2024 Guidelines",
   },
 ];
 

@@ -115,7 +115,7 @@ export default function CalculatorScreen() {
               ]}
               numberOfLines={1}
             >
-              Dose Calculator
+              MKashanEdu
             </Text>
             <Text
               style={[
@@ -123,7 +123,7 @@ export default function CalculatorScreen() {
                 { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" },
               ]}
             >
-              Weight-based dosing for all ages
+              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 95+ drugs
             </Text>
           </View>
           <TouchableOpacity
