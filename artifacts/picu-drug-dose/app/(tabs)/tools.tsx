@@ -685,8 +685,8 @@ export default function ToolsScreen() {
       <View style={[styles.header, { paddingTop: topPadding + 12, backgroundColor: isDark ? "#0A192F" : "#FFFFFF" }]}>
         <View style={styles.headerRow}>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.headerTitle, { color: textPrimary }]}>Clinical Tools</Text>
-            <Text style={[styles.headerSub, { color: textMuted }]}>Quick-access ICU utilities</Text>
+            <Text style={[styles.headerTitle, { color: textPrimary }]}>MKashanEdu</Text>
+            <Text style={[styles.headerSub, { color: textMuted }]}>Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 95+ drugs</Text>
           </View>
           <TouchableOpacity
             onPress={toggleDark}

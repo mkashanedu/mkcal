@@ -357,7 +357,7 @@ export default function EmergencyScreen() {
                 { fontFamily: "Inter_700Bold" },
               ]}
             >
-              Code Blue / Emergency
+              MKashanEdu
             </Text>
           </View>
           {/* Night shift toggle */}

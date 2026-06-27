@@ -397,9 +397,9 @@ export default function CalcsScreen() {
       <View style={[sh.topHeader, { paddingTop: topPadding + 12, backgroundColor: isDark ? "#0A192F" : "#FFF" }]}>
         <View style={sh.topHeaderRow}>
           <View style={{ flex: 1 }}>
-            <Text style={[sh.headerTitle, { color: textPrimary }]}>Clinical Protocols</Text>
+            <Text style={[sh.headerTitle, { color: textPrimary }]}>MKashanEdu</Text>
             <Text style={[sh.headerSub, { color: textMuted }]}>
-              10 evidence-based calculators · 100% offline
+              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 95+ drugs
             </Text>
           </View>
           <TouchableOpacity onPress={toggleDark}

@@ -60,10 +60,10 @@ export default function FavoritesScreen() {
         <View style={styles.headerRow}>
           <View style={{ flex: 1 }}>
             <Text style={[styles.headerTitle, { color: textPrimary }]}>
-              Favorites
+              MKashanEdu
             </Text>
             <Text style={[styles.headerSub, { color: textMuted }]}>
-              {items.length} starred items
+              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 95+ drugs
             </Text>
           </View>
           <TouchableOpacity

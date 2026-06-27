@@ -20,10 +20,10 @@ export function ProfessionalFooter() {
       ]}
     >
       <Text style={[styles.line1, { color: D ? "#8892B0" : "#64748B" }]}>
-        PEADSCAL CLINICAL REFERENCE V1.2
+        MKashanEdu Clinical Reference V1.2
       </Text>
       <Text style={[styles.line2, { color: D ? "#FFFFFF" : "#0F172A" }]}>
-        Prepared By: M. Kashan
+        Prepared By: M. Kashan, RN
       </Text>
       <Text style={[styles.line3, { color: D ? "#00B48A" : "#0D9488" }]}>
         Peads ICU & Cardiac Specialist

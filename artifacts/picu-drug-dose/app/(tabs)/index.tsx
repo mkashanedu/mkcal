@@ -213,7 +213,7 @@ export default function DrugListScreen() {
               ]}
               numberOfLines={1}
             >
-              PeadsCal
+              MKashanEdu
             </Text>
             <Text
               style={[
@@ -221,7 +221,7 @@ export default function DrugListScreen() {
                 { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" },
               ]}
             >
-              Neonatal, Pediatric & Adult · {DRUGS.length} drugs
+              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 95+ drugs
             </Text>
           </View>
 

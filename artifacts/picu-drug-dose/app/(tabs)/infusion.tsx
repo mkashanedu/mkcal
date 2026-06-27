@@ -345,10 +345,10 @@ export default function InfusionScreen() {
         <View style={[styles.header, { backgroundColor: CARD, borderBottomColor: BORDER }]}>
           <View style={styles.headerLeft}>
             <Text style={[styles.headerTitle, { color: TEXT }]} numberOfLines={1}>
-              Infusion Calculator
+              MKashanEdu
             </Text>
             <Text style={[styles.headerSubtitle, { color: MUTED }]} numberOfLines={1}>
-              {INFUSION_DRUGS.length} drugs · mL/hr pump rate
+              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 95+ drugs
             </Text>
           </View>
           <View style={styles.headerRight}>
