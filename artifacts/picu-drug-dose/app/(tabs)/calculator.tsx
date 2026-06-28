@@ -36,6 +36,7 @@ export default function CalculatorScreen() {
   const { isFav, toggleFav } = useFavorites();
 
   const [selectedCategory, setSelectedCategory] = useState<DrugCategory | null>(null);
+  const [search, setSearch] = useState("");
   const [weightUnit, setWeightUnit] = useState<"kg" | "lbs">("kg");
   const [lbsInput, setLbsInput] = useState("");
   const [weightWarning, setWeightWarning] = useState(false);
@@ -88,9 +89,17 @@ export default function CalculatorScreen() {
   const displayInput = weightUnit === "kg" ? weightInput : lbsInput;
 
   const drugsToShow = useMemo(() => {
-    if (!selectedCategory) return DRUGS;
-    return DRUGS.filter((d) => d.category === selectedCategory);
-  }, [selectedCategory]);
+    return DRUGS.filter((d) => {
+      const matchCat = !selectedCategory || d.category === selectedCategory;
+      const q = search.toLowerCase();
+      const matchSearch =
+        !q ||
+        d.name.toLowerCase().includes(q) ||
+        (d.genericName?.toLowerCase().includes(q) ?? false) ||
+        d.indications?.some((i) => i.toLowerCase().includes(q));
+      return matchCat && matchSearch;
+    });
+  }, [selectedCategory, search]);
 
   const categories = Object.entries(CATEGORIES) as [DrugCategory, typeof CATEGORIES[DrugCategory]][];
 
@@ -295,6 +304,24 @@ export default function CalculatorScreen() {
               </Pressable>
             ))}
           </ScrollView>
+        </View>
+
+        {/* Search bar */}
+        <View style={[styles.searchBar, { backgroundColor: isDark ? "#0A192F" : "#EBF5FB" }]}>
+          <Feather name="search" size={16} color={isDark ? "#4D6E88" : Colors.light.tint} />
+          <TextInput
+            style={[styles.searchInput, { color: isDark ? "#FFFFFF" : "#0D1B2A", fontFamily: "Inter_400Regular" }]}
+            placeholder="Search drugs, indications..."
+            placeholderTextColor={isDark ? "#8892B0" : "#8A9BB0"}
+            value={search}
+            onChangeText={setSearch}
+            returnKeyType="search"
+          />
+          {search.length > 0 && (
+            <Pressable onPress={() => setSearch("")}>
+              <Feather name="x" size={16} color={isDark ? "#8892B0" : "#8A9BB0"} />
+            </Pressable>
+          )}
         </View>
 
         {/* Category filter */}
@@ -647,6 +674,17 @@ const styles = StyleSheet.create({
   catList: { gap: 6, paddingBottom: 10 },
   catChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16 },
   catChipText: { fontSize: 12 },
+  searchBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginHorizontal: 16,
+    marginBottom: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderRadius: 12,
+  },
+  searchInput: { flex: 1, fontSize: 14, padding: 0 },
   scrollContent: { padding: 12, gap: 10 },
 
   // Drug blocks
