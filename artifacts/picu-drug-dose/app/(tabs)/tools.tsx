@@ -81,12 +81,46 @@ function findNearestAge(
 
 function estimatePercentile(val: number, refs: [number, number, number, number, number]) {
   const [p3, p15, p50, p85, p97] = refs;
-  if (val < p3) return { label: "<3rd percentile", color: "#DC2626", note: "Severely underweight — review nutrition/growth" };
-  if (val < p15) return { label: "3rd–15th percentile", color: "#D97706", note: "Below average — monitor closely" };
-  if (val < p50) return { label: "15th–50th percentile", color: "#16A34A", note: "Low-normal range" };
-  if (val < p85) return { label: "50th–85th percentile", color: "#16A34A", note: "Normal range" };
-  if (val < p97) return { label: "85th–97th percentile", color: "#D97706", note: "Above average — assess for obesity risk" };
-  return { label: ">97th percentile", color: "#DC2626", note: "Obese range — clinical review recommended" };
+
+  // Z-score approximation: SD ≈ (P97 - P3) / (2 × 1.88)
+  const sd = (p97 - p3) / (2 * 1.88);
+  const zscore = sd > 0 ? (val - p50) / sd : 0;
+  const zRounded = Math.round(zscore * 10) / 10;
+
+  // WHO Nutritional Status classification
+  let nutritionStatus: string;
+  let nutritionColor: string;
+  let samAlert = false;
+  if (zscore < -3) {
+    nutritionStatus = "Severe Acute Malnutrition (SAM)";
+    nutritionColor = "#DC2626";
+    samAlert = true;
+  } else if (zscore < -2) {
+    nutritionStatus = "Moderate Acute Malnutrition (MAM)";
+    nutritionColor = "#D97706";
+  } else if (zscore <= 2) {
+    nutritionStatus = "Normal";
+    nutritionColor = "#16A34A";
+  } else if (zscore <= 3) {
+    nutritionStatus = "Overweight";
+    nutritionColor = "#D97706";
+  } else {
+    nutritionStatus = "Obese";
+    nutritionColor = "#DC2626";
+  }
+
+  // Percentile band
+  let label: string;
+  let color: string;
+  let note: string;
+  if (val < p3) { label = "<3rd percentile"; color = "#DC2626"; note = "Significantly below expected weight for age"; }
+  else if (val < p15) { label = "3rd–15th percentile"; color = "#D97706"; note = "Below average — monitor closely"; }
+  else if (val < p50) { label = "15th–50th percentile"; color = "#16A34A"; note = "Low-normal range"; }
+  else if (val < p85) { label = "50th–85th percentile"; color = "#16A34A"; note = "Normal range"; }
+  else if (val < p97) { label = "85th–97th percentile"; color = "#D97706"; note = "Above average — assess for obesity risk"; }
+  else { label = ">97th percentile"; color = "#DC2626"; note = "Obese range — clinical review recommended"; }
+
+  return { label, color, note, zscore: zRounded, nutritionStatus, nutritionColor, samAlert };
 }
 
 // ─── VIS formula ──────────────────────────────────────────────────────────────
@@ -739,7 +773,7 @@ export default function ToolsScreen() {
         {/* ──────────────── MODULE 3: GROWTH CHARTS ──────────────── */}
         <View style={styles.sectionWrap} ref={(el) => { sectionRefs.current["growth"] = el; }}>
           <SectionHeader
-            title="Growth Charts (WHO/CDC)"
+            title="Growth Charts — WHO Standards"
             icon="bar-chart-2"
             color="#0D9488"
             open={openSection === "growth"}
@@ -748,70 +782,216 @@ export default function ToolsScreen() {
           />
           {openSection === "growth" && (
             <View style={[styles.sectionBody, { backgroundColor: cardBg, borderColor: border }]}>
-              <View style={{ flexDirection: "row", justifyContent: "flex-end", marginBottom: 4 }}>
+
+              {/* ── Header bar ── */}
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 12, fontWeight: "700", color: "#0D9488", letterSpacing: 0.3 }}>
+                    WHO Child Growth Standards
+                  </Text>
+                  <Text style={{ fontSize: 10, color: textMuted, marginTop: 1 }}>
+                    Nelson's Pediatrics 22e · Harriet Lane 23e
+                  </Text>
+                </View>
                 <StarButton isFav={isFav("tool-growth")} onToggle={() => toggleFav({ id: "tool-growth", type: "tool", label: "Growth Charts", color: "#0D9488" })} size={18} color="#0D9488" />
               </View>
-              <Text style={[styles.refText, { color: textMuted }]}>WHO (0–24 mo) · CDC (2–18 yr) — Weight-for-Age percentile estimate</Text>
 
-              {/* Sex selector */}
-              <View style={styles.chipRow}>
-                <Chip label="Male" color="#0D9488" selected={growthSex === "M"} onPress={() => setGrowthSex("M")} isDark={isDark} />
-                <Chip label="Female" color="#7C3AED" selected={growthSex === "F"} onPress={() => setGrowthSex("F")} isDark={isDark} />
+              <Text style={[styles.refText, { color: textMuted, marginBottom: 10 }]}>
+                Weight-for-Age · Z-score (SD) · Nutritional Status Classification
+              </Text>
+
+              {/* ── Sex selector ── */}
+              <Text style={[styles.inputLabel, { color: textMuted, marginBottom: 4 }]}>Sex</Text>
+              <View style={{ flexDirection: "row", gap: 8, marginBottom: 12 }}>
+                <TouchableOpacity
+                  onPress={() => setGrowthSex("M")}
+                  style={{
+                    flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: "center",
+                    backgroundColor: growthSex === "M" ? "#0D9488" : (isDark ? "#1E293B" : "#F1F5F9"),
+                    borderWidth: 2,
+                    borderColor: growthSex === "M" ? "#0D9488" : (isDark ? "#334155" : "#CBD5E1"),
+                  }}
+                >
+                  <Text style={{ fontWeight: "700", fontSize: 14, color: growthSex === "M" ? "#FFFFFF" : textMuted }}>
+                    ♂ Male
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setGrowthSex("F")}
+                  style={{
+                    flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: "center",
+                    backgroundColor: growthSex === "F" ? "#7C3AED" : (isDark ? "#1E293B" : "#F1F5F9"),
+                    borderWidth: 2,
+                    borderColor: growthSex === "F" ? "#7C3AED" : (isDark ? "#334155" : "#CBD5E1"),
+                  }}
+                >
+                  <Text style={{ fontWeight: "700", fontSize: 14, color: growthSex === "F" ? "#FFFFFF" : textMuted }}>
+                    ♀ Female
+                  </Text>
+                </TouchableOpacity>
               </View>
 
-              {/* Age input */}
-              <View style={styles.inputRow}>
-                <View style={styles.inputWrap}>
-                  <Text style={[styles.inputLabel, { color: textMuted }]}>Age</Text>
-                  <TextInput
-                    style={[styles.input, { color: textPrimary, backgroundColor: inputBg, borderColor: border }]}
-                    value={growthAge}
-                    onChangeText={setGrowthAge}
-                    keyboardType="decimal-pad"
-                    placeholder="e.g. 18"
-                    placeholderTextColor={textMuted}
-                  />
-                </View>
-                <View style={styles.chipRow}>
-                  <Chip label="Months" color="#0D9488" selected={growthAgeUnit === "months"} onPress={() => setGrowthAgeUnit("months")} isDark={isDark} />
-                  <Chip label="Years" color="#0D9488" selected={growthAgeUnit === "years"} onPress={() => setGrowthAgeUnit("years")} isDark={isDark} />
-                </View>
-              </View>
-
-              {/* Weight input */}
-              <View style={styles.inputWrap}>
-                <Text style={[styles.inputLabel, { color: textMuted }]}>Weight (kg)</Text>
+              {/* ── Age input + unit toggle ── */}
+              <Text style={[styles.inputLabel, { color: textMuted, marginBottom: 4 }]}>Age</Text>
+              <View style={{ flexDirection: "row", gap: 8, marginBottom: 12 }}>
                 <TextInput
-                  style={[styles.input, { color: textPrimary, backgroundColor: inputBg, borderColor: border }]}
-                  value={growthWeight}
-                  onChangeText={setGrowthWeight}
+                  style={[styles.input, { flex: 1, color: textPrimary, backgroundColor: inputBg, borderColor: border }]}
+                  value={growthAge}
+                  onChangeText={setGrowthAge}
                   keyboardType="decimal-pad"
-                  placeholder="e.g. 12.5"
+                  placeholder="e.g. 18"
                   placeholderTextColor={textMuted}
                 />
+                <TouchableOpacity
+                  onPress={() => setGrowthAgeUnit("months")}
+                  style={{
+                    paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10, justifyContent: "center",
+                    backgroundColor: growthAgeUnit === "months" ? "#0D9488" : (isDark ? "#1E293B" : "#F1F5F9"),
+                    borderWidth: 2,
+                    borderColor: growthAgeUnit === "months" ? "#0D9488" : (isDark ? "#334155" : "#CBD5E1"),
+                  }}
+                >
+                  <Text style={{ fontWeight: "700", fontSize: 13, color: growthAgeUnit === "months" ? "#FFFFFF" : textMuted }}>Months</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setGrowthAgeUnit("years")}
+                  style={{
+                    paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10, justifyContent: "center",
+                    backgroundColor: growthAgeUnit === "years" ? "#0D9488" : (isDark ? "#1E293B" : "#F1F5F9"),
+                    borderWidth: 2,
+                    borderColor: growthAgeUnit === "years" ? "#0D9488" : (isDark ? "#334155" : "#CBD5E1"),
+                  }}
+                >
+                  <Text style={{ fontWeight: "700", fontSize: 13, color: growthAgeUnit === "years" ? "#FFFFFF" : textMuted }}>Years</Text>
+                </TouchableOpacity>
               </View>
 
+              {/* ── Weight input ── */}
+              <Text style={[styles.inputLabel, { color: textMuted, marginBottom: 4 }]}>Weight (kg)</Text>
+              <TextInput
+                style={[styles.input, { color: textPrimary, backgroundColor: inputBg, borderColor: border, marginBottom: 14 }]}
+                value={growthWeight}
+                onChangeText={setGrowthWeight}
+                keyboardType="decimal-pad"
+                placeholder="e.g. 12.5"
+                placeholderTextColor={textMuted}
+              />
+
+              {/* ── Results ── */}
               {growthResult && growthRefs && (
-                <View style={[styles.resultBox, { backgroundColor: growthResult.color + "15", borderColor: growthResult.color + "40" }]}>
-                  <Text style={[styles.resultLabel, { color: growthResult.color }]}>{growthResult.label}</Text>
-                  <Text style={[styles.resultNote, { color: textMuted }]}>{growthResult.note}</Text>
-                  <Text style={[styles.refText, { color: textMuted, marginTop: 6 }]}>
-                    Reference at age {Math.round(growthAgeMonths)} mo ({growthSex === "M" ? "Boys" : "Girls"}):
-                    {" "}P3={growthRefs[0]} · P50={growthRefs[2]} · P97={growthRefs[4]} kg
+                <View style={{ gap: 10 }}>
+
+                  {/* SAM Critical Alert */}
+                  {growthResult.samAlert && (
+                    <View style={{ backgroundColor: "#FEE2E2", borderColor: "#DC2626", borderWidth: 2, borderRadius: 10, padding: 12, flexDirection: "row", alignItems: "center", gap: 8 }}>
+                      <Feather name="alert-triangle" size={20} color="#DC2626" />
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ color: "#DC2626", fontWeight: "800", fontSize: 13 }}>
+                          CRITICAL: Severe Acute Malnutrition
+                        </Text>
+                        <Text style={{ color: "#B91C1C", fontSize: 12, marginTop: 2 }}>
+                          Refer to Dietitian — Initiate SAM Protocol
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+
+                  {/* Z-score + Percentile row */}
+                  <View style={{ flexDirection: "row", gap: 8 }}>
+                    <View style={{ flex: 1, backgroundColor: growthResult.color + "18", borderColor: growthResult.color + "50", borderWidth: 1.5, borderRadius: 10, padding: 12, alignItems: "center" }}>
+                      <Text style={{ fontSize: 11, color: textMuted, fontWeight: "600", marginBottom: 2 }}>Z-SCORE (SD)</Text>
+                      <Text style={{ fontSize: 26, fontWeight: "800", color: growthResult.color }}>
+                        {growthResult.zscore > 0 ? "+" : ""}{growthResult.zscore}
+                      </Text>
+                    </View>
+                    <View style={{ flex: 1, backgroundColor: growthResult.color + "18", borderColor: growthResult.color + "50", borderWidth: 1.5, borderRadius: 10, padding: 12, alignItems: "center" }}>
+                      <Text style={{ fontSize: 11, color: textMuted, fontWeight: "600", marginBottom: 2 }}>PERCENTILE</Text>
+                      <Text style={{ fontSize: 14, fontWeight: "800", color: growthResult.color, textAlign: "center" }}>
+                        {growthResult.label}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Nutritional Status badge */}
+                  <View style={{ backgroundColor: growthResult.nutritionColor + "15", borderColor: growthResult.nutritionColor + "60", borderWidth: 1.5, borderRadius: 10, padding: 12 }}>
+                    <Text style={{ fontSize: 11, color: textMuted, fontWeight: "600", marginBottom: 2 }}>NUTRITIONAL STATUS</Text>
+                    <Text style={{ fontSize: 15, fontWeight: "800", color: growthResult.nutritionColor }}>
+                      {growthResult.nutritionStatus}
+                    </Text>
+                    <Text style={{ fontSize: 12, color: textMuted, marginTop: 3 }}>{growthResult.note}</Text>
+                  </View>
+
+                  {/* Visual Z-score bar */}
+                  <View style={{ marginTop: 2 }}>
+                    <Text style={{ fontSize: 11, color: textMuted, fontWeight: "600", marginBottom: 6 }}>
+                      NUTRITIONAL STATUS BAR (Z-score −4 to +4)
+                    </Text>
+                    <View style={{ height: 16, borderRadius: 8, flexDirection: "row", overflow: "hidden", marginBottom: 4 }}>
+                      <View style={{ flex: 1, backgroundColor: "#DC2626" }} />
+                      <View style={{ flex: 1, backgroundColor: "#F59E0B" }} />
+                      <View style={{ flex: 4, backgroundColor: "#16A34A" }} />
+                      <View style={{ flex: 1, backgroundColor: "#F59E0B" }} />
+                      <View style={{ flex: 1, backgroundColor: "#DC2626" }} />
+                    </View>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                      <Text style={{ fontSize: 9, color: "#DC2626", fontWeight: "700" }}>SAM</Text>
+                      <Text style={{ fontSize: 9, color: "#F59E0B", fontWeight: "700" }}>MAM</Text>
+                      <Text style={{ fontSize: 9, color: "#16A34A", fontWeight: "700" }}>NORMAL</Text>
+                      <Text style={{ fontSize: 9, color: "#F59E0B", fontWeight: "700" }}>OVER</Text>
+                      <Text style={{ fontSize: 9, color: "#DC2626", fontWeight: "700" }}>OBESE</Text>
+                    </View>
+                  </View>
+
+                  {/* Reference values */}
+                  <Text style={[styles.refText, { color: textMuted }]}>
+                    Reference at {Math.round(growthAgeMonths)} mo ({growthSex === "M" ? "Boys" : "Girls"}):
+                    {"  "}P3 = {growthRefs[0]} kg · P50 = {growthRefs[2]} kg · P97 = {growthRefs[4]} kg
                   </Text>
                 </View>
               )}
 
-              {/* HC reference */}
-              <View style={[styles.infoBox, { backgroundColor: isDark ? "#0A192F" : "#EFF6FF", borderColor: isDark ? "#233554" : "#BFDBFE" }]}>
-                <Text style={[styles.infoTitle, { color: "#3B82F6" }]}>Head Circumference Reference (WHO)</Text>
-                <Text style={[styles.infoText, { color: textMuted }]}>
-                  {"Birth: 34 cm  ·  3 mo: 40 cm  ·  6 mo: 43 cm\n12 mo: 46 cm  ·  2 yr: 48 cm  ·  Adult: ~57 cm\nMicrocephaly <2SD below mean  ·  Macrocephaly >98th %ile"}
+              {/* ── Head Circumference Reference Table ── */}
+              <View style={{ marginTop: 16, backgroundColor: isDark ? "#0F172A" : "#EFF6FF", borderColor: isDark ? "#1E3A5F" : "#BFDBFE", borderWidth: 1, borderRadius: 10, padding: 12 }}>
+                <Text style={{ fontSize: 13, fontWeight: "800", color: "#2563EB", marginBottom: 8 }}>
+                  Head Circumference Reference (WHO)
+                </Text>
+                {[
+                  ["Age", "Male (cm)", "Female (cm)", "Note"],
+                  ["Birth", "34.5", "33.9", ""],
+                  ["3 months", "40.5", "39.5", ""],
+                  ["6 months", "43.3", "42.2", ""],
+                  ["9 months", "45.0", "43.8", ""],
+                  ["12 months", "46.1", "44.9", ""],
+                  ["18 months", "47.6", "46.4", ""],
+                  ["2 years", "48.6", "47.3", ""],
+                  ["3 years", "49.6", "48.3", ""],
+                  ["5 years", "51.1", "49.8", ""],
+                  ["10 years", "53.2", "52.0", ""],
+                  ["Adult", "57.0", "55.0", "Approx."],
+                ].map((row, i) => (
+                  <View key={i} style={{
+                    flexDirection: "row",
+                    paddingVertical: 5,
+                    borderBottomWidth: i < 11 ? 0.5 : 0,
+                    borderBottomColor: isDark ? "#1E3A5F" : "#DBEAFE",
+                    backgroundColor: i === 0 ? (isDark ? "#1E3A5F" : "#DBEAFE") : "transparent",
+                    borderRadius: i === 0 ? 6 : 0,
+                    paddingHorizontal: i === 0 ? 4 : 0,
+                    marginBottom: i === 0 ? 2 : 0,
+                  }}>
+                    <Text style={{ flex: 2, fontSize: i === 0 ? 11 : 12, fontWeight: i === 0 ? "700" : "500", color: i === 0 ? "#2563EB" : textPrimary }}>{row[0]}</Text>
+                    <Text style={{ flex: 1.5, fontSize: i === 0 ? 11 : 12, fontWeight: i === 0 ? "700" : "600", color: i === 0 ? "#2563EB" : "#0D9488", textAlign: "center" }}>{row[1]}</Text>
+                    <Text style={{ flex: 1.5, fontSize: i === 0 ? 11 : 12, fontWeight: i === 0 ? "700" : "600", color: i === 0 ? "#2563EB" : "#7C3AED", textAlign: "center" }}>{row[2]}</Text>
+                    <Text style={{ flex: 1.5, fontSize: 10, color: textMuted, textAlign: "right" }}>{row[3]}</Text>
+                  </View>
+                ))}
+                <Text style={{ fontSize: 10, color: textMuted, marginTop: 8 }}>
+                  Microcephaly: {"<"}2 SD below mean · Macrocephaly: {">"}98th percentile
                 </Text>
               </View>
 
-              <Text style={[styles.refText, { color: textMuted, marginTop: 4 }]}>
-                Source: WHO Child Growth Standards · CDC Growth Charts 2000
+              <Text style={[styles.refText, { color: textMuted, marginTop: 8 }]}>
+                Source: WHO Child Growth Standards · Nelson's Pediatrics 22e · Harriet Lane 23e
               </Text>
             </View>
           )}
