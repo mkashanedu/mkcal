@@ -6,7 +6,6 @@ import {
   ScrollView,
   TextInput,
   TouchableOpacity,
-  FlatList,
   Platform,
   Animated,
   KeyboardAvoidingView,
@@ -229,7 +228,6 @@ export default function InfusionScreen() {
   const { isFav, toggleFav } = useFavorites();
 
   const [search, setSearch] = useState("");
-  const [showSearch, setShowSearch] = useState(false);
   const [catFilter, setCatFilter] = useState<InfusionCatKey>("all");
   const [selectedDrug, setSelectedDrug] = useState<InfusionDrug | null>(null);
   const [selectedConcIdx, setSelectedConcIdx] = useState(0);
@@ -271,7 +269,6 @@ export default function InfusionScreen() {
   const handleDrugSelect = useCallback(
     (drug: InfusionDrug) => {
       setSelectedDrug(drug);
-      setShowSearch(false);
       setSearch("");
       setSelectedConcIdx(0);
       setDoseInput(String(drug.typicalDose ?? drug.minDose));
@@ -421,7 +418,6 @@ export default function InfusionScreen() {
                     onPress={() => {
                       setCatFilter(cat.key as InfusionCatKey);
                       setSelectedDrug(null);
-                      setShowSearch(false);
                       setSearch("");
                     }}
                     style={[
@@ -441,75 +437,57 @@ export default function InfusionScreen() {
               })}
             </ScrollView>
 
-            <TouchableOpacity
-              style={[
-                styles.drugSelector,
-                {
-                  borderColor: selectedDrug ? selectedDrug.color : BORDER,
-                  backgroundColor: BG,
-                  borderWidth: selectedDrug ? 2 : 1.5,
-                },
-              ]}
-              onPress={() => setShowSearch((s) => !s)}
-              activeOpacity={0.8}
-            >
-              {selectedDrug ? (
-                <View style={styles.selectedDrugRow}>
-                  <View style={[styles.drugDot, { backgroundColor: selectedDrug.color, width: 12, height: 12, borderRadius: 6 }]} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={[styles.selectedDrugName, { color: selectedDrug.color }]}>
-                      {selectedDrug.name}
-                    </Text>
-                    <Text style={[styles.selectedDrugCategory, { color: MUTED }]}>
-                      {selectedDrug.category}
-                    </Text>
-                  </View>
-                  <Feather name={showSearch ? "chevron-up" : "chevron-down"} size={18} color={MUTED} />
-                </View>
-              ) : (
-                <View style={styles.selectedDrugRow}>
-                  <Feather name="search" size={18} color={MUTED} style={{ marginRight: 10 }} />
-                  <Text style={{ color: MUTED, fontSize: 15, flex: 1 }}>Search dopamine, fentanyl, atracurium…</Text>
-                  <Feather name="chevron-down" size={18} color={MUTED} />
-                </View>
+            {/* ── Persistent search bar ── */}
+            <View style={[styles.drugSearchBar, { backgroundColor: isDark ? "#0A192F" : "#EBF5FB" }]}>
+              <Feather name="search" size={15} color={isDark ? "#4D6E88" : C.tint} />
+              <TextInput
+                style={[styles.drugSearchInput, { color: TEXT }]}
+                value={search}
+                onChangeText={setSearch}
+                placeholder="Search dopamine, fentanyl, rocuronium…"
+                placeholderTextColor={MUTED}
+                returnKeyType="search"
+              />
+              {search.length > 0 && (
+                <TouchableOpacity onPress={() => setSearch("")}>
+                  <Feather name="x" size={15} color={MUTED} />
+                </TouchableOpacity>
               )}
-            </TouchableOpacity>
+            </View>
 
-            {showSearch && (
-              <View style={[styles.searchDropdown, { backgroundColor: CARD, borderColor: BORDER }]}>
-                <View style={[styles.searchInputRow, { borderBottomColor: BORDER }]}>
-                  <Feather name="search" size={16} color={MUTED} />
-                  <TextInput
-                    style={[styles.searchInput, { color: TEXT }]}
-                    value={search}
-                    onChangeText={setSearch}
-                    placeholder="Dopamine, fentanyl, rocuronium…"
-                    placeholderTextColor={MUTED}
-                    autoFocus
-                    returnKeyType="search"
-                  />
-                  {search.length > 0 && (
-                    <TouchableOpacity onPress={() => setSearch("")}>
-                      <Feather name="x" size={16} color={MUTED} />
+            {/* ── One-tap drug pill grid ── */}
+            {filteredDrugs.length === 0 ? (
+              <View style={styles.noDrugWrap}>
+                <Feather name="search" size={28} color={MUTED} />
+                <Text style={[styles.noDrugText, { color: MUTED }]}>No drugs match "{search}"</Text>
+              </View>
+            ) : (
+              <View style={styles.drugPillGrid}>
+                {filteredDrugs.map((drug) => {
+                  const isSel = selectedDrug?.id === drug.id;
+                  return (
+                    <TouchableOpacity
+                      key={drug.id}
+                      onPress={() => handleDrugSelect(drug)}
+                      style={[
+                        styles.drugPill,
+                        {
+                          backgroundColor: isSel ? drug.color : isDark ? "#1A2F4E" : "#F1F5F9",
+                          borderColor: isSel ? drug.color : isDark ? "#2D4A6B" : "#E2E8F0",
+                        },
+                      ]}
+                      activeOpacity={0.72}
+                    >
+                      <View style={[styles.drugPillDot, { backgroundColor: isSel ? "#fff" : drug.color }]} />
+                      <Text
+                        style={[styles.drugPillText, { color: isSel ? "#fff" : isDark ? "#CCD6F6" : "#1E293B" }]}
+                        numberOfLines={2}
+                      >
+                        {drug.name}
+                      </Text>
                     </TouchableOpacity>
-                  )}
-                </View>
-                <FlatList
-                  data={filteredDrugs}
-                  keyExtractor={(d) => d.id}
-                  renderItem={({ item }) => (
-                    <DrugSearchItem
-                      drug={item}
-                      selected={selectedDrug?.id === item.id}
-                      onSelect={handleDrugSelect}
-                      textColor={TEXT}
-                      borderColor={BORDER}
-                    />
-                  )}
-                  style={{ maxHeight: 320 }}
-                  keyboardShouldPersistTaps="handled"
-                  showsVerticalScrollIndicator={false}
-                />
+                  );
+                })}
               </View>
             )}
           </View>
@@ -1477,4 +1455,40 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
   },
   catChipText: { fontSize: 12, fontWeight: "600" },
+
+  // Drug search bar (persistent)
+  drugSearchBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 12,
+    marginBottom: 10,
+  },
+  drugSearchInput: { flex: 1, fontSize: 14, padding: 0 },
+
+  // One-tap drug pill grid
+  drugPillGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  drugPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    minWidth: "30%",
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: "30%",
+  },
+  drugPillDot: { width: 7, height: 7, borderRadius: 4, flexShrink: 0 },
+  drugPillText: { fontSize: 13, fontWeight: "600", flexShrink: 1, lineHeight: 17 },
+  noDrugWrap: { alignItems: "center", paddingVertical: 24, gap: 8, width: "100%" },
+  noDrugText: { fontSize: 14, fontStyle: "italic", textAlign: "center" },
 });
