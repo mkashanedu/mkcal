@@ -1,5 +1,6 @@
 import { Feather } from "@expo/vector-icons";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   Platform,
   Pressable,
@@ -109,18 +110,19 @@ function estimatePercentile(val: number, refs: [number, number, number, number, 
     nutritionColor = "#DC2626";
   }
 
-  // Percentile band
+  // Percentile band (0=<3rd … 5=>97th) used for FTT detection
   let label: string;
   let color: string;
   let note: string;
-  if (val < p3) { label = "<3rd percentile"; color = "#DC2626"; note = "Significantly below expected weight for age"; }
-  else if (val < p15) { label = "3rd–15th percentile"; color = "#D97706"; note = "Below average — monitor closely"; }
-  else if (val < p50) { label = "15th–50th percentile"; color = "#16A34A"; note = "Low-normal range"; }
-  else if (val < p85) { label = "50th–85th percentile"; color = "#16A34A"; note = "Normal range"; }
-  else if (val < p97) { label = "85th–97th percentile"; color = "#D97706"; note = "Above average — assess for obesity risk"; }
-  else { label = ">97th percentile"; color = "#DC2626"; note = "Obese range — clinical review recommended"; }
+  let band: number;
+  if (val < p3) { label = "<3rd percentile"; color = "#DC2626"; note = "Significantly below expected weight for age"; band = 0; }
+  else if (val < p15) { label = "3rd–15th percentile"; color = "#D97706"; note = "Below average — monitor closely"; band = 1; }
+  else if (val < p50) { label = "15th–50th percentile"; color = "#16A34A"; note = "Low-normal range"; band = 2; }
+  else if (val < p85) { label = "50th–85th percentile"; color = "#16A34A"; note = "Normal range"; band = 3; }
+  else if (val < p97) { label = "85th–97th percentile"; color = "#D97706"; note = "Above average — assess for obesity risk"; band = 4; }
+  else { label = ">97th percentile"; color = "#DC2626"; note = "Obese range — clinical review recommended"; band = 5; }
 
-  return { label, color, note, zscore: zRounded, nutritionStatus, nutritionColor, samAlert };
+  return { label, color, note, zscore: zRounded, nutritionStatus, nutritionColor, samAlert, band };
 }
 
 // ─── VIS formula ──────────────────────────────────────────────────────────────
@@ -529,6 +531,9 @@ export default function ToolsScreen() {
   const [growthAge, setGrowthAge] = useState("");
   const [growthAgeUnit, setGrowthAgeUnit] = useState<"months" | "years">("months");
   const [growthWeight, setGrowthWeight] = useState(weight > 0 ? weight.toString() : "");
+  const [growthEdema, setGrowthEdema] = useState(false);
+  type GrowthEntry = { id: string; date: string; ageMonths: number; weight: number; zscore: number; band: number; sex: "M" | "F" };
+  const [growthEntries, setGrowthEntries] = useState<GrowthEntry[]>([]);
   const growthAgeMonths = growthAgeUnit === "years"
     ? (parseFloat(growthAge) || 0) * 12
     : parseFloat(growthAge) || 0;
@@ -536,6 +541,33 @@ export default function ToolsScreen() {
   const growthTable = growthSex === "M" ? WHO_W_BOYS : WHO_W_GIRLS;
   const growthRefs = growthAgeMonths > 0 ? findNearestAge(growthAgeMonths, growthTable) : null;
   const growthResult = growthRefs && growthWeightNum > 0 ? estimatePercentile(growthWeightNum, growthRefs) : null;
+  const lastGrowthEntry = growthEntries.length > 0 ? growthEntries[growthEntries.length - 1] : null;
+  const fttAlert = !!(lastGrowthEntry && growthResult && lastGrowthEntry.sex === growthSex && (lastGrowthEntry.band - growthResult.band) >= 1);
+  const zTrend = lastGrowthEntry && growthResult ? growthResult.zscore - lastGrowthEntry.zscore : null;
+  useEffect(() => {
+    AsyncStorage.getItem("growth_entries_v1").then((raw) => {
+      if (raw) { try { setGrowthEntries(JSON.parse(raw)); } catch { /* ignore */ } }
+    });
+  }, []);
+  const saveGrowthEntry = async () => {
+    if (!growthResult || growthWeightNum <= 0 || growthAgeMonths <= 0) return;
+    const entry: GrowthEntry = {
+      id: Date.now().toString(),
+      date: new Date().toLocaleDateString("en-GB"),
+      ageMonths: Math.round(growthAgeMonths),
+      weight: growthWeightNum,
+      zscore: growthResult.zscore,
+      band: growthResult.band,
+      sex: growthSex,
+    };
+    const updated = [...growthEntries, entry].slice(-8);
+    setGrowthEntries(updated);
+    await AsyncStorage.setItem("growth_entries_v1", JSON.stringify(updated));
+  };
+  const clearGrowthEntries = async () => {
+    setGrowthEntries([]);
+    await AsyncStorage.removeItem("growth_entries_v1");
+  };
 
   // ── VIS state ──
   const [vis, setVis] = useState({ dopa: "", dobu: "", epi: "", mil: "", vaso: "", norepi: "" });
@@ -894,7 +926,7 @@ export default function ToolsScreen() {
               {/* ── Weight input ── */}
               <Text style={[styles.inputLabel, { color: textMuted, marginBottom: 4 }]}>Weight (kg)</Text>
               <TextInput
-                style={[styles.input, { color: textPrimary, backgroundColor: inputBg, borderColor: border, marginBottom: 14 }]}
+                style={[styles.input, { color: textPrimary, backgroundColor: inputBg, borderColor: border, marginBottom: 10 }]}
                 value={growthWeight}
                 onChangeText={setGrowthWeight}
                 keyboardType="decimal-pad"
@@ -902,9 +934,64 @@ export default function ToolsScreen() {
                 placeholderTextColor={textMuted}
               />
 
+              {/* ── Edema Toggle ── */}
+              <TouchableOpacity
+                onPress={() => setGrowthEdema(!growthEdema)}
+                style={{
+                  flexDirection: "row", alignItems: "center", gap: 10, padding: 10,
+                  borderRadius: 10, marginBottom: 14,
+                  backgroundColor: growthEdema ? "#FEF3C7" : (isDark ? "#1E293B" : "#F8FAFC"),
+                  borderWidth: 1.5,
+                  borderColor: growthEdema ? "#F59E0B" : (isDark ? "#334155" : "#E2E8F0"),
+                }}
+              >
+                <View style={{
+                  width: 22, height: 22, borderRadius: 6, borderWidth: 2,
+                  borderColor: growthEdema ? "#F59E0B" : (isDark ? "#475569" : "#CBD5E1"),
+                  backgroundColor: growthEdema ? "#F59E0B" : "transparent",
+                  justifyContent: "center", alignItems: "center",
+                }}>
+                  {growthEdema && <Feather name="check" size={13} color="#FFFFFF" />}
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 13, fontWeight: "700", color: growthEdema ? "#92400E" : textPrimary }}>
+                    Edema Detected?
+                  </Text>
+                  <Text style={{ fontSize: 10, color: textMuted, marginTop: 1 }}>
+                    Tick if pitting edema is present — affects weight interpretation
+                  </Text>
+                </View>
+              </TouchableOpacity>
+
               {/* ── Results ── */}
               {growthResult && growthRefs && (
                 <View style={{ gap: 10 }}>
+
+                  {/* Edema Warning */}
+                  {growthEdema && (
+                    <View style={{ backgroundColor: "#FEF9C3", borderColor: "#FDE047", borderWidth: 1.5, borderRadius: 10, padding: 10, flexDirection: "row", alignItems: "flex-start", gap: 8 }}>
+                      <Feather name="droplet" size={16} color="#B45309" />
+                      <Text style={{ flex: 1, fontSize: 12, color: "#92400E", fontWeight: "600" }}>
+                        Weight may be falsely elevated due to fluid overload. Z-score and nutritional status may underestimate severity.{"\n"}
+                        <Text style={{ fontStyle: "italic", fontWeight: "400" }}>Ref: Nelson's Pediatric Nutrition</Text>
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* FTT Alert */}
+                  {fttAlert && (
+                    <View style={{ backgroundColor: "#FEE2E2", borderColor: "#DC2626", borderWidth: 2, borderRadius: 10, padding: 12, flexDirection: "row", alignItems: "center", gap: 8 }}>
+                      <Feather name="trending-down" size={18} color="#DC2626" />
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ color: "#DC2626", fontWeight: "800", fontSize: 13 }}>
+                          Warning: Potential Growth Failure
+                        </Text>
+                        <Text style={{ color: "#B91C1C", fontSize: 12, marginTop: 2 }}>
+                          Percentile has crossed a major centile line since last saved entry — Review Diet / History.
+                        </Text>
+                      </View>
+                    </View>
+                  )}
 
                   {/* SAM Critical Alert */}
                   {growthResult.samAlert && (
@@ -928,6 +1015,11 @@ export default function ToolsScreen() {
                       <Text style={{ fontSize: 26, fontWeight: "800", color: growthResult.color }}>
                         {growthResult.zscore > 0 ? "+" : ""}{growthResult.zscore}
                       </Text>
+                      {zTrend !== null && (
+                        <Text style={{ fontSize: 11, color: zTrend >= 0 ? "#16A34A" : "#DC2626", fontWeight: "700", marginTop: 2 }}>
+                          {zTrend >= 0 ? "↑" : "↓"} {zTrend >= 0 ? "+" : ""}{Math.round(zTrend * 10) / 10} vs last
+                        </Text>
+                      )}
                     </View>
                     <View style={{ flex: 1, backgroundColor: growthResult.color + "18", borderColor: growthResult.color + "50", borderWidth: 1.5, borderRadius: 10, padding: 12, alignItems: "center" }}>
                       <Text style={{ fontSize: 11, color: textMuted, fontWeight: "600", marginBottom: 2 }}>PERCENTILE</Text>
@@ -967,11 +1059,72 @@ export default function ToolsScreen() {
                     </View>
                   </View>
 
+                  {/* Save Entry button */}
+                  <TouchableOpacity
+                    onPress={saveGrowthEntry}
+                    style={{ backgroundColor: "#0D9488", borderRadius: 10, paddingVertical: 12, alignItems: "center", flexDirection: "row", justifyContent: "center", gap: 8 }}
+                  >
+                    <Feather name="save" size={15} color="#FFFFFF" />
+                    <Text style={{ color: "#FFFFFF", fontWeight: "700", fontSize: 14 }}>Save This Entry</Text>
+                  </TouchableOpacity>
+
                   {/* Reference values */}
                   <Text style={[styles.refText, { color: textMuted }]}>
                     Reference at {Math.round(growthAgeMonths)} mo ({growthSex === "M" ? "Boys" : "Girls"}):
                     {"  "}P3 = {growthRefs[0]} kg · P50 = {growthRefs[2]} kg · P97 = {growthRefs[4]} kg
                   </Text>
+                </View>
+              )}
+
+              {/* ── Trend Sparkline (saved entries) ── */}
+              {growthEntries.length > 0 && (
+                <View style={{ marginTop: 14, backgroundColor: isDark ? "#0F172A" : "#F0FDF4", borderColor: isDark ? "#1A3A2A" : "#BBF7D0", borderWidth: 1, borderRadius: 10, padding: 12 }}>
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                    <Text style={{ fontSize: 12, fontWeight: "800", color: "#16A34A" }}>
+                      Z-Score Trend ({growthEntries.length} saved)
+                    </Text>
+                    <TouchableOpacity onPress={clearGrowthEntries}>
+                      <Text style={{ fontSize: 11, color: "#DC2626", fontWeight: "600" }}>Clear</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Sparkline dots */}
+                  <View style={{ flexDirection: "row", alignItems: "flex-end", gap: 6, marginBottom: 8 }}>
+                    {growthEntries.map((entry, i) => {
+                      const dotColor = entry.zscore < -3 ? "#DC2626" : entry.zscore < -2 ? "#F59E0B" : "#16A34A";
+                      const barH = Math.max(8, Math.min(40, 24 + entry.zscore * 6));
+                      return (
+                        <View key={entry.id} style={{ flex: 1, alignItems: "center", gap: 3 }}>
+                          <Text style={{ fontSize: 9, color: dotColor, fontWeight: "700" }}>
+                            {entry.zscore > 0 ? "+" : ""}{entry.zscore}
+                          </Text>
+                          <View style={{ width: "100%", height: barH, backgroundColor: dotColor + "CC", borderRadius: 4 }} />
+                          <Text style={{ fontSize: 8, color: textMuted, textAlign: "center" }}>{entry.ageMonths}mo</Text>
+                        </View>
+                      );
+                    })}
+                  </View>
+
+                  {/* Velocity indicator */}
+                  {growthEntries.length >= 2 && (() => {
+                    const first = growthEntries[0];
+                    const last = growthEntries[growthEntries.length - 1];
+                    const delta = last.zscore - first.zscore;
+                    const improving = delta >= 0.1;
+                    const declining = delta <= -0.1;
+                    return (
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                        <Feather name={improving ? "trending-up" : declining ? "trending-down" : "minus"} size={14} color={improving ? "#16A34A" : declining ? "#DC2626" : "#6B7280"} />
+                        <Text style={{ fontSize: 12, fontWeight: "700", color: improving ? "#16A34A" : declining ? "#DC2626" : "#6B7280" }}>
+                          {improving ? "Improving" : declining ? "Declining" : "Stable"}
+                          {"  "}
+                        </Text>
+                        <Text style={{ fontSize: 11, color: textMuted }}>
+                          Z {delta >= 0 ? "+" : ""}{Math.round(delta * 10) / 10} over {last.ageMonths - first.ageMonths} months
+                        </Text>
+                      </View>
+                    );
+                  })()}
                 </View>
               )}
 
@@ -1016,6 +1169,7 @@ export default function ToolsScreen() {
               </View>
 
               <Text style={[styles.refText, { color: textMuted, marginTop: 8 }]}>
+                Growth trends follow Harriet Lane 23e / Nelson's growth velocity standards.{"\n"}
                 Source: WHO Child Growth Standards · Nelson's Pediatrics 22e · Harriet Lane 23e
               </Text>
             </View>
