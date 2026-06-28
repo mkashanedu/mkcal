@@ -377,6 +377,46 @@ export const DRUGS: Drug[] = [
     reference: "WHO PF 2024 | Harriet Lane 23e",
   },
 
+  {
+    id: "nalbuphine",
+    name: "Nalbuphine (Kinz)",
+    genericName: "Kinz",
+    category: "analgesic",
+    indications: [
+      "Moderate to severe pain",
+      "Post-operative analgesia",
+      "Procedural analgesia",
+      "ICU pain management",
+    ],
+    doses: [
+      {
+        min: 0.05, max: 0.1, unit: "mg/kg", perKg: true,
+        route: "IV / IM / SC",
+        maxDose: "10 mg/dose",
+        frequency: "Every 4–6 hr",
+        label: "Analgesia — standard dose",
+        notes: "Administer IV slowly over 2–3 min. Onset 2–3 min IV, 15 min IM.",
+      },
+    ],
+    contraindications: [
+      "Known hypersensitivity to nalbuphine",
+      "Active opioid dependency — risk of precipitating acute withdrawal",
+    ],
+    warnings: [
+      "Less respiratory depression than morphine but monitor respiratory rate and SpO₂",
+      "May precipitate withdrawal in opioid-dependent patients",
+      "Observe for hypotension, especially in hypovolemic patients",
+      "Agonist-antagonist opioid — ceiling effect on analgesia at high doses",
+    ],
+    compatibility: "Compatible with NS and D5W. Flush IV line with NS before and after administration.",
+    monitoring: ["Respiratory rate", "SpO₂", "Blood pressure", "Sedation score (COMFORT-B or RASS)"],
+    formulations: [
+      "1 mg/mL ampoule (10 mg/10 mL)",
+      "2 mg/mL ampoule (20 mg/10 mL)",
+    ],
+    reference: "Harriet Lane 23e | Nelson's Pediatrics 22e",
+  },
+
   // ════════════════════════════════════════════════════════════
   //  SEDATIVES
   // ════════════════════════════════════════════════════════════

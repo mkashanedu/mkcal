@@ -490,7 +490,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
   {
     id: "nalbuphine-infusion",
     name: "Nalbuphine (Kinz)",
-    category: "Opioid Analgesic",
+    category: "Sedation / Analgesic",
     primaryUnit: "mcg/kg/hr",
     alternateUnits: ["mg/hr"],
     minDose: 10,
@@ -498,23 +498,28 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
     typicalDose: 40,
     doseStep: 5,
     color: "#5D3A70",
-    indication: "Post-operative analgesia, ICU analgesia, procedural pain",
-    vialConc_per_mL: 10,
-    vialLabel: "10 mg/mL ampoule (Kinz — 10 mg/1 mL)",
-    diluent: "NS",
+    indication: "Moderate to severe pain, procedural analgesia, post-operative analgesia, ICU pain management",
+    vialConc_per_mL: 1,
+    vialLabel: "1 mg/mL ampoule (10 mg/10 mL) or 2 mg/mL ampoule (20 mg/10 mL)",
+    diluent: "NS or D5W",
     standardConcentrations: [
       {
-        label: "1 mg/mL — 50 mg (5 mL vial) in 50 mL NS",
+        label: "1 mg/mL — draw 50 mL from 1 mg/mL vial (50 mg) — run undiluted in 50 mL syringe",
         totalDrug_mg: 50, totalVolume_mL: 50, concentration_per_mL: 1, unit: "mg",
       },
       {
-        label: "2 mg/mL — 100 mg (10 mL vial) in 50 mL NS",
-        totalDrug_mg: 100, totalVolume_mL: 50, concentration_per_mL: 2, unit: "mg",
+        label: "2 mg/mL — draw 25 mL from 2 mg/mL vial (50 mg) + 25 mL NS in 50 mL syringe",
+        totalDrug_mg: 50, totalVolume_mL: 25, concentration_per_mL: 2, unit: "mg",
       },
     ],
-    notes: "Stock vial: 10 mg/mL (Kinz 10 mg/1 mL). Working concentrations: 1 mg/mL or 2 mg/mL. Max 160 mcg/kg/hr. Less respiratory depression than morphine.",
-    warnings: ["May precipitate withdrawal in opioid-dependent patients"],
-    reference: "Harriet Lane 23e",
+    notes: "Dose: 0.05–0.1 mg/kg/dose IV/IM every 4–6 hr (max 10 mg/dose). Agonist-antagonist opioid — ceiling effect at high doses. Compatible with NS and D5W. Flush IV line with NS before and after. Less respiratory depression than morphine.",
+    warnings: [
+      "May precipitate acute withdrawal in opioid-dependent patients",
+      "Monitor: Respiratory rate, SpO₂, BP, Sedation Score (COMFORT-B or RASS)",
+      "Observe for hypotension — especially in hypovolemic patients",
+      "Avoid in known hypersensitivity to nalbuphine",
+    ],
+    reference: "Harriet Lane 23e | Nelson's Pediatrics 22e",
   },
 
   {
