@@ -560,6 +560,30 @@ export default function ToolsScreen() {
   const deficit = fluidWtNum > 0 ? Math.round((dehydPct / 100) * fluidWtNum * 1000) : 0;
   const total48h = maintenance ? Math.round(maintenance.daily + deficit / 2) : 0;
 
+  // ── Electrolyte Correction state ──
+  const [elActualK, setElActualK] = useState("");
+  const [elTargetK, setElTargetK] = useState("4.0");
+  const [elWt, setElWt] = useState(weight > 0 ? weight.toString() : "");
+  const [elCentral, setElCentral] = useState(false);
+  const [elRestrictFluids, setElRestrictFluids] = useState(false);
+  const [elChecklist, setElChecklist] = useState({ renal: false, ecg: false, mg: false });
+  const elActualKNum = parseFloat(elActualK) || 0;
+  const elTargetKNum = parseFloat(elTargetK) || 4.0;
+  const elWtNum = parseFloat(elWt) || 0;
+  const elDeficit = elWtNum > 0 && elActualKNum > 0 && elTargetKNum > elActualKNum
+    ? Math.round((elTargetKNum - elActualKNum) * elWtNum * 0.4 * 10) / 10
+    : 0;
+  const elChecklistDone = elChecklist.renal && elChecklist.ecg && elChecklist.mg;
+  // KCl ampoule: 2 mEq/mL (20 mEq / 10 mL)
+  // Peripheral: max 40 mEq/L = 0.04 mEq/mL  |  Central / fluid-restricted: 80 mEq/L = 0.08 mEq/mL
+  const elConc = (elCentral || elRestrictFluids) ? 0.08 : 0.04;
+  const elKClML = elDeficit > 0 ? Math.round((elDeficit / 2) * 10) / 10 : 0;
+  const elTotalVol = elKClML > 0 ? Math.round(elDeficit / elConc) : 0;
+  const elNSML = Math.max(0, elTotalVol - elKClML);
+  const elRateMEqHr = elWtNum > 0 ? (elCentral ? 0.5 : 0.3) * elWtNum : 0;
+  const elRateMLHr = elConc > 0 && elRateMEqHr > 0 ? Math.round(elRateMEqHr / elConc * 10) / 10 : 0;
+  const elDurationHr = elRateMLHr > 0 && elTotalVol > 0 ? Math.round(elTotalVol / elRateMLHr * 10) / 10 : 0;
+
   // ── pGCS state ──
   const [eye, setEye] = useState(4);
   const [verbal, setVerbal] = useState(5);
@@ -743,6 +767,7 @@ export default function ToolsScreen() {
           { key: "vis", label: "VIS", color: "#E53E3E" },
           { key: "bundles", label: "Bundles", color: "#7C3AED" },
           { key: "fluids", label: "Fluids", color: "#0EA5E9" },
+          { key: "electrolytes", label: "Electrolytes", color: "#0891B2" },
           { key: "gcs", label: "GCS", color: "#16A34A" },
           { key: "scores", label: "Scores", color: "#FF4C60" },
           { key: "renal", label: "Renal", color: "#DC2626" },
@@ -1348,6 +1373,212 @@ export default function ToolsScreen() {
                   />
                 </>
               )}
+            </View>
+          )}
+        </View>
+
+        {/* ──────────────── MODULE 7B: ELECTROLYTE CORRECTION ──────────────── */}
+        <View style={styles.sectionWrap} ref={(el) => { sectionRefs.current["electrolytes"] = el; }}>
+          <SectionHeader
+            title="Electrolyte Correction — K⁺"
+            icon="zap"
+            color="#0891B2"
+            open={openSection === "electrolytes"}
+            onToggle={() => toggle("electrolytes")}
+            isDark={isDark}
+          />
+          {openSection === "electrolytes" && (
+            <View style={[styles.sectionBody, { backgroundColor: cardBg, borderColor: border }]}>
+
+              {/* Header */}
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 12, fontWeight: "700", color: "#0891B2", letterSpacing: 0.3 }}>
+                    Potassium (K⁺) Correction Calculator
+                  </Text>
+                  <Text style={{ fontSize: 10, color: textMuted, marginTop: 1 }}>
+                    Deficit = (Target − Actual) × Weight × 0.4 · KCl 2 mEq/mL ampoule
+                  </Text>
+                </View>
+                <StarButton isFav={isFav("tool-electrolytes")} onToggle={() => toggleFav({ id: "tool-electrolytes", type: "tool", label: "Electrolyte Correction", color: "#0891B2" })} size={18} color="#0891B2" />
+              </View>
+
+              {/* ── Inputs ── */}
+              <View style={{ flexDirection: "row", gap: 8, marginBottom: 10 }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.inputLabel, { color: textMuted, marginBottom: 4 }]}>Actual K⁺ (mEq/L)</Text>
+                  <TextInput
+                    style={[styles.input, { color: textPrimary, backgroundColor: inputBg, borderColor: border }]}
+                    value={elActualK}
+                    onChangeText={setElActualK}
+                    keyboardType="decimal-pad"
+                    placeholder="e.g. 2.8"
+                    placeholderTextColor={textMuted}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.inputLabel, { color: textMuted, marginBottom: 4 }]}>Target K⁺ (mEq/L)</Text>
+                  <TextInput
+                    style={[styles.input, { color: textPrimary, backgroundColor: inputBg, borderColor: border }]}
+                    value={elTargetK}
+                    onChangeText={setElTargetK}
+                    keyboardType="decimal-pad"
+                    placeholder="e.g. 4.0"
+                    placeholderTextColor={textMuted}
+                  />
+                </View>
+              </View>
+
+              <View style={{ marginBottom: 10 }}>
+                <Text style={[styles.inputLabel, { color: textMuted, marginBottom: 4 }]}>Weight (kg)</Text>
+                <TextInput
+                  style={[styles.input, { color: textPrimary, backgroundColor: inputBg, borderColor: border }]}
+                  value={elWt}
+                  onChangeText={setElWt}
+                  keyboardType="decimal-pad"
+                  placeholder="e.g. 15"
+                  placeholderTextColor={textMuted}
+                />
+              </View>
+
+              {/* ── Toggles: Central Line + Fluid Restriction ── */}
+              <View style={{ flexDirection: "row", gap: 8, marginBottom: 14 }}>
+                <TouchableOpacity
+                  onPress={() => setElCentral(!elCentral)}
+                  style={{
+                    flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: "center",
+                    backgroundColor: elCentral ? "#0891B2" : (isDark ? "#1E293B" : "#F1F5F9"),
+                    borderWidth: 2, borderColor: elCentral ? "#0891B2" : (isDark ? "#334155" : "#CBD5E1"),
+                  }}
+                >
+                  <Text style={{ fontWeight: "700", fontSize: 12, color: elCentral ? "#FFFFFF" : textMuted }}>
+                    🏥 Central Line
+                  </Text>
+                  <Text style={{ fontSize: 10, color: elCentral ? "#E0F7FA" : textMuted, marginTop: 2 }}>
+                    {elCentral ? "80 mEq/L max" : "Peripheral"}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setElRestrictFluids(!elRestrictFluids)}
+                  style={{
+                    flex: 1, paddingVertical: 10, borderRadius: 10, alignItems: "center",
+                    backgroundColor: elRestrictFluids ? "#7C3AED" : (isDark ? "#1E293B" : "#F1F5F9"),
+                    borderWidth: 2, borderColor: elRestrictFluids ? "#7C3AED" : (isDark ? "#334155" : "#CBD5E1"),
+                  }}
+                >
+                  <Text style={{ fontWeight: "700", fontSize: 12, color: elRestrictFluids ? "#FFFFFF" : textMuted }}>
+                    💧 Restrict Fluids
+                  </Text>
+                  <Text style={{ fontSize: 10, color: elRestrictFluids ? "#EDE9FE" : textMuted, marginTop: 2 }}>
+                    {elRestrictFluids ? "High-conc. recipe" : "Standard volume"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* ── Safety Checklist ── */}
+              <View style={{ backgroundColor: isDark ? "#0F172A" : "#FEF9C3", borderColor: isDark ? "#334155" : "#FDE047", borderWidth: 1.5, borderRadius: 10, padding: 12, marginBottom: 14 }}>
+                <Text style={{ fontSize: 12, fontWeight: "800", color: "#B45309", marginBottom: 8 }}>
+                  ⚠ Safety Checklist — Required Before Infusion
+                </Text>
+                {([
+                  { key: "renal", label: "Renal function (Cr / BUN) checked?" },
+                  { key: "ecg",   label: "Baseline ECG performed?" },
+                  { key: "mg",    label: "Magnesium levels normal (≥ 0.7 mmol/L)?" },
+                ] as { key: keyof typeof elChecklist; label: string }[]).map((item) => (
+                  <TouchableOpacity
+                    key={item.key}
+                    onPress={() => setElChecklist(prev => ({ ...prev, [item.key]: !prev[item.key] }))}
+                    style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 6 }}
+                  >
+                    <View style={{
+                      width: 22, height: 22, borderRadius: 6, borderWidth: 2,
+                      borderColor: elChecklist[item.key] ? "#16A34A" : "#D97706",
+                      backgroundColor: elChecklist[item.key] ? "#16A34A" : "transparent",
+                      justifyContent: "center", alignItems: "center",
+                    }}>
+                      {elChecklist[item.key] && <Feather name="check" size={13} color="#FFFFFF" />}
+                    </View>
+                    <Text style={{ flex: 1, fontSize: 13, color: elChecklist[item.key] ? "#16A34A" : (isDark ? "#FDE68A" : "#92400E"), fontWeight: elChecklist[item.key] ? "600" : "400" }}>
+                      {item.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+                {!elChecklistDone && (
+                  <Text style={{ fontSize: 11, color: "#B45309", marginTop: 6, fontStyle: "italic" }}>
+                    Tick all 3 items to unlock the calculation result.
+                  </Text>
+                )}
+              </View>
+
+              {/* ── Results — only shown when checklist complete ── */}
+              {elDeficit > 0 && elChecklistDone && (
+                <View style={{ gap: 8 }}>
+
+                  {/* Total Deficit card */}
+                  <View style={{ flexDirection: "row", gap: 8 }}>
+                    <View style={{ flex: 1, backgroundColor: "#0891B220", borderColor: "#0891B250", borderWidth: 1.5, borderRadius: 10, padding: 12, alignItems: "center" }}>
+                      <Text style={{ fontSize: 11, color: textMuted, fontWeight: "600", marginBottom: 2 }}>TOTAL DEFICIT</Text>
+                      <Text style={{ fontSize: 26, fontWeight: "800", color: "#0891B2" }}>{elDeficit}</Text>
+                      <Text style={{ fontSize: 12, color: textMuted }}>mEq</Text>
+                    </View>
+                    <View style={{ flex: 1, backgroundColor: "#0891B220", borderColor: "#0891B250", borderWidth: 1.5, borderRadius: 10, padding: 12, alignItems: "center" }}>
+                      <Text style={{ fontSize: 11, color: textMuted, fontWeight: "600", marginBottom: 2 }}>RATE</Text>
+                      <Text style={{ fontSize: 26, fontWeight: "800", color: "#0891B2" }}>{elRateMLHr}</Text>
+                      <Text style={{ fontSize: 12, color: textMuted }}>mL/hr</Text>
+                    </View>
+                  </View>
+
+                  {/* Dilution Recipe */}
+                  <View style={{ backgroundColor: isDark ? "#0A192F" : "#EFF6FF", borderColor: isDark ? "#1E3A5F" : "#BFDBFE", borderWidth: 1, borderRadius: 10, padding: 12 }}>
+                    <Text style={{ fontSize: 12, fontWeight: "800", color: "#2563EB", marginBottom: 6 }}>
+                      {(elCentral || elRestrictFluids) ? "Central / Fluid-Restricted Recipe" : "Peripheral Line Recipe"}
+                    </Text>
+                    <Text style={{ fontSize: 13, color: textPrimary, lineHeight: 20 }}>
+                      {"• KCl drawn: "}<Text style={{ fontWeight: "700", color: "#0891B2" }}>{elKClML} mL</Text>{" from 2 mEq/mL ampoule\n"}
+                      {"• Add NS: "}<Text style={{ fontWeight: "700", color: "#0891B2" }}>{elNSML} mL\n</Text>
+                      {"• Total syringe: "}<Text style={{ fontWeight: "700", color: "#0891B2" }}>{elTotalVol} mL\n</Text>
+                      {"• Concentration: "}<Text style={{ fontWeight: "700", color: "#0891B2" }}>{(elCentral || elRestrictFluids) ? "80" : "40"} mEq/L</Text>
+                      {(elCentral || elRestrictFluids) ? " (Central / Restricted)" : " (Peripheral — max safe)"}
+                    </Text>
+                    <View style={{ marginTop: 8, paddingTop: 8, borderTopWidth: 0.5, borderTopColor: isDark ? "#1E3A5F" : "#BFDBFE" }}>
+                      <Text style={{ fontSize: 12, color: textMuted }}>
+                        {"Infusion duration: ~"}<Text style={{ fontWeight: "700", color: "#0891B2" }}>{elDurationHr} hr</Text>
+                        {"  ·  Rate: "}<Text style={{ fontWeight: "700" }}>{(elCentral ? 0.5 : 0.3)} mEq/kg/hr</Text>
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* Warnings */}
+                  <View style={{ backgroundColor: "#FEF2F2", borderColor: "#FECACA", borderWidth: 1, borderRadius: 10, padding: 10 }}>
+                    <Text style={{ fontSize: 11, color: "#DC2626", fontWeight: "700", marginBottom: 4 }}>⚠ Clinical Warnings</Text>
+                    <Text style={{ fontSize: 11, color: "#991B1B", lineHeight: 18 }}>
+                      {"• Max peripheral KCl: 40 mEq/L — extravasation risk at higher conc.\n"}
+                      {"• Central line required if concentration > 40 mEq/L\n"}
+                      {"• Never give KCl bolus IV — fatal arrhythmia risk\n"}
+                      {"• Continuous cardiac monitoring (ECG) during infusion\n"}
+                      {"• Recheck K⁺ level 1–2 hr after infusion"}
+                    </Text>
+                  </View>
+                </View>
+              )}
+
+              {/* Placeholder when inputs incomplete */}
+              {(elDeficit <= 0 || !elChecklistDone) && elActualKNum > 0 && elWtNum > 0 && (
+                <View style={{ padding: 12, borderRadius: 10, backgroundColor: isDark ? "#1E293B" : "#F8FAFC", borderColor: isDark ? "#334155" : "#E2E8F0", borderWidth: 1 }}>
+                  <Text style={{ color: textMuted, fontSize: 13, textAlign: "center" }}>
+                    {!elChecklistDone
+                      ? "Complete the safety checklist above to view results."
+                      : elTargetKNum <= elActualKNum
+                        ? "Target K⁺ must be higher than Actual K⁺ to calculate a deficit."
+                        : "Enter all values above."}
+                  </Text>
+                </View>
+              )}
+
+              {/* Branding footer */}
+              <Text style={[styles.refText, { color: textMuted, marginTop: 12 }]}>
+                Calculations based on Nelson's Pediatrics 22e · Harriet Lane 23e
+              </Text>
             </View>
           )}
         </View>
