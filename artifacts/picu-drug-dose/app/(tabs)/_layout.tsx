@@ -54,6 +54,7 @@ function ClassicTabLayout() {
 
   return (
     <Tabs
+      initialRouteName="calculator"
       screenOptions={{
         tabBarActiveTintColor: C.tint,
         tabBarInactiveTintColor: C.tabIconDefault,

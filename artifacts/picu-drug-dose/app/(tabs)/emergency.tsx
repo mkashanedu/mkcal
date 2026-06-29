@@ -17,6 +17,7 @@ import { DRUGS, calculateDose } from "@/constants/drugs";
 import { useTheme } from "@/context/ThemeContext";
 import { useFavorites } from "@/context/FavoritesContext";
 import { useWeight } from "@/context/WeightContext";
+import { useDrawer } from "@/context/DrawerContext";
 import { ProfessionalFooter } from "@/components/ProfessionalFooter";
 import { StarButton } from "@/components/StarButton";
 
@@ -116,6 +117,7 @@ export default function EmergencyScreen() {
   const colors = Colors.light;
   const { weight } = useWeight();
   const { isFav, toggleFav } = useFavorites();
+  const { openDrawer } = useDrawer();
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
 
   const [ageYearsInput, setAgeYearsInput] = useState("2");
@@ -350,6 +352,13 @@ export default function EmergencyScreen() {
       >
         <View style={styles.headerTop}>
           <View style={styles.headerRow}>
+            <TouchableOpacity
+              onPress={openDrawer}
+              style={styles.hamburgerBtn}
+              activeOpacity={0.7}
+            >
+              <Feather name="menu" size={20} color="rgba(255,255,255,0.9)" />
+            </TouchableOpacity>
             <Feather name="alert-circle" size={22} color="#FFFFFF" />
             <Text
               style={[
@@ -768,6 +777,7 @@ export default function EmergencyScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  hamburgerBtn: { width: 36, height: 36, borderRadius: 18, alignItems: "center", justifyContent: "center", flexShrink: 0, marginRight: 4, backgroundColor: "rgba(255,255,255,0.15)" },
   header: {
     paddingHorizontal: 16,
     paddingBottom: 14,

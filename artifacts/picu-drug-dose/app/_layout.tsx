@@ -16,9 +16,11 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { DisclaimerModal } from "@/components/DisclaimerModal";
+import { AppDrawer } from "@/components/AppDrawer";
 import { FavoritesProvider } from "@/context/FavoritesContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { WeightProvider } from "@/context/WeightContext";
+import { DrawerProvider } from "@/context/DrawerContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -37,6 +39,12 @@ function RootLayoutNav() {
           headerTransparent: true,
           headerBlurEffect: "light",
           headerTintColor: "#0A9396",
+        }}
+      />
+      <Stack.Screen
+        name="privacy-policy"
+        options={{
+          headerShown: false,
         }}
       />
     </Stack>
@@ -67,12 +75,15 @@ export default function RootLayout() {
           <ThemeProvider>
             <WeightProvider>
               <FavoritesProvider>
-                <GestureHandlerRootView>
-                <KeyboardProvider>
-                  <RootLayoutNav />
-                  <DisclaimerModal />
-                </KeyboardProvider>
-              </GestureHandlerRootView>
+                <DrawerProvider>
+                  <GestureHandlerRootView>
+                    <KeyboardProvider>
+                      <RootLayoutNav />
+                      <DisclaimerModal />
+                      <AppDrawer />
+                    </KeyboardProvider>
+                  </GestureHandlerRootView>
+                </DrawerProvider>
               </FavoritesProvider>
             </WeightProvider>
           </ThemeProvider>

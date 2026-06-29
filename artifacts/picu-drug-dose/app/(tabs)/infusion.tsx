@@ -16,6 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useWeight } from "@/context/WeightContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useFavorites } from "@/context/FavoritesContext";
+import { useDrawer } from "@/context/DrawerContext";
 import { StarButton } from "@/components/StarButton";
 import {
   INFUSION_DRUGS,
@@ -225,6 +226,7 @@ type ConcMode = "standard" | "dilution";
 export default function InfusionScreen() {
   const { weightInput: weight, setWeightInput: setWeight } = useWeight();
   const { isDark, toggleDark } = useTheme();
+  const { openDrawer } = useDrawer();
   const { isFav, toggleFav } = useFavorites();
 
   const [search, setSearch] = useState("");
@@ -340,6 +342,13 @@ export default function InfusionScreen() {
       >
         {/* ══ HEADER ══ */}
         <View style={[styles.header, { backgroundColor: CARD, borderBottomColor: BORDER }]}>
+          <TouchableOpacity
+            onPress={openDrawer}
+            style={[styles.hamburgerBtn, { backgroundColor: isDark ? "#0A192F" : "#E8F4F9" }]}
+            activeOpacity={0.7}
+          >
+            <Feather name="menu" size={20} color={isDark ? "#8892B0" : C.tint} />
+          </TouchableOpacity>
           <View style={styles.headerLeft}>
             <Text style={[styles.headerTitle, { color: TEXT }]} numberOfLines={1}>
               MKashanEdu
@@ -1079,6 +1088,7 @@ function ResultDetail({
 const styles = StyleSheet.create({
   safeArea: { flex: 1 },
   scroll: { flex: 1 },
+  hamburgerBtn: { width: 38, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center", flexShrink: 0, marginRight: 6 },
 
   header: {
     flexDirection: "row",

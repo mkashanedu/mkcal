@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTheme } from "@/context/ThemeContext";
 import { useFavorites } from "@/context/FavoritesContext";
+import { useDrawer } from "@/context/DrawerContext";
 import { ProfessionalFooter } from "@/components/ProfessionalFooter";
 
 const typeLabels: Record<string, string> = {
@@ -35,6 +36,7 @@ export default function FavoritesScreen() {
   const insets = useSafeAreaInsets();
   const { isDark, toggleDark } = useTheme();
   const { items, removeFav } = useFavorites();
+  const { openDrawer } = useDrawer();
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
 
   const bg = isDark ? "#0B132B" : "#F0F9FF";
@@ -58,6 +60,13 @@ export default function FavoritesScreen() {
         ]}
       >
         <View style={styles.headerRow}>
+          <TouchableOpacity
+            onPress={openDrawer}
+            style={[styles.hamburgerBtn, { backgroundColor: isDark ? "#233554" : "#F0F4F8" }]}
+            activeOpacity={0.7}
+          >
+            <Feather name="menu" size={20} color={isDark ? "#8892B0" : "#0891B2"} />
+          </TouchableOpacity>
           <View style={{ flex: 1 }}>
             <Text style={[styles.headerTitle, { color: textPrimary }]}>
               MKashanEdu
@@ -180,6 +189,7 @@ export default function FavoritesScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  hamburgerBtn: { width: 38, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center", flexShrink: 0, marginRight: 8 },
   header: { paddingHorizontal: 16, paddingBottom: 14, shadowColor: "#000", shadowOpacity: 0.06, shadowRadius: 8, elevation: 3 },
   headerRow: { flexDirection: "row", alignItems: "center" },
   headerTitle: { fontSize: 22, fontWeight: "800", letterSpacing: -0.3 },

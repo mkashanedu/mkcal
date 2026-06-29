@@ -19,6 +19,7 @@ import { StarButton } from "@/components/StarButton";
 import { useFavorites } from "@/context/FavoritesContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useWeight } from "@/context/WeightContext";
+import { useDrawer } from "@/context/DrawerContext";
 import { ProfessionalFooter } from "@/components/ProfessionalFooter";
 
 const C = Colors.light;
@@ -207,6 +208,7 @@ export default function CalcsScreen() {
   const insets = useSafeAreaInsets();
   const { isDark, toggleDark } = useTheme();
   const { weight: ctxWeight } = useWeight();
+  const { openDrawer } = useDrawer();
   const { isFav, toggleFav } = useFavorites();
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
 
@@ -396,6 +398,13 @@ export default function CalcsScreen() {
       {/* Header */}
       <View style={[sh.topHeader, { paddingTop: topPadding + 12, backgroundColor: isDark ? "#0A192F" : "#FFF" }]}>
         <View style={sh.topHeaderRow}>
+          <TouchableOpacity
+            onPress={openDrawer}
+            style={[sh.hamburgerBtn, { backgroundColor: isDark ? "#233554" : "#F0F4F8" }]}
+            activeOpacity={0.7}
+          >
+            <Feather name="menu" size={20} color={isDark ? "#8892B0" : C.tint} />
+          </TouchableOpacity>
           <View style={{ flex: 1 }}>
             <Text style={[sh.headerTitle, { color: textPrimary }]}>MKashanEdu</Text>
             <Text style={[sh.headerSub, { color: textMuted }]}>
@@ -1061,6 +1070,7 @@ export default function CalcsScreen() {
 // ─── Shared Stylesheet ────────────────────────────────────────────────────────
 const sh = StyleSheet.create({
   container: { flex: 1 },
+  hamburgerBtn: { width: 38, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center", flexShrink: 0, marginRight: 8 },
   topHeader: { paddingHorizontal: 16, paddingBottom: 14, shadowColor: "#000", shadowOpacity: 0.06, shadowRadius: 8, elevation: 3 },
   topHeaderRow: { flexDirection: "row", alignItems: "center" },
   headerTitle: { fontSize: 22, fontWeight: "800", letterSpacing: -0.3 },

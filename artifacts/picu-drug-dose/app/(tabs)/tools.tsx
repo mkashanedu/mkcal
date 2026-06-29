@@ -17,6 +17,7 @@ import Colors from "@/constants/colors";
 import { useTheme } from "@/context/ThemeContext";
 import { useWeight } from "@/context/WeightContext";
 import { useFavorites } from "@/context/FavoritesContext";
+import { useDrawer } from "@/context/DrawerContext";
 import { ProfessionalFooter } from "@/components/ProfessionalFooter";
 import { StarButton } from "@/components/StarButton";
 
@@ -506,6 +507,7 @@ export default function ToolsScreen() {
   const { isDark, toggleDark } = useTheme();
   const { weight } = useWeight();
   const { isFav, toggleFav } = useFavorites();
+  const { openDrawer } = useDrawer();
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
 
   const [openSection, setOpenSection] = useState<string | null>(null);
@@ -774,6 +776,13 @@ export default function ToolsScreen() {
       {/* Header */}
       <View style={[styles.header, { paddingTop: topPadding + 12, backgroundColor: isDark ? "#0A192F" : "#FFFFFF" }]}>
         <View style={styles.headerRow}>
+          <TouchableOpacity
+            onPress={openDrawer}
+            style={[styles.hamburgerBtn, { backgroundColor: isDark ? "#233554" : "#F0F4F8" }]}
+            activeOpacity={0.7}
+          >
+            <Feather name="menu" size={20} color={isDark ? "#8892B0" : C.tint} />
+          </TouchableOpacity>
           <View style={{ flex: 1 }}>
             <Text style={[styles.headerTitle, { color: textPrimary }]}>MKashanEdu</Text>
             <Text style={[styles.headerSub, { color: textMuted }]}>Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 95+ drugs</Text>
@@ -2242,6 +2251,7 @@ export default function ToolsScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  hamburgerBtn: { width: 38, height: 38, borderRadius: 19, alignItems: "center", justifyContent: "center", flexShrink: 0, marginRight: 8 },
   header: { paddingHorizontal: 16, paddingBottom: 14, shadowColor: "#000", shadowOpacity: 0.06, shadowRadius: 8, elevation: 3 },
   headerRow: { flexDirection: "row", alignItems: "center" },
   headerTitle: { fontSize: 22, fontWeight: "800", letterSpacing: -0.3 },

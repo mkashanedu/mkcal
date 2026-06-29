@@ -18,6 +18,7 @@ import { CATEGORIES, DRUGS, Drug, DrugCategory } from "@/constants/drugs";
 import { useFavorites } from "@/context/FavoritesContext";
 import { useTheme } from "@/context/ThemeContext";
 import { MAX_WEIGHT_KG, MIN_WEIGHT_KG, useWeight } from "@/context/WeightContext";
+import { useDrawer } from "@/context/DrawerContext";
 import { StarButton } from "@/components/StarButton";
 
 const ALL = "all" as const;
@@ -29,6 +30,7 @@ export default function DrugListScreen() {
   const colors = Colors.light;
   const { weight, setWeight, weightInput, setWeightInput, resetWeight } = useWeight();
   const { isFav, toggleFav } = useFavorites();
+  const { openDrawer } = useDrawer();
 
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<FilterTab>(ALL);
@@ -204,6 +206,14 @@ export default function DrugListScreen() {
         ]}
       >
         <View style={styles.headerTop}>
+          {/* Hamburger */}
+          <TouchableOpacity
+            onPress={openDrawer}
+            style={[styles.hamburgerBtn, { backgroundColor: isDark ? "#0A192F" : "#E8F4FA" }]}
+            activeOpacity={0.7}
+          >
+            <Feather name="menu" size={20} color={isDark ? "#8892B0" : Colors.light.tint} />
+          </TouchableOpacity>
           {/* Title */}
           <View style={{ flex: 1, minWidth: 0 }}>
             <Text
@@ -358,6 +368,15 @@ export default function DrugListScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  hamburgerBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+    marginTop: 4,
+  },
   header: {
     paddingHorizontal: 16,
     paddingBottom: 8,

@@ -17,6 +17,7 @@ import { CATEGORIES, DRUGS, DrugCategory, calculateDose } from "@/constants/drug
 import { useTheme } from "@/context/ThemeContext";
 import { useFavorites } from "@/context/FavoritesContext";
 import { MAX_WEIGHT_KG, MIN_WEIGHT_KG, useWeight } from "@/context/WeightContext";
+import { useDrawer } from "@/context/DrawerContext";
 import { ProfessionalFooter } from "@/components/ProfessionalFooter";
 import { StarButton } from "@/components/StarButton";
 
@@ -34,6 +35,7 @@ export default function CalculatorScreen() {
   const colors = Colors.light;
   const { weight, setWeight, weightInput, setWeightInput, resetWeight } = useWeight();
   const { isFav, toggleFav } = useFavorites();
+  const { openDrawer } = useDrawer();
 
   const [selectedCategory, setSelectedCategory] = useState<DrugCategory | null>(null);
   const [search, setSearch] = useState("");
@@ -116,6 +118,13 @@ export default function CalculatorScreen() {
         ]}
       >
         <View style={styles.headerRow}>
+          <TouchableOpacity
+            onPress={openDrawer}
+            style={[styles.hamburgerBtn, { backgroundColor: isDark ? "#233554" : "#F0F4F8" }]}
+            activeOpacity={0.7}
+          >
+            <Feather name="menu" size={20} color={isDark ? "#8892B0" : Colors.light.tint} />
+          </TouchableOpacity>
           <View style={{ flex: 1, minWidth: 0 }}>
             <Text
               style={[
@@ -562,6 +571,16 @@ export default function CalculatorScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  hamburgerBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+    marginTop: 4,
+    marginRight: 4,
+  },
   header: {
     paddingHorizontal: 16,
     paddingBottom: 4,
