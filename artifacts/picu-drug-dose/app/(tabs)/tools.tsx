@@ -126,6 +126,128 @@ function estimatePercentile(val: number, refs: [number, number, number, number, 
   return { label, color, note, zscore: zRounded, nutritionStatus, nutritionColor, samAlert, band };
 }
 
+// ─── NHBPEP Fourth Report BP Percentile Tables ───────────────────────────────
+// Source: NHBPEP Working Group, Pediatrics 2004;114(2 Suppl):555-576
+// Tables 3 & 4 — Systolic BP percentiles by age, gender, and height percentile
+// Height columns index 0-6 → 5th, 10th, 25th, 50th, 75th, 90th, 95th height percentile
+// Each entry: [50th BP pctile values, 90th BP pctile values, 95th BP pctile values]
+type BPRow = [number[], number[], number[]]; // [p50, p90, p95] each with 7 height-col values
+
+const BP_BOYS_SBP: Record<number, BPRow> = {
+  1:  [[80,81,83,85,87,88,89],   [94,95,97,99,100,102,102], [98,99,101,103,104,106,106]],
+  2:  [[84,85,87,88,90,92,92],   [98,99,101,102,104,105,106],[102,103,105,107,108,110,110]],
+  3:  [[86,87,89,91,93,94,95],   [100,101,103,105,107,108,109],[104,105,107,109,111,112,113]],
+  4:  [[88,89,91,93,95,96,97],   [102,103,105,107,109,110,111],[106,107,109,111,113,114,115]],
+  5:  [[90,91,93,95,96,98,98],   [104,105,106,108,110,112,112],[108,109,110,112,114,115,116]],
+  6:  [[91,92,94,96,98,99,100],  [105,106,108,110,112,113,114],[109,110,112,114,116,117,118]],
+  7:  [[92,94,95,97,99,100,101], [106,107,109,111,113,114,115],[110,111,113,115,117,118,119]],
+  8:  [[94,95,97,99,100,102,102],[107,109,110,112,114,115,116],[111,112,114,116,118,119,120]],
+  9:  [[95,96,98,100,102,103,104],[109,110,112,114,115,117,117],[113,114,116,118,119,121,121]],
+  10: [[97,98,100,102,103,105,106],[111,112,114,115,117,119,119],[115,116,117,119,121,122,123]],
+  11: [[99,100,102,104,105,107,107],[113,114,115,117,119,120,121],[117,118,119,121,123,124,125]],
+  12: [[101,102,104,106,108,109,110],[115,116,118,120,121,123,123],[119,120,122,123,125,127,127]],
+  13: [[104,105,106,108,110,111,112],[117,118,120,122,124,125,126],[121,122,124,126,128,129,130]],
+  14: [[106,107,109,111,113,114,115],[120,121,123,125,126,128,128],[124,125,127,128,130,132,132]],
+  15: [[109,110,112,113,115,117,117],[122,124,125,127,129,130,131],[126,127,129,131,133,134,135]],
+  16: [[111,112,114,116,118,119,120],[125,126,128,130,131,133,134],[129,130,132,134,135,137,137]],
+  17: [[114,115,116,118,120,121,122],[127,128,130,132,134,135,136],[131,132,134,136,138,139,140]],
+};
+
+const BP_GIRLS_SBP: Record<number, BPRow> = {
+  1:  [[83,84,85,86,88,89,90],   [97,97,98,100,101,102,103],[100,101,102,104,105,106,107]],
+  2:  [[85,85,87,88,89,91,91],   [98,99,100,101,103,104,105],[102,102,104,105,106,108,108]],
+  3:  [[86,87,88,89,91,92,92],   [100,100,102,103,104,105,106],[104,104,105,107,108,109,110]],
+  4:  [[88,88,90,91,92,94,94],   [101,102,103,105,106,107,108],[105,106,107,108,110,111,112]],
+  5:  [[89,90,91,93,94,95,96],   [103,103,105,106,107,109,109],[107,107,108,110,111,112,113]],
+  6:  [[91,92,93,94,96,97,98],   [104,105,106,108,109,110,111],[108,109,110,111,113,114,115]],
+  7:  [[93,93,95,96,97,99,99],   [106,107,108,109,111,112,113],[110,111,112,113,115,116,116]],
+  8:  [[95,95,96,98,99,100,101], [108,109,110,111,113,114,114],[112,112,114,115,116,118,118]],
+  9:  [[96,97,98,100,101,102,103],[110,110,112,113,114,116,116],[114,114,115,117,118,119,120]],
+  10: [[98,99,100,102,103,104,105],[112,112,114,115,116,118,118],[116,116,117,119,120,121,122]],
+  11: [[100,101,102,103,105,106,107],[114,114,116,117,118,119,120],[118,118,119,121,122,123,124]],
+  12: [[102,103,104,105,107,108,108],[116,116,117,119,120,121,122],[119,120,121,123,124,125,126]],
+  13: [[104,105,106,107,109,110,110],[117,118,119,121,122,123,124],[121,122,123,124,126,127,128]],
+  14: [[106,106,107,109,110,111,112],[119,120,121,122,124,125,125],[123,123,125,126,127,129,129]],
+  15: [[107,108,109,110,111,113,113],[120,121,122,123,125,126,127],[124,125,126,127,129,130,131]],
+  16: [[108,108,110,111,112,114,114],[121,121,123,124,125,127,127],[125,125,126,128,129,130,131]],
+  17: [[108,109,110,111,113,114,115],[122,122,123,125,126,127,128],[125,126,127,128,130,131,132]],
+};
+
+// CDC height-for-age percentile cutoffs [5th,10th,25th,50th,75th,90th,95th] in cm
+const HT_BOYS_PCT: Record<number, number[]> = {
+  1: [71,73,75,76,78,80,81], 2: [82,83,86,87,89,91,92], 3: [89,91,93,96,98,100,101],
+  4: [96,98,100,103,105,107,109], 5: [102,104,107,110,113,115,116], 6: [108,110,113,116,119,122,123],
+  7: [114,116,119,122,125,128,129], 8: [119,122,125,128,131,134,136], 9: [124,127,130,133,137,140,142],
+  10: [129,132,135,138,142,146,148], 11: [134,137,141,144,148,152,154], 12: [139,142,147,151,156,161,163],
+  13: [145,148,153,157,162,168,170], 14: [151,154,159,164,169,174,176], 15: [156,159,164,170,175,179,181],
+  16: [159,162,167,173,178,182,184], 17: [161,163,168,175,180,184,186],
+};
+const HT_GIRLS_PCT: Record<number, number[]> = {
+  1: [69,71,73,75,77,78,79], 2: [80,82,84,86,88,90,91], 3: [88,90,92,95,97,99,100],
+  4: [95,97,99,102,104,106,107], 5: [101,103,106,109,111,113,115], 6: [107,109,112,115,118,120,122],
+  7: [112,115,118,121,124,127,128], 8: [118,120,124,127,130,133,135], 9: [123,126,129,133,136,139,141],
+  10: [128,131,135,138,142,145,147], 11: [133,137,141,145,148,152,154], 12: [139,142,147,151,154,157,159],
+  13: [144,147,151,156,159,162,163], 14: [148,151,155,160,163,165,166], 15: [150,153,157,162,165,167,168],
+  16: [151,154,158,163,166,168,169], 17: [151,155,159,163,167,169,170],
+};
+
+// Determine height-column index (0-6) based on measured height vs CDC percentile cutoffs
+function getHeightColIndex(ht: number, htPcts: number[]): number {
+  // htPcts = [p5, p10, p25, p50, p75, p90, p95]
+  if (ht < htPcts[0]) return 0;
+  if (ht < htPcts[1]) return 0;
+  if (ht < htPcts[2]) return 1;
+  if (ht < htPcts[3]) return 2;
+  if (ht < htPcts[4]) return 3;
+  if (ht < htPcts[5]) return 4;
+  if (ht < htPcts[6]) return 5;
+  return 6;
+}
+
+// Returns height percentile label for display
+function htPctLabel(col: number): string {
+  return ["5th","10th","25th","50th","75th","90th","95th"][col] ?? "50th";
+}
+
+// Classify BP and return result
+function classifyBP(ageYears: number, gender: "M" | "F", heightCm: number, sbp: number): {
+  sbp50: number; sbp90: number; sbp95: number;
+  classification: string; color: string; band: number; htPctLabel: string;
+} | null {
+  const age = Math.round(ageYears);
+  if (age < 1 || age > 17) return null;
+  const bpTable = gender === "M" ? BP_BOYS_SBP : BP_GIRLS_SBP;
+  const htTable = gender === "M" ? HT_BOYS_PCT : HT_GIRLS_PCT;
+  const row = bpTable[age];
+  const htPcts = htTable[age];
+  if (!row || !htPcts) return null;
+  const col = getHeightColIndex(heightCm, htPcts);
+  const sbp50 = row[0][col];
+  const sbp90 = row[1][col];
+  const sbp95 = row[2][col];
+  let classification: string;
+  let color: string;
+  let band: number;
+  if (sbp < sbp50) {
+    classification = "Normotensive (<50th percentile)";
+    color = "#16A34A";
+    band = 0;
+  } else if (sbp < sbp90) {
+    classification = "High-Normal (50th–90th percentile)";
+    color = "#0891B2";
+    band = 1;
+  } else if (sbp < sbp95) {
+    classification = "Pre-hypertensive (90th–95th percentile)";
+    color = "#D97706";
+    band = 2;
+  } else {
+    classification = "Hypertensive (>95th percentile)";
+    color = "#DC2626";
+    band = 3;
+  }
+  return { sbp50, sbp90, sbp95, classification, color, band, htPctLabel: htPctLabel(col) };
+}
+
 // ─── VIS formula ──────────────────────────────────────────────────────────────
 // Wernovsky et al. VIS = Dopa + Dobu + 100×Epi + 10×Milrinone + 10000×Vaso + 100×Norepi
 function calcVIS(d: { dopa: string; dobu: string; epi: string; mil: string; vaso: string; norepi: string }) {
@@ -575,6 +697,19 @@ export default function ToolsScreen() {
   const [vis, setVis] = useState({ dopa: "", dobu: "", epi: "", mil: "", vaso: "", norepi: "" });
   const visScore = calcVIS(vis);
   const visResult = visInterpret(visScore);
+
+  // ── BP Percentile Calculator state ──
+  const [bpAgeYears, setBpAgeYears] = useState("");
+  const [bpGender, setBpGender] = useState<"M" | "F">("M");
+  const [bpHeight, setBpHeight] = useState("");
+  const [bpSBP, setBpSBP] = useState("");
+  const bpAgeNum = parseFloat(bpAgeYears) || 0;
+  const bpHeightNum = parseFloat(bpHeight) || 0;
+  const bpSBPNum = parseFloat(bpSBP) || 0;
+  const bpResult = bpAgeNum >= 1 && bpAgeNum <= 17 && bpHeightNum > 0 && bpSBPNum > 0
+    ? classifyBP(bpAgeNum, bpGender, bpHeightNum, bpSBPNum)
+    : null;
+  const bpVISAlert = bpResult !== null && bpResult.band === 0 && visScore > 10;
 
   // ── Fluids state ──
   const [fluidWt, setFluidWt] = useState(weight > 0 ? weight.toString() : "");
@@ -1234,6 +1369,140 @@ export default function ToolsScreen() {
                 <Text style={[styles.resultNote, { color: textMuted }]}>{visResult.label}</Text>
               </View>
 
+              {/* ── BP Percentile Calculator ── */}
+              <View style={[styles.bpCalcBox, { backgroundColor: isDark ? "#0D1F36" : "#F0F9FF", borderColor: isDark ? "#1E3A5F" : "#BAE6FD", marginTop: 16 }]}>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                  <View style={{ width: 32, height: 32, borderRadius: 9, backgroundColor: "#0891B218", alignItems: "center", justifyContent: "center" }}>
+                    <Feather name="activity" size={16} color="#0891B2" />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 13, fontFamily: "Inter_700Bold", color: "#0891B2", letterSpacing: 0.2 }}>BP Percentile Calculator</Text>
+                    <Text style={{ fontSize: 10, color: textMuted, fontFamily: "Inter_400Regular", marginTop: 1 }}>NHBPEP Fourth Report · Harriet Lane 23e</Text>
+                  </View>
+                </View>
+
+                {/* Gender */}
+                <Text style={[styles.inputLabel, { color: textMuted, marginBottom: 4 }]}>Gender</Text>
+                <View style={{ flexDirection: "row", gap: 8, marginBottom: 12 }}>
+                  {(["M", "F"] as const).map((g) => (
+                    <TouchableOpacity
+                      key={g}
+                      onPress={() => setBpGender(g)}
+                      style={{
+                        flex: 1, paddingVertical: 9, borderRadius: 10, alignItems: "center",
+                        backgroundColor: bpGender === g ? "#0891B2" : (isDark ? "#1E293B" : "#F1F5F9"),
+                        borderWidth: 2,
+                        borderColor: bpGender === g ? "#0891B2" : (isDark ? "#334155" : "#CBD5E1"),
+                      }}
+                    >
+                      <Text style={{ fontFamily: "Inter_700Bold", fontSize: 13, color: bpGender === g ? "#FFFFFF" : textMuted }}>
+                        {g === "M" ? "♂ Male" : "♀ Female"}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                {/* Age + Height + SBP inputs */}
+                <View style={{ flexDirection: "row", gap: 8, marginBottom: 12 }}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.inputLabel, { color: textMuted, marginBottom: 4 }]}>Age (years)</Text>
+                    <TextInput
+                      style={[styles.input, { color: textPrimary, backgroundColor: inputBg, borderColor: border }]}
+                      value={bpAgeYears}
+                      onChangeText={setBpAgeYears}
+                      keyboardType="decimal-pad"
+                      placeholder="1–17"
+                      placeholderTextColor={textMuted}
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.inputLabel, { color: textMuted, marginBottom: 4 }]}>Height (cm)</Text>
+                    <TextInput
+                      style={[styles.input, { color: textPrimary, backgroundColor: inputBg, borderColor: border }]}
+                      value={bpHeight}
+                      onChangeText={setBpHeight}
+                      keyboardType="decimal-pad"
+                      placeholder="e.g. 120"
+                      placeholderTextColor={textMuted}
+                    />
+                  </View>
+                </View>
+
+                <Text style={[styles.inputLabel, { color: textMuted, marginBottom: 4 }]}>Actual SBP (mmHg)</Text>
+                <TextInput
+                  style={[styles.input, { color: textPrimary, backgroundColor: inputBg, borderColor: border, marginBottom: 12 }]}
+                  value={bpSBP}
+                  onChangeText={setBpSBP}
+                  keyboardType="decimal-pad"
+                  placeholder="e.g. 110"
+                  placeholderTextColor={textMuted}
+                />
+
+                {/* Age range hint */}
+                {bpAgeNum > 0 && (bpAgeNum < 1 || bpAgeNum > 17) && (
+                  <View style={{ backgroundColor: "#FEF3C7", borderRadius: 8, padding: 10, marginBottom: 10, flexDirection: "row", gap: 6, alignItems: "center" }}>
+                    <Feather name="alert-triangle" size={14} color="#92400E" />
+                    <Text style={{ fontSize: 12, color: "#92400E", fontFamily: "Inter_500Medium" }}>Age must be 1–17 years (NHBPEP table range)</Text>
+                  </View>
+                )}
+
+                {/* BP Result */}
+                {bpResult && (
+                  <View style={{ gap: 8 }}>
+                    {/* Thresholds row */}
+                    <View style={{ flexDirection: "row", gap: 6 }}>
+                      {[
+                        { label: "50th", val: bpResult.sbp50, color: "#16A34A" },
+                        { label: "90th", val: bpResult.sbp90, color: "#D97706" },
+                        { label: "95th", val: bpResult.sbp95, color: "#DC2626" },
+                      ].map((t) => (
+                        <View key={t.label} style={{ flex: 1, backgroundColor: t.color + "14", borderRadius: 10, padding: 8, alignItems: "center", borderWidth: 1, borderColor: t.color + "30" }}>
+                          <Text style={{ fontSize: 10, color: t.color, fontFamily: "Inter_600SemiBold", letterSpacing: 0.3 }}>{t.label} SBP</Text>
+                          <Text style={{ fontSize: 18, fontFamily: "Inter_700Bold", color: t.color, marginTop: 2 }}>{t.val}</Text>
+                          <Text style={{ fontSize: 9, color: textMuted, fontFamily: "Inter_400Regular" }}>mmHg</Text>
+                        </View>
+                      ))}
+                    </View>
+
+                    {/* Height percentile used */}
+                    <Text style={{ fontSize: 11, color: textMuted, fontFamily: "Inter_400Regular", textAlign: "center" }}>
+                      Height at {bpResult.htPctLabel} percentile for age · {bpGender === "M" ? "Male" : "Female"}
+                    </Text>
+
+                    {/* Classification badge */}
+                    <View style={[styles.bpResultBadge, { backgroundColor: bpResult.color + "18", borderColor: bpResult.color + "40" }]}>
+                      <Feather name={bpResult.band === 0 ? "check-circle" : bpResult.band === 3 ? "alert-circle" : "alert-triangle"} size={18} color={bpResult.color} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 14, fontFamily: "Inter_700Bold", color: bpResult.color }}>{bpResult.classification}</Text>
+                        <Text style={{ fontSize: 11, color: textMuted, fontFamily: "Inter_400Regular", marginTop: 2 }}>
+                          Entered SBP: {bpSBPNum} mmHg · Age {Math.round(bpAgeNum)}y · {bpHeightNum}cm
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                )}
+
+                {/* ── VIS + BP Clinical Alert ── */}
+                {bpVISAlert && (
+                  <View style={styles.bpVISAlert}>
+                    <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 10 }}>
+                      <Feather name="alert-octagon" size={20} color="#FFFFFF" style={{ marginTop: 1 }} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={{ fontSize: 13, fontFamily: "Inter_700Bold", color: "#FFFFFF", letterSpacing: 0.2 }}>
+                          Clinical Alert: Active Inotropic Support with Hypotension
+                        </Text>
+                        <Text style={{ fontSize: 11, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.9)", marginTop: 4, lineHeight: 16 }}>
+                          SBP is below the 50th percentile while VIS = {visScore} (&gt;10). Consider vasopressor escalation.
+                        </Text>
+                        <Text style={{ fontSize: 10, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.7)", marginTop: 6, fontStyle: "italic" }}>
+                          Ref: Harriet Lane 23e · Wernovsky et al. 1995
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                )}
+              </View>
+
               {/* Normal Vitals Table */}
               <View style={[styles.infoBox, { backgroundColor: isDark ? "#0A192F" : "#EFF6FF", borderColor: isDark ? "#233554" : "#BFDBFE", marginTop: 14 }]}>
                 <Text style={[styles.infoTitle, { color: "#3B82F6" }]}>Normal Vitals by Age</Text>
@@ -1251,6 +1520,14 @@ export default function ToolsScreen() {
                     <Text style={[styles.vitalsCell, { color: textMuted }]}>{row.map}</Text>
                   </View>
                 ))}
+              </View>
+
+              {/* Clinical Reference Citation */}
+              <View style={[styles.bpCitationBox, { backgroundColor: isDark ? "#0A192F" : "#F8FAFD", borderColor: isDark ? "#1E3A5F" : "#E2E8F0" }]}>
+                <Feather name="book-open" size={13} color={textMuted} style={{ marginTop: 1 }} />
+                <Text style={{ flex: 1, fontSize: 11, color: textMuted, fontFamily: "Inter_400Regular", lineHeight: 16, fontStyle: "italic" }}>
+                  Reference: BP Percentile standards & VIS protocols based on Harriet Lane 23e, Nelson's Pediatrics, and NHBPEP Fourth Report (Pediatrics 2004).
+                </Text>
               </View>
             </View>
           )}
@@ -2278,6 +2555,10 @@ const styles = StyleSheet.create({
   refText: { fontSize: 11, lineHeight: 16 },
   infoBox: { borderWidth: 1, borderRadius: 12, padding: 12, gap: 6 },
   infoTitle: { fontSize: 13, fontWeight: "700" },
+  bpCalcBox: { borderWidth: 1.5, borderRadius: 14, padding: 14, marginTop: 16, gap: 0 },
+  bpResultBadge: { flexDirection: "row", alignItems: "flex-start", gap: 10, borderWidth: 1.5, borderRadius: 12, padding: 12 },
+  bpVISAlert: { backgroundColor: "#DC2626", borderRadius: 12, padding: 14, marginTop: 10 },
+  bpCitationBox: { flexDirection: "row", alignItems: "flex-start", gap: 8, borderWidth: 1, borderRadius: 10, padding: 10, marginTop: 12 },
   infoText: { fontSize: 12, lineHeight: 18 },
   tableHeaderRow: { flexDirection: "row", paddingBottom: 6, borderBottomWidth: 1, marginBottom: 2 },
   tableHeaderCell: { flex: 1, fontSize: 11, fontWeight: "700" },
