@@ -1,197 +1,26 @@
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useMemo, useState } from "react";
+import React from "react";
 import {
-  FlatList,
   Platform,
-  Pressable,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Colors from "@/constants/colors";
-import { CATEGORIES, DRUGS, Drug, DrugCategory } from "@/constants/drugs";
-import { useFavorites } from "@/context/FavoritesContext";
 import { useTheme } from "@/context/ThemeContext";
-import { MAX_WEIGHT_KG, MIN_WEIGHT_KG, useWeight } from "@/context/WeightContext";
 import { useDrawer } from "@/context/DrawerContext";
-import { StarButton } from "@/components/StarButton";
 
-const ALL = "all" as const;
-type FilterTab = DrugCategory | typeof ALL;
-
-export default function DrugListScreen() {
+export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { isDark, toggleDark } = useTheme();
-  const colors = Colors.light;
-  const { weight, setWeight, weightInput, setWeightInput, resetWeight } = useWeight();
-  const { isFav, toggleFav } = useFavorites();
   const { openDrawer } = useDrawer();
-
-  const [search, setSearch] = useState("");
-  const [activeCategory, setActiveCategory] = useState<FilterTab>(ALL);
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
-  const [weightWarning, setWeightWarning] = useState(false);
+  const colors = Colors.light;
 
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
-
-  const categories: { key: FilterTab; label: string; color: string }[] = [
-    { key: ALL, label: "All", color: colors.tint },
-    ...Object.entries(CATEGORIES).map(([k, v]) => ({
-      key: k as DrugCategory,
-      label: v.label,
-      color: v.color,
-    })),
-  ];
-
-  const filtered = useMemo(() => {
-    return DRUGS.filter((d) => {
-      const matchCat = activeCategory === ALL || d.category === activeCategory;
-      const matchSearch =
-        !search ||
-        d.name.toLowerCase().includes(search.toLowerCase()) ||
-        (d.genericName?.toLowerCase().includes(search.toLowerCase()) ?? false) ||
-        d.indications.some((i) =>
-          i.toLowerCase().includes(search.toLowerCase())
-        );
-      const matchFav = !showFavoritesOnly || isFav(d.id);
-      return matchCat && matchSearch && matchFav;
-    });
-  }, [search, activeCategory, showFavoritesOnly, isFav]);
-
-  function handleWeightChange(text: string) {
-    setWeightInput(text);
-    const num = parseFloat(text);
-    if (!isNaN(num) && num > 0) {
-      if (num > MAX_WEIGHT_KG) {
-        setWeight(MAX_WEIGHT_KG);
-        setWeightWarning(true);
-      } else if (num < MIN_WEIGHT_KG) {
-        setWeightWarning(true);
-      } else {
-        setWeight(num);
-        setWeightWarning(false);
-      }
-    } else {
-      setWeightWarning(false);
-    }
-  }
-
-  function handleReset() {
-    resetWeight();
-    setWeightWarning(false);
-  }
-
-  function renderCategoryPill(item: { key: FilterTab; label: string; color: string }) {
-    const isActive = activeCategory === item.key;
-    return (
-      <Pressable
-        key={item.key}
-        onPress={() => setActiveCategory(item.key)}
-        style={[
-          styles.categoryPill,
-          {
-            backgroundColor: isActive ? item.color : isDark ? "#0A192F" : "#EBF5FB",
-            borderColor: "transparent",
-          },
-        ]}
-      >
-        <Text
-          style={[
-            styles.categoryPillText,
-            {
-              color: isActive ? "#fff" : isDark ? "#5A8099" : "#374B5C",
-              fontFamily: isActive ? "Inter_600SemiBold" : "Inter_400Regular",
-            },
-          ]}
-        >
-          {item.label}
-        </Text>
-      </Pressable>
-    );
-  }
-
-  function renderDrugItem({ item }: { item: Drug }) {
-    const cat = CATEGORIES[item.category];
-    const f = isFav(item.id);
-    return (
-      <Pressable
-        onPress={() => router.push({ pathname: "/drug/[id]", params: { id: item.id } })}
-        style={({ pressed }) => [
-          styles.drugCard,
-          {
-            backgroundColor: isDark ? "#112240" : "#FFFFFF",
-            opacity: pressed ? 0.85 : 1,
-            transform: [{ scale: pressed ? 0.99 : 1 }],
-          },
-        ]}
-      >
-        <View style={[styles.categoryDot, { backgroundColor: cat.color }]} />
-        <View style={styles.drugInfo}>
-          <View style={styles.drugNameRow}>
-            <Text
-              style={[
-                styles.drugName,
-                { color: isDark ? "#FFFFFF" : "#0D1B2A", fontFamily: "Inter_600SemiBold" },
-              ]}
-            >
-              {item.name}
-            </Text>
-            {item.highAlert && (
-              <View style={styles.highAlertBadge}>
-                <Text style={styles.highAlertText}>⚠ HIGH ALERT</Text>
-              </View>
-            )}
-          </View>
-          {item.genericName ? (
-            <Text
-              style={[
-                styles.genericName,
-                { color: isDark ? "#8892B0" : "#4A5568", fontFamily: "Inter_400Regular" },
-              ]}
-            >
-              {item.genericName}
-            </Text>
-          ) : null}
-          <Text
-            style={[
-              styles.indication,
-              { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" },
-            ]}
-            numberOfLines={1}
-          >
-            {item.indications.slice(0, 2).join(" · ")}
-          </Text>
-        </View>
-        <View style={styles.drugRight}>
-          <View style={[styles.catBadge, { backgroundColor: cat.color + "22" }]}>
-            <Text style={[styles.catBadgeText, { color: cat.color, fontFamily: "Inter_500Medium" }]}>
-              {cat.label}
-            </Text>
-          </View>
-          <StarButton
-            isFav={f}
-            onToggle={() =>
-              toggleFav({
-                id: item.id,
-                type: "drug",
-                label: item.name,
-                color: cat.color,
-                category: cat.label,
-                notes: item.indications.slice(0, 2).join(" · "),
-              })
-            }
-            size={18}
-            color={cat.color}
-          />
-        </View>
-      </Pressable>
-    );
-  }
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? "#0B132B" : "#F0F9FF" }]}>
@@ -206,15 +35,14 @@ export default function DrugListScreen() {
         ]}
       >
         <View style={styles.headerTop}>
-          {/* Hamburger */}
           <TouchableOpacity
             onPress={openDrawer}
             style={[styles.hamburgerBtn, { backgroundColor: isDark ? "#0A192F" : "#E8F4FA" }]}
             activeOpacity={0.7}
           >
-            <Feather name="menu" size={20} color={isDark ? "#8892B0" : Colors.light.tint} />
+            <Feather name="menu" size={20} color={isDark ? "#8892B0" : colors.tint} />
           </TouchableOpacity>
-          {/* Title */}
+
           <View style={{ flex: 1, minWidth: 0 }}>
             <Text
               style={[
@@ -231,11 +59,10 @@ export default function DrugListScreen() {
                 { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" },
               ]}
             >
-              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 95+ drugs
+              Pediatric Clinical Suite
             </Text>
           </View>
 
-          {/* Dark mode toggle */}
           <TouchableOpacity
             onPress={toggleDark}
             style={[styles.darkToggle, { backgroundColor: isDark ? "#0A192F" : "#E8F4FA" }]}
@@ -244,142 +71,94 @@ export default function DrugListScreen() {
             <Feather
               name={isDark ? "sun" : "moon"}
               size={16}
-              color={isDark ? "#FFD700" : Colors.light.tint}
+              color={isDark ? "#FFD700" : colors.tint}
             />
           </TouchableOpacity>
-
-          {/* Weight box */}
-          <View style={styles.weightBox}>
-            <Text
-              style={[
-                styles.weightLabel,
-                { color: colors.tint, fontFamily: "Inter_500Medium" },
-              ]}
-            >
-              Weight (kg)
-            </Text>
-            <View style={styles.weightInputRow}>
-              <TextInput
-                style={[
-                  styles.weightInput,
-                  {
-                    color: weightWarning ? "#E53E3E" : isDark ? "#FFFFFF" : "#0A1628",
-                    backgroundColor: isDark ? "#0A192F" : "#EBF5FB",
-                    fontFamily: "Inter_700Bold",
-                    borderColor: weightWarning ? "#E53E3E" : "transparent",
-                    borderWidth: weightWarning ? 1.5 : 0,
-                  },
-                ]}
-                value={weightInput}
-                onChangeText={handleWeightChange}
-                keyboardType="decimal-pad"
-                selectTextOnFocus
-                maxLength={6}
-              />
-              <TouchableOpacity
-                onPress={handleReset}
-                style={[styles.resetBtn, { backgroundColor: isDark ? "#0D1928" : "#D9EDF8" }]}
-                activeOpacity={0.7}
-              >
-                <Feather name="x" size={13} color={isDark ? "#8892B0" : "#4A5568"} />
-              </TouchableOpacity>
-            </View>
-            {weightWarning && (
-              <Text style={styles.weightWarning}>Weight: {MIN_WEIGHT_KG}–{MAX_WEIGHT_KG} kg</Text>
-            )}
-          </View>
         </View>
-
-        {/* Search */}
-        <View
-          style={[
-            styles.searchBar,
-            { backgroundColor: isDark ? "#0A192F" : "#EBF5FB" },
-          ]}
-        >
-          <Feather name="search" size={16} color={isDark ? "#4D6E88" : Colors.light.tint} />
-          <TextInput
-            style={[
-              styles.searchInput,
-              {
-                color: isDark ? "#FFFFFF" : "#0D1B2A",
-                fontFamily: "Inter_400Regular",
-              },
-            ]}
-            placeholder="Search drugs, indications..."
-            placeholderTextColor={isDark ? "#8892B0" : "#8A9BB0"}
-            value={search}
-            onChangeText={setSearch}
-          />
-          {search.length > 0 && (
-            <Pressable onPress={() => setSearch("")}>
-              <Feather name="x" size={16} color={isDark ? "#8892B0" : "#8A9BB0"} />
-            </Pressable>
-          )}
-          <View style={styles.searchDivider} />
-          <Pressable onPress={() => setShowFavoritesOnly((v) => !v)}>
-            <Feather
-              name="bookmark"
-              size={16}
-              color={showFavoritesOnly ? colors.accent : isDark ? "#8892B0" : "#8A9BB0"}
-            />
-          </Pressable>
-        </View>
-
-        {/* Category Pills */}
-        <FlatList
-          horizontal
-          data={categories}
-          renderItem={({ item }) => renderCategoryPill(item)}
-          keyExtractor={(item) => item.key}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.pillList}
-        />
       </View>
 
-      {/* Drug List */}
-      <FlatList
-        data={filtered}
-        renderItem={renderDrugItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={[
-          styles.listContent,
-          { paddingBottom: insets.bottom + (Platform.OS === "web" ? 84 : 90) },
-        ]}
-        showsVerticalScrollIndicator={false}
-        scrollEnabled={!!filtered.length}
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <Feather name="search" size={40} color={isDark ? "#233554" : "#E2E8F0"} />
-            <Text
-              style={[
-                styles.emptyText,
-                { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_500Medium" },
-              ]}
-            >
-              No drugs found
+      {/* Main Content */}
+      <View style={styles.content}>
+        {/* Welcome label */}
+        <Text style={[styles.welcomeLabel, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_500Medium" }]}>
+          SELECT MODULE
+        </Text>
+
+        {/* Dose Calculator Button */}
+        <TouchableOpacity
+          onPress={() => router.push("/(tabs)/calculator" as any)}
+          activeOpacity={0.85}
+          style={[
+            styles.mainButton,
+            {
+              backgroundColor: isDark ? "#0E2A45" : "#FFFFFF",
+              borderColor: colors.tint,
+              shadowColor: colors.tint,
+            },
+          ]}
+        >
+          <View style={[styles.mainButtonIconWrap, { backgroundColor: colors.tint + "18" }]}>
+            <Feather name="sliders" size={32} color={colors.tint} />
+          </View>
+          <View style={styles.mainButtonText}>
+            <Text style={[styles.mainButtonTitle, { color: isDark ? "#FFFFFF" : "#0D1B2A", fontFamily: "Inter_700Bold" }]}>
+              Dose Calculator
+            </Text>
+            <Text style={[styles.mainButtonDesc, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_400Regular" }]}>
+              Weight-based drug doses · 95+ medications
             </Text>
           </View>
-        }
-      />
+          <Feather name="chevron-right" size={22} color={colors.tint} />
+        </TouchableOpacity>
+
+        {/* Emergency Button */}
+        <TouchableOpacity
+          onPress={() => router.push("/(tabs)/emergency" as any)}
+          activeOpacity={0.85}
+          style={[
+            styles.mainButton,
+            styles.emergencyButton,
+            {
+              backgroundColor: "#DC2626",
+              borderColor: "#B91C1C",
+              shadowColor: "#DC2626",
+            },
+          ]}
+        >
+          <View style={[styles.mainButtonIconWrap, { backgroundColor: "rgba(255,255,255,0.18)" }]}>
+            <Feather name="alert-triangle" size={32} color="#FFFFFF" />
+          </View>
+          <View style={styles.mainButtonText}>
+            <Text style={[styles.mainButtonTitle, { color: "#FFFFFF", fontFamily: "Inter_700Bold" }]}>
+              EMERGENCY
+            </Text>
+            <Text style={[styles.mainButtonDesc, { color: "rgba(255,255,255,0.8)", fontFamily: "Inter_400Regular" }]}>
+              RESUSCITATION · Rapid reference
+            </Text>
+          </View>
+          <Feather name="chevron-right" size={22} color="#FFFFFF" />
+        </TouchableOpacity>
+
+        <Text style={[styles.hint, { color: isDark ? "#3A5070" : "#B0C4D8", fontFamily: "Inter_400Regular" }]}>
+          All other modules accessible via the menu ☰
+        </Text>
+      </View>
+
+      {/* Footer */}
+      <View style={[styles.footer, { paddingBottom: insets.bottom + 16 }]}>
+        <Text style={[styles.footerText, { color: isDark ? "#3A5070" : "#B0C4D8", fontFamily: "Inter_400Regular" }]}>
+          Prepared By: M. Kashan, RN
+        </Text>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  hamburgerBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-    marginTop: 4,
-  },
   header: {
     paddingHorizontal: 16,
-    paddingBottom: 8,
+    paddingBottom: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -388,11 +167,18 @@ const styles = StyleSheet.create({
   },
   headerTop: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 12,
-    gap: 8,
+    alignItems: "center",
+    gap: 10,
   },
-  headerTitle: { fontSize: 24, letterSpacing: -0.5 },
+  hamburgerBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  },
+  headerTitle: { fontSize: 22, letterSpacing: -0.5 },
   headerSubtitle: { fontSize: 12, marginTop: 2 },
   darkToggle: {
     width: 34,
@@ -400,91 +186,63 @@ const styles = StyleSheet.create({
     borderRadius: 17,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 4,
     flexShrink: 0,
   },
-  weightBox: { alignItems: "flex-end", flexShrink: 0 },
-  weightLabel: { fontSize: 10, marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 },
-  weightInputRow: { flexDirection: "row", alignItems: "center", gap: 4 },
-  weightInput: {
-    width: 72,
-    height: 36,
-    borderRadius: 8,
-    paddingHorizontal: 6,
-    fontSize: 18,
-    textAlign: "center",
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 36,
+    gap: 16,
   },
-  resetBtn: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+  welcomeLabel: {
+    fontSize: 11,
+    letterSpacing: 1.5,
+    marginBottom: 4,
+  },
+  mainButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 20,
+    padding: 20,
+    gap: 16,
+    borderWidth: 1.5,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.14,
+    shadowRadius: 16,
+    elevation: 6,
+  },
+  emergencyButton: {
+    borderWidth: 0,
+    shadowOpacity: 0.3,
+  },
+  mainButtonIconWrap: {
+    width: 60,
+    height: 60,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
-  },
-  weightWarning: {
-    fontSize: 10,
-    color: "#E53E3E",
-    marginTop: 2,
-    fontWeight: "600",
-  },
-  searchBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 10,
-    gap: 8,
-  },
-  searchInput: { flex: 1, fontSize: 15, padding: 0 },
-  searchDivider: { width: 1, height: 16, backgroundColor: "#CBD5E0", marginHorizontal: 2 },
-  pillList: { paddingBottom: 8, gap: 8 },
-  categoryPill: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 100,
-    borderWidth: 0,
-  },
-  categoryPillText: { fontSize: 12 },
-  listContent: { padding: 12, gap: 8 },
-  drugCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderRadius: 16,
-    padding: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 3,
-    gap: 12,
-  },
-  categoryDot: {
-    width: 4,
-    height: 48,
-    borderRadius: 2,
     flexShrink: 0,
   },
-  drugInfo: { flex: 1 },
-  drugNameRow: { flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap", marginBottom: 2 },
-  drugName: { fontSize: 16 },
-  highAlertBadge: {
-    backgroundColor: "#FEF3C7",
-    borderRadius: 4,
-    paddingHorizontal: 5,
-    paddingVertical: 2,
+  mainButtonText: { flex: 1 },
+  mainButtonTitle: {
+    fontSize: 20,
+    letterSpacing: -0.3,
+    marginBottom: 4,
   },
-  highAlertText: {
-    fontSize: 9,
-    color: "#92400E",
-    fontWeight: "700",
-    letterSpacing: 0.3,
+  mainButtonDesc: {
+    fontSize: 13,
+    lineHeight: 18,
   },
-  genericName: { fontSize: 13, marginBottom: 3 },
-  indication: { fontSize: 12 },
-  drugRight: { alignItems: "flex-end" },
-  catBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
-  catBadgeText: { fontSize: 10 },
-  emptyState: { alignItems: "center", paddingTop: 60, gap: 12 },
-  emptyText: { fontSize: 16 },
+  hint: {
+    fontSize: 12,
+    textAlign: "center",
+    marginTop: 8,
+  },
+  footer: {
+    alignItems: "center",
+    paddingTop: 12,
+  },
+  footerText: {
+    fontSize: 12,
+  },
 });

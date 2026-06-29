@@ -27,15 +27,24 @@ interface NavItem {
   route: string;
   color: string;
   description: string;
+  isEmergency?: boolean;
 }
 
 const NAV_ITEMS: NavItem[] = [
   {
     label: "Dashboard",
-    icon: "sliders",
-    route: "/(tabs)/calculator",
+    icon: "home",
+    route: "/(tabs)/index",
     color: "#0891B2",
-    description: "Main Dose Calculator",
+    description: "Home screen",
+  },
+  {
+    label: "EMERGENCY / RESUSCITATION",
+    icon: "alert-triangle",
+    route: "/(tabs)/emergency",
+    color: "#DC2626",
+    description: "Rapid resuscitation reference",
+    isEmergency: true,
   },
   {
     label: "Drug Infusions",
@@ -62,15 +71,8 @@ const NAV_ITEMS: NavItem[] = [
     label: "VIS / Cardiac & Haemodynamic",
     icon: "heart",
     route: "/(tabs)/tools",
-    color: "#E53E3E",
+    color: "#7C3AED",
     description: "Vasoactive-Inotropic Score",
-  },
-  {
-    label: "Tools",
-    icon: "tool",
-    route: "/(tabs)/tools",
-    color: "#16A34A",
-    description: "GCS, fluids, scores & more",
   },
   {
     label: "Protocols",
@@ -78,6 +80,13 @@ const NAV_ITEMS: NavItem[] = [
     route: "/(tabs)/calcs",
     color: "#D97706",
     description: "ABG, epilepsy, burns & toxicology",
+  },
+  {
+    label: "Tools",
+    icon: "tool",
+    route: "/(tabs)/tools",
+    color: "#16A34A",
+    description: "GCS, fluids, scores & more",
   },
 ];
 
@@ -95,7 +104,6 @@ export function AppDrawer() {
   const border = isDark ? "#1E3A5F" : "#E2EFF6";
   const textPrimary = isDark ? "#E2E8F0" : "#0D1B2A";
   const textMuted = isDark ? "#8892B0" : "#64748B";
-  const itemHover = isDark ? "#112240" : "#F0F9FF";
   const settingsBg = isDark ? "#0D1B2A" : "#F8FAFD";
 
   useEffect(() => {
@@ -158,9 +166,7 @@ export function AppDrawer() {
       statusBarTranslucent
     >
       <View style={styles.root}>
-        <Animated.View
-          style={[styles.backdrop, { opacity: backdropAnim }]}
-        >
+        <Animated.View style={[styles.backdrop, { opacity: backdropAnim }]}>
           <Pressable style={StyleSheet.absoluteFill} onPress={closeDrawer} />
         </Animated.View>
 
@@ -207,20 +213,43 @@ export function AppDrawer() {
               key={item.label}
               onPress={() => navigate(item.route)}
               activeOpacity={0.75}
-              style={[styles.navItem, { backgroundColor: "transparent" }]}
+              style={[
+                styles.navItem,
+                item.isEmergency && styles.emergencyNavItem,
+                item.isEmergency && { backgroundColor: "#DC262612", borderColor: "#DC262630" },
+              ]}
             >
-              <View style={[styles.navIcon, { backgroundColor: item.color + "18" }]}>
+              <View
+                style={[
+                  styles.navIcon,
+                  { backgroundColor: item.isEmergency ? "#DC262620" : item.color + "18" },
+                ]}
+              >
                 <Feather name={item.icon as any} size={18} color={item.color} />
               </View>
               <View style={styles.navText}>
-                <Text style={[styles.navLabel, { color: textPrimary }]}>
+                <Text
+                  style={[
+                    styles.navLabel,
+                    {
+                      color: item.isEmergency ? "#DC2626" : textPrimary,
+                      fontFamily: item.isEmergency ? "Inter_700Bold" : "Inter_600SemiBold",
+                    },
+                  ]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                >
                   {item.label}
                 </Text>
-                <Text style={[styles.navDesc, { color: textMuted }]} numberOfLines={1}>
+                <Text style={[styles.navDesc, { color: item.isEmergency ? "#DC262699" : textMuted }]} numberOfLines={1}>
                   {item.description}
                 </Text>
               </View>
-              <Feather name="chevron-right" size={15} color={isDark ? "#3A5070" : "#CBD5E0"} />
+              <Feather
+                name="chevron-right"
+                size={15}
+                color={item.isEmergency ? "#DC262666" : isDark ? "#3A5070" : "#CBD5E0"}
+              />
             </TouchableOpacity>
           ))}
 
@@ -239,7 +268,7 @@ export function AppDrawer() {
             </View>
             <View style={styles.navText}>
               <Text style={[styles.navLabel, { color: textPrimary }]}>Settings</Text>
-              <Text style={[styles.navDesc, { color: textMuted }]}>Theme · Login · Privacy</Text>
+              <Text style={[styles.navDesc, { color: textMuted }]}>Login · Privacy Policy</Text>
             </View>
             <Feather
               name={settingsOpen ? "chevron-up" : "chevron-down"}
@@ -384,6 +413,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     gap: 12,
   },
+  emergencyNavItem: {
+    borderWidth: 1,
+    marginVertical: 2,
+  },
   navIcon: {
     width: 38,
     height: 38,
@@ -392,10 +425,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexShrink: 0,
   },
-  navText: { flex: 1 },
+  navText: { flex: 1, minWidth: 0 },
   navLabel: {
-    fontSize: 14,
-    fontFamily: "Inter_600SemiBold",
+    fontSize: 13,
     letterSpacing: -0.1,
   },
   navDesc: {
