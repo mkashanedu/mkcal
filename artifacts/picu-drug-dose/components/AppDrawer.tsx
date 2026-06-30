@@ -79,14 +79,21 @@ const NAV_ITEMS: NavItem[] = [
     icon: "clipboard",
     route: "/(tabs)/calcs",
     color: "#D97706",
-    description: "ABG, epilepsy, burns & toxicology",
+    description: "ABG, epilepsy, burns & airway",
+  },
+  {
+    label: "Toxicology & Antidotes",
+    icon: "shield",
+    route: "/(tabs)/toxicology",
+    color: "#991B1B",
+    description: "16 antidotes with weight-based dosing",
   },
   {
     label: "Tools",
     icon: "tool",
     route: "/(tabs)/tools",
     color: "#16A34A",
-    description: "GCS, fluids, scores & more",
+    description: "BP percentile, GCS, fluids, scores & more",
   },
 ];
 

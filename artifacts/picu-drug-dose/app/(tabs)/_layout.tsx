@@ -165,6 +165,18 @@ function ClassicTabLayout() {
         }}
       />
       <Tabs.Screen
+        name="toxicology"
+        options={{
+          title: "Toxicology",
+          tabBarIcon: ({ color }) =>
+            isIOS ? (
+              <SymbolView name="cross.circle" tintColor={color} size={24} />
+            ) : (
+              <Feather name="shield" size={22} color={color} />
+            ),
+        }}
+      />
+      <Tabs.Screen
         name="favorites"
         options={{
           title: "Favorites",
