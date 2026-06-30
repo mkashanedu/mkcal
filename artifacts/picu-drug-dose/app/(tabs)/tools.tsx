@@ -750,13 +750,16 @@ export default function ToolsScreen() {
   const [bpGender, setBpGender] = useState<"M" | "F">("M");
   const [bpHeight, setBpHeight] = useState("");
   const [bpSBP, setBpSBP] = useState("");
+  const [bpDBP, setBpDBP] = useState("");
+  const [bpShowTable, setBpShowTable] = useState(false);
   const bpAgeNum = parseFloat(bpAgeYears) || 0;
   const bpHeightNum = parseFloat(bpHeight) || 0;
   const bpSBPNum = parseFloat(bpSBP) || 0;
+  const bpDBPNum = parseFloat(bpDBP) || 0;
   const bpResult = bpAgeNum >= 1 && bpAgeNum <= 17 && bpHeightNum > 0 && bpSBPNum > 0
-    ? classifyBP(bpAgeNum, bpGender, bpHeightNum, bpSBPNum)
+    ? classifyBP(bpAgeNum, bpGender, bpHeightNum, bpSBPNum, bpDBPNum)
     : null;
-  const bpVISAlert = bpResult !== null && bpResult.band === 0 && visScore > 10;
+  const bpVISAlert = bpResult !== null && bpResult.overallBand === 0 && visScore > 10;
 
   // ── Fluids state ──
   const [fluidWt, setFluidWt] = useState(weight > 0 ? weight.toString() : "");
@@ -1424,7 +1427,7 @@ export default function ToolsScreen() {
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontSize: 13, fontFamily: "Inter_700Bold", color: "#0891B2", letterSpacing: 0.2 }}>BP Percentile Calculator</Text>
-                    <Text style={{ fontSize: 10, color: textMuted, fontFamily: "Inter_400Regular", marginTop: 1 }}>NHBPEP Fourth Report · Harriet Lane 23e</Text>
+                    <Text style={{ fontSize: 10, color: textMuted, fontFamily: "Inter_400Regular", marginTop: 1 }}>NHBPEP Fourth Report · Harriet Lane 23e / Nelson's Pediatrics</Text>
                   </View>
                 </View>
 
@@ -1449,7 +1452,7 @@ export default function ToolsScreen() {
                   ))}
                 </View>
 
-                {/* Age + Height + SBP inputs */}
+                {/* Age + Height */}
                 <View style={{ flexDirection: "row", gap: 8, marginBottom: 12 }}>
                   <View style={{ flex: 1 }}>
                     <Text style={[styles.inputLabel, { color: textMuted, marginBottom: 4 }]}>Age (years)</Text>
@@ -1475,15 +1478,31 @@ export default function ToolsScreen() {
                   </View>
                 </View>
 
-                <Text style={[styles.inputLabel, { color: textMuted, marginBottom: 4 }]}>Actual SBP (mmHg)</Text>
-                <TextInput
-                  style={[styles.input, { color: textPrimary, backgroundColor: inputBg, borderColor: border, marginBottom: 12 }]}
-                  value={bpSBP}
-                  onChangeText={setBpSBP}
-                  keyboardType="decimal-pad"
-                  placeholder="e.g. 110"
-                  placeholderTextColor={textMuted}
-                />
+                {/* SBP + DBP */}
+                <View style={{ flexDirection: "row", gap: 8, marginBottom: 12 }}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.inputLabel, { color: textMuted, marginBottom: 4 }]}>Actual SBP (mmHg)</Text>
+                    <TextInput
+                      style={[styles.input, { color: textPrimary, backgroundColor: inputBg, borderColor: border }]}
+                      value={bpSBP}
+                      onChangeText={setBpSBP}
+                      keyboardType="decimal-pad"
+                      placeholder="e.g. 110"
+                      placeholderTextColor={textMuted}
+                    />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.inputLabel, { color: textMuted, marginBottom: 4 }]}>Actual DBP (mmHg)</Text>
+                    <TextInput
+                      style={[styles.input, { color: textPrimary, backgroundColor: inputBg, borderColor: border }]}
+                      value={bpDBP}
+                      onChangeText={setBpDBP}
+                      keyboardType="decimal-pad"
+                      placeholder="e.g. 72"
+                      placeholderTextColor={textMuted}
+                    />
+                  </View>
+                </View>
 
                 {/* Age range hint */}
                 {bpAgeNum > 0 && (bpAgeNum < 1 || bpAgeNum > 17) && (
@@ -1493,39 +1512,104 @@ export default function ToolsScreen() {
                   </View>
                 )}
 
-                {/* BP Result */}
+                {/* BP Result — dual SBP + DBP classification */}
                 {bpResult && (
                   <View style={{ gap: 8 }}>
-                    {/* Thresholds row */}
+                    {/* SBP threshold cards */}
                     <View style={{ flexDirection: "row", gap: 6 }}>
                       {[
-                        { label: "50th", val: bpResult.sbp50, color: "#16A34A" },
-                        { label: "90th", val: bpResult.sbp90, color: "#D97706" },
-                        { label: "95th", val: bpResult.sbp95, color: "#DC2626" },
+                        { label: "50th", sbp: bpResult.sbp50, dbp: bpResult.dbp50, color: "#16A34A" },
+                        { label: "90th", sbp: bpResult.sbp90, dbp: bpResult.dbp90, color: "#D97706" },
+                        { label: "95th", sbp: bpResult.sbp95, dbp: bpResult.dbp95, color: "#DC2626" },
+                        { label: "99th", sbp: bpResult.sbp99, dbp: bpResult.dbp99, color: "#7F1D1D" },
                       ].map((t) => (
                         <View key={t.label} style={{ flex: 1, backgroundColor: t.color + "14", borderRadius: 10, padding: 8, alignItems: "center", borderWidth: 1, borderColor: t.color + "30" }}>
-                          <Text style={{ fontSize: 10, color: t.color, fontFamily: "Inter_600SemiBold", letterSpacing: 0.3 }}>{t.label} SBP</Text>
-                          <Text style={{ fontSize: 18, fontFamily: "Inter_700Bold", color: t.color, marginTop: 2 }}>{t.val}</Text>
-                          <Text style={{ fontSize: 9, color: textMuted, fontFamily: "Inter_400Regular" }}>mmHg</Text>
+                          <Text style={{ fontSize: 9, color: t.color, fontFamily: "Inter_600SemiBold", letterSpacing: 0.3 }}>{t.label} SBP</Text>
+                          <Text style={{ fontSize: 16, fontFamily: "Inter_700Bold", color: t.color, marginTop: 1 }}>{t.sbp}</Text>
+                          <Text style={{ fontSize: 8, color: textMuted, fontFamily: "Inter_400Regular" }}>mmHg</Text>
                         </View>
                       ))}
                     </View>
 
                     {/* Height percentile used */}
                     <Text style={{ fontSize: 11, color: textMuted, fontFamily: "Inter_400Regular", textAlign: "center" }}>
-                      Height at {bpResult.htPctLabel} percentile for age · {bpGender === "M" ? "Male" : "Female"}
+                      Height at {bpResult.htLabel} percentile for age · {bpGender === "M" ? "Male" : "Female"}
                     </Text>
 
-                    {/* Classification badge */}
+                    {/* Dual classification summary */}
                     <View style={[styles.bpResultBadge, { backgroundColor: bpResult.color + "18", borderColor: bpResult.color + "40" }]}>
-                      <Feather name={bpResult.band === 0 ? "check-circle" : bpResult.band === 3 ? "alert-circle" : "alert-triangle"} size={18} color={bpResult.color} />
+                      <Feather name={bpResult.overallBand === 0 ? "check-circle" : bpResult.overallBand >= 3 ? "alert-circle" : "alert-triangle"} size={18} color={bpResult.color} />
                       <View style={{ flex: 1 }}>
                         <Text style={{ fontSize: 14, fontFamily: "Inter_700Bold", color: bpResult.color }}>{bpResult.classification}</Text>
                         <Text style={{ fontSize: 11, color: textMuted, fontFamily: "Inter_400Regular", marginTop: 2 }}>
-                          Entered SBP: {bpSBPNum} mmHg · Age {Math.round(bpAgeNum)}y · {bpHeightNum}cm
+                          SBP: {bpSBPNum} mmHg · DBP: {bpDBPNum > 0 ? bpDBPNum + " mmHg" : "—"} · Age {Math.round(bpAgeNum)}y · {bpHeightNum}cm
                         </Text>
                       </View>
                     </View>
+
+                    {/* Individual component badges */}
+                    <View style={{ flexDirection: "row", gap: 6 }}>
+                      {[
+                        { name: "SBP", band: bpResult.sbpBand, color: bpResult.sbpBand === 0 ? "#16A34A" : bpResult.sbpBand >= 3 ? "#DC2626" : "#D97706" },
+                        { name: "DBP", band: bpResult.dbpBand, color: bpResult.dbpBand === 0 ? "#16A34A" : bpResult.dbpBand >= 3 ? "#DC2626" : "#D97706" },
+                      ].map((c) => (
+                        <View key={c.name} style={{ flex: 1, borderRadius: 8, padding: 6, alignItems: "center", backgroundColor: c.color + "12", borderWidth: 1, borderColor: c.color + "30" }}>
+                          <Text style={{ fontSize: 10, color: c.color, fontFamily: "Inter_600SemiBold" }}>{c.name}</Text>
+                          <Text style={{ fontSize: 11, color: c.color, fontFamily: "Inter_500Medium", marginTop: 1 }}>
+                            {c.band === 0 ? "<50th" : c.band === 1 ? "50th–90th" : c.band === 2 ? "90th–95th" : ">95th"}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                )}
+
+                {/* ── Show Reference Table toggle ── */}
+                <TouchableOpacity
+                  onPress={() => setBpShowTable((v) => !v)}
+                  style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 10, marginBottom: 4 }}
+                >
+                  <View style={{
+                    width: 20, height: 20, borderRadius: 4, borderWidth: 1.5,
+                    borderColor: bpShowTable ? "#0891B2" : (isDark ? "#475569" : "#CBD5E1"),
+                    backgroundColor: bpShowTable ? "#0891B2" : "transparent",
+                    alignItems: "center", justifyContent: "center",
+                  }}>
+                    {bpShowTable && <Feather name="check" size={12} color="#FFFFFF" />}
+                  </View>
+                  <Text style={{ fontSize: 12, fontFamily: "Inter_600SemiBold", color: "#0891B2" }}>Show Reference Table</Text>
+                  <Feather name={bpShowTable ? "chevron-up" : "chevron-down"} size={14} color="#0891B2" />
+                </TouchableOpacity>
+
+                {/* Reference Table grid */}
+                {bpShowTable && bpResult && (
+                  <View style={[styles.bpRefTable, { backgroundColor: isDark ? "#0A192F" : "#FFFFFF", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
+                    <View style={[styles.bpRefHeader, { borderBottomColor: isDark ? "#233554" : "#E2E8F0" }]}>
+                      <Text style={{ flex: 1, fontSize: 11, fontFamily: "Inter_700Bold", color: "#3B82F6" }}>Percentile</Text>
+                      <Text style={{ flex: 1, fontSize: 11, fontFamily: "Inter_700Bold", color: "#3B82F6", textAlign: "center" }}>SBP (mmHg)</Text>
+                      <Text style={{ flex: 1, fontSize: 11, fontFamily: "Inter_700Bold", color: "#3B82F6", textAlign: "center" }}>DBP (mmHg)</Text>
+                    </View>
+                    {[
+                      { pct: "50th", sbp: bpResult.sbp50, dbp: bpResult.dbp50, color: "#16A34A" },
+                      { pct: "90th", sbp: bpResult.sbp90, dbp: bpResult.dbp90, color: "#D97706" },
+                      { pct: "95th", sbp: bpResult.sbp95, dbp: bpResult.dbp95, color: "#DC2626" },
+                      { pct: "99th", sbp: bpResult.sbp99, dbp: bpResult.dbp99, color: "#7F1D1D" },
+                    ].map((r, i, arr) => (
+                      <View
+                        key={r.pct}
+                        style={[styles.bpRefRow, { borderBottomColor: isDark ? "#1E293B" : "#F1F5F9", borderBottomWidth: i < arr.length - 1 ? 1 : 0 }]}
+                      >
+                        <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 6 }}>
+                          <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: r.color }} />
+                          <Text style={{ fontSize: 12, fontFamily: "Inter_600SemiBold", color: textPrimary }}>{r.pct}</Text>
+                        </View>
+                        <Text style={{ flex: 1, fontSize: 14, fontFamily: "Inter_700Bold", color: textPrimary, textAlign: "center" }}>{r.sbp}</Text>
+                        <Text style={{ flex: 1, fontSize: 14, fontFamily: "Inter_700Bold", color: textPrimary, textAlign: "center" }}>{r.dbp}</Text>
+                      </View>
+                    ))}
+                    <Text style={{ fontSize: 10, color: textMuted, fontFamily: "Inter_400Regular", marginTop: 6, textAlign: "center" }}>
+                      Values for height at {bpResult.htLabel} percentile · {bpGender === "M" ? "Male" : "Female"} · Age {Math.round(bpAgeNum)}y
+                    </Text>
                   </View>
                 )}
 
@@ -1539,7 +1623,7 @@ export default function ToolsScreen() {
                           Clinical Alert: Active Inotropic Support with Hypotension
                         </Text>
                         <Text style={{ fontSize: 11, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.9)", marginTop: 4, lineHeight: 16 }}>
-                          SBP is below the 50th percentile while VIS = {visScore} (&gt;10). Consider vasopressor escalation.
+                          Overall BP below the 50th percentile while VIS = {visScore} (&gt;10). Consider vasopressor escalation.
                         </Text>
                         <Text style={{ fontSize: 10, fontFamily: "Inter_400Regular", color: "rgba(255,255,255,0.7)", marginTop: 6, fontStyle: "italic" }}>
                           Ref: Harriet Lane 23e · Wernovsky et al. 1995
@@ -1573,7 +1657,7 @@ export default function ToolsScreen() {
               <View style={[styles.bpCitationBox, { backgroundColor: isDark ? "#0A192F" : "#F8FAFD", borderColor: isDark ? "#1E3A5F" : "#E2E8F0" }]}>
                 <Feather name="book-open" size={13} color={textMuted} style={{ marginTop: 1 }} />
                 <Text style={{ flex: 1, fontSize: 11, color: textMuted, fontFamily: "Inter_400Regular", lineHeight: 16, fontStyle: "italic" }}>
-                  Reference: BP Percentile standards & VIS protocols based on Harriet Lane 23e, Nelson's Pediatrics, and NHBPEP Fourth Report (Pediatrics 2004).
+                  Reference: NHBPEP Fourth Report (Harriet Lane 23e / Nelson's Pediatrics).
                 </Text>
               </View>
             </View>
@@ -2606,6 +2690,9 @@ const styles = StyleSheet.create({
   bpResultBadge: { flexDirection: "row", alignItems: "flex-start", gap: 10, borderWidth: 1.5, borderRadius: 12, padding: 12 },
   bpVISAlert: { backgroundColor: "#DC2626", borderRadius: 12, padding: 14, marginTop: 10 },
   bpCitationBox: { flexDirection: "row", alignItems: "flex-start", gap: 8, borderWidth: 1, borderRadius: 10, padding: 10, marginTop: 12 },
+  bpRefTable: { borderWidth: 1, borderRadius: 12, padding: 10, marginTop: 8, gap: 0 },
+  bpRefHeader: { flexDirection: "row", paddingVertical: 6, borderBottomWidth: 1 },
+  bpRefRow: { flexDirection: "row", alignItems: "center", paddingVertical: 8, paddingHorizontal: 4 },
   infoText: { fontSize: 12, lineHeight: 18 },
   tableHeaderRow: { flexDirection: "row", paddingBottom: 6, borderBottomWidth: 1, marginBottom: 2 },
   tableHeaderCell: { flex: 1, fontSize: 11, fontWeight: "700" },
