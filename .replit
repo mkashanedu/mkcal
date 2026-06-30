@@ -39,7 +39,7 @@ args = "PORT=22385 pnpm --filter @workspace/picu-drug-dose run dev"
 waitForPort = 22385
 
 [agent]
-stack = "PNPM_WORKSPACE"
+stack = "BEST_EFFORT_FALLBACK"
 expertMode = true
 
 [postMerge]
