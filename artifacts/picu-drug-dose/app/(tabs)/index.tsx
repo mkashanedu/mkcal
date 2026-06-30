@@ -79,11 +79,6 @@ export default function HomeScreen() {
 
       {/* Main Content */}
       <View style={styles.content}>
-        {/* Welcome label */}
-        <Text style={[styles.welcomeLabel, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_500Medium" }]}>
-          SELECT MODULE
-        </Text>
-
         {/* Dose Calculator Button */}
         <TouchableOpacity
           onPress={() => router.push("/(tabs)/calculator" as any)}
@@ -193,11 +188,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 36,
     gap: 16,
-  },
-  welcomeLabel: {
-    fontSize: 11,
-    letterSpacing: 1.5,
-    marginBottom: 4,
   },
   mainButton: {
     flexDirection: "row",

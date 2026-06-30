@@ -60,6 +60,7 @@ function ClassicTabLayout() {
         tabBarInactiveTintColor: C.tabIconDefault,
         headerShown: false,
         tabBarStyle: {
+          display: "none",
           position: "absolute",
           backgroundColor: isIOS ? "transparent" : isDark ? "#0B132B" : "#fff",
           borderTopWidth: isWeb ? 1 : 0,
