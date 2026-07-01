@@ -22,7 +22,7 @@ import { useDrawer } from "@/context/DrawerContext";
 import { ProfessionalFooter } from "@/components/ProfessionalFooter";
 import { StarButton } from "@/components/StarButton";
 
-// ── CPR / Code Blue Timers ────────────────────────────────────────────────────────
+// ── CPR / Code Blue Timers ───────────────────────────────────────────────────────────────
 const CPR_CYCLE_SECS = 120;
 
 function useCPRTimers(epiIntervalSec: number) {
@@ -111,13 +111,20 @@ function fmtTime(s: number) {
 
 // ── ET Tube, Airway, Defibrillation formulas (Harriet Lane 23e · PALS 2025) ───
 function calcETTube(ageYears: number) {
-  if (ageYears < 1) {
-    return { uncuffed: "3.0–3.5", cuffed: "3.0 (premature–3.0)", depth: "9–10 cm at lip", cuffedNum: 3.0 };
-  }
-  const uncuffed = +(ageYears / 4 + 4).toFixed(1);
-  const cuffed   = +(ageYears / 4 + 3.5).toFixed(1);
-  const depth    = +(ageYears / 2 + 12).toFixed(1);
-  return { uncuffed: `${uncuffed} mm`, cuffed: `${cuffed} mm`, depth: `${depth} cm at lip`, cuffedNum: cuffed };
+  const cuffed = ageYears / 4 + 3.5;
+  const uncuffed = ageYears / 4 + 4;
+  const cuffedNum = +(ageYears / 4 + 3.5).toFixed(1);
+  const uncuffedStr = uncuffed.toFixed(1);
+  const cuffedStr = cuffed.toFixed(1);
+  const depth =
+    ageYears >= 1
+      ? `${(ageYears / 2 + 12).toFixed(0)} cm`
+      : `${(ageYears * 4 + 8).toFixed(0)} cm`;
+  return { uncuffed: uncuffedStr, cuffed: cuffedStr, cuffedNum, depth };
+}
+
+function calcSuctionCatheter(ettubeSize: number) {
+  return Math.round(ettubeSize * 2);
 }
 
 function calcDefib(weightKg: number) {
@@ -129,24 +136,6 @@ function calcDefib(weightKg: number) {
   return { unsync1st, unsyncSub, unsyncMax, sync1st, syncSub };
 }
 
-// Target vitals post-ROSC (PALS 2025)
-function calcTargetVitals(ageYears: number) {
-  let minHR: number, maxHR: number;
-  if (ageYears < 1)       { minHR = 100; maxHR = 160; }
-  else if (ageYears < 2)  { minHR = 90;  maxHR = 150; }
-  else if (ageYears < 6)  { minHR = 80;  maxHR = 140; }
-  else if (ageYears < 12) { minHR = 70;  maxHR = 120; }
-  else                    { minHR = 60;  maxHR = 100; }
-  const minSBP = ageYears < 1 ? 60 : 70 + Math.round(2 * ageYears);
-  return { minHR, maxHR, minSBP };
-}
-
-// Suction catheter: Cuffed tube size × 2, round to nearest even French
-function calcSuctionCatheter(cuffedMm: number) {
-  const raw = cuffedMm * 2;
-  return Math.round(raw / 2) * 2;
-}
-
 // Laryngoscope blade by age (PALS 2025)
 function calcBlade(ageYears: number) {
   if (ageYears < 0.08) return "Miller 00";
@@ -156,15 +145,39 @@ function calcBlade(ageYears: number) {
   return "Mac 3";
 }
 
-// LMA size by weight (kg)
-function calcLMA(weightKg: number) {
-  if (weightKg <= 5)    return "1";
-  if (weightKg <= 10)   return "1.5";
-  if (weightKg <= 20)   return "2";
-  if (weightKg <= 30)   return "2.5";
-  if (weightKg <= 50)   return "3";
-  if (weightKg <= 70)   return "4";
-  return "5";
+// LMA size by AGE (PALS 2025)
+function calcLMA(ageYears: number) {
+  if (ageYears < 1)   return "1";
+  if (ageYears < 5)   return "1.5";
+  if (ageYears < 10)  return "2";
+  if (ageYears < 15)  return "2.5";
+  if (ageYears < 20)  return "3";
+  return "4";
+}
+
+function calcTargetVitals(ageYears: number) {
+  let minHR: number, maxHR: number, minSBP: number;
+  if (ageYears < 1) { minHR = 100; maxHR = 160; minSBP = 60; }
+  else if (ageYears < 6) { minHR = 80; maxHR = 140; minSBP = 70; }
+  else if (ageYears < 12) { minHR = 70; maxHR = 120; minSBP = 80; }
+  else { minHR = 60; maxHR = 100; minSBP = 90; }
+  return { minHR, maxHR, minSBP };
+}
+
+// Weight/Age cross-validation (WHO median approximations)
+function checkWeightAge(weightKg: number, ageYears: number): string | null {
+  if (ageYears <= 0 || weightKg <= 0) return "Enter Age and Weight to calculate doses";
+  const expected =
+    ageYears < 1
+      ? 3.2 + ageYears * 6
+      : ageYears < 13
+      ? 9.5 + (ageYears - 1) * 2.5
+      : 40 + (ageYears - 13) * 4;
+  if (weightKg < expected * 0.45)
+    return `Weight ${weightKg} kg very low for age ${ageYears} yrs (expected ~${Math.round(expected)} kg)`;
+  if (weightKg > expected * 2.2)
+    return `Weight ${weightKg} kg very high for age ${ageYears} yrs (expected ~${Math.round(expected)} kg)`;
+  return null;
 }
 
 interface HsTsItem {
@@ -203,220 +216,300 @@ export default function EmergencyScreen() {
   const insets = useSafeAreaInsets();
   const { isDark, toggleDark } = useTheme();
   const colors = Colors.light;
-  const { weight } = useWeight();
+  const { weight, setWeight, weightInput, setWeightInput } = useWeight();
   const { isFav, toggleFav } = useFavorites();
   const { openDrawer } = useDrawer();
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
 
+  // ── Dual Inputs ──────────────────────────────────────────────────────
   const [ageYearsInput, setAgeYearsInput] = useState("2");
   const ageYears = Math.max(0, parseFloat(ageYearsInput) || 0);
+
+  const [localWeightInput, setLocalWeightInput] = useState(weightInput);
+  const localWeight = Math.min(Math.max(parseFloat(localWeightInput) || 0.5, 0.5), 150);
+
+  useEffect(() => {
+    setLocalWeightInput(weightInput);
+  }, [weightInput]);
+
+  const handleWeightChange = useCallback(
+    (text: string) => {
+      setLocalWeightInput(text);
+      const num = parseFloat(text);
+      if (!isNaN(num) && num >= 0.5 && num <= 150) {
+        setWeight(num);
+        setWeightInput(text);
+      }
+    },
+    [setWeight, setWeightInput]
+  );
+
+  // ── Equipment (age-based ET/blade/LMA, weight-based defib) ───────────────────
   const ettube = calcETTube(ageYears);
-  const defib = calcDefib(weight);
+  const defib = calcDefib(localWeight);
   const suctionFr = calcSuctionCatheter(ettube.cuffedNum);
   const blade = calcBlade(ageYears);
-  const lma = calcLMA(weight);
+  const lma = calcLMA(ageYears);
   const targetVitals = calcTargetVitals(ageYears);
+  const mismatchWarning = useMemo(
+    () => checkWeightAge(localWeight, ageYears),
+    [localWeight, ageYears]
+  );
 
   // Hs & Ts interactive checklist
   const [hsChecked, setHsChecked] = useState<boolean[]>(HsItems.map(() => false));
   const [tsChecked, setTsChecked] = useState<boolean[]>(TsItems.map(() => false));
-  const toggleH = (i: number) => setHsChecked((prev) => { const c = [...prev]; c[i] = !c[i]; return c; });
-  const toggleT = (i: number) => setTsChecked((prev) => { const c = [...prev]; c[i] = !c[i]; return c; });
+  const toggleH = (i: number) =>
+    setHsChecked((prev) => {
+      const c = [...prev];
+      c[i] = !c[i];
+      return c;
+    });
+  const toggleT = (i: number) =>
+    setTsChecked((prev) => {
+      const c = [...prev];
+      c[i] = !c[i];
+      return c;
+    });
 
+  // ── Critical Code Blue Drugs — reordered, all with adult max enforcement ─────────
   const emergencyCards = useMemo((): EmergencyItem[] => {
     const results: EmergencyItem[] = [];
+    const w = localWeight;
 
-    // Epinephrine (Cardiac Arrest / Bradycardia) — 0.01 mg/kg = 10 mcg/kg
-    const epiMg = +(0.01 * weight).toFixed(2);
-    const epiMcg = Math.round(10 * weight);
-    const epiMl = +(0.1 * weight).toFixed(1);
-    results.push({
-      label: "Epinephrine (Cardiac Arrest / Bradycardia)",
-      dose: `${epiMg} mg`,
-      doseSub: `(or ${epiMcg} mcg)`,
-      route: "IV / IO",
-      notes: `0.01 mg/kg — Give ${epiMl} mL of 1:10,000. Repeat every 3–5 min.`,
-      color: "#6366F1",
-      warning: true,
-    });
-    // Epinephrine (Anaphylaxis)
-    const epiImMg = +(0.01 * weight).toFixed(2);
-    const epiImMcg = Math.round(10 * weight);
-    results.push({
-      label: "Epinephrine (Anaphylaxis)",
-      dose: `${epiImMg} mg`,
-      doseSub: `(or ${epiImMcg} mcg)`,
-      route: "IM Anterolateral thigh",
-      notes: "Use 1:1,000 solution. May repeat after 5–15 min.",
-      color: "#6366F1",
-      warning: true,
-    });
-    // Epinephrine (Continuous Infusion) — hardcoded therapeutic range
-    results.push({
-      label: "Epinephrine (Continuous Infusion)",
-      dose: "0.03 – 1",
-      doseSub: "mcg/kg/min",
-      route: "IV infusion (Central)",
-      notes: "Titrate to effect.",
-      color: "#6366F1",
-    });
-
-    // Atropine — mg
-    const atropine = DRUGS.find((d) => d.id === "atropine");
-    if (atropine) {
-      const d = atropine.doses[0];
-      const calc = calculateDose(d, weight);
+    // 1. Epinephrine — Cardiac Arrest (RED — most critical)
+    const epiDrug = DRUGS.find((d) => d.id === "epinephrine");
+    if (epiDrug) {
+      const calc = calculateDose(epiDrug.doses[0], w);
       results.push({
-        label: "Atropine (Bradycardia)",
+        label: "Epinephrine (Cardiac Arrest)",
         dose: calc.dose,
+        doseSub: "(10 mcg/kg)",
         route: "IV / IO",
-        notes: "Minimum 0.1 mg; max 0.5 mg child / 3 mg adolescent",
-        color: "#6366F1",
-        exceedsAdultMax: calc.exceedsAdultMax,
-        adultMaxLabel: calc.adultMaxLabel,
-      });
-    }
-
-    // Adenosine — mg
-    const adenosine = DRUGS.find((d) => d.id === "adenosine");
-    if (adenosine) {
-      const d = adenosine.doses[0];
-      const calc = calculateDose(d, weight);
-      const dose2 = +(0.2 * weight).toFixed(2);
-      results.push({
-        label: "Adenosine (SVT) — 1st Dose",
-        dose: calc.dose,
-        route: "IV rapid push",
-        notes: `2nd dose: ${dose2} mg (max 12 mg) — rapid flush!`,
-        color: "#6366F1",
-        exceedsAdultMax: calc.exceedsAdultMax,
-        adultMaxLabel: calc.adultMaxLabel,
-      });
-    }
-
-    // Sodium Bicarbonate — mEq
-    const bicarb = DRUGS.find((d) => d.id === "sodium-bicarbonate");
-    if (bicarb) {
-      const d = bicarb.doses[0];
-      const calc = calculateDose(d, weight);
-      results.push({
-        label: "Sodium Bicarbonate",
-        dose: calc.dose,
-        route: "IV",
-        notes: "1–2 mEq/kg for severe metabolic acidosis",
-        color: "#6366F1",
-        exceedsAdultMax: calc.exceedsAdultMax,
-        adultMaxLabel: calc.adultMaxLabel,
-      });
-    }
-
-    // Calcium Gluconate — mg
-    const calcGluc = DRUGS.find((d) => d.id === "calcium-gluconate");
-    if (calcGluc) {
-      const d = calcGluc.doses[0];
-      const calcResult = calculateDose(d, weight);
-      results.push({
-        label: "Calcium Gluconate",
-        dose: calcResult.dose,
-        route: "IV",
-        notes: "Infuse slowly with cardiac monitoring",
-        color: "#6366F1",
-        exceedsAdultMax: calcResult.exceedsAdultMax,
-        adultMaxLabel: calcResult.adultMaxLabel,
-      });
-    }
-
-    // Dextrose — mL
-    const dextrose = DRUGS.find((d) => d.id === "dextrose");
-    if (dextrose) {
-      const d10 = +(4 * weight).toFixed(0);
-      const d25 = +(2 * weight).toFixed(0);
-      const d50 = +(1 * weight).toFixed(0);
-      results.push({
-        label: "Dextrose (Hypoglycemia)",
-        dose: `D10: ${d10} mL · D25: ${d25} mL · D50: ${d50} mL`,
-        route: "IV",
-        notes: "Neonates: D10 only",
-        color: "#6366F1",
-      });
-    }
-
-    // Naloxone — mcg
-    const naloxone = DRUGS.find((d) => d.id === "naloxone");
-    if (naloxone) {
-      const d = naloxone.doses[0];
-      const calc = calculateDose(d, weight);
-      results.push({
-        label: "Naloxone (Opioid OD)",
-        dose: calc.dose,
-        route: "IV · IM · IN",
-        notes: "IN: use 4 mg/mL atomiser · may repeat every 2–3 min",
-        color: "#6366F1",
-        exceedsAdultMax: calc.exceedsAdultMax,
-        adultMaxLabel: calc.adultMaxLabel,
-      });
-    }
-
-    // Amiodarone — mg
-    const amiodarone = DRUGS.find((d) => d.id === "amiodarone");
-    if (amiodarone) {
-      const d = amiodarone.doses[0];
-      const calc = calculateDose(d, weight);
-      results.push({
-        label: "Amiodarone (Pulseless VT/VF)",
-        dose: calc.dose,
-        route: "IV / IO",
-        notes: "Max 300 mg per dose — dilute in D5W only",
-        color: "#6366F1",
+        notes: "0.1 mL/kg of 1:10,000. Repeat q3–5 min. Adult max 1000 mcg.",
+        color: "#DC2626",
         warning: true,
         exceedsAdultMax: calc.exceedsAdultMax,
         adultMaxLabel: calc.adultMaxLabel,
       });
     }
 
-    // Lorazepam — mg
-    const lorazepam = DRUGS.find((d) => d.id === "lorazepam");
-    if (lorazepam) {
-      const d = lorazepam.doses[0];
-      const calc = calculateDose(d, weight);
+    // 2. Amiodarone — Pulseless VT/VF
+    const amio = DRUGS.find((d) => d.id === "amiodarone");
+    if (amio) {
+      const calc = calculateDose(amio.doses[0], w);
       results.push({
-        label: "Lorazepam (Status Epilepticus)",
+        label: "Amiodarone (VT/VF)",
         dose: calc.dose,
-        route: "IV",
-        notes: "Max 4 mg; may repeat once after 5 min",
+        doseSub: "(5 mg/kg)",
+        route: "IV/IO bolus",
+        notes: "Give rapidly. Dilute D5W only. Max 300 mg.",
         color: "#6366F1",
         exceedsAdultMax: calc.exceedsAdultMax,
         adultMaxLabel: calc.adultMaxLabel,
       });
     }
 
-    // Midazolam — mg
-    const midazolam = DRUGS.find((d) => d.id === "midazolam");
-    if (midazolam) {
-      const inDose = +(0.3 * weight).toFixed(2);
+    // 3. Atropine — Bradycardia
+    const atropine = DRUGS.find((d) => d.id === "atropine");
+    if (atropine) {
+      const calc = calculateDose(atropine.doses[0], w);
+      results.push({
+        label: "Atropine (Bradycardia)",
+        dose: calc.dose,
+        doseSub: "(0.02 mg/kg)",
+        route: "IV / IO",
+        notes: "Min 0.1 mg. Max 1 mg child / 3 mg adolescent.",
+        color: "#6366F1",
+        exceedsAdultMax: calc.exceedsAdultMax,
+        adultMaxLabel: calc.adultMaxLabel,
+      });
+    }
+
+    // 4. Adenosine — SVT
+    const adenosine = DRUGS.find((d) => d.id === "adenosine");
+    if (adenosine) {
+      const calc = calculateDose(adenosine.doses[0], w);
+      results.push({
+        label: "Adenosine (SVT) 1st",
+        dose: calc.dose,
+        doseSub: "(0.1 mg/kg)",
+        route: "IV rapid push + flush",
+        notes: "2nd dose: 0.2 mg/kg. Max 6 mg / 12 mg.",
+        color: "#6366F1",
+        exceedsAdultMax: calc.exceedsAdultMax,
+        adultMaxLabel: calc.adultMaxLabel,
+      });
+    }
+
+    // 5. Sodium Bicarbonate
+    const bicarb = DRUGS.find((d) => d.id === "sodium-bicarbonate");
+    if (bicarb) {
+      const calc = calculateDose(bicarb.doses[0], w);
+      results.push({
+        label: "Sodium Bicarbonate",
+        dose: calc.dose,
+        doseSub: "(1 mEq/kg)",
+        route: "IV slow push",
+        notes: "Over 5–10 min. After airway secured. Max 50 mEq.",
+        color: "#6366F1",
+        exceedsAdultMax: calc.exceedsAdultMax,
+        adultMaxLabel: calc.adultMaxLabel,
+      });
+    }
+
+    // 6. Calcium Gluconate
+    const caGlu = DRUGS.find((d) => d.id === "calcium-gluconate");
+    if (caGlu) {
+      const calc = calculateDose(caGlu.doses[0], w);
+      results.push({
+        label: "Calcium Gluconate",
+        dose: calc.dose,
+        doseSub: "(100–200 mg/kg)",
+        route: "IV over 5–10 min",
+        notes: "10% solution. Cardiac monitor. Max 2000 mg.",
+        color: "#6366F1",
+        exceedsAdultMax: calc.exceedsAdultMax,
+        adultMaxLabel: calc.adultMaxLabel,
+      });
+    }
+
+    // 7. Lidocaine — VT/VF alternative
+    const lido = DRUGS.find((d) => d.id === "lidocaine");
+    if (lido) {
+      const calc = calculateDose(lido.doses[0], w);
+      results.push({
+        label: "Lidocaine (VT/VF alt)",
+        dose: calc.dose,
+        doseSub: "(1 mg/kg)",
+        route: "IV/IO",
+        notes: "If amiodarone unavailable. Max 100 mg.",
+        color: "#6366F1",
+        exceedsAdultMax: calc.exceedsAdultMax,
+        adultMaxLabel: calc.adultMaxLabel,
+      });
+    }
+
+    // 8. Dextrose D10 (neonates)
+    const d10Raw = 2 * w;
+    const d10Display = Math.min(Math.round(d10Raw), 25);
+    results.push({
+      label: "Dextrose D10",
+      dose: `${d10Display} mL`,
+      doseSub: "(2 mL/kg D10)",
+      route: "IV",
+      notes: "Neonate max 25 mL. Check glucose 15 min after.",
+      color: "#0891B2",
+      exceedsAdultMax: d10Raw > 25,
+      adultMaxLabel: d10Raw > 25 ? "Max 25 mL D10 neonate — dose capped" : undefined,
+    });
+
+    // 9. Dextrose D25 (infants/children)
+    const d25Raw = 2 * w;
+    const d25Display = Math.min(Math.round(d25Raw), 25);
+    results.push({
+      label: "Dextrose D25",
+      dose: `${d25Display} mL`,
+      doseSub: "(2 mL/kg D25)",
+      route: "IV",
+      notes: "Infant/child. Max 25 mL D25.",
+      color: "#0891B2",
+      exceedsAdultMax: d25Raw > 25,
+      adultMaxLabel: d25Raw > 25 ? "Max 25 mL D25 — dose capped" : undefined,
+    });
+
+    // 10. Naloxone
+    const nalox = DRUGS.find((d) => d.id === "naloxone");
+    if (nalox) {
+      const calc = calculateDose(nalox.doses[0], w);
+      results.push({
+        label: "Naloxone",
+        dose: calc.dose,
+        doseSub: "(0.01 mg/kg)",
+        route: "IV/IM/IN",
+        notes: "Repeat q2–3 min. Max 2 mg.",
+        color: "#6366F1",
+        exceedsAdultMax: calc.exceedsAdultMax,
+        adultMaxLabel: calc.adultMaxLabel,
+      });
+    }
+
+    // 11. Flumazenil
+    const flum = DRUGS.find((d) => d.id === "flumazenil");
+    if (flum) {
+      const calc = calculateDose(flum.doses[0], w);
+      results.push({
+        label: "Flumazenil (BZD reversal)",
+        dose: calc.dose,
+        doseSub: "(0.01 mg/kg)",
+        route: "IV",
+        notes: "Max 1 mg total. Re-sedation common.",
+        color: "#6366F1",
+        exceedsAdultMax: calc.exceedsAdultMax,
+        adultMaxLabel: calc.adultMaxLabel,
+      });
+    }
+
+    // 12. Magnesium Sulfate
+    const mgSo4 = DRUGS.find((d) => d.id === "magnesium-sulfate-emergency");
+    if (mgSo4) {
+      const calc = calculateDose(mgSo4.doses[0], w);
+      results.push({
+        label: "Magnesium Sulfate",
+        dose: calc.dose,
+        doseSub: "(25–50 mg/kg)",
+        route: "IV over 10–20 min",
+        notes: "Torsades / severe asthma. Max 2000 mg.",
+        color: "#6366F1",
+        exceedsAdultMax: calc.exceedsAdultMax,
+        adultMaxLabel: calc.adultMaxLabel,
+      });
+    }
+
+    // 13. Lorazepam
+    const loraz = DRUGS.find((d) => d.id === "lorazepam");
+    if (loraz) {
+      const calc = calculateDose(loraz.doses[0], w);
+      results.push({
+        label: "Lorazepam (Seizures)",
+        dose: calc.dose,
+        doseSub: "(0.05–0.1 mg/kg)",
+        route: "IV/IO",
+        notes: "Status epilepticus 1st line. Max 4 mg.",
+        color: "#6366F1",
+        exceedsAdultMax: calc.exceedsAdultMax,
+        adultMaxLabel: calc.adultMaxLabel,
+      });
+    }
+
+    // 14. Midazolam IN
+    const midaz = DRUGS.find((d) => d.id === "midazolam");
+    if (midaz) {
+      const inDose = +(0.3 * w).toFixed(2);
       const cappedDose = Math.min(inDose, 10);
       const exceeded = inDose > 10;
       results.push({
         label: "Midazolam IN (Seizures)",
         dose: `${cappedDose} mg`,
-        route: "Intranasal (IN)",
-        notes: "0.3 mg/kg via atomiser · divide equally between nostrils · max 10 mg",
+        doseSub: "(0.3 mg/kg IN)",
+        route: "Intranasal",
+        notes: "Divide between nostrils. Max 10 mg.",
         color: "#6366F1",
         exceedsAdultMax: exceeded,
         adultMaxLabel: exceeded ? "Adult max: 10 mg — dose capped" : undefined,
       });
     }
 
-    // Fentanyl — mcg
-    const fentanyl = DRUGS.find((d) => d.id === "fentanyl");
-    if (fentanyl) {
-      const d = fentanyl.doses[2];
-      const calc = calculateDose(d, weight);
+    // 15. Fentanyl IN
+    const fent = DRUGS.find((d) => d.id === "fentanyl");
+    if (fent) {
+      const calc = calculateDose(fent.doses[2], w);
       results.push({
-        label: "Fentanyl IN (Procedural Pain)",
+        label: "Fentanyl IN (Pain)",
         dose: calc.dose,
-        route: "Intranasal (IN)",
-        notes: "Use atomiser · max 0.5 mL per nostril · max 200 mcg total",
+        doseSub: "(1–2 mcg/kg)",
+        route: "Intranasal",
+        notes: "Max 0.5 mL per nostril. Max 200 mcg.",
         color: "#6366F1",
         exceedsAdultMax: calc.exceedsAdultMax,
         adultMaxLabel: calc.adultMaxLabel,
@@ -424,7 +517,7 @@ export default function EmergencyScreen() {
     }
 
     return results;
-  }, [weight]);
+  }, [localWeight]);
 
   // ── CPR / Code Blue Timer State ──────────────────────────────────────────
   const [epiInterval, setEpiInterval] = useState(300);
@@ -483,21 +576,11 @@ export default function EmergencyScreen() {
               <Feather name="menu" size={20} color="rgba(255,255,255,0.9)" />
             </TouchableOpacity>
             <Feather name="alert-circle" size={22} color="#FFFFFF" />
-            <Text
-              style={[
-                styles.headerTitle,
-                { fontFamily: "Inter_700Bold" },
-              ]}
-            >
+            <Text style={[styles.headerTitle, { fontFamily: "Inter_700Bold" }]}>
               MKashanEdu
             </Text>
           </View>
-          {/* Night shift toggle */}
-          <TouchableOpacity
-            onPress={toggleDark}
-            style={styles.nightToggle}
-            activeOpacity={0.7}
-          >
+          <TouchableOpacity onPress={toggleDark} style={styles.nightToggle} activeOpacity={0.7}>
             <Feather
               name={isDark ? "sun" : "moon"}
               size={16}
@@ -509,10 +592,7 @@ export default function EmergencyScreen() {
           </TouchableOpacity>
         </View>
         <Text style={[styles.headerSubtitle, { fontFamily: "Inter_400Regular" }]}>
-          Weight: {weight} kg · All doses weight-based · Capped at adult max
-        </Text>
-        <Text style={[styles.headerSubtitle, { fontFamily: "Inter_400Regular", fontSize: 11, marginTop: 0, marginBottom: 8, opacity: 0.8 }]}>
-          Target HR: {targetVitals.minHR}–{targetVitals.maxHR} bpm · Min SBP: {targetVitals.minSBP} mmHg
+          Age: {ageYears} yrs · Weight: {localWeight} kg · HR: {targetVitals.minHR}–{targetVitals.maxHR} · SBP ≥ {targetVitals.minSBP}
         </Text>
         <View style={styles.warningBanner}>
           <Feather name="alert-triangle" size={14} color="#FFFFFF" />
@@ -522,7 +602,185 @@ export default function EmergencyScreen() {
         </View>
       </View>
 
-      {/* Emergency Scrollable Content */}
+      {/* ── PINNED: Dual Inputs + Compact Status Bar + Validation ── */}
+      <View
+        style={[
+          styles.pinnedSection,
+          {
+            backgroundColor: isDark ? "#112240" : "#FFFFFF",
+            borderBottomColor: isDark ? "#233554" : "#E2E8F0",
+          },
+        ]}
+      >
+        {/* Dual Inputs */}
+        <View style={styles.inputRow}>
+          <View style={styles.inputWrap}>
+            <Text style={[styles.inputLabel, { color: isDark ? "#8892B0" : "#64748B" }]}>
+              Age (yrs)
+            </Text>
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  color: isDark ? "#FFFFFF" : "#0D1B2A",
+                  backgroundColor: isDark ? "#233554" : "#F0F4F8",
+                  borderColor: isDark ? "#3D4770" : "#E2E8F0",
+                },
+              ]}
+              value={ageYearsInput}
+              onChangeText={setAgeYearsInput}
+              keyboardType="decimal-pad"
+              selectTextOnFocus
+              maxLength={4}
+              placeholder="0"
+              placeholderTextColor={isDark ? "#8892B0" : "#8A9BB0"}
+            />
+          </View>
+          <View style={styles.inputWrap}>
+            <Text style={[styles.inputLabel, { color: isDark ? "#8892B0" : "#64748B" }]}>
+              Weight (kg)
+            </Text>
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  color: isDark ? "#FFFFFF" : "#0D1B2A",
+                  backgroundColor: isDark ? "#233554" : "#F0F4F8",
+                  borderColor: isDark ? "#3D4770" : "#E2E8F0",
+                },
+              ]}
+              value={localWeightInput}
+              onChangeText={handleWeightChange}
+              keyboardType="decimal-pad"
+              selectTextOnFocus
+              maxLength={5}
+              placeholder="10"
+              placeholderTextColor={isDark ? "#8892B0" : "#8A9BB0"}
+            />
+          </View>
+        </View>
+
+        {/* Compact Status Bar */}
+        <View
+          style={[
+            styles.statusBar,
+            {
+              backgroundColor: isDark ? "#0B132B" : "#F0F4F8",
+              borderColor: isDark ? "#233554" : "#E2E8F0",
+            },
+          ]}
+        >
+          {/* CPR Timer */}
+          <Animated.View
+            style={[
+              styles.statusTimer,
+              {
+                backgroundColor: cpr.switchAlert ? "#DC262622" : cprColor + "1A",
+                borderColor: cpr.switchAlert ? "#DC2626" : cprColor,
+                opacity: cpr.switchAlert ? switchBlinkAnim : 1,
+              },
+            ]}
+          >
+            {cpr.switchAlert ? (
+              <Text style={styles.statusAlert}>🔄 SWITCH</Text>
+            ) : (
+              <>
+                <Text style={[styles.statusTimerLabel, { color: cprColor + "BB" }]}>CPR</Text>
+                <Text style={[styles.statusTimerValue, { color: cprColor }]}>
+                  {fmtTime(cpr.cprSecs)}
+                </Text>
+              </>
+            )}
+          </Animated.View>
+
+          {/* Epi Timer */}
+          <Animated.View
+            style={[
+              styles.statusTimer,
+              {
+                backgroundColor: cpr.epiDue ? "#DC262622" : "#7C3AED12",
+                borderColor: cpr.epiDue ? "#DC2626" : "#7C3AED",
+                opacity: cpr.epiDue ? epiBlinkAnim : 1,
+              },
+            ]}
+          >
+            {cpr.epiDue ? (
+              <TouchableOpacity onPress={cpr.acknowledgeEpi} style={{ alignItems: "center" }}>
+                <Text style={styles.statusAlertEpi}>💉 EPI</Text>
+                <Text style={{ fontSize: 10, color: "#DC2626", fontWeight: "700" }}>
+                  TAP = GIVEN
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <>
+                <Text style={[styles.statusTimerLabel, { color: "#7C3AED" }]}>EPI</Text>
+                <Text style={[styles.statusTimerValue, { color: "#7C3AED" }]}>
+                  {fmtTime(cpr.epiSecs)}
+                </Text>
+              </>
+            )}
+          </Animated.View>
+
+          {/* Start/Stop */}
+          <TouchableOpacity
+            onPress={cpr.running ? cpr.stop : cpr.start}
+            style={[styles.statusBtn, { backgroundColor: cpr.running ? "#DC2626" : "#16A34A" }]}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.statusBtnText}>
+              {cpr.running ? "■ STOP" : "▶ START"}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Epi interval chips (only when stopped) */}
+          {!cpr.running && (
+            <View style={styles.statusChips}>
+              {[180, 240, 300].map((s) => (
+                <TouchableOpacity
+                  key={s}
+                  onPress={() => setEpiInterval(s)}
+                  style={[styles.statusChip, epiInterval === s && styles.statusChipActive]}
+                  activeOpacity={0.8}
+                >
+                  <Text
+                    style={[
+                      styles.statusChipText,
+                      epiInterval === s && styles.statusChipTextActive,
+                    ]}
+                  >
+                    q{s / 60}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
+
+        {/* Cross-validation warning */}
+        {mismatchWarning && (
+          <View
+            style={[
+              styles.mismatchBanner,
+              {
+                backgroundColor: isDark ? "#7C2D1222" : "#FEF2F2",
+                borderColor: isDark ? "#7C2D12" : "#FCA5A5",
+              },
+            ]}
+          >
+            <Feather name="alert-triangle" size={14} color="#DC2626" />
+            <Text
+              style={[
+                styles.mismatchText,
+                { color: isDark ? "#FCA5A5" : "#991B1B" },
+              ]}
+            >
+              {mismatchWarning}
+            </Text>
+          </View>
+        )}
+      </View>
+
+      {/* ── Scrollable Content ── */}
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
@@ -533,140 +791,7 @@ export default function EmergencyScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* ── CPR / Code Blue Timer ── */}
-        <View
-          style={[
-            styles.cprCard,
-            {
-              backgroundColor: isDark ? "#1A0A0A" : "#FEF2F2",
-              borderColor: isDark ? "#7F1D1D" : "#FCA5A5",
-            },
-          ]}
-        >
-          <Text style={styles.cprTitle}>⚠ CODE BLUE · CPR TIMER</Text>
-
-          {/* Epi interval selector — only when stopped */}
-          {!cpr.running && (
-            <View style={styles.cprChipRow}>
-              {([180, 240, 300] as const).map((s) => (
-                <TouchableOpacity
-                  key={s}
-                  onPress={() => setEpiInterval(s)}
-                  style={[styles.cprChip, epiInterval === s && styles.cprChipActive]}
-                  activeOpacity={0.8}
-                >
-                  <Text style={[styles.cprChipText, epiInterval === s && styles.cprChipTextActive]}>
-                    Epi q{s / 60} min
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-
-          {/* CPR Cycle Timer */}
-          <Animated.View
-            style={[
-              styles.cprTimerBox,
-              {
-                backgroundColor: cpr.switchAlert ? "#DC262622" : cprColor + "1A",
-                borderColor: cpr.switchAlert ? "#DC2626" : cprColor,
-                opacity: cpr.switchAlert ? switchBlinkAnim : 1,
-              },
-            ]}
-          >
-            {cpr.switchAlert ? (
-              <>
-                <Text style={styles.switchIcon}>🔄</Text>
-                <Text style={styles.switchText}>SWITCH COMPRESSOR</Text>
-                <Text style={[styles.cprCycleSub, { color: "#DC2626" }]}>
-                  Cycle {cpr.cprCycle} complete · New cycle starting
-                </Text>
-              </>
-            ) : (
-              <>
-                <Text style={[styles.cprCycleLabel, { color: cprColor + "BB" }]}>
-                  {cpr.running ? `CPR CYCLE ${cpr.cprCycle + 1}` : "CPR CYCLE TIMER"}
-                </Text>
-                <Text style={[styles.cprTime, { color: cprColor }]}>{fmtTime(cpr.cprSecs)}</Text>
-                <Text style={[styles.cprCycleSub, { color: isDark ? "#8892B0" : "#475569" }]}>
-                  {cpr.running
-                    ? cpr.cprSecs <= 15
-                      ? "⚠ Switch compressor soon!"
-                      : "100–120/min · 5–6 cm depth · Full recoil"
-                    : "Press START CODE to begin"}
-                </Text>
-              </>
-            )}
-          </Animated.View>
-
-          {/* Epi Reminder Timer */}
-          <Animated.View
-            style={[
-              styles.epiBox,
-              {
-                backgroundColor: cpr.epiDue ? "#DC262622" : "#7C3AED12",
-                borderColor: cpr.epiDue ? "#DC2626" : "#7C3AED",
-                opacity: cpr.epiDue ? epiBlinkAnim : 1,
-              },
-            ]}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-              <View style={{ flex: 1 }}>
-                {cpr.epiDue ? (
-                  <>
-                    <Text style={styles.epiDueText}>💉 EPINEPHRINE DUE</Text>
-                    <Text style={[styles.epiSub, { color: isDark ? "#F8B4B4" : "#991B1B" }]}>
-                      0.01 mg/kg IV/IO · Max 1 mg · Dose {cpr.epiCount}
-                    </Text>
-                  </>
-                ) : (
-                  <>
-                    <Text style={[styles.epiLabel, { color: "#7C3AED" }]}>
-                      {cpr.running
-                        ? cpr.epiCount > 0
-                          ? `EPI REMINDER · Dose ${cpr.epiCount + 1} in`
-                          : "EPI REMINDER · First dose in"
-                        : "EPI REMINDER"}
-                    </Text>
-                    <Text style={[styles.epiTime, { color: cpr.running ? "#7C3AED" : isDark ? "#8892B0" : "#475569" }]}>
-                      {cpr.running ? fmtTime(cpr.epiSecs) : `${epiInterval / 60} min interval`}
-                    </Text>
-                    <Text style={[styles.epiSub, { color: isDark ? "#8892B0" : "#475569" }]}>
-                      Epinephrine 0.01 mg/kg IV/IO · Max 1 mg q{epiInterval / 60} min
-                    </Text>
-                  </>
-                )}
-              </View>
-              {cpr.epiDue && (
-                <TouchableOpacity onPress={cpr.acknowledgeEpi} style={styles.epiAckBtn} activeOpacity={0.8}>
-                  <Text style={styles.epiAckText}>✓{"\n"}Given</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          </Animated.View>
-
-          {/* One-Touch Start / Stop */}
-          <TouchableOpacity
-            onPress={cpr.running ? cpr.stop : cpr.start}
-            style={[styles.cprMainBtn, { backgroundColor: cpr.running ? "#DC2626" : "#16A34A" }]}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.cprMainBtnText}>
-              {cpr.running ? "■  STOP CODE" : "▶  START CODE"}
-            </Text>
-          </TouchableOpacity>
-
-          {cpr.running && (
-            <View style={styles.cprRunningBadge}>
-              <View style={styles.cprRunningDot} />
-              <Text style={[styles.cprRunningText, { color: isDark ? "#8892B0" : "#475569" }]}>
-                Running · Auto-loops every 2 min · No manual reset needed
-              </Text>
-            </View>
-          )}
-        </View>
-
-        {/* Emergency Calculators — ET Tube, Defibrillator, Hs & Ts */}
+        {/* Emergency Calculators — ET Tube, Blade, LMA, Defibrillator */}
         <View
           style={[
             styles.palsBanner,
@@ -684,7 +809,6 @@ export default function EmergencyScreen() {
           >
             Emergency Calculators
           </Text>
-
           <Text
             style={[
               styles.calcSource,
@@ -694,53 +818,22 @@ export default function EmergencyScreen() {
             PALS 2025 · Harriet Lane 23e
           </Text>
 
-          {/* ET Tube section */}
+          {/* ET Tube + Airway Equipment */}
           <View style={[styles.calcSection, { borderTopColor: isDark ? "#233554" : "#F0F4F8" }]}>
-            <View style={styles.calcSectionHeader}>
-              <Text style={[styles.calcSectionTitle, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_600SemiBold" }]}>
-                ET Tube Size
-              </Text>
-              <View style={styles.ageInputWrap}>
-                <Text style={[styles.ageLabel, { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" }]}>
-                  Age (yrs):
-                </Text>
-                <TextInput
-                  style={[styles.ageInput, {
-                    color: isDark ? "#FFFFFF" : "#0D1B2A",
-                    backgroundColor: isDark ? "#233554" : "#F0F4F8",
-                    fontFamily: "Inter_700Bold",
-                  }]}
-                  value={ageYearsInput}
-                  onChangeText={setAgeYearsInput}
-                  keyboardType="decimal-pad"
-                  selectTextOnFocus
-                  maxLength={4}
-                  placeholder="0"
-                  placeholderTextColor={isDark ? "#8892B0" : "#8A9BB0"}
-                />
-              </View>
-            </View>
             <View style={styles.ettGrid}>
               <View style={[styles.ettBox, { backgroundColor: isDark ? "#112240" : "#EBF8FF", borderColor: isDark ? "#1A4F7A" : "#EBF8FF" }]}>
                 <Text style={[styles.ettLabel, { color: isDark ? "#5A8FC0" : "#1A4F7A", fontFamily: "Inter_500Medium" }]}>Uncuffed</Text>
-                <Text style={[styles.ettValue, { color: isDark ? "#93C5FD" : "#1A4F7A", fontFamily: "Inter_700Bold" }]}>
-                  {ettube.uncuffed}
-                </Text>
+                <Text style={[styles.ettValue, { color: isDark ? "#93C5FD" : "#1A4F7A", fontFamily: "Inter_700Bold" }]}>{ettube.uncuffed}</Text>
               </View>
               <View style={[styles.ettBox, { backgroundColor: isDark ? "#112240" : "#F0FFF4", borderColor: isDark ? "#146B35" : "#F0FFF4" }]}>
                 <Text style={[styles.ettLabel, { color: isDark ? "#6FCF97" : "#146B35", fontFamily: "Inter_500Medium" }]}>Cuffed</Text>
-                <Text style={[styles.ettValue, { color: isDark ? "#86EFAC" : "#146B35", fontFamily: "Inter_700Bold" }]}>
-                  {ettube.cuffed}
-                </Text>
+                <Text style={[styles.ettValue, { color: isDark ? "#86EFAC" : "#146B35", fontFamily: "Inter_700Bold" }]}>{ettube.cuffed}</Text>
               </View>
               <View style={[styles.ettBox, { backgroundColor: isDark ? "#112240" : "#FEE2E2", borderColor: isDark ? "#DC2626" : "#FEE2E2" }]}>
-                <Text style={[styles.ettLabel, { color: isDark ? "#FCA5A5" : "#991B1B", fontFamily: "Inter_500Medium" }]}>Depth at lip</Text>
-                <Text style={[styles.ettValue, { color: isDark ? "#FECACA" : "#DC2626", fontFamily: "Inter_700Bold" }]}>
-                  {ettube.depth}
-                </Text>
+                <Text style={[styles.ettLabel, { color: isDark ? "#FCA5A5" : "#991B1B", fontFamily: "Inter_500Medium" }]}>Depth</Text>
+                <Text style={[styles.ettValue, { color: isDark ? "#FECACA" : "#DC2626", fontFamily: "Inter_700Bold" }]}>{ettube.depth}</Text>
               </View>
             </View>
-            {/* Airway equipment row */}
             <View style={styles.airwayRow}>
               <View style={[styles.airwayBadge, { backgroundColor: isDark ? "#1A1F3D" : "#F0F4F8", borderColor: isDark ? "#3D4770" : "#E2E8F0" }]}>
                 <Text style={[styles.airwayBadgeLabel, { color: isDark ? "#8892B0" : "#64748B" }]}>Suction</Text>
@@ -755,141 +848,55 @@ export default function EmergencyScreen() {
                 <Text style={[styles.airwayBadgeValue, { color: isDark ? "#FFD700" : "#B45309" }]}>Size {lma}</Text>
               </View>
             </View>
-            {/* DOPE mnemonic */}
             <View style={[styles.dopeStrip, { backgroundColor: isDark ? "#1A1F3D" : "#F0F4F8", borderColor: isDark ? "#3D4770" : "#E2E8F0" }]}>
               <Text style={[styles.dopeLabel, { color: isDark ? "#8892B0" : "#64748B" }]}>DOPE Check</Text>
               <Text style={[styles.dopeText, { color: isDark ? "#8892B0" : "#64748B" }]}>Displacement · Obstruction · Pneumothorax · Equipment failure</Text>
             </View>
           </View>
 
-          {/* Defibrillator section */}
+          {/* Defibrillator */}
           <View style={[styles.calcSection, { borderTopColor: isDark ? "#233554" : "#F0F4F8" }]}>
             <Text style={[styles.calcSectionTitle, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_600SemiBold", marginBottom: 10 }]}>
-              Defibrillator Energy — {weight} kg
+              Defibrillator Energy — {localWeight} kg
             </Text>
             <View style={{ gap: 8 }}>
-              {/* Unsynchronized (VF/pVT) */}
               <View style={[styles.shockBox, { backgroundColor: isDark ? "#112240" : "#FEE2E2", borderColor: isDark ? "#DC2626" : "#FCA5A5" }]}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 6 }}>
                   <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: "#DC2626" }} />
-                  <Text style={[styles.shockType, { color: isDark ? "#FCA5A5" : "#991B1B" }]}>
-                    Unsynchronized — VF / pVT
-                  </Text>
+                  <Text style={[styles.shockType, { color: isDark ? "#FCA5A5" : "#991B1B" }]}>Unsynchronized — VF / pVT</Text>
                 </View>
                 <View style={{ flexDirection: "row", gap: 12, alignItems: "baseline" }}>
-                  <View>
-                    <Text style={[styles.shockJoules, { color: isDark ? "#FECACA" : "#DC2626" }]}>{defib.unsync1st} J</Text>
-                    <Text style={[styles.shockFormula, { color: isDark ? "#F87171" : "#991B1B" }]}>1st: 2 J/kg</Text>
-                  </View>
-                  <View>
-                    <Text style={[styles.shockJoules, { color: isDark ? "#FECACA" : "#DC2626" }]}>{defib.unsyncSub} J</Text>
-                    <Text style={[styles.shockFormula, { color: isDark ? "#F87171" : "#991B1B" }]}>Subsequent: 4 J/kg</Text>
-                  </View>
-                  <View>
-                    <Text style={[styles.shockJoules, { color: isDark ? "#FECACA" : "#DC2626" }]}>{defib.unsyncMax} J</Text>
-                    <Text style={[styles.shockFormula, { color: isDark ? "#F87171" : "#991B1B" }]}>Max: 10 J/kg</Text>
-                  </View>
+                  <Text style={[styles.shockJoules, { color: isDark ? "#FECACA" : "#DC2626" }]}>{defib.unsync1st} J</Text>
+                  <Text style={[styles.shockFormula, { color: isDark ? "#FCA5A5" : "#991B1B" }]}>1st = 2 J/kg (max 200)</Text>
+                </View>
+                <View style={{ flexDirection: "row", gap: 12, alignItems: "baseline", marginTop: 4 }}>
+                  <Text style={[styles.shockJoules, { color: isDark ? "#FECACA" : "#DC2626" }]}>{defib.unsyncSub} J</Text>
+                  <Text style={[styles.shockFormula, { color: isDark ? "#FCA5A5" : "#991B1B" }]}>Subsequent = 4 J/kg (max 360)</Text>
+                </View>
+                <View style={{ flexDirection: "row", gap: 12, alignItems: "baseline", marginTop: 4 }}>
+                  <Text style={[styles.shockJoules, { color: isDark ? "#FECACA" : "#DC2626" }]}>{defib.unsyncMax} J</Text>
+                  <Text style={[styles.shockFormula, { color: isDark ? "#FCA5A5" : "#991B1B" }]}>Max = 10 J/kg (max 360)</Text>
                 </View>
               </View>
-              {/* Synchronized (SVT/VT with pulse) */}
               <View style={[styles.shockBox, { backgroundColor: isDark ? "#112240" : "#FEF3C7", borderColor: isDark ? "#D97706" : "#FCD34D" }]}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 6 }}>
                   <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: "#D97706" }} />
-                  <Text style={[styles.shockType, { color: isDark ? "#FCD34D" : "#92400E" }]}>
-                    Synchronized — SVT / VT with pulse
-                  </Text>
+                  <Text style={[styles.shockType, { color: isDark ? "#FCD34D" : "#92400E" }]}>Synchronized — SVT / VT with pulse</Text>
                 </View>
                 <View style={{ flexDirection: "row", gap: 12, alignItems: "baseline" }}>
-                  <View>
-                    <Text style={[styles.shockJoules, { color: isDark ? "#FDE047" : "#B45309" }]}>{defib.sync1st} J</Text>
-                    <Text style={[styles.shockFormula, { color: isDark ? "#F59E0B" : "#92400E" }]}>1st: 0.5–1 J/kg</Text>
-                  </View>
-                  <View>
-                    <Text style={[styles.shockJoules, { color: isDark ? "#FDE047" : "#B45309" }]}>{defib.syncSub} J</Text>
-                    <Text style={[styles.shockFormula, { color: isDark ? "#F59E0B" : "#92400E" }]}>Subsequent: 2 J/kg</Text>
-                  </View>
+                  <Text style={[styles.shockJoules, { color: isDark ? "#FDE68A" : "#B45309" }]}>{defib.sync1st} J</Text>
+                  <Text style={[styles.shockFormula, { color: isDark ? "#FCD34D" : "#92400E" }]}>1st = 0.5 J/kg (max 50)</Text>
                 </View>
-              </View>
-            </View>
-          </View>
-
-          {/* Hs & Ts — Interactive Reversible Causes Checklist */}
-          <View style={[styles.calcSection, { borderTopColor: isDark ? "#233554" : "#F0F4F8" }]}>
-            <Text style={[styles.calcSectionTitle, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_600SemiBold", marginBottom: 10 }]}>
-              Reversible Causes (Hs & Ts)
-            </Text>
-            <View style={styles.htGrid}>
-              {/* Hs Column */}
-              <View style={[styles.htCol, { backgroundColor: isDark ? "#112240" : "#F0F4F8", borderColor: isDark ? "#1E40AF" : "#93C5FD" }]}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 6 }}>
-                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: isDark ? "#93C5FD" : "#1E40AF" }} />
-                  <Text style={[styles.htColTitle, { color: isDark ? "#93C5FD" : "#1E40AF" }]}>Hs</Text>
+                <View style={{ flexDirection: "row", gap: 12, alignItems: "baseline", marginTop: 4 }}>
+                  <Text style={[styles.shockJoules, { color: isDark ? "#FDE68A" : "#B45309" }]}>{defib.syncSub} J</Text>
+                  <Text style={[styles.shockFormula, { color: isDark ? "#FCD34D" : "#92400E" }]}>Subsequent = 2 J/kg (max 100)</Text>
                 </View>
-                {HsItems.map((h, i) => {
-                  const checked = hsChecked[i];
-                  return (
-                    <TouchableOpacity
-                      key={i}
-                      onPress={() => toggleH(i)}
-                      activeOpacity={0.7}
-                      style={[styles.htRow, { opacity: checked ? 0.45 : 1 }]}>
-                      <View style={{ width: 18, alignItems: "center" }}>
-                        {checked ? (
-                          <Feather name="check-square" size={14} color={isDark ? "#93C5FD" : "#1E40AF"} />
-                        ) : (
-                          <View style={{ width: 14, height: 14, borderRadius: 3, borderWidth: 1.5, borderColor: isDark ? "#93C5FD" : "#1E40AF" }} />
-                        )}
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={[styles.htLabel, { color: isDark ? "#CCD6F6" : "#0D1B2A", textDecorationLine: checked ? "line-through" : "none" }]}>
-                          {h.label}
-                        </Text>
-                        <Text style={[styles.htAction, { color: isDark ? "#93C5FD" : "#1E40AF" }]}>
-                          Action: {h.action}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-              {/* Ts Column */}
-              <View style={[styles.htCol, { backgroundColor: isDark ? "#112240" : "#F0F4F8", borderColor: isDark ? "#FCA5A5" : "#991B1B" }]}>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 6 }}>
-                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: isDark ? "#FCA5A5" : "#991B1B" }} />
-                  <Text style={[styles.htColTitle, { color: isDark ? "#FCA5A5" : "#991B1B" }]}>Ts</Text>
-                </View>
-                {TsItems.map((t, i) => {
-                  const checked = tsChecked[i];
-                  return (
-                    <TouchableOpacity
-                      key={i}
-                      onPress={() => toggleT(i)}
-                      activeOpacity={0.7}
-                      style={[styles.htRow, { opacity: checked ? 0.45 : 1 }]}>
-                      <View style={{ width: 18, alignItems: "center" }}>
-                        {checked ? (
-                          <Feather name="check-square" size={14} color={isDark ? "#FCA5A5" : "#991B1B"} />
-                        ) : (
-                          <View style={{ width: 14, height: 14, borderRadius: 3, borderWidth: 1.5, borderColor: isDark ? "#FCA5A5" : "#991B1B" }} />
-                        )}
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={[styles.htLabel, { color: isDark ? "#CCD6F6" : "#0D1B2A", textDecorationLine: checked ? "line-through" : "none" }]}>
-                          {t.label}
-                        </Text>
-                        <Text style={[styles.htAction, { color: isDark ? "#FCA5A5" : "#991B1B" }]}>
-                          Action: {t.action}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
               </View>
             </View>
           </View>
         </View>
 
-        {/* Emergency Medications */}
+        {/* Critical Code Blue Drug Cards — compact, reordered */}
         {emergencyCards.map((item, idx) => (
           <View
             key={idx}
@@ -900,90 +907,34 @@ export default function EmergencyScreen() {
                 borderLeftColor: item.color,
                 borderWidth: isDark ? 1 : 0,
                 borderColor: isDark ? "#233554" : "transparent",
-                borderLeftWidth: 4,
+                borderLeftWidth: 3,
               },
             ]}
           >
-            <View style={styles.cardTop}>
-              <View style={styles.cardTitleRow}>
-                <View style={styles.badgeRow}>
-                  {item.warning && (
-                    <View
-                      style={[
-                        styles.criticalBadge,
-                        {
-                          backgroundColor: isDark ? "#6366F120" : item.color + "22",
-                        },
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.criticalText,
-                          { color: isDark ? "#6366F1" : item.color, fontFamily: "Inter_700Bold" },
-                        ]}
-                      >
-                        CODE BLUE READY
-                      </Text>
-                    </View>
-                  )}
-                  {/* IN route badge for intranasal items */}
-                  {(item.route.includes("IN") || item.route.toLowerCase().includes("intranasal")) && (
-                    <View style={styles.inBadge}>
-                      <Text style={[styles.inBadgeText, { fontFamily: "Inter_700Bold" }]}>
-                        IN
-                      </Text>
-                    </View>
-                  )}
-                </View>
+            <View style={styles.cardTopCompact}>
+              <Text
+                style={[
+                  styles.cardLabelCompact,
+                  { color: isDark ? "#FFFFFF" : "#0D1B2A", fontFamily: "Inter_600SemiBold" },
+                ]}
+              >
+                {item.label}
+              </Text>
+              <View style={[styles.routeTagCompact, { backgroundColor: item.color + "22" }]}>
                 <Text
                   style={[
-                    styles.cardLabel,
-                    {
-                      color: isDark ? "#FFFFFF" : "#0D1B2A",
-                      fontFamily: "Inter_600SemiBold",
-                    },
+                    styles.routeTagTextCompact,
+                    { color: item.color, fontFamily: "Inter_600SemiBold" },
                   ]}
                 >
-                  {item.label}
+                  {item.route}
                 </Text>
               </View>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                <View
-                  style={[
-                    styles.routeTag,
-                    { backgroundColor: item.color + "22" },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.routeTagText,
-                      { color: item.color, fontFamily: "Inter_600SemiBold" },
-                    ]}
-                  >
-                    {item.route}
-                  </Text>
-                </View>
-                <StarButton
-                  isFav={isFav(`emergency-${idx}`)}
-                  onToggle={() =>
-                    toggleFav({
-                      id: `emergency-${idx}`,
-                      type: "drug",
-                      label: item.label,
-                      color: item.color,
-                      notes: item.route,
-                    })
-                  }
-                  size={18}
-                  color={item.color}
-                />
-              </View>
             </View>
-
             <View style={{ flexDirection: "row", alignItems: "baseline", gap: 6, flexWrap: "wrap" }}>
               <Text
                 style={[
-                  styles.cardDose,
+                  styles.cardDoseCompact,
                   { color: item.color, fontFamily: "Inter_800ExtraBold" },
                 ]}
               >
@@ -992,7 +943,7 @@ export default function EmergencyScreen() {
               {item.doseSub && (
                 <Text
                   style={[
-                    styles.cardDoseUnit,
+                    styles.cardDoseUnitCompact,
                     { color: item.color, fontFamily: "Inter_600SemiBold" },
                   ]}
                 >
@@ -1000,30 +951,122 @@ export default function EmergencyScreen() {
                 </Text>
               )}
             </View>
-
-            {/* Adult max dose red alert */}
             {item.exceedsAdultMax && (
               <View style={styles.adultMaxAlert}>
-                <Feather name="alert-octagon" size={13} color="#fff" />
+                <Feather name="alert-octagon" size={12} color="#fff" />
                 <Text style={[styles.adultMaxAlertText, { fontFamily: "Inter_700Bold" }]}>
-                  RED ALERT: {item.adultMaxLabel}
+                  {item.adultMaxLabel}
                 </Text>
               </View>
             )}
-
             <Text
               style={[
-                styles.cardNotes,
-                {
-                  color: isDark ? "#8892B0" : "#8A9BB0",
-                  fontFamily: "Inter_400Regular",
-                },
+                styles.cardNotesCompact,
+                { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" },
               ]}
             >
               {item.notes}
             </Text>
+            <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
+              <StarButton
+                isFav={isFav(`emergency-${idx}`)}
+                onToggle={() =>
+                  toggleFav({
+                    id: `emergency-${idx}`,
+                    type: "drug",
+                    label: item.label,
+                    color: item.color,
+                    route: item.route,
+                  })
+                }
+                size={16}
+                color={item.color}
+              />
+            </View>
           </View>
         ))}
+
+        {/* Hs & Ts Checklist */}
+        <View
+          style={[
+            styles.palsBanner,
+            {
+              backgroundColor: isDark ? "#0A192F" : "#FFFFFF",
+              borderColor: isDark ? "#233554" : "#E2E8F0",
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.palsTitle,
+              { color: colors.tint, fontFamily: "Inter_700Bold" },
+            ]}
+          >
+            Hs & Ts — Reversible Causes
+          </Text>
+          <View style={styles.htGrid}>
+            <View
+              style={[
+                styles.htCol,
+                {
+                  backgroundColor: isDark ? "#112240" : "#F0FFF4",
+                  borderColor: isDark ? "#146B35" : "#D1FAE5",
+                },
+              ]}
+            >
+              <Text style={[styles.htColTitle, { color: isDark ? "#86EFAC" : "#146B35" }]}>H's</Text>
+              {HsItems.map((h, i) => (
+                <TouchableOpacity key={i} onPress={() => toggleH(i)} style={styles.htRow} activeOpacity={0.7}>
+                  <View
+                    style={[
+                      styles.htCheckbox,
+                      {
+                        backgroundColor: hsChecked[i] ? (isDark ? "#146B35" : "#16A34A") : "transparent",
+                        borderColor: isDark ? "#6FCF97" : "#16A34A",
+                      },
+                    ]}
+                  >
+                    {hsChecked[i] && <Feather name="check" size={10} color="#FFFFFF" />}
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.htLabel, { color: isDark ? "#FFFFFF" : "#0D1B2A" }]}>{h.label}</Text>
+                    <Text style={[styles.htAction, { color: isDark ? "#8892B0" : "#64748B" }]}>{h.action}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <View
+              style={[
+                styles.htCol,
+                {
+                  backgroundColor: isDark ? "#112240" : "#FEF2F2",
+                  borderColor: isDark ? "#7F1D1D" : "#FECACA",
+                },
+              ]}
+            >
+              <Text style={[styles.htColTitle, { color: isDark ? "#FCA5A5" : "#991B1B" }]}>T's</Text>
+              {TsItems.map((t, i) => (
+                <TouchableOpacity key={i} onPress={() => toggleT(i)} style={styles.htRow} activeOpacity={0.7}>
+                  <View
+                    style={[
+                      styles.htCheckbox,
+                      {
+                        backgroundColor: tsChecked[i] ? (isDark ? "#7F1D1D" : "#DC2626") : "transparent",
+                        borderColor: isDark ? "#FCA5A5" : "#DC2626",
+                      },
+                    ]}
+                  >
+                    {tsChecked[i] && <Feather name="check" size={10} color="#FFFFFF" />}
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.htLabel, { color: isDark ? "#FFFFFF" : "#0D1B2A" }]}>{t.label}</Text>
+                    <Text style={[styles.htAction, { color: isDark ? "#8892B0" : "#64748B" }]}>{t.action}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </View>
 
         <ProfessionalFooter />
       </ScrollView>
@@ -1083,98 +1126,145 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   warningText: { fontSize: 12, color: "#FFFFFF" },
-  scrollContent: { padding: 12, gap: 10 },
+
+  // Pinned section
+  pinnedSection: {
+    borderBottomWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 8,
+  },
+  inputRow: { flexDirection: "row", gap: 10 },
+  inputWrap: { flex: 1 },
+  inputLabel: { fontSize: 11, fontWeight: "700", marginBottom: 4, textTransform: "uppercase", letterSpacing: 0.5 },
+  input: {
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+
+  // Compact Status Bar
+  statusBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 12,
+    borderWidth: 1,
+    padding: 6,
+    gap: 6,
+  },
+  statusTimer: {
+    flex: 1,
+    borderRadius: 10,
+    borderWidth: 1,
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 52,
+  },
+  statusTimerLabel: { fontSize: 10, fontWeight: "800", letterSpacing: 1, textTransform: "uppercase" },
+  statusTimerValue: { fontSize: 22, fontWeight: "900", letterSpacing: -0.5 },
+  statusAlert: { fontSize: 16, fontWeight: "900", color: "#DC2626", textAlign: "center" },
+  statusAlertEpi: { fontSize: 16, fontWeight: "900", color: "#DC2626", textAlign: "center" },
+  statusBtn: {
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  statusBtnText: { color: "#FFF", fontSize: 13, fontWeight: "900", letterSpacing: 0.5 },
+  statusChips: { flexDirection: "row", gap: 4, alignItems: "center" },
+  statusChip: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#7C3AED",
+  },
+  statusChipActive: { backgroundColor: "#7C3AED", borderColor: "#7C3AED" },
+  statusChipText: { fontSize: 11, fontWeight: "700", color: "#7C3AED" },
+  statusChipTextActive: { color: "#FFF" },
+
+  // Cross-validation warning
+  mismatchBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    borderRadius: 8,
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+  },
+  mismatchText: { fontSize: 12, fontWeight: "700", flex: 1 },
+
+  // Scroll content
+  scrollContent: { padding: 12, gap: 8 },
+
+  // Drug cards — compact
   emergencyCard: {
-    borderRadius: 14,
-    padding: 14,
-    borderLeftWidth: 4,
+    borderRadius: 12,
+    padding: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.06,
     shadowRadius: 4,
     elevation: 2,
-    gap: 6,
-    marginBottom: 10,
+    gap: 4,
+    marginBottom: 6,
   },
-  cardTop: {
+  cardTopCompact: {
     flexDirection: "row",
     alignItems: "flex-start",
     justifyContent: "space-between",
     gap: 8,
   },
-  cardTitleRow: { flex: 1, gap: 4 },
-  badgeRow: { flexDirection: "row", gap: 4, flexWrap: "wrap" },
-  criticalBadge: {
-    alignSelf: "flex-start",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  criticalText: { fontSize: 9, letterSpacing: 0.5 },
-  inBadge: {
-    alignSelf: "flex-start",
-    backgroundColor: "#FF6B0022",
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  inBadgeText: { fontSize: 9, color: "#6366F1", letterSpacing: 0.5 },
-  cardLabel: { fontSize: 14, flex: 1 },
-  routeTag: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 },
-  routeTagText: { fontSize: 11 },
-  cardDose: { fontSize: 32, letterSpacing: -0.5 },
-  cardDoseUnit: { fontSize: 20 },
+  cardLabelCompact: { fontSize: 12, flex: 1, lineHeight: 16 },
+  routeTagCompact: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, alignSelf: "flex-start" },
+  routeTagTextCompact: { fontSize: 9, letterSpacing: 0.3 },
+  cardDoseCompact: { fontSize: 24, letterSpacing: -0.5 },
+  cardDoseUnitCompact: { fontSize: 14 },
+  cardNotesCompact: { fontSize: 11, lineHeight: 14 },
   adultMaxAlert: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
     backgroundColor: "#B91C1C",
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
   },
   adultMaxAlertText: {
-    fontSize: 11,
+    fontSize: 10,
     color: "#FFFFFF",
     flex: 1,
     letterSpacing: 0.1,
   },
-  cardNotes: { fontSize: 12, lineHeight: 16 },
+
+  // Equipment calculators
   palsBanner: {
     borderRadius: 14,
-    padding: 16,
+    padding: 14,
     borderWidth: 1,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
-    marginBottom: 10,
+    marginBottom: 6,
   },
-  palsTitle: { fontSize: 16, marginBottom: 12 },
-  calcSource: { fontSize: 11, marginBottom: 12, marginTop: -8, letterSpacing: 0.3 },
+  palsTitle: { fontSize: 15, marginBottom: 10 },
+  calcSource: { fontSize: 11, marginBottom: 10, marginTop: -6, letterSpacing: 0.3 },
   calcSection: {
     borderTopWidth: 1,
-    marginTop: 10,
-    paddingTop: 10,
+    marginTop: 8,
+    paddingTop: 8,
   },
-  calcSectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 8,
-  },
-  calcSectionTitle: { fontSize: 13, letterSpacing: 0.3 },
-  ageInputWrap: { flexDirection: "row", alignItems: "center", gap: 6 },
-  ageLabel: { fontSize: 13 },
-  ageInput: {
-    width: 52,
-    height: 32,
-    borderRadius: 8,
-    paddingHorizontal: 6,
-    fontSize: 16,
-    textAlign: "center",
-  },
+  calcSectionTitle: { fontSize: 12, letterSpacing: 0.3 },
   ettGrid: { flexDirection: "row", gap: 8 },
   ettBox: {
     flex: 1,
@@ -1186,40 +1276,12 @@ const styles = StyleSheet.create({
   },
   ettLabel: { fontSize: 10 },
   ettValue: { fontSize: 15, textAlign: "center" },
-
-
-  inputRow: { flexDirection: "row", alignItems: "center", gap: 6 },
-  inputWrap: { flex: 1 },
-  inputLabel: { fontSize: 12, fontWeight: "600" },
-  input: {
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 15,
-    fontWeight: "600",
-  },
-  resultBox: { borderWidth: 1, borderRadius: 12, padding: 12, gap: 6, marginTop: 4 },
-  resultLabel: { fontSize: 13, fontWeight: "700" },
-  resultNote: { fontSize: 12, fontWeight: "700" },
-  refRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    alignItems: "center",
-  },
-  refLabel: { fontSize: 13, flex: 1 },
-  refValue: { fontSize: 14, textAlign: "right", flex: 1 },
-  refText: { fontSize: 11, lineHeight: 16 },
-  // Airway equipment row
   airwayRow: { flexDirection: "row", gap: 6, marginTop: 8 },
   airwayBadge: {
     flex: 1, borderRadius: 8, borderWidth: 1, paddingVertical: 8, paddingHorizontal: 4, alignItems: "center",
   },
   airwayBadgeLabel: { fontSize: 10, fontWeight: "600", marginBottom: 2 },
   airwayBadgeValue: { fontSize: 13, fontWeight: "700" },
-  // DOPE strip
   dopeStrip: {
     flexDirection: "row",
     alignItems: "center",
@@ -1233,7 +1295,6 @@ const styles = StyleSheet.create({
   },
   dopeLabel: { fontSize: 10, fontWeight: "700" },
   dopeText: { fontSize: 10, fontWeight: "500" },
-  // Defibrillator shock boxes
   shockBox: {
     borderRadius: 10,
     borderWidth: 1,
@@ -1243,7 +1304,8 @@ const styles = StyleSheet.create({
   shockType: { fontSize: 12, fontWeight: "700" },
   shockJoules: { fontSize: 18, fontWeight: "700" },
   shockFormula: { fontSize: 10, fontWeight: "500" },
-  // Hs & Ts interactive grid
+
+  // Hs & Ts
   htGrid: { flexDirection: "row", gap: 8 },
   htCol: {
     flex: 1,
@@ -1259,32 +1321,15 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingVertical: 2,
   },
+  htCheckbox: {
+    width: 18,
+    height: 18,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 1,
+  },
   htLabel: { fontSize: 11, fontWeight: "600", lineHeight: 15 },
   htAction: { fontSize: 9, fontWeight: "500", lineHeight: 13, marginTop: 1 },
-  // CPR / Code Blue Timer
-  cprCard: { borderRadius: 16, borderWidth: 2, padding: 14, gap: 10, marginBottom: 10 },
-  cprTitle: { fontSize: 15, fontWeight: "900", color: "#DC2626", textAlign: "center", letterSpacing: 1 },
-  cprChipRow: { flexDirection: "row", gap: 8, justifyContent: "center" },
-  cprChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: "#7C3AED" },
-  cprChipActive: { backgroundColor: "#7C3AED", borderColor: "#7C3AED" },
-  cprChipText: { fontSize: 12, fontWeight: "700", color: "#7C3AED" },
-  cprChipTextActive: { color: "#FFF" },
-  cprTimerBox: { borderWidth: 3, borderRadius: 20, padding: 20, alignItems: "center", gap: 6 },
-  cprCycleLabel: { fontSize: 12, fontWeight: "800", letterSpacing: 2, textTransform: "uppercase" },
-  cprTime: { fontSize: 72, fontWeight: "900", letterSpacing: -3, lineHeight: 80 },
-  cprCycleSub: { fontSize: 13, fontWeight: "600", textAlign: "center" },
-  switchIcon: { fontSize: 40 },
-  switchText: { fontSize: 26, fontWeight: "900", color: "#DC2626", letterSpacing: 1, textAlign: "center" },
-  epiBox: { borderWidth: 2, borderRadius: 16, padding: 14 },
-  epiLabel: { fontSize: 11, fontWeight: "800", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 2 },
-  epiTime: { fontSize: 36, fontWeight: "900", letterSpacing: -1 },
-  epiSub: { fontSize: 11, fontWeight: "600", marginTop: 2 },
-  epiDueText: { fontSize: 22, fontWeight: "900", color: "#DC2626", letterSpacing: 0.5 },
-  epiAckBtn: { backgroundColor: "#16A34A", paddingHorizontal: 16, paddingVertical: 12, borderRadius: 12, alignItems: "center" },
-  epiAckText: { color: "#FFF", fontWeight: "800", fontSize: 13, textAlign: "center" },
-  cprMainBtn: { borderRadius: 16, paddingVertical: 18, alignItems: "center", justifyContent: "center" },
-  cprMainBtnText: { color: "#FFF", fontSize: 20, fontWeight: "900", letterSpacing: 1 },
-  cprRunningBadge: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
-  cprRunningDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#DC2626" },
-  cprRunningText: { fontSize: 12, fontWeight: "600", textAlign: "center" },
 });

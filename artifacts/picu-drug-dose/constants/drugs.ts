@@ -144,7 +144,7 @@ export const DRUGS: Drug[] = [
     highAlert: true,
     indications: ["Pulseless VT/VF (alternative to amiodarone)", "Ventricular arrhythmias"],
     doses: [
-      { value: 1, unit: "mg/kg", perKg: true, route: "IV/IO", maxDose: "100 mg", label: "Loading dose", notes: "PALS 2025: Alternative if amiodarone unavailable" },
+      { value: 1, unit: "mg/kg", perKg: true, route: "IV/IO", maxDose: "100 mg", label: "Loading dose", notes: "PALS 2025: Alternative if amiodarone unavailable", adultMaxDose_num: 100 },
       { min: 20, max: 50, unit: "mcg/kg/min", perKg: true, route: "IV infusion", label: "Maintenance", notes: "= 1.2–3 mg/kg/hr" },
     ],
     warnings: ["Reduce dose 50% in hepatic impairment", "Toxicity: seizures, arrhythmia"],
@@ -170,7 +170,7 @@ export const DRUGS: Drug[] = [
     category: "emergency",
     indications: ["Symptomatic hypocalcemia", "Hyperkalemia with ECG changes", "Hypermagnesemia", "Calcium channel blocker overdose"],
     doses: [
-      { min: 100, max: 200, unit: "mg/kg", perKg: true, route: "IV over 5–10 min", maxDose: "2000 mg (2 g)", label: "Acute hypocalcemia/hyperkalemia", notes: "10% solution (100 mg/mL); cardiac monitoring required" },
+      { min: 100, max: 200, unit: "mg/kg", perKg: true, route: "IV over 5–10 min", maxDose: "2000 mg (2 g)", label: "Acute hypocalcemia/hyperkalemia", notes: "10% solution (100 mg/mL); cardiac monitoring required", adultMaxDose_num: 2000 },
     ],
     warnings: ["NEVER give by IV push — fatal bradycardia/asystole", "Incompatible with bicarbonate (precipitates)", "Tissue necrosis with extravasation (use central line if possible)"],
     formulations: ["100 mg/mL (10% solution)"],
@@ -198,7 +198,7 @@ export const DRUGS: Drug[] = [
     category: "emergency",
     indications: ["Opioid overdose/respiratory depression"],
     doses: [
-      { value: 0.01, unit: "mg/kg", perKg: true, route: "IV/IM/SC/IN", maxDose: "0.4 mg (child), 2 mg (adolescent)", frequency: "Repeat every 2–3 min", label: "Standard reversal", notes: "Intranasal: use 4 mg/mL IN (0.5 mL each nostril if < 5 kg)" },
+      { value: 0.01, unit: "mg/kg", perKg: true, route: "IV/IM/SC/IN", maxDose: "0.4 mg (child), 2 mg (adolescent)", frequency: "Repeat every 2–3 min", label: "Standard reversal", notes: "Intranasal: use 4 mg/mL IN (0.5 mL each nostril if < 5 kg)", adultMaxDose_num: 2 },
       { min: 0.005, max: 0.02, unit: "mg/kg/hr", perKg: true, route: "IV infusion", label: "Continuous infusion", notes: "Use when short-acting naloxone needed repeatedly" },
     ],
     warnings: ["Short duration (30–90 min) — repeat doses often needed for long-acting opioids", "May precipitate acute opioid withdrawal, seizures"],
@@ -211,7 +211,7 @@ export const DRUGS: Drug[] = [
     category: "emergency",
     indications: ["Benzodiazepine reversal (diagnostic/procedural)"],
     doses: [
-      { value: 0.01, unit: "mg/kg", perKg: true, route: "IV", maxDose: "0.2 mg per dose, 1 mg total", frequency: "Repeat every 1 min if needed", notes: "Duration 45–90 min — re-sedation common" },
+      { value: 0.01, unit: "mg/kg", perKg: true, route: "IV", maxDose: "0.2 mg per dose, 1 mg total", frequency: "Repeat every 1 min if needed", notes: "Duration 45–90 min — re-sedation common", adultMaxDose_num: 1 },
     ],
     warnings: ["Contraindicated in chronic BZD users — seizure risk", "Do NOT use for TCA overdose"],
     formulations: ["0.1 mg/mL (10 mL vial)"],
@@ -223,7 +223,7 @@ export const DRUGS: Drug[] = [
     category: "emergency",
     indications: ["Torsades de pointes", "Severe asthma", "Hypomagnesemia with symptoms"],
     doses: [
-      { min: 25, max: 50, unit: "mg/kg", perKg: true, route: "IV over 10–20 min", maxDose: "2000 mg (2 g)", label: "Torsades / Severe asthma", notes: "Faster push for Torsades (over 1–2 min); calcium gluconate is antidote" },
+      { min: 25, max: 50, unit: "mg/kg", perKg: true, route: "IV over 10–20 min", maxDose: "2000 mg (2 g)", label: "Torsades / Severe asthma", notes: "Faster push for Torsades (over 1–2 min); calcium gluconate is antidote", adultMaxDose_num: 2000 },
     ],
     warnings: ["Hypotension with rapid infusion", "Respiratory depression at toxic levels", "Have calcium gluconate ready"],
     formulations: ["500 mg/mL (50%)", "200 mg/mL (20%)"],
