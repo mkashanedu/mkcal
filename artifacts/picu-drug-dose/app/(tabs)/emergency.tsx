@@ -1,7 +1,8 @@
 import { Feather } from "@expo/vector-icons";
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
+  Animated,
   Platform,
   ScrollView,
   StyleSheet,
@@ -20,6 +21,93 @@ import { useWeight } from "@/context/WeightContext";
 import { useDrawer } from "@/context/DrawerContext";
 import { ProfessionalFooter } from "@/components/ProfessionalFooter";
 import { StarButton } from "@/components/StarButton";
+
+// ── CPR / Code Blue Timers ────────────────────────────────────────────────────────
+const CPR_CYCLE_SECS = 120;
+
+function useCPRTimers(epiIntervalSec: number) {
+  const [running, setRunning] = useState(false);
+  const [cprSecs, setCprSecs] = useState(CPR_CYCLE_SECS);
+  const [cprCycle, setCprCycle] = useState(0);
+  const [switchAlert, setSwitchAlert] = useState(false);
+  const [epiSecs, setEpiSecs] = useState(epiIntervalSec);
+  const [epiDue, setEpiDue] = useState(false);
+  const [epiCount, setEpiCount] = useState(0);
+
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const switchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const epiIntervalRef = useRef(epiIntervalSec);
+  epiIntervalRef.current = epiIntervalSec;
+
+  const start = useCallback(() => {
+    setCprSecs(CPR_CYCLE_SECS);
+    setEpiSecs(epiIntervalRef.current);
+    setCprCycle(0);
+    setEpiCount(0);
+    setSwitchAlert(false);
+    setEpiDue(false);
+    setRunning(true);
+  }, []);
+
+  const stop = useCallback(() => {
+    setRunning(false);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    if (switchTimeoutRef.current) clearTimeout(switchTimeoutRef.current);
+    setCprSecs(CPR_CYCLE_SECS);
+    setEpiSecs(epiIntervalRef.current);
+    setCprCycle(0);
+    setEpiCount(0);
+    setSwitchAlert(false);
+    setEpiDue(false);
+  }, []);
+
+  const acknowledgeEpi = useCallback(() => setEpiDue(false), []);
+
+  useEffect(() => {
+    if (!running) {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      return;
+    }
+    intervalRef.current = setInterval(() => {
+      setCprSecs((prev) => {
+        if (prev <= 1) {
+          setSwitchAlert(true);
+          setCprCycle((c) => c + 1);
+          if (switchTimeoutRef.current) clearTimeout(switchTimeoutRef.current);
+          switchTimeoutRef.current = setTimeout(() => setSwitchAlert(false), 4000);
+          return CPR_CYCLE_SECS;
+        }
+        return prev - 1;
+      });
+      setEpiSecs((prev) => {
+        if (prev <= 1) {
+          setEpiDue(true);
+          setEpiCount((c) => c + 1);
+          return epiIntervalRef.current;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [running]);
+
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (switchTimeoutRef.current) clearTimeout(switchTimeoutRef.current);
+    };
+  }, []);
+
+  return { running, cprSecs, cprCycle, switchAlert, epiSecs, epiDue, epiCount, start, stop, acknowledgeEpi };
+}
+
+function fmtTime(s: number) {
+  const m = Math.floor(s / 60);
+  const ss = s % 60;
+  return `${m}:${ss.toString().padStart(2, "0")}`;
+}
 
 // ── ET Tube, Airway, Defibrillation formulas (Harriet Lane 23e · PALS 2025) ───
 function calcETTube(ageYears: number) {
@@ -338,6 +426,41 @@ export default function EmergencyScreen() {
     return results;
   }, [weight]);
 
+  // ── CPR / Code Blue Timer State ──────────────────────────────────────────
+  const [epiInterval, setEpiInterval] = useState(300);
+  const cpr = useCPRTimers(epiInterval);
+
+  const switchBlinkAnim = useRef(new Animated.Value(1)).current;
+  const epiBlinkAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (cpr.switchAlert) {
+      const loop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(switchBlinkAnim, { toValue: 0.15, duration: 250, useNativeDriver: false }),
+          Animated.timing(switchBlinkAnim, { toValue: 1, duration: 250, useNativeDriver: false }),
+        ])
+      );
+      loop.start();
+      return () => { loop.stop(); switchBlinkAnim.setValue(1); };
+    }
+  }, [cpr.switchAlert]);
+
+  useEffect(() => {
+    if (cpr.epiDue) {
+      const loop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(epiBlinkAnim, { toValue: 0.3, duration: 400, useNativeDriver: false }),
+          Animated.timing(epiBlinkAnim, { toValue: 1, duration: 400, useNativeDriver: false }),
+        ])
+      );
+      loop.start();
+      return () => { loop.stop(); epiBlinkAnim.setValue(1); };
+    }
+  }, [cpr.epiDue]);
+
+  const cprColor = cpr.cprSecs <= 15 ? "#DC2626" : cpr.cprSecs <= 30 ? "#EA580C" : "#0891B2";
+
   return (
     <View style={[styles.container, { backgroundColor: isDark ? "#0B132B" : "#F0F4F8" }]}>
       {/* Header */}
@@ -410,6 +533,139 @@ export default function EmergencyScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
+        {/* ── CPR / Code Blue Timer ── */}
+        <View
+          style={[
+            styles.cprCard,
+            {
+              backgroundColor: isDark ? "#1A0A0A" : "#FEF2F2",
+              borderColor: isDark ? "#7F1D1D" : "#FCA5A5",
+            },
+          ]}
+        >
+          <Text style={styles.cprTitle}>⚠ CODE BLUE · CPR TIMER</Text>
+
+          {/* Epi interval selector — only when stopped */}
+          {!cpr.running && (
+            <View style={styles.cprChipRow}>
+              {([180, 240, 300] as const).map((s) => (
+                <TouchableOpacity
+                  key={s}
+                  onPress={() => setEpiInterval(s)}
+                  style={[styles.cprChip, epiInterval === s && styles.cprChipActive]}
+                  activeOpacity={0.8}
+                >
+                  <Text style={[styles.cprChipText, epiInterval === s && styles.cprChipTextActive]}>
+                    Epi q{s / 60} min
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
+          {/* CPR Cycle Timer */}
+          <Animated.View
+            style={[
+              styles.cprTimerBox,
+              {
+                backgroundColor: cpr.switchAlert ? "#DC262622" : cprColor + "1A",
+                borderColor: cpr.switchAlert ? "#DC2626" : cprColor,
+                opacity: cpr.switchAlert ? switchBlinkAnim : 1,
+              },
+            ]}
+          >
+            {cpr.switchAlert ? (
+              <>
+                <Text style={styles.switchIcon}>🔄</Text>
+                <Text style={styles.switchText}>SWITCH COMPRESSOR</Text>
+                <Text style={[styles.cprCycleSub, { color: "#DC2626" }]}>
+                  Cycle {cpr.cprCycle} complete · New cycle starting
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text style={[styles.cprCycleLabel, { color: cprColor + "BB" }]}>
+                  {cpr.running ? `CPR CYCLE ${cpr.cprCycle + 1}` : "CPR CYCLE TIMER"}
+                </Text>
+                <Text style={[styles.cprTime, { color: cprColor }]}>{fmtTime(cpr.cprSecs)}</Text>
+                <Text style={[styles.cprCycleSub, { color: isDark ? "#8892B0" : "#475569" }]}>
+                  {cpr.running
+                    ? cpr.cprSecs <= 15
+                      ? "⚠ Switch compressor soon!"
+                      : "100–120/min · 5–6 cm depth · Full recoil"
+                    : "Press START CODE to begin"}
+                </Text>
+              </>
+            )}
+          </Animated.View>
+
+          {/* Epi Reminder Timer */}
+          <Animated.View
+            style={[
+              styles.epiBox,
+              {
+                backgroundColor: cpr.epiDue ? "#DC262622" : "#7C3AED12",
+                borderColor: cpr.epiDue ? "#DC2626" : "#7C3AED",
+                opacity: cpr.epiDue ? epiBlinkAnim : 1,
+              },
+            ]}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+              <View style={{ flex: 1 }}>
+                {cpr.epiDue ? (
+                  <>
+                    <Text style={styles.epiDueText}>💉 EPINEPHRINE DUE</Text>
+                    <Text style={[styles.epiSub, { color: isDark ? "#F8B4B4" : "#991B1B" }]}>
+                      0.01 mg/kg IV/IO · Max 1 mg · Dose {cpr.epiCount}
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <Text style={[styles.epiLabel, { color: "#7C3AED" }]}>
+                      {cpr.running
+                        ? cpr.epiCount > 0
+                          ? `EPI REMINDER · Dose ${cpr.epiCount + 1} in`
+                          : "EPI REMINDER · First dose in"
+                        : "EPI REMINDER"}
+                    </Text>
+                    <Text style={[styles.epiTime, { color: cpr.running ? "#7C3AED" : isDark ? "#8892B0" : "#475569" }]}>
+                      {cpr.running ? fmtTime(cpr.epiSecs) : `${epiInterval / 60} min interval`}
+                    </Text>
+                    <Text style={[styles.epiSub, { color: isDark ? "#8892B0" : "#475569" }]}>
+                      Epinephrine 0.01 mg/kg IV/IO · Max 1 mg q{epiInterval / 60} min
+                    </Text>
+                  </>
+                )}
+              </View>
+              {cpr.epiDue && (
+                <TouchableOpacity onPress={cpr.acknowledgeEpi} style={styles.epiAckBtn} activeOpacity={0.8}>
+                  <Text style={styles.epiAckText}>✓{"\n"}Given</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </Animated.View>
+
+          {/* One-Touch Start / Stop */}
+          <TouchableOpacity
+            onPress={cpr.running ? cpr.stop : cpr.start}
+            style={[styles.cprMainBtn, { backgroundColor: cpr.running ? "#DC2626" : "#16A34A" }]}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.cprMainBtnText}>
+              {cpr.running ? "■  STOP CODE" : "▶  START CODE"}
+            </Text>
+          </TouchableOpacity>
+
+          {cpr.running && (
+            <View style={styles.cprRunningBadge}>
+              <View style={styles.cprRunningDot} />
+              <Text style={[styles.cprRunningText, { color: isDark ? "#8892B0" : "#475569" }]}>
+                Running · Auto-loops every 2 min · No manual reset needed
+              </Text>
+            </View>
+          )}
+        </View>
+
         {/* Emergency Calculators — ET Tube, Defibrillator, Hs & Ts */}
         <View
           style={[
@@ -1005,4 +1261,30 @@ const styles = StyleSheet.create({
   },
   htLabel: { fontSize: 11, fontWeight: "600", lineHeight: 15 },
   htAction: { fontSize: 9, fontWeight: "500", lineHeight: 13, marginTop: 1 },
+  // CPR / Code Blue Timer
+  cprCard: { borderRadius: 16, borderWidth: 2, padding: 14, gap: 10, marginBottom: 10 },
+  cprTitle: { fontSize: 15, fontWeight: "900", color: "#DC2626", textAlign: "center", letterSpacing: 1 },
+  cprChipRow: { flexDirection: "row", gap: 8, justifyContent: "center" },
+  cprChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1, borderColor: "#7C3AED" },
+  cprChipActive: { backgroundColor: "#7C3AED", borderColor: "#7C3AED" },
+  cprChipText: { fontSize: 12, fontWeight: "700", color: "#7C3AED" },
+  cprChipTextActive: { color: "#FFF" },
+  cprTimerBox: { borderWidth: 3, borderRadius: 20, padding: 20, alignItems: "center", gap: 6 },
+  cprCycleLabel: { fontSize: 12, fontWeight: "800", letterSpacing: 2, textTransform: "uppercase" },
+  cprTime: { fontSize: 72, fontWeight: "900", letterSpacing: -3, lineHeight: 80 },
+  cprCycleSub: { fontSize: 13, fontWeight: "600", textAlign: "center" },
+  switchIcon: { fontSize: 40 },
+  switchText: { fontSize: 26, fontWeight: "900", color: "#DC2626", letterSpacing: 1, textAlign: "center" },
+  epiBox: { borderWidth: 2, borderRadius: 16, padding: 14 },
+  epiLabel: { fontSize: 11, fontWeight: "800", letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 2 },
+  epiTime: { fontSize: 36, fontWeight: "900", letterSpacing: -1 },
+  epiSub: { fontSize: 11, fontWeight: "600", marginTop: 2 },
+  epiDueText: { fontSize: 22, fontWeight: "900", color: "#DC2626", letterSpacing: 0.5 },
+  epiAckBtn: { backgroundColor: "#16A34A", paddingHorizontal: 16, paddingVertical: 12, borderRadius: 12, alignItems: "center" },
+  epiAckText: { color: "#FFF", fontWeight: "800", fontSize: 13, textAlign: "center" },
+  cprMainBtn: { borderRadius: 16, paddingVertical: 18, alignItems: "center", justifyContent: "center" },
+  cprMainBtnText: { color: "#FFF", fontSize: 20, fontWeight: "900", letterSpacing: 1 },
+  cprRunningBadge: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
+  cprRunningDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#DC2626" },
+  cprRunningText: { fontSize: 12, fontWeight: "600", textAlign: "center" },
 });
