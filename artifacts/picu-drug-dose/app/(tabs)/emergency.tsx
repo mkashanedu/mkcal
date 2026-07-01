@@ -10,6 +10,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -220,6 +221,8 @@ interface EmergencyItem {
 
 export default function EmergencyScreen() {
   const insets = useSafeAreaInsets();
+  const { width: screenWidth } = useWindowDimensions();
+  const isNarrow = screenWidth < 600;
   const { isDark, toggleDark } = useTheme();
   const colors = Colors.light;
   const {
@@ -654,17 +657,21 @@ export default function EmergencyScreen() {
 
       {/* ── PINNED: Inputs + Status Bar ── */}
       <View style={[styles.pinnedSection, { backgroundColor: isDark ? "#112240" : "#FFFFFF", borderBottomColor: isDark ? "#233554" : "#E2E8F0" }]}>
-        {/* Inputs Row — each field has a number box + prominent segmented pill toggle */}
-        <View style={styles.inputRow}>
+        {/* Inputs — vertical stack on mobile (<600 px), side-by-side on tablet/desktop */}
+        <View style={[styles.inputRow, { flexDirection: isNarrow ? "column" : "row" }]}>
 
           {/* ── WEIGHT ── */}
-          <View style={styles.inputWrap}>
+          <View style={[styles.inputWrap, isNarrow && styles.inputWrapFull]}>
             <Text style={[styles.inputFieldLabel, { color: isDark ? "#8892B0" : "#64748B" }]}>
               WEIGHT
             </Text>
             <View style={styles.inputWithToggle}>
               <TextInput
-                style={[styles.inputBox, { color: isDark ? "#FFFFFF" : "#0D1B2A", backgroundColor: isDark ? "#233554" : "#F0F4F8", borderColor: isDark ? "#3D4770" : "#CBD5E1" }]}
+                style={[styles.inputBox, {
+                  color: isDark ? "#FFFFFF" : "#0D1B2A",
+                  backgroundColor: isDark ? "#233554" : "#F0F4F8",
+                  borderColor: isDark ? "#3D4770" : "#CBD5E1",
+                }]}
                 value={weightInput}
                 onChangeText={handleWeightChange}
                 keyboardType="decimal-pad"
@@ -673,23 +680,24 @@ export default function EmergencyScreen() {
                 placeholder={weightUnit === "kg" ? "10" : "22"}
                 placeholderTextColor={isDark ? "#8892B0" : "#8A9BB0"}
               />
-              {/* KG / LBS segmented pill — VISIBLE TOGGLE */}
+              {/* ── KG | LBS pill — horizontal, 44 px tall ── */}
               <View style={[styles.segPill, { backgroundColor: isDark ? "#0B132B" : "#E2E8F0" }]}>
                 <TouchableOpacity
                   onPress={() => { if (weightUnit !== "kg") toggleWeightUnit(); }}
-                  style={[styles.segOption, weightUnit === "kg" && { backgroundColor: "#0891B2" }]}
+                  style={[styles.segOption, weightUnit === "kg" && styles.segOptionActiveBlue]}
                   activeOpacity={0.75}
                 >
-                  <Text style={[styles.segOptionText, { color: weightUnit === "kg" ? "#FFFFFF" : (isDark ? "#8892B0" : "#64748B") }]}>
+                  <Text style={[styles.segOptionText, { color: weightUnit === "kg" ? "#FFFFFF" : (isDark ? "#94A3B8" : "#475569") }]}>
                     KG
                   </Text>
                 </TouchableOpacity>
+                <View style={[styles.segDivider, { backgroundColor: isDark ? "#1E3A5F" : "#CBD5E1" }]} />
                 <TouchableOpacity
                   onPress={() => { if (weightUnit !== "lbs") toggleWeightUnit(); }}
-                  style={[styles.segOption, weightUnit === "lbs" && { backgroundColor: "#0891B2" }]}
+                  style={[styles.segOption, weightUnit === "lbs" && styles.segOptionActiveBlue]}
                   activeOpacity={0.75}
                 >
-                  <Text style={[styles.segOptionText, { color: weightUnit === "lbs" ? "#FFFFFF" : (isDark ? "#8892B0" : "#64748B") }]}>
+                  <Text style={[styles.segOptionText, { color: weightUnit === "lbs" ? "#FFFFFF" : (isDark ? "#94A3B8" : "#475569") }]}>
                     LBS
                   </Text>
                 </TouchableOpacity>
@@ -698,13 +706,17 @@ export default function EmergencyScreen() {
           </View>
 
           {/* ── AGE ── */}
-          <View style={styles.inputWrap}>
-            <Text style={[styles.inputFieldLabel, { color: isDark ? "#8892B0" : "#64748B" }]}>
+          <View style={[styles.inputWrap, isNarrow && styles.inputWrapFull]}>
+            <Text style={[styles.inputFieldLabel, { color: isDark ? "#8892B0" : "#64748B", marginTop: isNarrow ? 10 : 0 }]}>
               AGE
             </Text>
             <View style={styles.inputWithToggle}>
               <TextInput
-                style={[styles.inputBox, { color: isDark ? "#FFFFFF" : "#0D1B2A", backgroundColor: isDark ? "#233554" : "#F0F4F8", borderColor: isDark ? "#3D4770" : "#CBD5E1" }]}
+                style={[styles.inputBox, {
+                  color: isDark ? "#FFFFFF" : "#0D1B2A",
+                  backgroundColor: isDark ? "#233554" : "#F0F4F8",
+                  borderColor: isDark ? "#3D4770" : "#CBD5E1",
+                }]}
                 value={ageInput}
                 onChangeText={handleAgeChange}
                 keyboardType="decimal-pad"
@@ -713,24 +725,25 @@ export default function EmergencyScreen() {
                 placeholder={ageUnit === "years" ? "2" : "24"}
                 placeholderTextColor={isDark ? "#8892B0" : "#8A9BB0"}
               />
-              {/* YRS / MONTHS segmented pill — VISIBLE TOGGLE */}
+              {/* ── YRS | MONTHS pill — horizontal, 44 px tall ── */}
               <View style={[styles.segPill, { backgroundColor: isDark ? "#0B132B" : "#E2E8F0" }]}>
                 <TouchableOpacity
                   onPress={() => { if (ageUnit !== "years") toggleAgeUnit(); }}
-                  style={[styles.segOption, ageUnit === "years" && { backgroundColor: "#6366F1" }]}
+                  style={[styles.segOption, ageUnit === "years" && styles.segOptionActiveIndigo]}
                   activeOpacity={0.75}
                 >
-                  <Text style={[styles.segOptionText, { color: ageUnit === "years" ? "#FFFFFF" : (isDark ? "#8892B0" : "#64748B") }]}>
+                  <Text style={[styles.segOptionText, { color: ageUnit === "years" ? "#FFFFFF" : (isDark ? "#94A3B8" : "#475569") }]}>
                     YRS
                   </Text>
                 </TouchableOpacity>
+                <View style={[styles.segDivider, { backgroundColor: isDark ? "#1E3A5F" : "#CBD5E1" }]} />
                 <TouchableOpacity
                   onPress={() => { if (ageUnit !== "months") toggleAgeUnit(); }}
-                  style={[styles.segOption, ageUnit === "months" && { backgroundColor: "#6366F1" }]}
+                  style={[styles.segOption, ageUnit === "months" && styles.segOptionActiveIndigo]}
                   activeOpacity={0.75}
                 >
-                  <Text style={[styles.segOptionText, { color: ageUnit === "months" ? "#FFFFFF" : (isDark ? "#8892B0" : "#64748B") }]}>
-                    MONTHS
+                  <Text style={[styles.segOptionText, { color: ageUnit === "months" ? "#FFFFFF" : (isDark ? "#94A3B8" : "#475569") }]}>
+                    MO
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -1051,26 +1064,34 @@ const styles = StyleSheet.create({
   warningText: { fontSize: 12, color: "#FFFFFF" },
 
   pinnedSection: { borderBottomWidth: 1, paddingHorizontal: 12, paddingVertical: 10, gap: 8 },
-  inputRow: { flexDirection: "row", gap: 10 },
+  inputRow: { gap: 10 },
   inputWrap: { flex: 1 },
+  inputWrapFull: { width: "100%", flex: 0 },
 
   // Label above each input group
-  inputFieldLabel: { fontSize: 10, fontWeight: "800", textTransform: "uppercase", letterSpacing: 1, marginBottom: 5 },
+  inputFieldLabel: { fontSize: 10, fontWeight: "800", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 },
 
-  // Number box + pill toggle sit side by side
-  inputWithToggle: { flexDirection: "row", alignItems: "center", gap: 6 },
+  // Number box + pill toggle always in a row, wraps on very narrow screens
+  inputWithToggle: { flexDirection: "row", alignItems: "stretch", gap: 8, flexWrap: "wrap" },
 
-  // The number input box (compact, square-ish)
-  inputBox: { flex: 1, borderWidth: 1.5, borderRadius: 10, paddingHorizontal: 8, paddingVertical: 10, fontSize: 18, fontWeight: "800", textAlign: "center" },
+  // The number input box — takes remaining space, min height 44
+  inputBox: { flex: 1, minWidth: 60, borderWidth: 1.5, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 0, minHeight: 44, fontSize: 20, fontWeight: "800", textAlign: "center" },
 
-  // Outer container for the two pill options
-  segPill: { flexDirection: "column", borderRadius: 10, overflow: "hidden", minWidth: 52 },
+  // Pill container: horizontal KG|LBS or YRS|MO side-by-side
+  segPill: { flexDirection: "row", borderRadius: 10, overflow: "hidden" },
 
-  // Each individual pill option (KG, LBS, YRS, MONTHS)
-  segOption: { paddingHorizontal: 8, paddingVertical: 6, alignItems: "center", justifyContent: "center" },
+  // Thin divider between the two pill options
+  segDivider: { width: 1 },
+
+  // Each pill option — minimum 44×44 for thumb safety
+  segOption: { minWidth: 48, minHeight: 44, paddingHorizontal: 10, alignItems: "center", justifyContent: "center" },
+
+  // Active states — teal for weight, indigo for age
+  segOptionActiveBlue: { backgroundColor: "#0891B2" },
+  segOptionActiveIndigo: { backgroundColor: "#6366F1" },
 
   // Text inside each pill option
-  segOptionText: { fontSize: 11, fontWeight: "800", letterSpacing: 0.3 },
+  segOptionText: { fontSize: 12, fontWeight: "800", letterSpacing: 0.5 },
 
   // Status Bar
   statusBar: { flexDirection: "row", alignItems: "center", borderRadius: 12, borderWidth: 1, padding: 6, gap: 6 },
