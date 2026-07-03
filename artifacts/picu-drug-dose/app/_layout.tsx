@@ -42,6 +42,18 @@ function RootLayoutNav() {
         }}
       />
       <Stack.Screen
+        name="formulary/[category]"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="formulary/drug/[id]"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
         name="privacy-policy"
         options={{
           headerShown: false,
