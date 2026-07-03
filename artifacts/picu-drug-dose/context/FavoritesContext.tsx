@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 
-export type FavItemType = "drug" | "antidote" | "calculator" | "infusion" | "tool";
+export type FavItemType = "drug" | "antidote" | "calculator" | "infusion" | "tool" | "formulary";
 
 export interface FavItem {
   id: string;
