@@ -43,6 +43,8 @@ export default function CalculatorScreen() {
   const [weightUnit, setWeightUnit] = useState<"kg" | "lbs">("kg");
   const [lbsInput, setLbsInput] = useState("");
   const [weightWarning, setWeightWarning] = useState(false);
+  const [ageInput, setAgeInput] = useState("");
+  const [ageUnit, setAgeUnit] = useState<"yrs" | "mths">("yrs");
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
 
   function handleWeightChange(text: string) {
@@ -169,43 +171,94 @@ export default function CalculatorScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Weight Section */}
-        <View
-          style={[
-            styles.weightSection,
-            { backgroundColor: isDark ? "#233554" : "#F8FAFC" },
-          ]}
-        >
-          {/* Unit toggle */}
-          <View style={styles.unitToggleRow}>
-            <Feather name="user" size={16} color={colors.tint} />
-            <Text
-              style={[
-                styles.weightLabel,
-                { color: isDark ? "#FFFFFF" : "#0D1B2A", fontFamily: "Inter_500Medium" },
-              ]}
-            >
-              Patient Weight
+        {/* Compact 2-row input grid: Weight + Age */}
+        <View style={[styles.inputGrid, { backgroundColor: isDark ? "#233554" : "#F8FAFC" }]}>
+          {/* Row 1 — Weight */}
+          <View style={styles.inputRow}>
+            <Feather name="user" size={13} color={colors.tint} />
+            <Text style={[styles.inputRowLabel, { color: isDark ? "#CCD6F6" : "#4A5568", fontFamily: "Inter_500Medium" }]}>
+              Weight
             </Text>
-            <View style={[styles.unitToggleWrap, { backgroundColor: isDark ? "#0A192F" : "#E8EDF2" }]}>
+            <TextInput
+              style={[
+                styles.compactInput,
+                {
+                  color: weightWarning ? "#E53E3E" : isDark ? "#FFFFFF" : "#0D1B2A",
+                  backgroundColor: isDark ? "#0A192F" : "#FFFFFF",
+                  fontFamily: "Inter_700Bold",
+                  borderColor: weightWarning ? "#E53E3E" : "transparent",
+                  borderWidth: weightWarning ? 1.5 : 0,
+                },
+              ]}
+              value={displayInput}
+              onChangeText={handleWeightChange}
+              keyboardType="decimal-pad"
+              selectTextOnFocus
+              maxLength={6}
+              placeholder="–"
+              placeholderTextColor={isDark ? "#4D6E88" : "#CBD5E0"}
+            />
+            <View style={[styles.pillGroup, { backgroundColor: isDark ? "#0A192F" : "#E8EDF2" }]}>
               {(["kg", "lbs"] as const).map((u) => (
                 <TouchableOpacity
                   key={u}
                   onPress={() => handleUnitToggle(u)}
-                  style={[
-                    styles.unitToggleBtn,
-                    weightUnit === u && { backgroundColor: colors.tint },
-                  ]}
+                  style={[styles.pill, weightUnit === u && { backgroundColor: colors.tint }]}
                 >
-                  <Text
-                    style={[
-                      styles.unitToggleBtnText,
-                      {
-                        color: weightUnit === u ? "#fff" : isDark ? "#8892B0" : "#4A5568",
-                        fontFamily: "Inter_600SemiBold",
-                      },
-                    ]}
-                  >
+                  <Text style={[styles.pillText, { color: weightUnit === u ? "#fff" : isDark ? "#8892B0" : "#4A5568", fontFamily: "Inter_600SemiBold" }]}>
+                    {u}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            {weightUnit === "lbs" && weight > 0 && (
+              <Text style={[styles.convText, { color: colors.tint, fontFamily: "Inter_600SemiBold" }]}>
+                ={weight}kg
+              </Text>
+            )}
+            <View style={styles.resetMiniSpacer} />
+            <TouchableOpacity onPress={handleReset} style={styles.resetMini} activeOpacity={0.7}>
+              <Feather name="rotate-ccw" size={12} color={isDark ? "#8892B0" : "#4A5568"} />
+            </TouchableOpacity>
+          </View>
+
+          {weightWarning && (
+            <Text style={styles.weightWarning}>
+              ⚠ {MIN_WEIGHT_KG}–{MAX_WEIGHT_KG} kg — dose capped
+            </Text>
+          )}
+
+          {/* Row 2 — Age */}
+          <View style={styles.inputRow}>
+            <Feather name="clock" size={13} color={colors.tint} />
+            <Text style={[styles.inputRowLabel, { color: isDark ? "#CCD6F6" : "#4A5568", fontFamily: "Inter_500Medium" }]}>
+              Age
+            </Text>
+            <TextInput
+              style={[
+                styles.compactInput,
+                {
+                  color: isDark ? "#FFFFFF" : "#0D1B2A",
+                  backgroundColor: isDark ? "#0A192F" : "#FFFFFF",
+                  fontFamily: "Inter_700Bold",
+                },
+              ]}
+              value={ageInput}
+              onChangeText={setAgeInput}
+              keyboardType="decimal-pad"
+              selectTextOnFocus
+              maxLength={4}
+              placeholder="–"
+              placeholderTextColor={isDark ? "#4D6E88" : "#CBD5E0"}
+            />
+            <View style={[styles.pillGroup, { backgroundColor: isDark ? "#0A192F" : "#E8EDF2" }]}>
+              {(["yrs", "mths"] as const).map((u) => (
+                <TouchableOpacity
+                  key={u}
+                  onPress={() => setAgeUnit(u)}
+                  style={[styles.pill, ageUnit === u && { backgroundColor: colors.tint }]}
+                >
+                  <Text style={[styles.pillText, { color: ageUnit === u ? "#fff" : isDark ? "#8892B0" : "#4A5568", fontFamily: "Inter_600SemiBold" }]}>
                     {u}
                   </Text>
                 </TouchableOpacity>
@@ -213,64 +266,7 @@ export default function CalculatorScreen() {
             </View>
           </View>
 
-          <View style={styles.weightInputRow}>
-            <View style={styles.weightInputContainer}>
-              <TextInput
-                style={[
-                  styles.weightInput,
-                  {
-                    color: weightWarning ? "#E53E3E" : isDark ? "#FFFFFF" : "#0D1B2A",
-                    backgroundColor: isDark ? "#0A192F" : "#FFFFFF",
-                    fontFamily: "Inter_700Bold",
-                    borderColor: weightWarning ? "#E53E3E" : "transparent",
-                    borderWidth: weightWarning ? 2 : 0,
-                  },
-                ]}
-                value={displayInput}
-                onChangeText={handleWeightChange}
-                keyboardType="decimal-pad"
-                selectTextOnFocus
-                maxLength={6}
-              />
-              <Text
-                style={[
-                  styles.kgLabel,
-                  { color: colors.tint, fontFamily: "Inter_600SemiBold" },
-                ]}
-              >
-                {weightUnit}
-              </Text>
-            </View>
-
-            {/* Reset button */}
-            <TouchableOpacity
-              onPress={handleReset}
-              style={[styles.resetBtn, { backgroundColor: isDark ? "#0A192F" : "#E2E8F0" }]}
-              activeOpacity={0.7}
-            >
-              <Feather name="rotate-ccw" size={14} color={isDark ? "#8892B0" : "#4A5568"} />
-              <Text style={[styles.resetText, { color: isDark ? "#8892B0" : "#4A5568", fontFamily: "Inter_500Medium" }]}>
-                Reset
-              </Text>
-            </TouchableOpacity>
-
-            {weightUnit === "lbs" && weight > 0 && (
-              <View style={[styles.kgConvBadge, { backgroundColor: colors.tint + "18", borderColor: colors.tint + "40" }]}>
-                <Feather name="refresh-cw" size={11} color={colors.tint} />
-                <Text style={[styles.kgConvText, { color: colors.tint, fontFamily: "Inter_700Bold" }]}>
-                  {weight} kg
-                </Text>
-              </View>
-            )}
-          </View>
-
-          {weightWarning && (
-            <Text style={styles.weightWarning}>
-              ⚠ Weight range: {MIN_WEIGHT_KG}–{MAX_WEIGHT_KG} kg — dose capped
-            </Text>
-          )}
-
-          {/* Quick Weight Buttons */}
+          {/* Quick weight pills */}
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -290,12 +286,7 @@ export default function CalculatorScreen() {
                 style={[
                   styles.quickWeightBtn,
                   {
-                    backgroundColor:
-                      weight === w
-                        ? colors.tint
-                        : isDark
-                        ? "#0D1B2A"
-                        : "#FFFFFF",
+                    backgroundColor: weight === w ? colors.tint : isDark ? "#0D1B2A" : "#FFFFFF",
                     borderColor: weight === w ? colors.tint : isDark ? "#233554" : "#E2E8F0",
                   },
                 ]}
@@ -389,8 +380,9 @@ export default function CalculatorScreen() {
         </ScrollView>
       </View>
 
-      {/* Scrollable content */}
+      {/* Scrollable content — flex:1 so it fills all remaining space */}
       <ScrollView
+        style={{ flex: 1 }}
         contentContainerStyle={[
           styles.scrollContent,
           { paddingBottom: insets.bottom + (Platform.OS === "web" ? 84 : 90) },
@@ -412,7 +404,7 @@ export default function CalculatorScreen() {
                 {/* Tappable area → full drug detail (Harriet Lane/Nelson's) */}
                 <TouchableOpacity
                   style={styles.drugBlockTapArea}
-                  onPress={() => router.push(`/drug/${drug.id}` as any)}
+                  onPress={() => router.push({ pathname: "/drug/[id]", params: { id: drug.id } })}
                   activeOpacity={0.75}
                 >
                   <View style={[styles.catStripe, { backgroundColor: cat.color }]} />
@@ -618,87 +610,67 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   nightToggleText: { fontSize: 13 },
-  weightSection: {
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 12,
+  // Compact 2-row input grid
+  inputGrid: {
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 8,
+    gap: 8,
   },
-  unitToggleRow: {
+  inputRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginBottom: 10,
   },
-  weightLabel: { flex: 1, fontSize: 15 },
-  unitToggleWrap: {
+  inputRowLabel: {
+    fontSize: 12,
+    width: 44,
+  },
+  compactInput: {
+    width: 70,
+    height: 32,
+    borderRadius: 8,
+    paddingHorizontal: 6,
+    fontSize: 17,
+    textAlign: "center",
+  },
+  pillGroup: {
     flexDirection: "row",
-    borderRadius: 10,
+    borderRadius: 8,
     padding: 2,
     gap: 2,
   },
-  unitToggleBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    borderRadius: 8,
-  },
-  unitToggleBtnText: { fontSize: 13 },
-  weightInputRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 6,
-    flexWrap: "wrap",
-  },
-  weightInputContainer: { flexDirection: "row", alignItems: "center", gap: 6 },
-  weightInput: {
-    width: 96,
-    height: 42,
-    borderRadius: 10,
+  pill: {
     paddingHorizontal: 8,
-    fontSize: 22,
-    textAlign: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 1,
+    paddingVertical: 3,
+    borderRadius: 6,
   },
-  kgLabel: { fontSize: 16 },
-  resetBtn: {
-    flexDirection: "row",
+  pillText: { fontSize: 11 },
+  convText: { fontSize: 11 },
+  resetMiniSpacer: { flex: 1 },
+  resetMini: {
+    width: 28,
+    height: 28,
     alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-    borderRadius: 8,
+    justifyContent: "center",
   },
-  resetText: { fontSize: 13 },
   weightWarning: {
-    fontSize: 11,
+    fontSize: 10,
     color: "#E53E3E",
     fontWeight: "700",
-    marginBottom: 8,
+    marginLeft: 4,
   },
-  kgConvBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
-    borderWidth: 1,
-  },
-  kgConvText: { fontSize: 16 },
-  quickWeightList: { gap: 6 },
+  quickWeightList: { gap: 5, paddingTop: 2 },
   quickWeightBtn: {
-    width: 44,
-    height: 34,
-    borderRadius: 8,
+    width: 40,
+    height: 28,
+    borderRadius: 7,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
   },
-  quickWeightText: { fontSize: 13 },
+  quickWeightText: { fontSize: 12 },
   catList: { gap: 6, paddingBottom: 10 },
   catChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 16 },
   catChipText: { fontSize: 12 },
@@ -706,10 +678,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginHorizontal: 16,
     marginBottom: 8,
     paddingHorizontal: 12,
-    paddingVertical: 9,
+    paddingVertical: 8,
     borderRadius: 12,
   },
   searchInput: { flex: 1, fontSize: 14, padding: 0 },
