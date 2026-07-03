@@ -1064,21 +1064,51 @@ const styles = StyleSheet.create({
   warningText: { fontSize: 12, color: "#FFFFFF" },
 
   pinnedSection: { borderBottomWidth: 1, paddingHorizontal: 12, paddingVertical: 10, gap: 8 },
-  inputRow: { gap: 10 },
-  inputWrap: { flex: 1 },
-  inputWrapFull: { width: "100%", flex: 0 },
+  // Row of the two input blocks — each block is its own isolated flex column, never overlaps its neighbor
+  inputRow: { gap: 12 },
+  inputWrap: {
+    flex: 1,
+    minWidth: 0,
+    flexBasis: 0,
+    minHeight: 60,
+    zIndex: 1,
+    position: "relative",
+  },
+  inputWrapFull: { width: "100%", flex: 0, flexBasis: "auto" },
 
   // Label above each input group
   inputFieldLabel: { fontSize: 10, fontWeight: "800", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 },
 
-  // Number box + pill toggle always in a row, wraps on very narrow screens
-  inputWithToggle: { flexDirection: "row", alignItems: "stretch", gap: 8, flexWrap: "wrap" },
+  // Number box + pill toggle: fixed-height row, never wraps so the two never stack on top of each other
+  inputWithToggle: { flexDirection: "row", alignItems: "stretch", gap: 8, minHeight: 44, width: "100%" },
 
-  // The number input box — takes remaining space, min height 44
-  inputBox: { flex: 1, minWidth: 60, borderWidth: 1.5, borderRadius: 10, paddingHorizontal: 10, paddingVertical: 0, minHeight: 44, fontSize: 20, fontWeight: "800", textAlign: "center" },
+  // The number input box — solid opaque background + its own stacking context so text is always on top
+  inputBox: {
+    flex: 1,
+    minWidth: 0,
+    flexBasis: 0,
+    flexShrink: 1,
+    borderWidth: 1.5,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 0,
+    minHeight: 44,
+    fontSize: 20,
+    fontWeight: "800",
+    textAlign: "center",
+    zIndex: 2,
+    position: "relative",
+  },
 
-  // Pill container: horizontal KG|LBS or YRS|MO side-by-side
-  segPill: { flexDirection: "row", borderRadius: 10, overflow: "hidden" },
+  // Pill container: horizontal KG|LBS or YRS|MO side-by-side, fixed width so it never gets squeezed into the input box
+  segPill: {
+    flexDirection: "row",
+    borderRadius: 10,
+    overflow: "hidden",
+    flexShrink: 0,
+    zIndex: 2,
+    position: "relative",
+  },
 
   // Thin divider between the two pill options
   segDivider: { width: 1 },
