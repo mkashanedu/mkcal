@@ -1,4 +1,5 @@
 import { Feather } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
   Platform,
@@ -408,39 +409,47 @@ export default function CalculatorScreen() {
               ]}
             >
               <View style={styles.drugBlockHeader}>
-                <View style={[styles.catStripe, { backgroundColor: cat.color }]} />
-                <View style={{ flex: 1 }}>
-                  <View style={styles.drugNameRow}>
-                    <Text
-                      style={[
-                        styles.drugBlockName,
-                        { color: isDark ? "#FFFFFF" : "#0D1B2A", fontFamily: "Inter_600SemiBold" },
-                      ]}
-                    >
-                      {drug.name}
-                    </Text>
-                    {drug.highAlert && (
-                      <View style={styles.highAlertBadge}>
-                        <Text style={styles.highAlertText}>⚠ HIGH ALERT</Text>
-                      </View>
-                    )}
+                {/* Tappable area → full drug detail (Harriet Lane/Nelson's) */}
+                <TouchableOpacity
+                  style={styles.drugBlockTapArea}
+                  onPress={() => router.push(`/drug/${drug.id}` as any)}
+                  activeOpacity={0.75}
+                >
+                  <View style={[styles.catStripe, { backgroundColor: cat.color }]} />
+                  <View style={{ flex: 1 }}>
+                    <View style={styles.drugNameRow}>
+                      <Text
+                        style={[
+                          styles.drugBlockName,
+                          { color: isDark ? "#FFFFFF" : "#0D1B2A", fontFamily: "Inter_600SemiBold" },
+                        ]}
+                      >
+                        {drug.name}
+                      </Text>
+                      {drug.highAlert && (
+                        <View style={styles.highAlertBadge}>
+                          <Text style={styles.highAlertText}>⚠ HIGH ALERT</Text>
+                        </View>
+                      )}
+                    </View>
+                    {drug.genericName ? (
+                      <Text
+                        style={[
+                          styles.drugBlockGeneric,
+                          { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" },
+                        ]}
+                      >
+                        {drug.genericName}
+                      </Text>
+                    ) : null}
                   </View>
-                  {drug.genericName ? (
-                    <Text
-                      style={[
-                        styles.drugBlockGeneric,
-                        { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" },
-                      ]}
-                    >
-                      {drug.genericName}
+                  <View style={[styles.catTag, { backgroundColor: cat.color + "22" }]}>
+                    <Text style={[styles.catTagText, { color: cat.color, fontFamily: "Inter_500Medium" }]}>
+                      {cat.label}
                     </Text>
-                  ) : null}
-                </View>
-                <View style={[styles.catTag, { backgroundColor: cat.color + "22" }]}>
-                  <Text style={[styles.catTagText, { color: cat.color, fontFamily: "Inter_500Medium" }]}>
-                    {cat.label}
-                  </Text>
-                </View>
+                  </View>
+                  <Feather name="chevron-right" size={16} color={cat.color} style={{ marginLeft: 4 }} />
+                </TouchableOpacity>
                 <StarButton
                   isFav={isFav(drug.id)}
                   onToggle={() =>
@@ -718,6 +727,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   drugBlockHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 0,
+  },
+  drugBlockTapArea: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     padding: 14,
