@@ -34,66 +34,66 @@ const NAV_ITEMS: NavItem[] = [
   {
     label: "Dashboard",
     icon: "home",
-    route: "/(tabs)/index",
+    route: "/",
     color: "#0891B2",
     description: "Home screen",
   },
   {
     label: "EMERGENCY / RESUSCITATION",
     icon: "alert-triangle",
-    route: "/(tabs)/emergency",
+    route: "/emergency",
     color: "#DC2626",
     description: "Rapid resuscitation reference",
     isEmergency: true,
   },
   {
+    label: "Drug Calculator",
+    icon: "sliders",
+    route: "/calculator",
+    color: "#0891B2",
+    description: "95+ drugs — Harriet Lane & Nelson's",
+  },
+  {
     label: "Drug Infusions",
     icon: "activity",
-    route: "/(tabs)/infusion",
+    route: "/infusion",
     color: "#7C3AED",
     description: "IV drip & infusion calculator",
   },
   {
-    label: "Growth Charts",
-    icon: "trending-up",
-    route: "/(tabs)/tools",
+    label: "Formulary",
+    icon: "book-open",
+    route: "/formulary",
     color: "#0D9488",
-    description: "WHO/CDC growth centiles",
+    description: "Tablets, syrups, nebulisers & IV",
   },
   {
-    label: "Electrolytes",
+    label: "Electrolytes & Protocols",
     icon: "zap",
-    route: "/(tabs)/calcs",
+    route: "/calcs",
     color: "#0EA5E9",
-    description: "K⁺ / Na⁺ correction calculator",
-  },
-  {
-    label: "VIS / Cardiac & Haemodynamic",
-    icon: "heart",
-    route: "/(tabs)/tools",
-    color: "#7C3AED",
-    description: "Vasoactive-Inotropic Score",
-  },
-  {
-    label: "Protocols",
-    icon: "clipboard",
-    route: "/(tabs)/calcs",
-    color: "#D97706",
-    description: "ABG, epilepsy, burns & airway",
+    description: "K⁺ / Na⁺ correction, ABG & more",
   },
   {
     label: "Toxicology & Antidotes",
     icon: "shield",
-    route: "/(tabs)/toxicology",
+    route: "/toxicology",
     color: "#991B1B",
     description: "16 antidotes with weight-based dosing",
   },
   {
-    label: "Tools",
+    label: "Tools & Scores",
     icon: "tool",
-    route: "/(tabs)/tools",
+    route: "/tools",
     color: "#16A34A",
-    description: "BP percentile, GCS, fluids, scores & more",
+    description: "BP centile, GCS, growth & VIS score",
+  },
+  {
+    label: "Favorites",
+    icon: "star",
+    route: "/favorites",
+    color: "#D97706",
+    description: "Your starred drugs & infusions",
   },
 ];
 
@@ -150,8 +150,9 @@ export function AppDrawer() {
 
   function navigate(route: string) {
     closeDrawer();
+    // Use replace so back-stack doesn't accumulate between tab switches
     setTimeout(() => {
-      router.push(route as any);
+      router.replace(route as any);
     }, 180);
   }
 

@@ -21,7 +21,7 @@ export default function FormularyScreen() {
   const { isDark, toggleDark } = useTheme();
   const { openDrawer } = useDrawer();
   const colors = Colors.light;
-  const topPadding = Platform.OS === "web" ? 67 : insets.top;
+  const topPadding = insets.top;
 
   const bg = isDark ? "#0B132B" : "#F0F9FF";
   const cardBg = isDark ? "#112240" : "#FFFFFF";

@@ -142,7 +142,7 @@ export default function ToxicologyScreen() {
   const border = isDark ? "#233554" : "#E2E8F0";
   const textPrimary = isDark ? "#CCD6F6" : "#0D1B2A";
   const textMuted = isDark ? "#8892B0" : "#64748B";
-  const topPadding = Platform.OS === "web" ? 67 : insets.top;
+  const topPadding = insets.top;
 
   const [toxWt, setToxWt] = useState(ctxWeight > 0 ? ctxWeight.toString() : "");
   const [toxDrug, setToxDrug] = useState<AntidoteKey>("nac");

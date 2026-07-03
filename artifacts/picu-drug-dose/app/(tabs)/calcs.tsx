@@ -210,7 +210,7 @@ export default function CalcsScreen() {
   const { weight: ctxWeight } = useWeight();
   const { openDrawer } = useDrawer();
   const { isFav, toggleFav } = useFavorites();
-  const topPadding = Platform.OS === "web" ? 67 : insets.top;
+  const topPadding = insets.top;
 
   const [openSection, setOpenSection] = useState<string | null>(null);
   const toggle = (key: string) => setOpenSection((p) => (p === key ? null : key));

@@ -45,7 +45,7 @@ export default function CalculatorScreen() {
   const [weightWarning, setWeightWarning] = useState(false);
   const [ageInput, setAgeInput] = useState("");
   const [ageUnit, setAgeUnit] = useState<"yrs" | "mths">("yrs");
-  const topPadding = Platform.OS === "web" ? 67 : insets.top;
+  const topPadding = insets.top;
 
   function handleWeightChange(text: string) {
     if (weightUnit === "kg") {

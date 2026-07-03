@@ -20,7 +20,7 @@ export default function HomeScreen() {
   const { openDrawer } = useDrawer();
   const colors = Colors.light;
 
-  const topPadding = Platform.OS === "web" ? 67 : insets.top;
+  const topPadding = insets.top;
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? "#0B132B" : "#F0F9FF" }]}>

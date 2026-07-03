@@ -677,7 +677,7 @@ export default function ToolsScreen() {
   const { weight } = useWeight();
   const { isFav, toggleFav } = useFavorites();
   const { openDrawer } = useDrawer();
-  const topPadding = Platform.OS === "web" ? 67 : insets.top;
+  const topPadding = insets.top;
 
   const [openSection, setOpenSection] = useState<string | null>(null);
   const scrollRef = useRef<ScrollView>(null);

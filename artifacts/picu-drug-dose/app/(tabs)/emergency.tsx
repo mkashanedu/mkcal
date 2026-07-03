@@ -241,7 +241,7 @@ export default function EmergencyScreen() {
   } = useWeight();
   const { isFav, toggleFav } = useFavorites();
   const { openDrawer } = useDrawer();
-  const topPadding = Platform.OS === "web" ? 67 : insets.top;
+  const topPadding = insets.top;
 
   // ── Precision Inputs with Unit Toggles ───────────────────────────────────────────
   // Weight
