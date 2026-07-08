@@ -14,7 +14,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Colors from "@/constants/colors";
-import { CATEGORIES, DRUGS, DrugCategory, calculateDose } from "@/constants/drugs";
+import { CATEGORIES, DRUGS, DrugCategory } from "@/constants/drugs";
 import { useTheme } from "@/context/ThemeContext";
 import { useFavorites } from "@/context/FavoritesContext";
 import { MAX_WEIGHT_KG, MIN_WEIGHT_KG, useWeight } from "@/context/WeightContext";
@@ -24,11 +24,6 @@ import { StarButton } from "@/components/StarButton";
 
 const QUICK_WEIGHTS = [0.5, 1, 2, 3, 5, 8, 10, 15, 20, 25, 30, 40, 50, 70, 100, 150];
 const LBS_TO_KG = 0.453592;
-
-function isIntranasalRoute(route: string): boolean {
-  const r = route.toLowerCase();
-  return r.includes("intranasal") || r.includes("/ in") || r.startsWith("in ") || r === "in";
-}
 
 export default function CalculatorScreen() {
   const insets = useSafeAreaInsets();

@@ -59,6 +59,18 @@ function RootLayoutNav() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="infusion/[id]"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="tool/[id]"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }
