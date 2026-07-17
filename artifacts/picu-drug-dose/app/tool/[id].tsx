@@ -24,6 +24,7 @@ import { useWeight } from "@/context/WeightContext";
 import { useFavorites } from "@/context/FavoritesContext";
 import { StarButton } from "@/components/StarButton";
 import { ProfessionalFooter } from "@/components/ProfessionalFooter";
+import { BPGrowthCalc } from "@/components/BPGrowthCalc";
 
 const C = Colors.light;
 
@@ -75,140 +76,6 @@ function estimatePercentile(val: number, refs: [number,number,number,number,numb
   return{label,color,note,zscore:zRounded,nutritionStatus,nutritionColor,samAlert,band};
 }
 
-// ─── BP Tables (NHBPEP Fourth Report) ────────────────────────────────────────
-type BPRow = [number[], number[], number[], number[]];
-const BP_BOYS_SBP: Record<number, BPRow> = {
-  1:[[80,81,83,85,87,88,89],[94,95,97,99,100,102,102],[98,99,101,103,104,106,106],[105,106,108,110,112,113,114]],
-  2:[[84,85,87,88,90,92,92],[98,99,101,102,104,105,106],[102,103,105,107,108,110,110],[109,110,112,114,115,117,117]],
-  3:[[86,87,89,91,93,94,95],[100,101,103,105,107,108,109],[104,105,107,109,111,112,113],[111,112,114,116,118,119,120]],
-  4:[[88,89,91,93,95,96,97],[102,103,105,107,109,110,111],[106,107,109,111,113,114,115],[113,114,116,118,120,121,122]],
-  5:[[90,91,93,95,96,98,98],[104,105,106,108,110,112,112],[108,109,110,112,114,115,116],[115,116,118,120,121,123,123]],
-  6:[[91,92,94,96,98,99,100],[105,106,108,110,112,113,114],[109,110,112,114,116,117,118],[116,117,119,121,123,124,125]],
-  7:[[92,94,95,97,99,100,101],[106,107,109,111,113,114,115],[110,111,113,115,117,118,119],[117,119,120,122,124,125,126]],
-  8:[[94,95,97,99,100,102,102],[107,109,110,112,114,115,116],[111,112,114,116,118,119,120],[119,120,122,124,125,127,127]],
-  9:[[95,96,98,100,102,103,104],[109,110,112,114,115,117,117],[113,114,116,118,119,121,121],[120,121,123,125,127,128,129]],
-  10:[[97,98,100,102,103,105,106],[111,112,114,115,117,119,119],[115,116,117,119,121,122,123],[122,123,125,127,128,130,130]],
-  11:[[99,100,102,104,105,107,107],[113,114,115,117,119,120,121],[117,118,119,121,123,124,125],[124,125,126,128,130,132,132]],
-  12:[[101,102,104,106,108,109,110],[115,116,118,120,121,123,123],[119,120,122,123,125,127,127],[126,127,129,131,133,134,135]],
-  13:[[104,105,106,108,110,111,112],[117,118,120,122,124,125,126],[121,122,124,126,128,129,130],[128,130,131,133,135,136,137]],
-  14:[[106,107,109,111,113,114,115],[120,121,123,125,126,128,128],[124,125,127,128,130,132,132],[131,132,134,136,138,139,140]],
-  15:[[109,110,112,113,115,117,117],[122,124,125,127,129,130,131],[126,127,129,131,133,134,135],[134,135,136,138,140,142,142]],
-  16:[[111,112,114,116,118,119,120],[125,126,128,130,131,133,134],[129,130,132,134,135,137,137],[136,138,139,141,143,144,145]],
-  17:[[114,115,116,118,120,121,122],[127,128,130,132,134,135,136],[131,132,134,136,138,139,140],[139,140,141,143,145,146,147]],
-};
-const BP_GIRLS_SBP: Record<number, BPRow> = {
-  1:[[83,84,85,86,88,89,90],[97,97,98,100,101,102,103],[100,101,102,104,105,106,107],[107,108,109,111,112,113,114]],
-  2:[[85,85,87,88,89,91,91],[98,99,100,101,103,104,105],[102,102,104,105,106,108,108],[109,110,111,112,114,115,115]],
-  3:[[86,87,88,89,91,92,92],[100,100,102,103,104,105,106],[104,104,105,107,108,109,110],[111,112,113,114,116,117,117]],
-  4:[[88,88,90,91,92,94,94],[101,102,103,105,106,107,108],[105,106,107,108,110,111,112],[112,113,114,116,117,118,119]],
-  5:[[89,90,91,93,94,95,96],[103,103,105,106,107,109,109],[107,107,108,110,111,112,113],[114,115,116,117,119,120,120]],
-  6:[[91,92,93,94,96,97,98],[104,105,106,108,109,110,111],[108,109,110,111,113,114,115],[115,116,117,119,120,121,122]],
-  7:[[93,93,95,96,97,99,99],[106,107,108,109,111,112,113],[110,111,112,113,115,116,116],[117,118,119,120,122,123,123]],
-  8:[[95,95,96,98,99,100,101],[108,109,110,111,113,114,114],[112,112,114,115,116,118,118],[119,119,121,122,123,125,125]],
-  9:[[96,97,98,100,101,102,103],[110,110,112,113,114,116,116],[114,114,115,117,118,119,120],[121,121,122,124,125,126,127]],
-  10:[[98,99,100,102,103,104,105],[112,112,114,115,116,118,118],[116,116,117,119,120,121,122],[123,123,124,126,127,128,129]],
-  11:[[100,101,102,103,105,106,107],[114,114,116,117,118,119,120],[118,118,119,121,122,123,124],[125,125,126,128,129,130,131]],
-  12:[[102,103,104,105,107,108,108],[116,116,117,119,120,121,122],[119,120,121,123,124,125,126],[126,127,128,130,131,132,133]],
-  13:[[104,105,106,107,109,110,110],[117,118,119,121,122,123,124],[121,122,123,124,126,127,128],[128,129,130,131,133,134,135]],
-  14:[[106,106,107,109,110,111,112],[119,120,121,122,124,125,125],[123,123,125,126,127,129,129],[130,130,132,133,134,136,136]],
-  15:[[107,108,109,110,111,113,113],[120,121,122,123,125,126,127],[124,125,126,127,129,130,131],[131,132,133,134,136,137,138]],
-  16:[[108,108,110,111,112,114,114],[121,121,123,124,125,127,127],[125,125,126,128,129,130,131],[132,132,134,135,136,138,138]],
-  17:[[108,109,110,111,113,114,115],[122,122,123,125,126,127,128],[125,126,127,128,130,131,132],[132,133,134,135,137,138,139]],
-};
-const BP_BOYS_DBP: Record<number, BPRow> = {
-  1:[[34,35,36,37,38,39,39],[49,50,51,52,53,53,54],[54,54,55,56,57,58,58],[61,62,63,64,65,66,66]],
-  2:[[39,40,41,42,43,44,44],[54,55,55,56,57,58,58],[58,59,60,61,62,62,63],[66,67,67,68,69,70,70]],
-  3:[[44,44,45,46,47,48,48],[59,59,60,61,62,63,63],[63,63,64,65,66,67,67],[70,71,72,73,74,74,75]],
-  4:[[47,48,49,50,51,51,52],[62,63,64,65,66,66,67],[66,67,68,69,70,71,71],[74,74,75,76,77,78,78]],
-  5:[[50,51,52,53,54,55,55],[65,66,67,68,68,69,70],[69,70,71,72,72,73,74],[77,77,78,79,80,81,81]],
-  6:[[53,53,54,55,56,57,57],[68,68,69,70,71,72,72],[72,72,73,74,75,76,76],[79,80,81,82,83,83,84]],
-  7:[[55,55,56,57,58,59,59],[70,70,71,72,73,74,74],[74,74,75,76,77,78,78],[82,82,83,84,84,85,86]],
-  8:[[56,57,58,58,59,60,61],[71,72,72,73,74,75,75],[75,76,76,77,78,79,80],[83,83,84,85,86,87,87]],
-  9:[[57,58,59,60,61,61,62],[72,73,74,75,75,76,77],[76,77,78,79,80,81,81],[84,85,86,87,87,88,89]],
-  10:[[58,59,60,61,61,62,63],[73,74,75,75,76,77,78],[77,78,79,80,80,81,82],[85,86,87,87,88,89,90]],
-  11:[[59,59,60,61,62,63,63],[74,74,75,76,77,78,78],[78,78,79,80,81,82,82],[86,86,87,88,89,90,90]],
-  12:[[59,60,61,62,63,63,64],[74,75,75,76,77,78,79],[78,79,79,80,81,82,83],[86,87,87,88,89,90,91]],
-  13:[[60,60,61,62,63,64,64],[75,75,76,77,78,79,79],[79,79,80,81,82,83,83],[87,87,88,89,90,91,91]],
-  14:[[60,61,62,63,64,65,65],[75,76,77,78,79,79,80],[79,80,81,82,83,83,84],[87,88,89,90,91,91,92]],
-  15:[[61,62,63,64,65,66,66],[76,77,78,79,80,80,81],[80,81,82,83,84,84,85],[88,89,90,91,92,92,93]],
-  16:[[63,63,64,65,66,67,67],[78,78,79,80,81,82,82],[82,82,83,84,85,86,86],[90,90,91,92,93,94,94]],
-  17:[[65,66,66,67,68,69,70],[80,81,82,83,84,85,85],[84,85,86,87,88,89,89],[92,93,94,95,96,97,97]],
-};
-const BP_GIRLS_DBP: Record<number, BPRow> = {
-  1:[[38,38,39,39,40,41,41],[52,53,53,54,55,55,56],[56,57,57,58,59,59,60],[64,64,65,66,66,67,67]],
-  2:[[43,43,44,44,45,46,46],[58,58,58,59,60,60,61],[62,62,63,63,64,65,65],[69,70,70,71,72,72,73]],
-  3:[[47,47,48,48,49,50,50],[61,62,62,63,63,64,64],[65,66,66,67,68,68,69],[73,73,74,75,75,76,76]],
-  4:[[50,50,51,52,52,53,53],[64,64,65,65,66,67,67],[68,68,69,69,70,71,71],[76,76,77,77,78,79,79]],
-  5:[[52,52,53,54,54,55,55],[66,67,67,68,68,69,69],[70,71,71,72,73,73,74],[78,79,79,80,80,81,81]],
-  6:[[54,54,55,55,56,57,57],[68,68,69,69,70,70,71],[72,72,73,73,74,75,75],[80,80,81,81,82,83,83]],
-  7:[[55,56,56,57,57,58,58],[69,69,70,71,71,72,72],[73,74,74,74,75,76,76],[82,82,82,82,83,84,84]],
-  8:[[57,57,57,58,59,59,60],[71,71,71,72,72,73,74],[75,75,75,76,77,77,78],[83,83,83,84,85,85,86]],
-  9:[[58,58,59,59,60,61,61],[72,72,73,73,74,74,75],[76,76,77,77,78,79,79],[84,84,85,85,86,87,87]],
-  10:[[59,59,59,60,61,61,62],[73,73,73,74,74,75,75],[77,77,77,78,78,79,79],[85,85,85,86,86,87,87]],
-  11:[[60,60,60,61,61,62,62],[74,74,74,74,75,75,76],[78,78,78,78,79,79,80],[86,86,86,86,87,87,88]],
-  12:[[61,61,61,62,62,63,63],[75,75,75,75,76,76,77],[79,79,79,79,80,80,81],[87,87,87,87,88,88,89]],
-  13:[[62,62,62,63,63,64,64],[76,76,76,77,77,78,78],[80,80,80,81,81,82,82],[88,88,88,89,89,90,90]],
-  14:[[63,63,63,64,65,65,66],[77,77,77,78,78,79,79],[81,81,81,82,82,83,83],[89,89,89,90,90,91,91]],
-  15:[[64,64,65,66,66,67,67],[78,78,79,79,80,81,81],[82,82,83,83,84,85,85],[90,90,91,91,92,93,93]],
-  16:[[64,65,65,66,67,67,68],[78,78,79,80,80,81,81],[82,82,83,84,84,85,85],[90,90,91,92,92,93,93]],
-  17:[[64,65,65,66,66,67,67],[78,78,79,79,80,81,81],[82,82,83,83,84,85,85],[90,90,91,91,92,93,93]],
-};
-const HT_BOYS_PCT: Record<number, number[]> = {
-  1:[71,73,75,76,78,80,81],2:[82,83,86,87,89,91,92],3:[89,91,93,96,98,100,101],
-  4:[96,98,100,103,105,107,109],5:[102,104,107,110,113,115,116],6:[108,110,113,116,119,122,123],
-  7:[114,116,119,122,125,128,129],8:[119,122,125,128,131,134,136],9:[124,127,130,133,137,140,142],
-  10:[129,132,135,138,142,146,148],11:[134,137,141,144,148,152,154],12:[139,142,147,151,156,161,163],
-  13:[145,148,153,157,162,168,170],14:[151,154,159,164,169,174,176],15:[156,159,164,170,175,179,181],
-  16:[159,162,167,173,178,182,184],17:[161,163,168,175,180,184,186],
-};
-const HT_GIRLS_PCT: Record<number, number[]> = {
-  1:[69,71,73,75,77,78,79],2:[80,82,84,86,88,90,91],3:[88,90,92,95,97,99,100],
-  4:[95,97,99,102,104,106,107],5:[101,103,106,109,111,113,115],6:[107,109,112,115,118,120,122],
-  7:[112,115,118,121,124,127,128],8:[118,120,124,127,130,133,135],9:[123,126,129,133,136,139,141],
-  10:[128,131,135,138,142,145,147],11:[133,137,141,145,148,152,154],12:[139,142,147,151,154,157,159],
-  13:[144,147,151,156,159,162,163],14:[148,151,155,160,163,165,166],15:[150,153,157,162,165,167,168],
-  16:[151,154,158,163,166,168,169],17:[151,155,159,163,167,169,170],
-};
-const HT_PCT_LABELS = ["5th","10th","25th","50th","75th","90th","95th"];
-
-function getHeightColIndex(ht: number, htPcts: number[]): number {
-  if (ht<htPcts[1]) return 0; if (ht<htPcts[2]) return 1;
-  if (ht<htPcts[3]) return 2; if (ht<htPcts[4]) return 3;
-  if (ht<htPcts[5]) return 4; if (ht<htPcts[6]) return 5; return 6;
-}
-function getBPBand(val: number, p50: number, p90: number, p95: number): number {
-  if (val<p50) return 0; if (val<p90) return 1; if (val<p95) return 2; return 3;
-}
-interface BPCalcResult {
-  col: number; htLabel: string;
-  sbp50: number; sbp90: number; sbp95: number; sbp99: number;
-  dbp50: number; dbp90: number; dbp95: number; dbp99: number;
-  sbpBand: number; dbpBand: number; overallBand: number;
-  classification: string; color: string;
-}
-function classifyBP(ageYears: number, gender: "M"|"F", heightCm: number, sbp: number, dbp: number): BPCalcResult | null {
-  const age = Math.round(ageYears);
-  if (age<1||age>17) return null;
-  const sbpTable = gender==="M" ? BP_BOYS_SBP : BP_GIRLS_SBP;
-  const dbpTable = gender==="M" ? BP_BOYS_DBP : BP_GIRLS_DBP;
-  const htTable  = gender==="M" ? HT_BOYS_PCT : HT_GIRLS_PCT;
-  const sbpRow=sbpTable[age]; const dbpRow=dbpTable[age]; const htPcts=htTable[age];
-  if (!sbpRow||!dbpRow||!htPcts) return null;
-  const col=getHeightColIndex(heightCm,htPcts);
-  const sbp50=sbpRow[0][col],sbp90=sbpRow[1][col],sbp95=sbpRow[2][col],sbp99=sbpRow[3][col];
-  const dbp50=dbpRow[0][col],dbp90=dbpRow[1][col],dbp95=dbpRow[2][col],dbp99=dbpRow[3][col];
-  const sbpBand=sbp>0?getBPBand(sbp,sbp50,sbp90,sbp95):-1;
-  const dbpBand=dbp>0?getBPBand(dbp,dbp50,dbp90,dbp95):-1;
-  const overallBand=Math.max(sbpBand,dbpBand);
-  const BANDS=[
-    {label:"Normotensive (<50th percentile)",color:"#16A34A"},
-    {label:"High-Normal (50th–90th percentile)",color:"#0891B2"},
-    {label:"Pre-hypertensive (90th–95th percentile)",color:"#D97706"},
-    {label:"Hypertensive (>95th percentile)",color:"#DC2626"},
-  ];
-  const b=BANDS[overallBand]??BANDS[0];
-  return {col,htLabel:HT_PCT_LABELS[col]??"50th",sbp50,sbp90,sbp95,sbp99,dbp50,dbp90,dbp95,dbp99,sbpBand,dbpBand,overallBand,classification:b.label,color:b.color};
-}
 
 // ─── VIS ─────────────────────────────────────────────────────────────────────
 function calcVIS(d:{dopa:string;dobu:string;epi:string;mil:string;vaso:string;norepi:string}) {
@@ -487,18 +354,6 @@ export default function ToolDetailScreen() {
   const visScore = calcVIS(vis);
   const visResult = visInterpret(visScore);
 
-  // ── BP state ──────────────────────────────────────────────────────────────
-  const [bpAgeYears,setBpAgeYears] = useState("");
-  const [bpGender,setBpGender] = useState<"M"|"F">("M");
-  const [bpHeight,setBpHeight] = useState("");
-  const [bpSBP,setBpSBP] = useState("");
-  const [bpDBP,setBpDBP] = useState("");
-  const [bpShowTable,setBpShowTable] = useState(false);
-  const bpAgeNum=parseFloat(bpAgeYears)||0, bpHeightNum=parseFloat(bpHeight)||0;
-  const bpSBPNum=parseFloat(bpSBP)||0, bpDBPNum=parseFloat(bpDBP)||0;
-  const bpResult = bpAgeNum>=1&&bpAgeNum<=17&&bpHeightNum>0&&bpSBPNum>0 ? classifyBP(bpAgeNum,bpGender,bpHeightNum,bpSBPNum,bpDBPNum) : null;
-  const bpVISAlert = bpResult!==null&&bpResult.overallBand===0&&visScore>10;
-
   // ── Fluids state ──────────────────────────────────────────────────────────
   const [fluidWt,setFluidWt] = useState(weight>0?weight.toString():"");
   const [dehydPct,setDehydPct] = useState<5|10|15>(5);
@@ -716,52 +571,8 @@ export default function ToolDetailScreen() {
             <Text style={{fontSize:13,color:tm,marginTop:4}}>{visResult.label}</Text>
           </View>
 
-          {/* BP Calculator */}
-          <View style={{backgroundColor:isDark?"#0D1F36":"#F0F9FF",borderColor:isDark?"#1E3A5F":"#BAE6FD",borderWidth:1.5,borderRadius:14,padding:14,gap:10}}>
-            <View style={{flexDirection:"row",alignItems:"center",gap:8}}>
-              <View style={{width:32,height:32,borderRadius:9,backgroundColor:"#0891B218",alignItems:"center",justifyContent:"center"}}><Feather name="activity" size={16} color="#0891B2"/></View>
-              <View style={{flex:1}}><Text style={{fontSize:13,fontWeight:"700",color:"#0891B2"}}>BP Percentile Calculator</Text><Text style={{fontSize:10,color:tm,marginTop:1}}>NHBPEP Fourth Report · Harriet Lane 23e</Text></View>
-            </View>
-            <Text style={{fontSize:12,fontWeight:"700",color:tm}}>Gender</Text>
-            <View style={{flexDirection:"row",gap:8}}>
-              {(["M","F"] as const).map(g=>(
-                <TouchableOpacity key={g} onPress={()=>setBpGender(g)} style={{flex:1,paddingVertical:9,borderRadius:10,alignItems:"center",backgroundColor:bpGender===g?"#0891B2":isDark?"#1E293B":"#F1F5F9",borderWidth:2,borderColor:bpGender===g?"#0891B2":isDark?"#334155":"#CBD5E1"}}>
-                  <Text style={{fontWeight:"700",fontSize:13,color:bpGender===g?"#FFFFFF":tm}}>{g==="M"?"♂ Male":"♀ Female"}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            <View style={{flexDirection:"row",gap:8}}>
-              <View style={{flex:1}}><Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>Age (years)</Text><TextInput style={inputStyle} value={bpAgeYears} onChangeText={setBpAgeYears} keyboardType="decimal-pad" placeholder="1–17" placeholderTextColor={tm}/></View>
-              <View style={{flex:1}}><Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>Height (cm)</Text><TextInput style={inputStyle} value={bpHeight} onChangeText={setBpHeight} keyboardType="decimal-pad" placeholder="e.g. 120" placeholderTextColor={tm}/></View>
-            </View>
-            <View style={{flexDirection:"row",gap:8}}>
-              <View style={{flex:1}}><Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>Actual SBP (mmHg)</Text><TextInput style={inputStyle} value={bpSBP} onChangeText={setBpSBP} keyboardType="decimal-pad" placeholder="e.g. 110" placeholderTextColor={tm}/></View>
-              <View style={{flex:1}}><Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>Actual DBP (mmHg)</Text><TextInput style={inputStyle} value={bpDBP} onChangeText={setBpDBP} keyboardType="decimal-pad" placeholder="e.g. 72" placeholderTextColor={tm}/></View>
-            </View>
-            {bpAgeNum>0&&(bpAgeNum<1||bpAgeNum>17)&&<View style={{backgroundColor:"#FEF3C7",borderRadius:8,padding:10,flexDirection:"row",gap:6,alignItems:"center"}}><Feather name="alert-triangle" size={14} color="#92400E"/><Text style={{fontSize:12,color:"#92400E"}}>Age must be 1–17 years (NHBPEP table range)</Text></View>}
-            {bpResult&&(
-              <View style={{gap:8}}>
-                <View style={{flexDirection:"row",gap:6}}>
-                  {[{label:"50th",sbp:bpResult.sbp50,dbp:bpResult.dbp50,color:"#16A34A"},{label:"90th",sbp:bpResult.sbp90,dbp:bpResult.dbp90,color:"#D97706"},{label:"95th",sbp:bpResult.sbp95,dbp:bpResult.dbp95,color:"#DC2626"},{label:"99th",sbp:bpResult.sbp99,dbp:bpResult.dbp99,color:"#7F1D1D"}].map(t=>(
-                    <View key={t.label} style={{flex:1,backgroundColor:t.color+"14",borderRadius:10,padding:8,alignItems:"center",borderWidth:1,borderColor:t.color+"30"}}>
-                      <Text style={{fontSize:9,color:t.color,fontWeight:"600",letterSpacing:0.3}}>{t.label} SBP</Text>
-                      <Text style={{fontSize:16,fontWeight:"700",color:t.color,marginTop:1}}>{t.sbp}</Text>
-                      <Text style={{fontSize:8,color:tm}}>mmHg</Text>
-                    </View>
-                  ))}
-                </View>
-                <Text style={{fontSize:11,color:tm,textAlign:"center"}}>Height at {bpResult.htLabel} percentile · {bpGender==="M"?"Male":"Female"}</Text>
-                <View style={{flexDirection:"row",alignItems:"center",gap:10,padding:12,borderRadius:12,borderWidth:1.5,backgroundColor:bpResult.color+"18",borderColor:bpResult.color+"40"}}>
-                  <Feather name={bpResult.overallBand===0?"check-circle":bpResult.overallBand>=3?"alert-circle":"alert-triangle"} size={18} color={bpResult.color}/>
-                  <View style={{flex:1}}>
-                    <Text style={{fontSize:14,fontWeight:"700",color:bpResult.color}}>{bpResult.classification}</Text>
-                    <Text style={{fontSize:11,color:tm,marginTop:2}}>SBP: {bpSBPNum} · DBP: {bpDBPNum>0?bpDBPNum+"—":""} · Age {Math.round(bpAgeNum)}y · {bpHeightNum}cm</Text>
-                  </View>
-                </View>
-              </View>
-            )}
-            {bpVISAlert&&<View style={{backgroundColor:"#DC2626",borderRadius:12,padding:12}}><Text style={{color:"#FFF",fontWeight:"700",fontSize:13}}>Clinical Alert: Active Inotropic Support with Hypotension</Text><Text style={{color:"rgba(255,255,255,0.9)",fontSize:11,marginTop:4}}>BP below 50th percentile while VIS = {visScore} ({">"} 10). Consider vasopressor escalation.</Text></View>}
-          </View>
+          {/* BP & Growth Calculator */}
+          <BPGrowthCalc isDark={isDark} />
 
           {/* Vitals Table */}
           <View style={{backgroundColor:isDark?"#0A192F":"#EFF6FF",borderColor:isDark?"#233554":"#BFDBFE",borderWidth:1,borderRadius:12,padding:12}}>
