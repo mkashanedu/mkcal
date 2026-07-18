@@ -79,6 +79,7 @@ function DoseCard({
   textMuted,
   isDark,
   defaultConcMgPerMl,
+  showVolumeConversion,
 }: {
   dose: FormularyDoseFormula;
   index: number;
@@ -90,6 +91,7 @@ function DoseCard({
   textMuted: string;
   isDark: boolean;
   defaultConcMgPerMl?: number;
+  showVolumeConversion: boolean;
 }) {
   const result = calculateFormularyDose(dose, weightKg);
 
@@ -176,8 +178,8 @@ function DoseCard({
         </Text>
       )}
 
-      {/* Volume conversion — only for mass-unit doses (mg / mcg) */}
-      {isConvertible && (
+      {/* Volume conversion — only for liquid formulations (syrup, ivInfusion, inotrope) with mass-unit doses */}
+      {isConvertible && showVolumeConversion && (
         <View style={[dStyles.volSection, { borderTopColor: borderColor }]}>
           <Text style={[dStyles.volLabel, { color: textMuted, fontFamily: "Inter_600SemiBold" }]}>
             VOLUME CONVERSION{isMcg ? " (mcg → mg → mL)" : ""}
@@ -325,6 +327,7 @@ export default function FormularyDrugDetail() {
               textMuted={textMuted}
               isDark={isDark}
               defaultConcMgPerMl={drug.concentrationMgPerMl}
+              showVolumeConversion={drug.category !== "tablet" && drug.category !== "nebulizer"}
             />
           ))}
           {drug.formulations && drug.formulations.length > 0 && (
