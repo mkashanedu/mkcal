@@ -788,6 +788,68 @@ export const DRUGS: Drug[] = [
     formulations: ["2.5 mg/mL (5 mL vial)"],
     reference: "ESC Pediatric HF Guidelines 2024",
   },
+  {
+    id: "terlipressin",
+    name: "Terlipressin",
+    genericName: "Glypressin — Synthetic Vasopressin V1a Agonist (Prodrug)",
+    category: "inotrope",
+    highAlert: true,
+    indications: [
+      "Acute variceal bleeding (splanchnic vasoconstriction — reduces portal pressure)",
+      "Hepatorenal Syndrome (HRS) Type 1 — reversal of renal vasoconstriction",
+      "Refractory vasodilatory/vasopressor-resistant shock (adjunct to catecholamines)",
+    ],
+    contraindications: [
+      "Peripheral vascular disease (critical limb ischaemia risk)",
+      "Coronary artery disease / ischaemic heart disease (coronary vasoconstriction — angina/MI)",
+      "Hypersensitivity to terlipressin or vasopressin analogues",
+      "Pregnancy (uterotonic — causes contractions)",
+    ],
+    doses: [
+      {
+        min: 10,
+        max: 20,
+        unit: "mcg/kg/dose",
+        perKg: true,
+        route: "IV bolus — slow push over 1–2 min",
+        frequency: "Every 4–6 hours",
+        label: "Bolus — Variceal Bleeding / HRS",
+        maxDose: "2000 mcg (2 mg)",
+        adultMaxDose_num: 2000,
+        notes: "Administer undiluted or diluted to 100–200 mcg/mL. Continue for up to 48–72 hr for variceal haemostasis, or up to 14 days for HRS. Reassess renal response every 48 hr in HRS. Monitor MAP continuously during and after each bolus.",
+      },
+      {
+        min: 2,
+        max: 20,
+        unit: "mcg/kg/hr",
+        perKg: true,
+        route: "IV continuous infusion — central line preferred",
+        frequency: "Continuous — titrate to response",
+        label: "Infusion — Refractory Shock / HRS",
+        notes: "Start at 2 mcg/kg/hr. Titrate by 2–4 mcg/kg/hr every 30–60 min to MAP target. Usual effective range: 4–12 mcg/kg/hr. Max: 20 mcg/kg/hr. Wean by 25–50% once haemodynamically stable. Dilute to 10–20 mcg/mL in NS.",
+      },
+    ],
+    warnings: [
+      "HIGH ALERT — V1a vasopressor: peripheral and mesenteric ischaemia at high doses",
+      "Reflex bradycardia — monitor ECG continuously",
+      "Hyponatraemia — antidiuretic V2 effect; check serum Na every 6–8 hr",
+      "Hypertension — titrate carefully; hold/reduce if MAP excessive",
+      "Examine extremities every 2 hr for ischaemia (pallor, mottling, digital blanching)",
+    ],
+    formulations: [
+      "Terlipressin acetate 1 mg/5 mL vial (200 mcg/mL)",
+      "Dilute in NS or D5W — bolus: 100–200 mcg/mL | infusion: 10–20 mcg/mL",
+    ],
+    monitoring: [
+      "Continuous ECG (reflex bradycardia, arrhythmia)",
+      "Continuous arterial MAP monitoring",
+      "Hourly urine output (renal perfusion — key endpoint in HRS; target ≥ 0.5 mL/kg/hr)",
+      "Serum sodium every 6–8 hr (hyponatraemia risk)",
+      "Peripheral perfusion: capillary refill, limb colour, digital temperature",
+      "Serum creatinine / urea every 24–48 hr (HRS response monitoring)",
+    ],
+    reference: "Harriet Lane 22e | Nelson's Pediatrics 22e | EASL Variceal Bleeding Guidelines 2022 | ICA HRS Consensus 2015",
+  },
 
   // ════════════════════════════════════════════════════════════
   //  ANTIBIOTICS

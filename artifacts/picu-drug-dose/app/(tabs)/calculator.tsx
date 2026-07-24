@@ -139,7 +139,7 @@ export default function CalculatorScreen() {
                 { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" },
               ]}
             >
-              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 95+ drugs
+              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 96+ drugs
             </Text>
           </View>
           <TouchableOpacity

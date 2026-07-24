@@ -100,7 +100,7 @@ export default function HomeScreen() {
               Dose Calculator
             </Text>
             <Text style={[styles.mainButtonDesc, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_400Regular" }]}>
-              Weight-based drug doses · 95+ medications
+              Weight-based drug doses · 96+ medications
             </Text>
           </View>
           <Feather name="chevron-right" size={22} color={colors.tint} />
