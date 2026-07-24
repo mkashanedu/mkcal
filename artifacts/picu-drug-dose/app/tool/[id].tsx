@@ -233,6 +233,12 @@ const TOOL_META: Record<string,{title:string;icon:string;color:string;subtitle:s
   renal:{title:"Renal & Hepatic",icon:"shield",color:"#DC2626",subtitle:"Dose adjustments by organ function"},
   pews:{title:"PEWS Score",icon:"activity",color:"#FF4C60",subtitle:"Pediatric Early Warning Score"},
   apgar:{title:"APGAR Score",icon:"heart",color:"#EC4899",subtitle:"Neonatal assessment at 1 & 5 min"},
+  // ── New: Clinical Calculators ──────────────────────────────────────────────
+  gir:{title:"GIR Calculator",icon:"droplet",color:"#0EA5E9",subtitle:"Glucose Infusion Rate · mg/kg/min"},
+  "big-score":{title:"BIG Score",icon:"trending-up",color:"#DC2626",subtitle:"Pediatric Trauma Mortality Prediction"},
+  "phoenix-sepsis":{title:"Phoenix Sepsis Score 2024",icon:"activity",color:"#7C3AED",subtitle:"Schlapbach et al. JAMA 2024 Criteria"},
+  // ── New: ICU Protocols ─────────────────────────────────────────────────────
+  "streptokinase-empyema":{title:"Streptokinase — Empyema",icon:"shield",color:"#0D9488",subtitle:"Intrapleural Fibrinolysis Protocol"},
 };
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -453,6 +459,50 @@ export default function ToolDetailScreen() {
     {key:"Activity",setter:setApgarAc,value:apgarAc,options:[{score:0,label:"Flaccid / Limp"},{score:1,label:"Some flexion"},{score:2,label:"Active movement"}]},
     {key:"Respiration",setter:setApgarR,value:apgarR,options:[{score:0,label:"Absent"},{score:1,label:"Weak / irregular / gasping"},{score:2,label:"Good, strong cry"}]},
   ];
+
+  // ── GIR state ─────────────────────────────────────────────────────────────
+  const [girRate,setGirRate] = useState("");
+  const [girDextrose,setGirDextrose] = useState("");
+  const [girWeight,setGirWeight] = useState(weight>0?weight.toString():"");
+  const girRateNum=parseFloat(girRate)||0, girDexNum=parseFloat(girDextrose)||0, girWtNum=parseFloat(girWeight)||0;
+  const girResult = girRateNum>0&&girDexNum>0&&girWtNum>0 ? +((girRateNum*girDexNum)/(girWtNum*6)).toFixed(2) : null;
+  const girInterpret = girResult===null?null:girResult<4?{label:"Low — may need ↑ glucose supplementation",color:"#D97706"}:girResult<=8?{label:"Normal neonatal/infant range",color:"#16A34A"}:girResult<=12?{label:"Acceptable — monitor glucose closely",color:"#D97706"}:{label:"High — hyperglycaemia risk",color:"#DC2626"};
+
+  // ── BIG Score state ────────────────────────────────────────────────────────
+  const [bigBD,setBigBD] = useState("");
+  const [bigINR,setBigINR] = useState("");
+  const [bigGCS,setBigGCS] = useState("15");
+  const bigBDNum=parseFloat(bigBD)||0, bigINRNum=parseFloat(bigINR)||0, bigGCSNum=parseInt(bigGCS)||15;
+  const bigScore = bigBD&&bigINR ? +(bigBDNum+(2.5*bigINRNum)+(15-bigGCSNum)).toFixed(1) : null;
+  const bigInterpret = bigScore===null?null:bigScore<16?{label:"Low predicted mortality (< 1%)",color:"#16A34A"}:bigScore<22?{label:"Intermediate mortality risk (~10%)",color:"#D97706"}:bigScore<25?{label:"High mortality risk (> 25%)",color:"#EA580C"}:{label:"Very high predicted mortality (> 50%)",color:"#DC2626"};
+
+  // ── Phoenix Sepsis 2024 state ──────────────────────────────────────────────
+  const [phxIMV,setPhxIMV] = useState(false);
+  const [phxPFRatio,setPhxPFRatio] = useState("");
+  const [phxSFRatio,setPhxSFRatio] = useState("");
+  const [phxVasoCount,setPhxVasoCount] = useState(0);
+  const [phxLactate,setPhxLactate] = useState("");
+  const [phxMAPLow,setPhxMAPLow] = useState(false);
+  const [phxPHLow,setPhxPHLow] = useState(false);
+  const [phxPlatelets,setPhxPlatelets] = useState("");
+  const [phxINRHigh,setPhxINRHigh] = useState(false);
+  const [phxFibLow,setPhxFibLow] = useState(false);
+  const [phxGCSLow,setPhxGCSLow] = useState(false);
+  const [phxPupilsFixed,setPhxPupilsFixed] = useState(false);
+  // Phoenix domain scores
+  const phxPFNum=parseFloat(phxPFRatio)||0, phxSFNum=parseFloat(phxSFRatio)||0;
+  let phxResp=0;
+  if(phxIMV){if((phxPFNum>0&&phxPFNum<100)||(phxSFNum>0&&phxSFNum<148))phxResp=3;else if((phxPFNum>=100&&phxPFNum<200)||(phxSFNum>=148&&phxSFNum<264))phxResp=2;else phxResp=1;}
+  const phxLacNum=parseFloat(phxLactate)||0;
+  let phxCardio=Math.min(phxVasoCount,2)+(phxMAPLow?1:0)+(phxPHLow?1:0)+(phxLacNum>=11?2:phxLacNum>=5?1:0);
+  phxCardio=Math.min(phxCardio,6);
+  const phxPlatNum=parseFloat(phxPlatelets)||0;
+  let phxCoag=0;
+  if(phxPlatNum>0&&phxPlatNum<100)phxCoag+=1;
+  if(phxINRHigh||phxFibLow||(phxPlatNum>0&&phxPlatNum<50))phxCoag=Math.min(phxCoag+1,2);
+  const phxNeuro=(phxGCSLow?1:0)+(phxPupilsFixed?1:0);
+  const phxTotal=phxResp+phxCardio+phxCoag+phxNeuro;
+  const phxShock=phxCardio>=1;
 
   // ── Inline input styles ───────────────────────────────────────────────────
   const inputStyle = {color:tp,backgroundColor:inputBg,borderColor:border,borderWidth:1,borderRadius:10,paddingHorizontal:12,paddingVertical:10,fontSize:16,fontWeight:"600" as const};
@@ -988,6 +1038,450 @@ export default function ToolDetailScreen() {
           <TouchableOpacity onPress={()=>{setApgarA(null);setApgarP(null);setApgarG(null);setApgarAc(null);setApgarR(null);}} style={{flexDirection:"row",alignItems:"center",justifyContent:"center",gap:6,paddingVertical:10,borderRadius:10,backgroundColor:isDark?"#1E293B":"#F1F5F9"}}>
             <Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize:12,color:tm}}>Reset APGAR</Text>
           </TouchableOpacity>
+        </View>
+      );
+
+      // ── GIR CALCULATOR ────────────────────────────────────────────────────
+      case "gir": return (
+        <View style={{gap:14}}>
+          <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
+            <View style={{flex:1}}>
+              <Text style={{fontSize:12,color:"#0EA5E9",fontWeight:"700"}}>GIR = (Rate × Dextrose%) ÷ (Weight × 6)</Text>
+              <Text style={{fontSize:11,color:tm,marginTop:1}}>Result in mg/kg/min</Text>
+            </View>
+            <StarButton isFav={isFav("tool-gir")} onToggle={()=>toggleFav({id:"tool-gir",type:"tool",label:"GIR Calculator",color:"#0EA5E9"})} size={18} color="#0EA5E9"/>
+          </View>
+          <Text style={{fontSize:11,color:tm,fontStyle:"italic"}}>Normal neonatal range: 4–8 mg/kg/min. Premature neonates may require 6–10 mg/kg/min.</Text>
+
+          {/* Weight */}
+          <View>
+            <Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>Patient Weight (kg)</Text>
+            <View style={{flexDirection:"row",gap:8,alignItems:"center"}}>
+              <TextInput style={[inputStyle,{flex:1}]} value={girWeight} onChangeText={setGirWeight} keyboardType="decimal-pad" placeholder="kg" placeholderTextColor={tm}/>
+              {weight>0&&<TouchableOpacity onPress={()=>setGirWeight(weight.toString())} style={{paddingHorizontal:10,paddingVertical:8,borderRadius:8,backgroundColor:"#0EA5E915",borderWidth:1,borderColor:"#0EA5E940"}}>
+                <Text style={{fontSize:11,color:"#0EA5E9",fontWeight:"700"}}>Use {weight} kg</Text>
+              </TouchableOpacity>}
+            </View>
+          </View>
+
+          {/* IV Rate */}
+          <View>
+            <Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>IV Rate (mL/hr)</Text>
+            <TextInput style={inputStyle} value={girRate} onChangeText={setGirRate} keyboardType="decimal-pad" placeholder="e.g. 5" placeholderTextColor={tm}/>
+          </View>
+
+          {/* Dextrose concentration */}
+          <View>
+            <Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>Dextrose Concentration (%)</Text>
+            <View style={{flexDirection:"row",gap:6,flexWrap:"wrap",marginBottom:8}}>
+              {["5","10","12.5","15","20","25"].map(d=>(
+                <TouchableOpacity key={d} onPress={()=>setGirDextrose(d)} style={{paddingHorizontal:14,paddingVertical:8,borderRadius:8,backgroundColor:girDextrose===d?"#0EA5E9":isDark?"#1E293B":"#F1F5F9",borderWidth:1.5,borderColor:girDextrose===d?"#0EA5E9":isDark?"#334155":"#CBD5E1"}}>
+                  <Text style={{fontWeight:"700",fontSize:13,color:girDextrose===d?"#FFFFFF":tm}}>D{d}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            <TextInput style={inputStyle} value={girDextrose} onChangeText={setGirDextrose} keyboardType="decimal-pad" placeholder="or enter custom %" placeholderTextColor={tm}/>
+          </View>
+
+          {/* Result */}
+          {girResult!==null&&girInterpret&&(
+            <View style={{backgroundColor:girInterpret.color+"15",borderColor:girInterpret.color+"50",borderWidth:2,borderRadius:14,padding:18,gap:6,alignItems:"center"}}>
+              <Text style={{fontSize:12,fontWeight:"700",color:tm}}>GLUCOSE INFUSION RATE</Text>
+              <Text style={{fontSize:44,fontWeight:"900",color:girInterpret.color}}>{girResult}</Text>
+              <Text style={{fontSize:15,fontWeight:"700",color:girInterpret.color}}>mg/kg/min</Text>
+              <View style={{height:1,width:"100%",backgroundColor:girInterpret.color+"30"}}/>
+              <Text style={{fontSize:13,fontWeight:"700",color:girInterpret.color,textAlign:"center"}}>{girInterpret.label}</Text>
+              <Text style={{fontSize:11,color:tm,textAlign:"center"}}>({girRateNum} mL/hr × {girDexNum}%) ÷ ({girWtNum} kg × 6)</Text>
+            </View>
+          )}
+
+          {/* Reference ranges */}
+          <View style={{backgroundColor:isDark?"#112240":"#F8FAFC",borderRadius:10,padding:12,gap:5}}>
+            <Text style={{fontSize:11,fontWeight:"700",color:tm,marginBottom:4}}>Reference Ranges</Text>
+            {([
+              {range:"< 4 mg/kg/min",label:"Low — supplementation needed",color:"#D97706"},
+              {range:"4–8 mg/kg/min",label:"Normal (term neonates/infants)",color:"#16A34A"},
+              {range:"6–10 mg/kg/min",label:"Normal (premature neonates)",color:"#16A34A"},
+              {range:"8–12 mg/kg/min",label:"Acceptable — monitor glucose",color:"#D97706"},
+              {range:"> 12 mg/kg/min",label:"High — hyperglycaemia risk",color:"#DC2626"},
+            ] as const).map(r=>(
+              <View key={r.range} style={{flexDirection:"row",gap:8,alignItems:"center"}}>
+                <View style={{width:7,height:7,borderRadius:4,backgroundColor:r.color}}/>
+                <Text style={{fontSize:11,color:r.color,fontWeight:"700",width:115}}>{r.range}</Text>
+                <Text style={{fontSize:11,color:tm,flex:1}}>{r.label}</Text>
+              </View>
+            ))}
+          </View>
+          <Text style={{fontSize:10,color:tm,fontStyle:"italic",textAlign:"center"}}>Ref: Harriet Lane 23e | Nelson's Pediatric Nutrition | Neonatal Formulary</Text>
+        </View>
+      );
+
+      // ── BIG SCORE ─────────────────────────────────────────────────────────
+      case "big-score": return (
+        <View style={{gap:14}}>
+          <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
+            <View style={{flex:1}}>
+              <Text style={{fontSize:12,color:"#DC2626",fontWeight:"700"}}>BIG = Base Deficit + (2.5 × INR) + (15 − GCS)</Text>
+              <Text style={{fontSize:11,color:tm,marginTop:1}}>Borgman et al. (2009) J Trauma</Text>
+            </View>
+            <StarButton isFav={isFav("tool-big-score")} onToggle={()=>toggleFav({id:"tool-big-score",type:"tool",label:"BIG Score",color:"#DC2626"})} size={18} color="#DC2626"/>
+          </View>
+          <Text style={{fontSize:11,color:tm,fontStyle:"italic"}}>Validates in blunt paediatric trauma. Predicts in-hospital mortality from 3 readily available parameters.</Text>
+
+          {/* Base Deficit */}
+          <View>
+            <Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:4}}>Base Deficit (mmol/L)</Text>
+            <Text style={{fontSize:11,color:tm,marginBottom:6}}>Enter as a positive number (e.g. if base excess = −8, enter 8)</Text>
+            <TextInput style={inputStyle} value={bigBD} onChangeText={setBigBD} keyboardType="decimal-pad" placeholder="e.g. 8" placeholderTextColor={tm}/>
+          </View>
+
+          {/* INR */}
+          <View>
+            <Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>INR</Text>
+            <TextInput style={inputStyle} value={bigINR} onChangeText={setBigINR} keyboardType="decimal-pad" placeholder="e.g. 1.2" placeholderTextColor={tm}/>
+          </View>
+
+          {/* GCS */}
+          <View>
+            <Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>Glasgow Coma Scale (3–15)</Text>
+            <View style={{flexDirection:"row",flexWrap:"wrap",gap:6}}>
+              {[3,4,5,6,7,8,9,10,11,12,13,14,15].map(n=>(
+                <TouchableOpacity key={n} onPress={()=>setBigGCS(n.toString())} style={{width:46,paddingVertical:10,borderRadius:8,alignItems:"center",backgroundColor:bigGCS===n.toString()?"#DC2626":isDark?"#1E293B":"#F1F5F9",borderWidth:1.5,borderColor:bigGCS===n.toString()?"#DC2626":isDark?"#334155":"#CBD5E1"}}>
+                  <Text style={{fontWeight:"700",fontSize:14,color:bigGCS===n.toString()?"#FFFFFF":tm}}>{n}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+
+          {/* Result */}
+          {bigScore!==null&&bigInterpret&&(
+            <View style={{backgroundColor:bigInterpret.color+"15",borderColor:bigInterpret.color+"50",borderWidth:2,borderRadius:14,padding:18,gap:6,alignItems:"center"}}>
+              <Text style={{fontSize:12,fontWeight:"700",color:tm}}>BIG SCORE</Text>
+              <Text style={{fontSize:48,fontWeight:"900",color:bigInterpret.color}}>{bigScore}</Text>
+              <View style={{height:1,width:"100%",backgroundColor:bigInterpret.color+"30"}}/>
+              <Text style={{fontSize:13,fontWeight:"700",color:bigInterpret.color,textAlign:"center"}}>{bigInterpret.label}</Text>
+              <Text style={{fontSize:11,color:tm,textAlign:"center"}}>{bigBDNum} + (2.5 × {bigINRNum}) + (15 − {bigGCSNum}) = {bigScore}</Text>
+            </View>
+          )}
+
+          {/* Mortality table */}
+          <View style={{backgroundColor:isDark?"#112240":"#F8FAFC",borderRadius:10,padding:12,gap:6}}>
+            <Text style={{fontSize:11,fontWeight:"700",color:tm,marginBottom:4}}>Predicted Mortality (Borgman 2009)</Text>
+            {([
+              {range:"< 16",mortality:"< 1%",color:"#16A34A"},
+              {range:"16–21",mortality:"~ 10%",color:"#D97706"},
+              {range:"22–24",mortality:"~ 25%",color:"#EA580C"},
+              {range:"≥ 25",mortality:"> 50%",color:"#DC2626"},
+            ] as const).map(r=>(
+              <View key={r.range} style={{flexDirection:"row",gap:8,alignItems:"center"}}>
+                <View style={{width:7,height:7,borderRadius:4,backgroundColor:r.color}}/>
+                <Text style={{fontSize:12,color:r.color,fontWeight:"700",width:64}}>BIG {r.range}</Text>
+                <Text style={{fontSize:12,color:tm,flex:1}}>Predicted mortality: {r.mortality}</Text>
+              </View>
+            ))}
+          </View>
+          <View style={{backgroundColor:"#FEF9C3",borderColor:"#FDE047",borderWidth:1,borderRadius:10,padding:10}}>
+            <Text style={{fontSize:11,color:"#92400E"}}>⚠ Clinical adjunct only. Integrate with full trauma team assessment. Not validated in penetrating trauma or burns.</Text>
+          </View>
+          <Text style={{fontSize:10,color:tm,fontStyle:"italic",textAlign:"center"}}>Ref: Borgman et al. J Trauma 2009 | Harriet Lane 23e | Nelson's Pediatrics 22e</Text>
+        </View>
+      );
+
+      // ── PHOENIX SEPSIS SCORE 2024 ──────────────────────────────────────────
+      case "phoenix-sepsis": return (
+        <View style={{gap:12}}>
+          <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
+            <View style={{flex:1}}>
+              <Text style={{fontSize:12,color:"#7C3AED",fontWeight:"700"}}>Phoenix Pediatric Sepsis Score 2024</Text>
+              <Text style={{fontSize:11,color:tm,marginTop:1}}>Schlapbach et al. — JAMA 2024</Text>
+            </View>
+            <StarButton isFav={isFav("tool-phoenix-sepsis")} onToggle={()=>toggleFav({id:"tool-phoenix-sepsis",type:"tool",label:"Phoenix Sepsis Score",color:"#7C3AED"})} size={18} color="#7C3AED"/>
+          </View>
+          <Text style={{fontSize:11,color:tm,fontStyle:"italic"}}>Sepsis = total score ≥ 2. Septic shock = cardiovascular domain ≥ 1. Replaces SIRS-based criteria.</Text>
+
+          {/* ─ RESPIRATORY ─ */}
+          <View style={{backgroundColor:isDark?"#112240":"#FFFFFF",borderRadius:12,padding:14,gap:10,borderWidth:1,borderColor:isDark?"#233554":"#E2E8F0"}}>
+            <View style={{flexDirection:"row",alignItems:"center",gap:8}}>
+              <View style={{width:28,height:28,borderRadius:8,backgroundColor:"#0EA5E915",alignItems:"center",justifyContent:"center"}}><Feather name="wind" size={14} color="#0EA5E9"/></View>
+              <Text style={{fontSize:14,fontWeight:"800",color:tp}}>Respiratory</Text>
+              <View style={{marginLeft:"auto",backgroundColor:"#0EA5E920",borderRadius:8,paddingHorizontal:10,paddingVertical:4}}>
+                <Text style={{fontSize:13,fontWeight:"900",color:"#0EA5E9"}}>{phxResp} / 3</Text>
+              </View>
+            </View>
+            <TouchableOpacity onPress={()=>setPhxIMV(!phxIMV)} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,backgroundColor:phxIMV?"#0EA5E915":isDark?"#0A192F":"#F8FAFC",borderWidth:1.5,borderColor:phxIMV?"#0EA5E9":isDark?"#334155":"#E2E8F0"}}>
+              <View style={{width:20,height:20,borderRadius:5,borderWidth:2,borderColor:phxIMV?"#0EA5E9":isDark?"#475569":"#CBD5E1",backgroundColor:phxIMV?"#0EA5E9":"transparent",justifyContent:"center",alignItems:"center"}}>
+                {phxIMV&&<Feather name="check" size={12} color="#FFFFFF"/>}
+              </View>
+              <Text style={{fontSize:13,fontWeight:"700",color:phxIMV?"#0EA5E9":tp,flex:1}}>Invasive Mechanical Ventilation (IMV)</Text>
+              <Text style={{fontSize:11,color:"#0EA5E9",fontWeight:"700"}}>+1</Text>
+            </TouchableOpacity>
+            {phxIMV&&(<View style={{gap:8}}>
+              <Text style={{fontSize:11,fontWeight:"700",color:tm}}>PaO₂/FiO₂ ratio (if blood gas available)</Text>
+              <TextInput style={[inputStyle,{fontSize:14}]} value={phxPFRatio} onChangeText={setPhxPFRatio} keyboardType="decimal-pad" placeholder="e.g. 150" placeholderTextColor={tm}/>
+              <Text style={{fontSize:11,fontWeight:"700",color:tm}}>SpO₂/FiO₂ ratio (if PaO₂ unavailable)</Text>
+              <TextInput style={[inputStyle,{fontSize:14}]} value={phxSFRatio} onChangeText={setPhxSFRatio} keyboardType="decimal-pad" placeholder="e.g. 200" placeholderTextColor={tm}/>
+              <Text style={{fontSize:10,color:tm,fontStyle:"italic"}}>PF &lt;100 or SF &lt;148 → +3 · PF 100–199 or SF 148–263 → +2 · IMV only → +1</Text>
+            </View>)}
+          </View>
+
+          {/* ─ CARDIOVASCULAR ─ */}
+          <View style={{backgroundColor:isDark?"#112240":"#FFFFFF",borderRadius:12,padding:14,gap:10,borderWidth:1,borderColor:isDark?"#233554":"#E2E8F0"}}>
+            <View style={{flexDirection:"row",alignItems:"center",gap:8}}>
+              <View style={{width:28,height:28,borderRadius:8,backgroundColor:"#DC262615",alignItems:"center",justifyContent:"center"}}><Feather name="heart" size={14} color="#DC2626"/></View>
+              <Text style={{fontSize:14,fontWeight:"800",color:tp}}>Cardiovascular</Text>
+              <View style={{marginLeft:"auto",backgroundColor:"#DC262615",borderRadius:8,paddingHorizontal:10,paddingVertical:4}}>
+                <Text style={{fontSize:13,fontWeight:"900",color:"#DC2626"}}>{phxCardio} / 6</Text>
+              </View>
+            </View>
+            <View>
+              <Text style={{fontSize:11,fontWeight:"700",color:tm,marginBottom:6}}>Vasoactive medications (1 point each, max 2)</Text>
+              <View style={{flexDirection:"row",gap:8}}>
+                {[0,1,2,3].map(n=>(
+                  <TouchableOpacity key={n} onPress={()=>setPhxVasoCount(n)} style={{flex:1,paddingVertical:10,borderRadius:8,alignItems:"center",backgroundColor:phxVasoCount===n?"#DC2626":isDark?"#0A192F":"#F1F5F9",borderWidth:1.5,borderColor:phxVasoCount===n?"#DC2626":isDark?"#334155":"#CBD5E1"}}>
+                    <Text style={{fontWeight:"800",fontSize:16,color:phxVasoCount===n?"#FFFFFF":tm}}>{n}</Text>
+                    <Text style={{fontSize:9,color:phxVasoCount===n?"rgba(255,255,255,0.75)":tm}}>drug{n!==1?"s":""}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+            <View>
+              <Text style={{fontSize:11,fontWeight:"700",color:tm,marginBottom:6}}>Serum Lactate (mmol/L)</Text>
+              <TextInput style={[inputStyle,{fontSize:14}]} value={phxLactate} onChangeText={setPhxLactate} keyboardType="decimal-pad" placeholder="e.g. 3.5" placeholderTextColor={tm}/>
+              <Text style={{fontSize:10,color:tm,marginTop:3}}>≥ 5: +1 · ≥ 11: +2</Text>
+            </View>
+            {([
+              {label:"MAP below age-specific threshold",key:"map",val:phxMAPLow,set:setPhxMAPLow},
+              {label:"pH < 7.0",key:"ph",val:phxPHLow,set:setPhxPHLow},
+            ] as const).map((item:{label:string;key:string;val:boolean;set:(v:boolean)=>void})=>(
+              <TouchableOpacity key={item.key} onPress={()=>item.set(!item.val)} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,backgroundColor:item.val?"#DC262615":isDark?"#0A192F":"#F8FAFC",borderWidth:1.5,borderColor:item.val?"#DC2626":isDark?"#334155":"#E2E8F0"}}>
+                <View style={{width:20,height:20,borderRadius:5,borderWidth:2,borderColor:item.val?"#DC2626":isDark?"#475569":"#CBD5E1",backgroundColor:item.val?"#DC2626":"transparent",justifyContent:"center",alignItems:"center"}}>
+                  {item.val&&<Feather name="check" size={12} color="#FFFFFF"/>}
+                </View>
+                <Text style={{fontSize:13,fontWeight:"600",color:item.val?"#DC2626":tp,flex:1}}>{item.label}</Text>
+                <Text style={{fontSize:11,color:"#DC2626",fontWeight:"700"}}>+1</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* ─ COAGULATION ─ */}
+          <View style={{backgroundColor:isDark?"#112240":"#FFFFFF",borderRadius:12,padding:14,gap:10,borderWidth:1,borderColor:isDark?"#233554":"#E2E8F0"}}>
+            <View style={{flexDirection:"row",alignItems:"center",gap:8}}>
+              <View style={{width:28,height:28,borderRadius:8,backgroundColor:"#D9770615",alignItems:"center",justifyContent:"center"}}><Feather name="droplet" size={14} color="#D97706"/></View>
+              <Text style={{fontSize:14,fontWeight:"800",color:tp}}>Coagulation</Text>
+              <View style={{marginLeft:"auto",backgroundColor:"#D9770615",borderRadius:8,paddingHorizontal:10,paddingVertical:4}}>
+                <Text style={{fontSize:13,fontWeight:"900",color:"#D97706"}}>{phxCoag} / 2</Text>
+              </View>
+            </View>
+            <View>
+              <Text style={{fontSize:11,fontWeight:"700",color:tm,marginBottom:6}}>Platelet count (×10⁹/L)</Text>
+              <TextInput style={[inputStyle,{fontSize:14}]} value={phxPlatelets} onChangeText={setPhxPlatelets} keyboardType="decimal-pad" placeholder="e.g. 80" placeholderTextColor={tm}/>
+              <Text style={{fontSize:10,color:tm,marginTop:3}}>&lt; 100: +1 · &lt; 50: additional +1</Text>
+            </View>
+            {([
+              {label:"INR > 1.3",key:"inr",val:phxINRHigh,set:setPhxINRHigh},
+              {label:"Fibrinogen < 100 mg/dL",key:"fib",val:phxFibLow,set:setPhxFibLow},
+            ] as const).map((item:{label:string;key:string;val:boolean;set:(v:boolean)=>void})=>(
+              <TouchableOpacity key={item.key} onPress={()=>item.set(!item.val)} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,backgroundColor:item.val?"#D9770615":isDark?"#0A192F":"#F8FAFC",borderWidth:1.5,borderColor:item.val?"#D97706":isDark?"#334155":"#E2E8F0"}}>
+                <View style={{width:20,height:20,borderRadius:5,borderWidth:2,borderColor:item.val?"#D97706":isDark?"#475569":"#CBD5E1",backgroundColor:item.val?"#D97706":"transparent",justifyContent:"center",alignItems:"center"}}>
+                  {item.val&&<Feather name="check" size={12} color="#FFFFFF"/>}
+                </View>
+                <Text style={{fontSize:13,fontWeight:"600",color:item.val?"#D97706":tp,flex:1}}>{item.label}</Text>
+                <Text style={{fontSize:11,color:"#D97706",fontWeight:"700"}}>+1</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* ─ NEUROLOGICAL ─ */}
+          <View style={{backgroundColor:isDark?"#112240":"#FFFFFF",borderRadius:12,padding:14,gap:10,borderWidth:1,borderColor:isDark?"#233554":"#E2E8F0"}}>
+            <View style={{flexDirection:"row",alignItems:"center",gap:8}}>
+              <View style={{width:28,height:28,borderRadius:8,backgroundColor:"#7C3AED15",alignItems:"center",justifyContent:"center"}}><Feather name="zap" size={14} color="#7C3AED"/></View>
+              <Text style={{fontSize:14,fontWeight:"800",color:tp}}>Neurological</Text>
+              <View style={{marginLeft:"auto",backgroundColor:"#7C3AED15",borderRadius:8,paddingHorizontal:10,paddingVertical:4}}>
+                <Text style={{fontSize:13,fontWeight:"900",color:"#7C3AED"}}>{phxNeuro} / 2</Text>
+              </View>
+            </View>
+            {([
+              {label:"GCS ≤ 10",key:"gcs",val:phxGCSLow,set:setPhxGCSLow},
+              {label:"Fixed bilateral pupils",key:"pupils",val:phxPupilsFixed,set:setPhxPupilsFixed},
+            ] as const).map((item:{label:string;key:string;val:boolean;set:(v:boolean)=>void})=>(
+              <TouchableOpacity key={item.key} onPress={()=>item.set(!item.val)} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,backgroundColor:item.val?"#7C3AED15":isDark?"#0A192F":"#F8FAFC",borderWidth:1.5,borderColor:item.val?"#7C3AED":isDark?"#334155":"#E2E8F0"}}>
+                <View style={{width:20,height:20,borderRadius:5,borderWidth:2,borderColor:item.val?"#7C3AED":isDark?"#475569":"#CBD5E1",backgroundColor:item.val?"#7C3AED":"transparent",justifyContent:"center",alignItems:"center"}}>
+                  {item.val&&<Feather name="check" size={12} color="#FFFFFF"/>}
+                </View>
+                <Text style={{fontSize:13,fontWeight:"600",color:item.val?"#7C3AED":tp,flex:1}}>{item.label}</Text>
+                <Text style={{fontSize:11,color:"#7C3AED",fontWeight:"700"}}>+1</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* ─ TOTAL SCORE ─ */}
+          <View style={{backgroundColor:phxTotal>=2?"#7C3AED15":"#16A34A15",borderColor:phxTotal>=2?"#7C3AED60":"#16A34A40",borderWidth:2,borderRadius:14,padding:18,gap:10}}>
+            <Text style={{fontSize:12,fontWeight:"700",color:tm,textAlign:"center"}}>PHOENIX SEPSIS SCORE</Text>
+            <Text style={{fontSize:52,fontWeight:"900",color:phxTotal>=2?"#7C3AED":"#16A34A",textAlign:"center"}}>{phxTotal}</Text>
+            {/* Domain breakdown */}
+            <View style={{flexDirection:"row",gap:6}}>
+              {([
+                {label:"Resp",val:phxResp,max:3,color:"#0EA5E9"},
+                {label:"CV",val:phxCardio,max:6,color:"#DC2626"},
+                {label:"Coag",val:phxCoag,max:2,color:"#D97706"},
+                {label:"Neuro",val:phxNeuro,max:2,color:"#7C3AED"},
+              ] as const).map(d=>(
+                <View key={d.label} style={{flex:1,backgroundColor:d.color+"15",borderRadius:8,padding:8,alignItems:"center"}}>
+                  <Text style={{fontSize:10,color:d.color,fontWeight:"700"}}>{d.label}</Text>
+                  <Text style={{fontSize:20,fontWeight:"900",color:d.color}}>{d.val}</Text>
+                  <Text style={{fontSize:9,color:tm}}>/{d.max}</Text>
+                </View>
+              ))}
+            </View>
+            <View style={{height:1,backgroundColor:phxTotal>=2?"#7C3AED30":"#16A34A30"}}/>
+            {phxTotal>=2?(
+              <View style={{gap:4}}>
+                <Text style={{fontSize:15,fontWeight:"800",color:"#7C3AED",textAlign:"center"}}>⚠ MEETS PHOENIX SEPSIS CRITERIA</Text>
+                {phxShock&&<Text style={{fontSize:13,fontWeight:"700",color:"#DC2626",textAlign:"center"}}>🔴 Cardiovascular dysfunction — consider SEPTIC SHOCK</Text>}
+                <Text style={{fontSize:11,color:tm,textAlign:"center",lineHeight:17}}>Initiate sepsis bundle: blood cultures, empiric antibiotics within 1 hour, IV access, fluid resuscitation assessment</Text>
+              </View>
+            ):(
+              <Text style={{fontSize:14,fontWeight:"700",color:"#16A34A",textAlign:"center"}}>Score &lt; 2 — Does not meet Phoenix Sepsis criteria</Text>
+            )}
+          </View>
+          <Text style={{fontSize:10,color:tm,fontStyle:"italic",textAlign:"center"}}>Ref: Schlapbach et al. JAMA 2024;331(8):665–674 | Phoenix Sepsis Score Consortium</Text>
+        </View>
+      );
+
+      // ── STREPTOKINASE EMPYEMA PROTOCOL ────────────────────────────────────
+      case "streptokinase-empyema": return (
+        <View style={{gap:12}}>
+          <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
+            <View style={{flex:1}}>
+              <View style={{flexDirection:"row",alignItems:"center",gap:6,marginBottom:2}}>
+                <View style={{backgroundColor:"#0D948820",borderRadius:6,paddingHorizontal:8,paddingVertical:2}}>
+                  <Text style={{fontSize:10,fontWeight:"800",color:"#0D9488"}}>ICU PROTOCOL</Text>
+                </View>
+              </View>
+              <Text style={{fontSize:11,color:tm}}>Intrapleural Fibrinolysis — Empyema Thoracis</Text>
+            </View>
+            <StarButton isFav={isFav("tool-streptokinase-empyema")} onToggle={()=>toggleFav({id:"tool-streptokinase-empyema",type:"tool",label:"Streptokinase Empyema Protocol",color:"#0D9488"})} size={18} color="#0D9488"/>
+          </View>
+
+          {/* Drug overview */}
+          <View style={{backgroundColor:"#0D948812",borderColor:"#0D948840",borderWidth:1.5,borderRadius:12,padding:14}}>
+            <Text style={{fontSize:15,fontWeight:"800",color:"#0D9488",marginBottom:4}}>Streptokinase (Intrapleural)</Text>
+            <Text style={{fontSize:12,color:tp,lineHeight:18}}>Thrombolytic agent — degrades fibrin septa within loculated empyema to improve ICD drainage and accelerate resolution.</Text>
+          </View>
+
+          {/* Dosing */}
+          <View style={{backgroundColor:isDark?"#112240":"#FFFFFF",borderRadius:12,padding:14,gap:12,borderWidth:1,borderColor:isDark?"#233554":"#E2E8F0"}}>
+            <View style={{flexDirection:"row",alignItems:"center",gap:8,marginBottom:2}}>
+              <View style={{width:28,height:28,borderRadius:8,backgroundColor:"#0D948815",alignItems:"center",justifyContent:"center"}}><Feather name="droplet" size={14} color="#0D9488"/></View>
+              <Text style={{fontSize:14,fontWeight:"800",color:tp}}>Weight-Based Dosing</Text>
+            </View>
+
+            {/* < 1 year */}
+            <View style={{backgroundColor:isDark?"#0A192F":"#F0FDFA",borderRadius:10,padding:12,borderLeftWidth:4,borderLeftColor:"#0D9488"}}>
+              <Text style={{fontSize:13,fontWeight:"800",color:"#0D9488",marginBottom:8}}>Age &lt; 1 Year</Text>
+              {[
+                {lbl:"Dose",val:"10,000 units/kg"},
+                {lbl:"Diluent",val:"50 mL Normal Saline"},
+                {lbl:"Infuse over",val:"1 hour (via ICD)"},
+                {lbl:"Dwell time",val:"4 hours (clamp drain after infusion)"},
+                {lbl:"Duration",val:"3 consecutive days"},
+              ].map(r=>(
+                <View key={r.lbl} style={{flexDirection:"row",gap:8,marginBottom:4}}>
+                  <Text style={{fontSize:12,color:tm,width:86}}>{r.lbl}:</Text>
+                  <Text style={{fontSize:12,fontWeight:"700",color:tp,flex:1}}>{r.val}</Text>
+                </View>
+              ))}
+            </View>
+
+            {/* > 1 year */}
+            <View style={{backgroundColor:isDark?"#0A192F":"#F0FDFA",borderRadius:10,padding:12,borderLeftWidth:4,borderLeftColor:"#0891B2"}}>
+              <Text style={{fontSize:13,fontWeight:"800",color:"#0891B2",marginBottom:8}}>Age &gt; 1 Year</Text>
+              {[
+                {lbl:"Dose",val:"20,000 units/kg"},
+                {lbl:"Diluent",val:"50 mL Normal Saline"},
+                {lbl:"Infuse over",val:"1 hour (via ICD)"},
+                {lbl:"Dwell time",val:"4 hours (clamp drain after infusion)"},
+                {lbl:"Duration",val:"3 consecutive days"},
+              ].map(r=>(
+                <View key={r.lbl} style={{flexDirection:"row",gap:8,marginBottom:4}}>
+                  <Text style={{fontSize:12,color:tm,width:86}}>{r.lbl}:</Text>
+                  <Text style={{fontSize:12,fontWeight:"700",color:tp,flex:1}}>{r.val}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* Preparation steps */}
+          <View style={{backgroundColor:isDark?"#112240":"#FFFFFF",borderRadius:12,padding:14,gap:10,borderWidth:1,borderColor:isDark?"#233554":"#E2E8F0"}}>
+            <View style={{flexDirection:"row",alignItems:"center",gap:8,marginBottom:2}}>
+              <View style={{width:28,height:28,borderRadius:8,backgroundColor:"#0EA5E915",alignItems:"center",justifyContent:"center"}}><Feather name="settings" size={14} color="#0EA5E9"/></View>
+              <Text style={{fontSize:14,fontWeight:"800",color:tp}}>Preparation & Administration</Text>
+            </View>
+            {[
+              "Reconstitute streptokinase with 5 mL Normal Saline (gentle swirling — do NOT shake)",
+              "Dilute calculated dose to a final volume of 50 mL in Normal Saline",
+              "Instil via intercostal drain (ICD) — infuse over 60 minutes",
+              "Clamp ICD for 4-hour dwell time after infusion complete",
+              "Unclamp ICD — record drainage volume and character",
+              "Repeat once daily for 3 consecutive days",
+              "Chest X-ray before each dose to assess radiological response",
+            ].map((step,i)=>(
+              <View key={i} style={{flexDirection:"row",gap:10,alignItems:"flex-start"}}>
+                <View style={{width:22,height:22,borderRadius:11,backgroundColor:"#0EA5E920",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1}}>
+                  <Text style={{fontSize:11,fontWeight:"800",color:"#0EA5E9"}}>{i+1}</Text>
+                </View>
+                <Text style={{fontSize:12,color:tp,flex:1,lineHeight:18}}>{step}</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Contraindications */}
+          <View style={{backgroundColor:"#DC262608",borderColor:"#DC262630",borderWidth:1.5,borderRadius:12,padding:14,gap:8}}>
+            <View style={{flexDirection:"row",alignItems:"center",gap:8,marginBottom:4}}>
+              <Feather name="x-circle" size={16} color="#DC2626"/>
+              <Text style={{fontSize:14,fontWeight:"800",color:"#DC2626"}}>Contraindications</Text>
+            </View>
+            {[
+              "Bronchopleural fistula (air leak — absolute contraindication)",
+              "Active coagulopathy or severe thrombocytopenia (platelets < 50 × 10⁹/L)",
+              "Active systemic haemorrhage or recent major surgery (< 10 days)",
+              "Hypersensitivity to streptokinase",
+              "Recent streptococcal infection (neutralising antibodies may reduce efficacy)",
+            ].map((item,i)=>(
+              <View key={i} style={{flexDirection:"row",gap:8,alignItems:"flex-start"}}>
+                <Text style={{fontSize:14,color:"#DC2626",marginTop:-2}}>•</Text>
+                <Text style={{fontSize:12,color:isDark?"#8892B0":"#475569",flex:1,lineHeight:17}}>{item}</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Monitoring */}
+          <View style={{backgroundColor:isDark?"#112240":"#FFFFFF",borderRadius:12,padding:14,gap:8,borderWidth:1,borderColor:isDark?"#233554":"#E2E8F0"}}>
+            <View style={{flexDirection:"row",alignItems:"center",gap:8,marginBottom:4}}>
+              <View style={{width:28,height:28,borderRadius:8,backgroundColor:"#D9770615",alignItems:"center",justifyContent:"center"}}><Feather name="activity" size={14} color="#D97706"/></View>
+              <Text style={{fontSize:14,fontWeight:"800",color:tp}}>Monitoring</Text>
+            </View>
+            {[
+              "Vital signs every 30 min during infusion (fever, hypotension, anaphylaxis — stop infusion if occurs)",
+              "ICD output: record volume and character after unclamping",
+              "Coagulation profile (PT, APTT, fibrinogen) before each dose",
+              "Daily chest X-ray — assess radiological response",
+              "Temperature, HR, CRP every 24 hr — expect improvement by day 2–3",
+              "If no response after 3 doses — discuss VATS vs repeat course with surgical/respiratory team",
+            ].map((item,i)=>(
+              <View key={i} style={{flexDirection:"row",gap:8,alignItems:"flex-start"}}>
+                <Text style={{fontSize:14,color:"#D97706",marginTop:-2}}>•</Text>
+                <Text style={{fontSize:12,color:tp,flex:1,lineHeight:17}}>{item}</Text>
+              </View>
+            ))}
+          </View>
+
+          {/* Protocol disclaimer */}
+          <View style={{backgroundColor:isDark?"#1E293B":"#F8FAFC",borderRadius:10,padding:12,borderWidth:1,borderColor:isDark?"#334155":"#E2E8F0"}}>
+            <Text style={{fontSize:11,color:tm,fontStyle:"italic",lineHeight:16}}>
+              Adapted from IAP Standard Treatment Guidelines 2022 & Institutional Protocols. Cross-reference with Harriet Lane for systemic dosing.
+            </Text>
+          </View>
         </View>
       );
 

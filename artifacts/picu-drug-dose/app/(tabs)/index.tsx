@@ -134,6 +134,33 @@ export default function HomeScreen() {
           <Feather name="chevron-right" size={22} color="#FFFFFF" />
         </TouchableOpacity>
 
+        {/* Tools & Protocols Button */}
+        <TouchableOpacity
+          onPress={() => router.push("/(tabs)/tools" as any)}
+          activeOpacity={0.85}
+          style={[
+            styles.mainButton,
+            {
+              backgroundColor: isDark ? "#0A2318" : "#FFFFFF",
+              borderColor: "#16A34A",
+              shadowColor: "#16A34A",
+            },
+          ]}
+        >
+          <View style={[styles.mainButtonIconWrap, { backgroundColor: "#16A34A18" }]}>
+            <Feather name="tool" size={32} color="#16A34A" />
+          </View>
+          <View style={styles.mainButtonText}>
+            <Text style={[styles.mainButtonTitle, { color: isDark ? "#FFFFFF" : "#0D1B2A", fontFamily: "Inter_700Bold" }]}>
+              Tools &amp; Protocols
+            </Text>
+            <Text style={[styles.mainButtonDesc, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_400Regular" }]}>
+              GIR · BIG Score · Phoenix Sepsis · ICU Protocols
+            </Text>
+          </View>
+          <Feather name="chevron-right" size={22} color="#16A34A" />
+        </TouchableOpacity>
+
         <Text style={[styles.hint, { color: isDark ? "#3A5070" : "#B0C4D8", fontFamily: "Inter_400Regular" }]}>
           All other modules accessible via the menu ☰
         </Text>

@@ -82,11 +82,11 @@ const NAV_ITEMS: NavItem[] = [
     description: "16 antidotes with weight-based dosing",
   },
   {
-    label: "Tools & Scores",
+    label: "Tools & Protocols",
     icon: "tool",
     route: "/tools",
     color: "#16A34A",
-    description: "BP centile, GCS, growth & VIS score",
+    description: "GIR · BIG · Phoenix Sepsis · ICU Protocols · GCS · PEWS",
   },
   {
     label: "Favorites",
