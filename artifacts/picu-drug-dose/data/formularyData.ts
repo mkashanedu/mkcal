@@ -3238,6 +3238,76 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     adverseReactions: ["Hyponatraemia (antidiuretic V2 receptor effect — free water retention; common with prolonged use)", "Peripheral vasoconstriction → skin/digital ischaemia (alpha-like V1a effect)", "Mesenteric/hepatic ischaemia (gut vasoconstriction — raised lactate, ileus)", "Coronary vasoconstriction (angina/ischaemia at high doses)", "Bradycardia (reflex)", "Hypovolaemia/oliguria paradox (antidiuresis)", "Thrombocytopenia (rare)", "Infusion site reaction (non-central use)"],
     reference: "PALS 2025 | Harriet Lane 22e | Nelson's 22e | Surviving Sepsis Campaign Paediatric 2020",
   },
+  {
+    id: "f-terlipressin-inotrope",
+    name: "Terlipressin",
+    genericName: "Terlipressin Acetate (Glypressin)",
+    drugClass: "Vasopressin V1a Receptor Agonist — Synthetic Vasopressin Analogue",
+    category: "inotrope",
+    indications: [
+      "Acute oesophageal/gastric variceal bleeding (bolus: haemostasis via splanchnic vasoconstriction — reduces portal pressure)",
+      "Hepatorenal Syndrome (HRS) Type 1 — reversal of renal vasoconstriction in circulatory dysfunction",
+      "Refractory vasopressor-resistant distributive shock (adjunct to catecholamines — continuous infusion)",
+    ],
+    contraindications: [
+      "Peripheral vascular disease (severe atherosclerosis — risk of critical limb ischaemia)",
+      "Coronary artery disease / ischaemic heart disease (coronary vasoconstriction — angina/MI risk)",
+      "Hypersensitivity to terlipressin or vasopressin analogues",
+      "Septic shock without portal hypertension context (limited paediatric evidence — use vasopressin instead)",
+      "Pregnancy (uterotonic effect — causes uterine contractions)",
+    ],
+    dosing: [
+      {
+        min: 10,
+        max: 20,
+        unit: "mcg/kg/dose",
+        perKg: true,
+        route: "IV bolus — slow push over 1–2 min",
+        frequency: "Every 4–6 hours",
+        notes:
+          "ACUTE VARICEAL BLEEDING / HRS BOLUS: 10–20 mcg/kg/dose IV slow push over 1–2 min, every 4–6 hours. Max single dose: 2000 mcg (2 mg) in adults. Paediatric max: 20 mcg/kg/dose. Administer until haemostasis confirmed or for up to 48–72 hr (variceal bleeding). For HRS Type 1: continue bolus regimen for up to 14 days — reassess renal response every 48 hr. Monitor MAP continuously during and after each bolus.",
+        adultMaxDose_num: 2000,
+      },
+      {
+        min: 2,
+        max: 20,
+        unit: "mcg/kg/hr",
+        perKg: true,
+        route: "IV continuous infusion — central line preferred",
+        frequency: "Continuous — titrate to haemodynamic response",
+        notes:
+          "CONTINUOUS INFUSION (refractory shock / HRS): Start at 2 mcg/kg/hr. Titrate upward by 2–4 mcg/kg/hr every 30–60 min to MAP target. Usual effective range: 4–12 mcg/kg/hr. Maximum: 20 mcg/kg/hr. Wean by 25–50% increments once haemodynamically stable. Continuous infusion preferred over repeated boluses for shock indication to minimise haemodynamic fluctuation.",
+      },
+    ],
+    concentrationMgPerMl: 0.2,
+    formulations: [
+      "Terlipressin acetate 1 mg/5 mL vial (0.2 mg/mL = 200 mcg/mL) — dilute in NS or D5W",
+      "Bolus: dilute to 100–200 mcg/mL for slow IV push. Infusion: dilute to 10–20 mcg/mL in 50–100 mL NS",
+    ],
+    metabolism: "Enzymatic — cleaved to lysine vasopressin (active) by endopeptidases; prodrug with prolonged action. t½ terlipressin ~6 hr (vs vasopressin t½ 10–20 min)",
+    excretion: "Renal — metabolites excreted in urine; dose caution in severe renal impairment",
+    monitoring: [
+      "Continuous ECG (reflex bradycardia — most common; QTc prolongation at high doses)",
+      "Continuous arterial blood pressure — MAP target (centralise vasopressor titration)",
+      "Hourly urine output (renal perfusion response — key endpoint in HRS: target ≥0.5 mL/kg/hr)",
+      "Serum sodium and osmolality (antidiuretic V2 effect — hyponatraemia risk; check every 6–8 hr)",
+      "Peripheral perfusion: capillary refill, skin colour, limb temperature (peripheral ischaemia — especially digits)",
+      "Serum lactate (tissue perfusion adequacy)",
+      "Liver function and signs of mesenteric ischaemia (abdominal distension, raised lactate, bloody stools)",
+      "Serum creatinine and urea every 24–48 hr (HRS treatment response)",
+    ],
+    adverseReactions: [
+      "Hypertension (dose-dependent — excessive vasopressor response; reduce dose or hold)",
+      "Reflex bradycardia (baroreceptor-mediated; monitor HR continuously — may require dose reduction)",
+      "Peripheral ischaemia (digital/limb — vasoconstrictive V1a effect; examine extremities every 2 hr)",
+      "Abdominal cramps and diarrhoea (gut smooth muscle contraction — V1a receptor)",
+      "Hyponatraemia (antidiuretic V2 effect — free water retention; monitor sodium)",
+      "Pallor, skin blanching (cutaneous vasoconstriction)",
+      "Nausea and vomiting",
+      "Mesenteric ischaemia (rare but serious at high doses)",
+    ],
+    reference: "Harriet Lane 22e | Nelson's Pediatrics 22e | EASL Clinical Practice Guidelines (Variceal Bleeding 2022) | International Club of Ascites (ICA) — HRS Consensus 2015",
+  },
 ];
 
 export function calculateFormularyDose(

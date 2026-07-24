@@ -269,6 +269,47 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
   },
 
   {
+    id: "terlipressin",
+    name: "Terlipressin",
+    category: "Vasopressor",
+    primaryUnit: "mcg/kg/hr",
+    alternateUnits: ["mcg/hr"],
+    minDose: 2,
+    maxDose: 20,
+    typicalDose: 5,
+    doseStep: 2,
+    color: "#5D3A8E",
+    indication: "Refractory vasopressor-resistant shock, Hepatorenal Syndrome Type 1, acute variceal bleeding",
+    vialConc_per_mL: 200,
+    vialLabel: "1 mg/5 mL vial (200 mcg/mL)",
+    diluent: "NS or D5W",
+    standardConcentrations: [
+      {
+        label: "10 mcg/mL — 1 mg (5 mL) in 95 mL NS → 100 mL total",
+        totalDrug_mg: 1,
+        totalVolume_mL: 100,
+        concentration_per_mL: 10,
+        unit: "mg",
+      },
+      {
+        label: "20 mcg/mL — 2 mg (10 mL) in 90 mL NS → 100 mL total (concentrated)",
+        totalDrug_mg: 2,
+        totalVolume_mL: 100,
+        concentration_per_mL: 20,
+        unit: "mg",
+      },
+    ],
+    notes: "Prodrug — converted to active lysine vasopressin by endopeptidases. Prolonged action (t½ ~6 hr). Also given as IV bolus 10–20 mcg/kg/dose q4–6h for variceal bleeding / HRS — see Drug Dose Calculator.",
+    warnings: [
+      "Reflex bradycardia — monitor ECG continuously",
+      "Peripheral and mesenteric ischaemia at high doses — examine extremities every 2 hr",
+      "Hyponatraemia — antidiuretic V2 effect; monitor serum Na every 6–8 hr",
+      "Hypertension — titrate carefully; reduce dose if MAP excessive",
+    ],
+    reference: "Harriet Lane 22e | Nelson's 22e | EASL Variceal Bleeding Guidelines 2022",
+  },
+
+  {
     id: "levosimendan",
     name: "Levosimendan",
     category: "Inodilator (Inotrope)",
