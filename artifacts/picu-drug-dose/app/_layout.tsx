@@ -17,6 +17,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { DisclaimerModal } from "@/components/DisclaimerModal";
 import { AppDrawer } from "@/components/AppDrawer";
+import { AuthProvider } from "@/context/AuthContext";
 import { FavoritesProvider } from "@/context/FavoritesContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { WeightProvider } from "@/context/WeightContext";
@@ -71,6 +72,13 @@ function RootLayoutNav() {
           headerShown: false,
         }}
       />
+      <Stack.Screen
+        name="login"
+        options={{
+          headerShown: false,
+          presentation: "card",
+        }}
+      />
     </Stack>
   );
 }
@@ -98,6 +106,7 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
+          <AuthProvider>
           <ThemeProvider>
             <WeightProvider>
               <FavoritesProvider>
@@ -113,6 +122,7 @@ export default function RootLayout() {
               </FavoritesProvider>
             </WeightProvider>
           </ThemeProvider>
+          </AuthProvider>
         </QueryClientProvider>
       </ErrorBoundary>
     </SafeAreaProvider>

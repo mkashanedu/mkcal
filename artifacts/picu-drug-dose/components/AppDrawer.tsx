@@ -305,15 +305,20 @@ export function AppDrawer() {
 
               <View style={[styles.settingsDivider, { backgroundColor: border }]} />
 
-              {/* Login (placeholder) */}
-              <TouchableOpacity activeOpacity={0.8} style={styles.settingsRow}>
+              {/* Login */}
+              <TouchableOpacity
+                activeOpacity={0.8}
+                style={styles.settingsRow}
+                onPress={() => {
+                  closeDrawer();
+                  setTimeout(() => router.push("/login" as any), 180);
+                }}
+              >
                 <Feather name="log-in" size={16} color={teal} />
                 <Text style={[styles.settingsRowText, { color: textPrimary }]}>
                   Login / Sync Account
                 </Text>
-                <View style={[styles.comingSoonBadge, { backgroundColor: teal + "18" }]}>
-                  <Text style={[styles.comingSoonText, { color: teal }]}>Soon</Text>
-                </View>
+                <Feather name="chevron-right" size={14} color={isDark ? "#3A5070" : "#CBD5E0"} />
               </TouchableOpacity>
 
               <View style={[styles.settingsDivider, { backgroundColor: border }]} />
