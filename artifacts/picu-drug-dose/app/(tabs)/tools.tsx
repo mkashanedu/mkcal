@@ -25,6 +25,14 @@ const C = Colors.light;
 
 const CLINICAL_CALCULATORS = [
   {
+    key: "ventilator",
+    title: "Ventilator & ABG Management",
+    subtitle: "Vt · PEEP · Pplat · Driving Pressure · Hamilton C3 Modes · PARDS & Asthma Protocols",
+    icon: "wind",
+    color: "#0891B2",
+    badge: "NEW",
+  },
+  {
     key: "gir",
     title: "GIR Calculator",
     subtitle: "Glucose Infusion Rate · IV rate + dextrose% + weight → mg/kg/min",

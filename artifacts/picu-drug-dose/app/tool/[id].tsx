@@ -25,6 +25,7 @@ import { useFavorites } from "@/context/FavoritesContext";
 import { StarButton } from "@/components/StarButton";
 import { ProfessionalFooter } from "@/components/ProfessionalFooter";
 import { BPGrowthCalc } from "@/components/BPGrowthCalc";
+import { VentilatorTool } from "@/components/VentilatorTool";
 
 const C = Colors.light;
 
@@ -239,6 +240,8 @@ const TOOL_META: Record<string,{title:string;icon:string;color:string;subtitle:s
   "phoenix-sepsis":{title:"Phoenix Sepsis Score 2024",icon:"activity",color:"#7C3AED",subtitle:"Schlapbach et al. JAMA 2024 Criteria"},
   // ── New: ICU Protocols ─────────────────────────────────────────────────────
   "streptokinase-empyema":{title:"Streptokinase — Empyema",icon:"shield",color:"#0D9488",subtitle:"Intrapleural Fibrinolysis Protocol"},
+  // ── Ventilator & ABG Management ────────────────────────────────────────────
+  "ventilator":{title:"Ventilator & ABG Management",icon:"wind",color:"#0891B2",subtitle:"PALICC 2023 · Harriet Lane · Hamilton C3"},
 };
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -1482,6 +1485,20 @@ export default function ToolDetailScreen() {
               Adapted from IAP Standard Treatment Guidelines 2022 & Institutional Protocols. Cross-reference with Harriet Lane for systemic dosing.
             </Text>
           </View>
+        </View>
+      );
+
+      // ── VENTILATOR & ABG MANAGEMENT ───────────────────────────────────────
+      case "ventilator": return (
+        <View style={{gap:12}}>
+          <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
+            <View>
+              <Text style={{fontSize:12,fontWeight:"700",color:"#0891B2"}}>PALICC 2023 · Harriet Lane 22e/23e</Text>
+              <Text style={{fontSize:11,color:tm,marginTop:1}}>Hamilton C3 · Lung-Protective Ventilation</Text>
+            </View>
+            <StarButton isFav={isFav("tool-ventilator")} onToggle={()=>toggleFav({id:"tool-ventilator",type:"tool",label:"Ventilator & ABG",color:"#0891B2"})} size={18} color="#0891B2"/>
+          </View>
+          <VentilatorTool/>
         </View>
       );
 
