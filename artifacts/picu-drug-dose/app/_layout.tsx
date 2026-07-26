@@ -19,6 +19,7 @@ import { DisclaimerModal } from "@/components/DisclaimerModal";
 import { AppDrawer } from "@/components/AppDrawer";
 import { AuthProvider } from "@/context/AuthContext";
 import { FavoritesProvider } from "@/context/FavoritesContext";
+import { PreferencesProvider } from "@/context/PreferencesContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { WeightProvider } from "@/context/WeightContext";
 import { DrawerProvider } from "@/context/DrawerContext";
@@ -108,6 +109,7 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
           <ThemeProvider>
+            <PreferencesProvider>
             <WeightProvider>
               <FavoritesProvider>
                 <DrawerProvider>
@@ -121,6 +123,7 @@ export default function RootLayout() {
                 </DrawerProvider>
               </FavoritesProvider>
             </WeightProvider>
+            </PreferencesProvider>
           </ThemeProvider>
           </AuthProvider>
         </QueryClientProvider>

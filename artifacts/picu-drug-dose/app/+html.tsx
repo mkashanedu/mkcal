@@ -3,8 +3,8 @@ import React from "react";
 
 /**
  * Custom HTML shell for the Expo web build.
- * Injects PWA meta tags so the app installs correctly
- * when added to a mobile home screen.
+ * Registers the service worker for Cache-First offline support,
+ * and injects full PWA meta tags for iOS/Android home-screen install.
  */
 export default function Root({ children }: { children: React.ReactNode }) {
   return (
@@ -18,10 +18,10 @@ export default function Root({ children }: { children: React.ReactNode }) {
         />
         <meta
           name="description"
-          content="PeadsCal — Neonatal, Pediatric & Adult Dose Calculator for clinical professionals."
+          content="PeadsCal — Neonatal, Pediatric & Adult Dose Calculator for clinical professionals. 96+ medications, PICU protocols, offline-capable."
         />
 
-        {/* PWA manifest */}
+        {/* PWA manifest — display: standalone */}
         <link rel="manifest" href="/manifest.json" />
 
         {/* Theme / brand colours */}
@@ -46,12 +46,41 @@ export default function Root({ children }: { children: React.ReactNode }) {
         <meta property="og:title" content="PeadsCal — Pediatric Drug Dose Calculator" />
         <meta
           property="og:description"
-          content="96+ medications, weight-based dosing, emergency resuscitation, infusion calculator — for PICU professionals."
+          content="96+ medications, weight-based dosing, emergency resuscitation, infusion calculator, ventilator management — for PICU professionals."
         />
         <meta property="og:image" content="/icon.png" />
 
         {/* Expo Router web style reset */}
         <ScrollViewStyleReset />
+
+        {/* ── Service Worker registration (web only) ───────────────────────── */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      .then(function(reg) {
+        console.log('[PeadsCal SW] Registered. Scope:', reg.scope);
+        reg.addEventListener('updatefound', function() {
+          var newWorker = reg.installing;
+          if (newWorker) {
+            newWorker.addEventListener('statechange', function() {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('[PeadsCal SW] Update available.');
+              }
+            });
+          }
+        });
+      })
+      .catch(function(err) {
+        console.warn('[PeadsCal SW] Registration failed:', err);
+      });
+  });
+}
+`,
+          }}
+        />
       </head>
       <body>{children}</body>
     </html>

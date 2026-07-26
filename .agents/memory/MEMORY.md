@@ -1,3 +1,6 @@
 - [Design System](design-system.md) — Medical Teal primary #0891B2; Red #DC2626 strictly for emergency/high-alert only; inotrope category uses violet #7C3AED not red
 - [Picu Drug Dose App](picu-drug-dose-setup.md) — Expo app on port 22385; workflow command must inline PORT; drawer nav uses DrawerContext + AppDrawer modal overlay pattern
 - [Detail-page navigation refactor](detail-page-nav.md) — accordions replaced with nav-cards; calculator/infusion/tools list screens route to /drug/[id], /infusion/[id], /tool/[id]
+- [Auth & Roles](auth-roles.md) — AuthContext v2 session key @peadscal_session_v2; ClinicalRole enum; social login is scaffold-only; loginSocial() creates local account
+- [Preferences Architecture](preferences-arch.md) — PreferencesContext holds textSize+biometricEnabled; WeightContext holds weightUnit; both consumed in AppDrawer settings panel
+- [Platform Guards](platform-guards.md) — biometricEnabled is no-op on web (Platform.OS !== 'web' guard); SW registration only in +html.tsx script tag; never import expo-local-authentication at module level
