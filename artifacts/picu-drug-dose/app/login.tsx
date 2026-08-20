@@ -326,7 +326,7 @@ export default function LoginScreen() {
           </TouchableOpacity>
 
           <Text style={[styles.disclaimer, { color: isDark ? "#3A5070" : "#CBD5E1" }]}>
-            PeadsCal v1.2 · For clinical professionals only{"\n"}
+            PeadsCal v1.0.0 · For clinical professionals only{"\n"}
             Prepared By: M. Kashan, RN
           </Text>
         </ScrollView>

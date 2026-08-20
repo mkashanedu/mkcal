@@ -432,7 +432,7 @@ export function AppDrawer() {
               Prepared By: M. Kashan, RN
             </Text>
             <Text style={[styles.footerSub, { color: isDark ? "#2D4A6A" : "#CBD5E0" }]}>
-              Pediatric Clinical Suite · v1.2
+              Pediatric Clinical Suite · v1.0.0
             </Text>
           </View>
         </Animated.View>

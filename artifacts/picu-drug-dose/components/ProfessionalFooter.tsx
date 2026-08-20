@@ -20,7 +20,7 @@ export function ProfessionalFooter() {
       ]}
     >
       <Text style={[styles.line1, { color: D ? "#8892B0" : "#64748B" }]}>
-        MKashanEdu Clinical Reference V1.2
+        MKashanEdu Clinical Reference V1.0.0
       </Text>
       <Text style={[styles.line2, { color: D ? "#FFFFFF" : "#0F172A" }]}>
         Prepared By: M. Kashan, RN
