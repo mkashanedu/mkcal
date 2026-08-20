@@ -38,8 +38,9 @@ export default function Root({ children }: { children: React.ReactNode }) {
         <link rel="apple-touch-icon" sizes="512x512" href="/icon.png" />
 
         {/* Favicon */}
-        <link rel="icon" type="image/png" href="/favicon.png" />
-        <link rel="shortcut icon" href="/favicon.png" />
+        {/* Expo emits favicon.ico from expo.web.favicon during web export. */}
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="shortcut icon" href="/favicon.ico" />
 
         {/* Open Graph */}
         <meta property="og:type" content="website" />
