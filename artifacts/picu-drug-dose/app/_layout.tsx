@@ -17,6 +17,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { DisclaimerModal } from "@/components/DisclaimerModal";
 import { AppDrawer } from "@/components/AppDrawer";
+import { WebIconFonts } from "@/components/WebIconFonts";
 import { AuthProvider } from "@/context/AuthContext";
 import { FavoritesProvider } from "@/context/FavoritesContext";
 import { PreferencesProvider } from "@/context/PreferencesContext";
@@ -115,6 +116,7 @@ export default function RootLayout() {
                 <DrawerProvider>
                   <GestureHandlerRootView>
                     <KeyboardProvider>
+                      <WebIconFonts />
                       <RootLayoutNav />
                       <DisclaimerModal />
                       <AppDrawer />
