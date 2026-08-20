@@ -1,4 +1,13 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  onSnapshot,
+  setDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import React, {
   createContext,
   useCallback,
@@ -7,7 +16,16 @@ import React, {
   useState,
 } from "react";
 
-export type FavItemType = "drug" | "antidote" | "calculator" | "infusion" | "tool" | "formulary";
+import { useAuth } from "@/context/AuthContext";
+import { firestore } from "@/lib/firebase";
+
+export type FavItemType =
+  | "drug"
+  | "antidote"
+  | "calculator"
+  | "infusion"
+  | "tool"
+  | "formulary";
 
 export interface FavItem {
   id: string;
@@ -19,11 +37,16 @@ export interface FavItem {
   notes?: string;
 }
 
+export type FavoritesSyncStatus = "idle" | "syncing" | "synced" | "error";
+
 interface FavoritesContextValue {
   items: FavItem[];
   isFav: (id: string) => boolean;
   toggleFav: (item: FavItem) => void;
   removeFav: (id: string) => void;
+  syncNow: () => Promise<boolean>;
+  syncStatus: FavoritesSyncStatus;
+  syncMessage: string;
   drugFavIds: string[];
   antidoteFavIds: string[];
   calcFavIds: string[];
@@ -32,61 +55,179 @@ interface FavoritesContextValue {
 }
 
 const FavoritesContext = createContext<FavoritesContextValue | null>(null);
-
 const STORAGE_KEY = "picu_favorites_v2";
 
-export function FavoritesProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<FavItem[]>([]);
+function favoriteDocId(id: string) {
+  return encodeURIComponent(id);
+}
 
-  // Load from AsyncStorage on mount
+function favoritesCollection(uid: string) {
+  return collection(firestore, "users", uid, "favorites");
+}
+
+export function FavoritesProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  const [items, setItems] = useState<FavItem[]>([]);
+  const [syncStatus, setSyncStatus] = useState<FavoritesSyncStatus>("idle");
+  const [syncMessage, setSyncMessage] = useState("");
+
+  // Anonymous/offline fallback. A signed-in user's Firestore snapshot becomes
+  // authoritative as soon as it is available.
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then((val) => {
-      if (val) {
+    AsyncStorage.getItem(STORAGE_KEY)
+      .then((value) => {
+        if (!value) return;
         try {
-          const parsed = JSON.parse(val) as FavItem[];
+          const parsed = JSON.parse(value) as FavItem[];
           if (Array.isArray(parsed)) setItems(parsed);
-        } catch {}
-      }
-    });
+        } catch {
+          // Ignore malformed legacy local data.
+        }
+      })
+      .catch(() => {});
   }, []);
 
-  // Persist whenever items change
   useEffect(() => {
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(items)).catch(() => {});
   }, [items]);
 
-  const isFav = useCallback(
-    (id: string) => items.some((i) => i.id === id),
-    [items]
+  const writeFavorite = useCallback(
+    async (item: FavItem, uid: string) => {
+      await setDoc(
+        doc(firestore, "users", uid, "favorites", favoriteDocId(item.id)),
+        { ...item, updatedAt: serverTimestamp() },
+        { merge: true }
+      );
+    },
+    []
   );
 
-  const toggleFav = useCallback((item: FavItem) => {
-    setItems((prev) => {
-      const exists = prev.some((i) => i.id === item.id);
-      if (exists) {
-        return prev.filter((i) => i.id !== item.id);
+  const deleteFavorite = useCallback(async (id: string, uid: string) => {
+    await deleteDoc(doc(firestore, "users", uid, "favorites", favoriteDocId(id)));
+  }, []);
+
+  const applyRemoteSnapshot = useCallback((remoteItems: FavItem[]) => {
+    setItems(remoteItems);
+    setSyncStatus("synced");
+    setSyncMessage("Favorites synced");
+  }, []);
+
+  // Subscribe to the user's cloud favorites after Firebase restores the
+  // session. This also keeps multiple signed-in devices in sync in real time.
+  useEffect(() => {
+    if (!user?.id) {
+      setSyncStatus("idle");
+      setSyncMessage("");
+      return;
+    }
+
+    let active = true;
+    setSyncStatus("syncing");
+    setSyncMessage("Syncing favorites…");
+
+    const unsubscribe = onSnapshot(
+      favoritesCollection(user.id),
+      (snapshot) => {
+        if (!active) return;
+        const remoteItems = snapshot.docs.map((favorite) => favorite.data() as FavItem);
+        applyRemoteSnapshot(remoteItems);
+      },
+      () => {
+        if (!active) return;
+        setSyncStatus("error");
+        setSyncMessage("Cloud sync unavailable; saved locally");
       }
-      return [...prev, item];
-    });
-  }, []);
+    );
 
-  const removeFav = useCallback((id: string) => {
-    setItems((prev) => prev.filter((i) => i.id !== id));
-  }, []);
+    return () => {
+      active = false;
+      unsubscribe();
+    };
+  }, [applyRemoteSnapshot, user?.id]);
 
-  const drugFavIds = items.filter((i) => i.type === "drug").map((i) => i.id);
-  const antidoteFavIds = items.filter((i) => i.type === "antidote").map((i) => i.id);
-  const calcFavIds = items.filter((i) => i.type === "calculator").map((i) => i.id);
-  const infusionFavIds = items.filter((i) => i.type === "infusion").map((i) => i.id);
-  const toolFavIds = items.filter((i) => i.type === "tool").map((i) => i.id);
+  const syncNow = useCallback(async () => {
+    if (!user?.id) {
+      setSyncStatus("error");
+      setSyncMessage("Sign in to sync favorites");
+      return false;
+    }
+
+    setSyncStatus("syncing");
+    setSyncMessage("Syncing favorites…");
+    try {
+      const snapshot = await getDocs(favoritesCollection(user.id));
+      const remoteItems = snapshot.docs.map((favorite) => favorite.data() as FavItem);
+
+      if (remoteItems.length === 0 && items.length > 0) {
+        await Promise.all(items.map((item) => writeFavorite(item, user.id)));
+      } else {
+        setItems(remoteItems);
+      }
+
+      setSyncStatus("synced");
+      setSyncMessage("Favorites synced successfully");
+      return true;
+    } catch {
+      setSyncStatus("error");
+      setSyncMessage("Cloud sync unavailable; saved locally");
+      return false;
+    }
+  }, [items, user?.id, writeFavorite]);
+
+  const toggleFav = useCallback(
+    (item: FavItem) => {
+      const exists = items.some((favorite) => favorite.id === item.id);
+      const updated = exists
+        ? items.filter((favorite) => favorite.id !== item.id)
+        : [...items, item];
+
+      // Optimistic update: the UI responds immediately even if offline.
+      setItems(updated);
+
+      if (!user?.id) return;
+      setSyncStatus("syncing");
+      setSyncMessage("Syncing favorites…");
+      const operation = exists
+        ? deleteFavorite(item.id, user.id)
+        : writeFavorite(item, user.id);
+      operation
+        .then(() => {
+          setSyncStatus("synced");
+          setSyncMessage("Favorite saved to cloud");
+        })
+        .catch(() => {
+          setSyncStatus("error");
+          setSyncMessage("Saved locally; cloud sync unavailable");
+        });
+    },
+    [deleteFavorite, items, user?.id, writeFavorite]
+  );
+
+  const removeFav = useCallback(
+    (id: string) => {
+      const removed = items.find((item) => item.id === id);
+      if (!removed) return;
+      toggleFav(removed);
+    },
+    [items, toggleFav]
+  );
+
+  const drugFavIds = items.filter((item) => item.type === "drug").map((item) => item.id);
+  const antidoteFavIds = items.filter((item) => item.type === "antidote").map((item) => item.id);
+  const calcFavIds = items.filter((item) => item.type === "calculator").map((item) => item.id);
+  const infusionFavIds = items.filter((item) => item.type === "infusion").map((item) => item.id);
+  const toolFavIds = items.filter((item) => item.type === "tool").map((item) => item.id);
 
   return (
     <FavoritesContext.Provider
       value={{
         items,
-        isFav,
+        isFav: useCallback((id: string) => items.some((item) => item.id === id), [items]),
         toggleFav,
         removeFav,
+        syncNow,
+        syncStatus,
+        syncMessage,
         drugFavIds,
         antidoteFavIds,
         calcFavIds,
@@ -100,7 +241,7 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useFavorites() {
-  const ctx = useContext(FavoritesContext);
-  if (!ctx) throw new Error("useFavorites must be used within FavoritesProvider");
-  return ctx;
+  const context = useContext(FavoritesContext);
+  if (!context) throw new Error("useFavorites must be used within FavoritesProvider");
+  return context;
 }
