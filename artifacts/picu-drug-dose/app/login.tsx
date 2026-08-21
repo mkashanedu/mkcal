@@ -221,13 +221,9 @@ export default function LoginScreen() {
   // ── Social scaffold handler ───────────────────────────────────────────────
   async function handleSocial(provider: "google" | "apple") {
     setSocialLoading(provider);
-    // Scaffold: in production, trigger OAuth flow here.
-    // For now, simulate a short delay then create/login a demo account.
-    await new Promise((r) => setTimeout(r, 900));
-    const demoEmail = `demo.${provider}@peadscal.app`;
-    const demoName  = provider === "google" ? "Google User" : "Apple User";
-    await loginSocial(provider, demoName, demoEmail, lRole);
+    const result = await loginSocial(provider, "", "", lRole);
     setSocialLoading(null);
+    if (!result.success) setLError(result.error ?? "Social sign-in is not configured yet.");
   }
 
   // ── LOGGED-IN PROFILE VIEW ───────────────────────────────────────────────

@@ -1,5 +1,5 @@
 const firebaseConfig = {
-  apiKey: "AIzaSyDZ8ZSvG7rtiOwmjWhc_fl_riTnkHC1Vc4",
+  apiKey: "AIzaSyDZ8ZSvG7rtiOwmjWhc-f1_riTnkHC1Vc4",
   authDomain: "peadscal.firebaseapp.com",
   projectId: "peadscal",
   storageBucket: "peadscal.firebasestorage.app",

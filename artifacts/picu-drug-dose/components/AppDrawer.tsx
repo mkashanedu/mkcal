@@ -25,6 +25,7 @@ import { useDrawer } from "@/context/DrawerContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useWeight } from "@/context/WeightContext";
 import { usePreferences, TextSize } from "@/context/PreferencesContext";
+import { useFavorites } from "@/context/FavoritesContext";
 import Colors from "@/constants/colors";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -93,6 +94,7 @@ export function AppDrawer() {
   const { isDark, toggleDark }  = useTheme();
   const { weightUnit, setWeightUnit } = useWeight();
   const { textSize, setTextSize, biometricEnabled, setBiometricEnabled } = usePreferences();
+  const { syncNow, syncStatus, syncMessage } = useFavorites();
   const insets = useSafeAreaInsets();
 
   const slideAnim    = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
@@ -144,10 +146,9 @@ export function AppDrawer() {
     if (backupLoading) return;
     setBackupLoading(true);
     setBackupDone(false);
-    // Scaffold: simulate network call
-    await new Promise((r) => setTimeout(r, 1800));
+    const success = await syncNow();
     setBackupLoading(false);
-    setBackupDone(true);
+    setBackupDone(success);
   }
 
   if (!visible && !isOpen) return null;
@@ -382,13 +383,15 @@ export function AppDrawer() {
                         ? "Uploading…"
                         : backupDone
                         ? "Favorites synced successfully"
-                        : "Scaffold — cloud sync coming soon"}
+                        : syncStatus === "error"
+                        ? syncMessage
+                        : syncStatus === "synced"
+                        ? syncMessage
+                        : "Sync your favorites across devices"}
                     </Text>
                   </View>
-                  {!backupLoading && !backupDone && (
-                    <View style={[styles.nativeBadge, { backgroundColor: "#F59E0B20", borderColor: "#F59E0B40" }]}>
-                      <Text style={{ fontSize: 9, fontFamily: "Inter_700Bold", color: "#F59E0B" }}>SOON</Text>
-                    </View>
+                  {!backupLoading && !backupDone && syncStatus === "syncing" && (
+                    <ActivityIndicator size="small" color="#F59E0B" />
                   )}
                 </View>
               </TouchableOpacity>
