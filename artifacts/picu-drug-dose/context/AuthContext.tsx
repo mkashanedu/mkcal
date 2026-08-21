@@ -109,9 +109,14 @@ function providerFromUser(user: FirebaseUser): AuthProvider {
 }
 
 async function toAuthUser(firebaseUser: FirebaseUser): Promise<AuthUser> {
-  const profileRef = doc(firestore, "users", firebaseUser.uid);
-  const profile = await getDoc(profileRef);
-  const data = profile.data();
+  let data: Record<string, unknown> | undefined;
+  try {
+    const profileRef = doc(firestore, "users", firebaseUser.uid);
+    const profile = await getDoc(profileRef);
+    data = profile.data();
+  } catch (error) {
+    console.warn("[Auth] Could not load Firestore profile; using defaults.", error);
+  }
   const role =
     data?.role === "physician" ||
     data?.role === "rn" ||
@@ -170,17 +175,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           password
         );
         await updateProfile(result.user, { displayName: trimmedName });
-        await setDoc(
-          doc(firestore, "users", result.user.uid),
-          {
-            uid: result.user.uid,
-            name: trimmedName,
-            email: trimmedEmail,
-            role,
-            createdAt: new Date().toISOString(),
-          },
-          { merge: true }
-        );
+        try {
+          await setDoc(
+            doc(firestore, "users", result.user.uid),
+            {
+              uid: result.user.uid,
+              name: trimmedName,
+              email: trimmedEmail,
+              role,
+              createdAt: new Date().toISOString(),
+            },
+            { merge: true }
+          );
+        } catch (error) {
+          console.warn("[Auth] Account created, but profile sync failed.", error);
+        }
         setUser({
           id: result.user.uid,
           name: trimmedName,
@@ -205,7 +214,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           password
         );
         if (role) {
-          await setDoc(doc(firestore, "users", result.user.uid), { role }, { merge: true });
+          try {
+            await setDoc(doc(firestore, "users", result.user.uid), { role }, { merge: true });
+          } catch (error) {
+            console.warn("[Auth] Login succeeded, but role sync failed.", error);
+          }
         }
         setUser(await toAuthUser(result.user));
         return { success: true };
@@ -224,7 +237,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const updateRole = useCallback(
     async (role: ClinicalRole) => {
       if (!user) return;
-      await setDoc(doc(firestore, "users", user.id), { role }, { merge: true });
+      try {
+        await setDoc(doc(firestore, "users", user.id), { role }, { merge: true });
+      } catch (error) {
+        console.warn("[Auth] Role update could not be synced.", error);
+      }
       setUser({ ...user, role });
     },
     [user]

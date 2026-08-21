@@ -340,7 +340,11 @@ export default function LoginScreen() {
     setLLoading(true);
     const res = await login(lEmail, lPass, lRole);
     setLLoading(false);
-    if (!res.success) setLError(res.error ?? "Login failed.");
+    if (!res.success) {
+      setLError(res.error ?? "Login failed.");
+    } else {
+      router.replace("/(tabs)" as any);
+    }
   }
 
   // ── REGISTER FORM ─────────────────────────────────────────────────────────
@@ -354,7 +358,10 @@ export default function LoginScreen() {
     const res = await register(rName, rEmail, rPass, rRole);
     setRLoading(false);
     if (!res.success) setRError(res.error ?? "Registration failed.");
-    else setRSuccess(true);
+    else {
+      setRSuccess(true);
+      router.replace("/(tabs)" as any);
+    }
   }
 
   return (
