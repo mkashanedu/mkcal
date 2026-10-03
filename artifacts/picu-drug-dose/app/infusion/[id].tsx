@@ -126,7 +126,11 @@ function RecipeCard({ recipe, drug, diluent, vialLabel, isDark }: { recipe: Reci
 // ── Main Screen ───────────────────────────────────────────────────────────────
 export default function InfusionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { weightInput: weight, setWeightInput: setWeight } = useWeight();
+  const {
+    weightInput: weight,
+    setWeightInput: setWeight,
+    setWeight: setGlobalWeight,
+  } = useWeight();
   const { isDark } = useTheme();
   const { isFav, toggleFav } = useFavorites();
 
@@ -149,7 +153,11 @@ export default function InfusionDetailScreen() {
   const MUTED = isDark ? "#8892B0" : C.textMuted;
   const SEC   = isDark ? "#CCD6F6" : C.textSecondary;
 
-  const weightNum = parseFloat(weight) || 0;
+  const parsedWeight = Number(weight);
+  const weightNum =
+    weight.trim() !== "" && Number.isFinite(parsedWeight) && parsedWeight > 0
+      ? parsedWeight
+      : 0;
   const doseNum   = parseFloat(doseInput) || 0;
 
   const unitOptions = selectedDrug
@@ -192,6 +200,12 @@ export default function InfusionDetailScreen() {
 
   const rateStr   = formatRate(rateMLhr);
   const rateValid = rateMLhr > 0 && isFinite(rateMLhr);
+
+  function handleWeightChange(text: string) {
+    setWeight(text);
+    const value = Number(text);
+    setGlobalWeight(text.trim() !== "" && Number.isFinite(value) && value > 0 ? value : 0);
+  }
 
   function concDisplay(val: number) {
     const mcg = val * 1000;
@@ -237,9 +251,9 @@ export default function InfusionDetailScreen() {
             <View style={styles.weightBadge}>
               <Text style={[styles.weightLabel, { color: C.tint }]}>WT (KG)</Text>
               <TextInput
-                style={[styles.weightInput, { color: C.tint, borderColor: C.tint, backgroundColor: C.tint + "10" }]}
+                style={[styles.weightInput, { color: C.tint, borderColor: weightNum > 0 ? C.tint : "#DC2626", backgroundColor: C.tint + "10" }]}
                 value={weight}
-                onChangeText={setWeight}
+                onChangeText={handleWeightChange}
                 keyboardType="decimal-pad"
                 placeholder="—"
                 placeholderTextColor={C.textMuted}
@@ -494,7 +508,11 @@ export default function InfusionDetailScreen() {
                 </>
               )}
               {!rateValid && (
-                <Text style={[styles.resultPlaceholder, { color: MUTED }]}>Complete all steps above to calculate pump rate</Text>
+                <Text style={[styles.resultPlaceholder, { color: weightNum > 0 ? MUTED : "#B91C1C" }]}>
+                  {weightNum > 0
+                    ? "Complete all steps above to calculate pump rate"
+                    : "Enter a valid positive weight. Weight-based infusion calculations are disabled."}
+                </Text>
               )}
             </View>
 

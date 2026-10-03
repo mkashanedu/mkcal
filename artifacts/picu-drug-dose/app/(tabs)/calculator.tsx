@@ -29,7 +29,19 @@ export default function CalculatorScreen() {
   const insets = useSafeAreaInsets();
   const { isDark, toggleDark } = useTheme();
   const colors = Colors.light;
-  const { weight, setWeight, weightInput, setWeightInput, resetWeight } = useWeight();
+  const {
+    weight,
+    setWeight,
+    weightInput,
+    setWeightInput,
+    resetWeight,
+    ageInput: storedAgeInput,
+    setAge: setStoredAge,
+    setAgeInput: setStoredAgeInput,
+    ageConfirmed,
+    ageUnit: storedAgeUnit,
+    setAgeUnit: setStoredAgeUnit,
+  } = useWeight();
   const { isFav, toggleFav } = useFavorites();
   const { openDrawer } = useDrawer();
 
@@ -38,55 +50,84 @@ export default function CalculatorScreen() {
   const [weightUnit, setWeightUnit] = useState<"kg" | "lbs">("kg");
   const [lbsInput, setLbsInput] = useState("");
   const [weightWarning, setWeightWarning] = useState(false);
-  const [ageInput, setAgeInput] = useState("");
-  const [ageUnit, setAgeUnit] = useState<"yrs" | "mths">("yrs");
+  const [weightError, setWeightError] = useState("");
+  const ageInput = ageConfirmed ? storedAgeInput : "";
+  const ageUnit = storedAgeUnit === "years" ? "yrs" : "mths";
   const topPadding = insets.top;
 
+  function handleAgeChange(text: string) {
+    setStoredAgeInput(text);
+    const num = Number(text);
+    if (text.trim() !== "" && Number.isFinite(num) && num >= 0) {
+      setStoredAge(ageUnit === "yrs" ? num : num / 12);
+    }
+  }
+
+  function handleAgeUnitChange(nextUnit: "yrs" | "mths") {
+    const current = Number(ageInput);
+    setStoredAgeUnit(nextUnit === "yrs" ? "years" : "months");
+    if (ageInput.trim() !== "" && Number.isFinite(current) && current >= 0) {
+      const months = ageUnit === "yrs" ? current * 12 : current;
+      const converted = nextUnit === "yrs" ? months / 12 : months;
+      setStoredAgeInput(String(Number(converted.toFixed(3))));
+      setStoredAge(months / 12);
+    }
+  }
+
   function handleWeightChange(text: string) {
+    const num = Number(text);
+    const isValid = text.trim() !== "" && Number.isFinite(num) && num > 0;
+
     if (weightUnit === "kg") {
       setWeightInput(text);
-      const num = parseFloat(text);
-      if (!isNaN(num) && num > 0) {
-        if (num > MAX_WEIGHT_KG) {
-          setWeight(MAX_WEIGHT_KG);
-          setWeightWarning(true);
-        } else if (num < MIN_WEIGHT_KG) {
-          setWeightWarning(true);
-        } else {
-          setWeight(num);
-          setWeightWarning(false);
-        }
-      } else {
-        setWeightWarning(false);
-      }
     } else {
       setLbsInput(text);
-      const lbs = parseFloat(text);
-      if (!isNaN(lbs) && lbs > 0) {
-        const kg = +(lbs * LBS_TO_KG).toFixed(1);
-        const clamped = Math.min(Math.max(kg, MIN_WEIGHT_KG), MAX_WEIGHT_KG);
-        setWeight(clamped);
-        setWeightInput(clamped.toString());
-        setWeightWarning(kg > MAX_WEIGHT_KG || kg < MIN_WEIGHT_KG);
-      }
     }
+
+    const kg = weightUnit === "kg" ? num : num * LBS_TO_KG;
+    if (!isValid || !Number.isFinite(kg) || kg <= 0) {
+      setWeight(0);
+      setWeightInput(text);
+      setWeightWarning(false);
+      setWeightError(`Enter a valid positive weight in ${weightUnit}.`);
+      return;
+    }
+
+    setWeight(kg);
+    setWeightInput(kg.toString());
+    setWeightWarning(kg > MAX_WEIGHT_KG || kg < MIN_WEIGHT_KG);
+    setWeightError("");
   }
 
   function handleUnitToggle(unit: "kg" | "lbs") {
     setWeightUnit(unit);
-    setWeightWarning(false);
-    if (unit === "lbs" && weight > 0) {
-      setLbsInput((+(weight / LBS_TO_KG).toFixed(1)).toString());
+    if (weight > 0) {
+      if (unit === "lbs") {
+        setLbsInput((+(weight / LBS_TO_KG).toFixed(1)).toString());
+      } else {
+        setWeightInput(weight.toString());
+      }
+      setWeightWarning(weight > MAX_WEIGHT_KG || weight < MIN_WEIGHT_KG);
+      setWeightError("");
+    } else {
+      const currentText = weightUnit === "kg" ? weightInput : lbsInput;
+      setWeightInput(currentText);
+      setLbsInput(currentText);
+      setWeightWarning(false);
     }
   }
 
   function handleReset() {
     resetWeight();
+    setWeightUnit("kg");
     setWeightWarning(false);
-    if (weightUnit === "lbs") setLbsInput("");
+    setWeightError("");
+    setLbsInput("");
   }
 
   const displayInput = weightUnit === "kg" ? weightInput : lbsInput;
+  const visibleWeightError =
+    weightError || (weight <= 0 && displayInput.trim() ? "Enter a valid positive weight." : "");
 
   const drugsToShow = useMemo(() => {
     return DRUGS.filter((d) => {
@@ -178,11 +219,11 @@ export default function CalculatorScreen() {
               style={[
                 styles.compactInput,
                 {
-                  color: weightWarning ? "#E53E3E" : isDark ? "#FFFFFF" : "#0D1B2A",
+                  color: visibleWeightError || weightWarning ? "#E53E3E" : isDark ? "#FFFFFF" : "#0D1B2A",
                   backgroundColor: isDark ? "#0A192F" : "#FFFFFF",
                   fontFamily: "Inter_700Bold",
-                  borderColor: weightWarning ? "#E53E3E" : "transparent",
-                  borderWidth: weightWarning ? 1.5 : 0,
+                  borderColor: visibleWeightError || weightWarning ? "#E53E3E" : "transparent",
+                  borderWidth: visibleWeightError || weightWarning ? 1.5 : 0,
                 },
               ]}
               value={displayInput}
@@ -217,11 +258,15 @@ export default function CalculatorScreen() {
             </TouchableOpacity>
           </View>
 
-          {weightWarning && (
+          {visibleWeightError ? (
             <Text style={styles.weightWarning}>
-              ⚠ {MIN_WEIGHT_KG}–{MAX_WEIGHT_KG} kg — dose capped
+              {visibleWeightError} Weight-based calculations are disabled until corrected.
             </Text>
-          )}
+          ) : weightWarning ? (
+            <Text style={styles.weightWarning}>
+              ⚠ Outside the usual {MIN_WEIGHT_KG}–{MAX_WEIGHT_KG} kg range. Verify the entered weight; dose calculations use it as entered.
+            </Text>
+          ) : null}
 
           {/* Row 2 — Age */}
           <View style={styles.inputRow}>
@@ -239,7 +284,7 @@ export default function CalculatorScreen() {
                 },
               ]}
               value={ageInput}
-              onChangeText={setAgeInput}
+              onChangeText={handleAgeChange}
               keyboardType="decimal-pad"
               selectTextOnFocus
               maxLength={4}
@@ -250,7 +295,7 @@ export default function CalculatorScreen() {
               {(["yrs", "mths"] as const).map((u) => (
                 <TouchableOpacity
                   key={u}
-                  onPress={() => setAgeUnit(u)}
+                  onPress={() => handleAgeUnitChange(u)}
                   style={[styles.pill, ageUnit === u && { backgroundColor: colors.tint }]}
                 >
                   <Text style={[styles.pillText, { color: ageUnit === u ? "#fff" : isDark ? "#8892B0" : "#4A5568", fontFamily: "Inter_600SemiBold" }]}>
@@ -274,6 +319,7 @@ export default function CalculatorScreen() {
                   setWeight(w);
                   setWeightInput(w.toString());
                   setWeightWarning(false);
+                  setWeightError("");
                   if (weightUnit === "lbs") {
                     setLbsInput((+(w / LBS_TO_KG).toFixed(1)).toString());
                   }

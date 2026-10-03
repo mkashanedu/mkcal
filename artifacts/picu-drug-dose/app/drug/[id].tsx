@@ -26,6 +26,7 @@ export default function DrugDetailScreen() {
   const colors = Colors.light;
   const { weight } = useWeight();
   const { isFav, toggleFav } = useFavorites();
+  const weightValid = Number.isFinite(weight) && weight > 0;
 
   const drug = DRUGS.find((d) => d.id === id);
 
@@ -119,7 +120,7 @@ export default function DrugDetailScreen() {
               { color: isDark ? "#8892B0" : "#4A5568", fontFamily: "Inter_400Regular" },
             ]}
           >
-            Calculated for
+            {weightValid ? "Calculated for" : "Weight invalid — calculations disabled"}
           </Text>
           <Text
             style={[
@@ -127,9 +128,17 @@ export default function DrugDetailScreen() {
               { color: colors.tint, fontFamily: "Inter_700Bold" },
             ]}
           >
-            {weight} kg
+            {weightValid ? `${weight} kg` : "Invalid"}
           </Text>
         </View>
+        {!weightValid && (
+          <View style={styles.invalidWeightNotice}>
+            <Feather name="alert-triangle" size={14} color="#FFFFFF" />
+            <Text style={[styles.invalidWeightText, { fontFamily: "Inter_600SemiBold" }]}>
+              Enter a valid positive weight to calculate weight-based doses.
+            </Text>
+          </View>
+        )}
 
         {/* Doses */}
         <SectionHeader title="Dosing" icon="activity" color={cat.color} isDark={isDark} />
@@ -183,6 +192,14 @@ export default function DrugDetailScreen() {
                     </View>
                   )}
                 </View>
+                {calc.exceedsAdultMax && calc.adultMaxLabel && (
+                  <View style={styles.maxDoseWarning}>
+                    <Feather name="alert-octagon" size={15} color="#FFFFFF" />
+                    <Text style={[styles.maxDoseWarningText, { fontFamily: "Inter_700Bold" }]}>
+                      {calc.adultMaxLabel}
+                    </Text>
+                  </View>
+                )}
                 {dose.notes && (
                   <View style={[styles.noteBox, { backgroundColor: isDark ? "#0A192F" : "#F4F9FC" }]}>
                     <Feather name="info" size={12} color={isDark ? "#8892B0" : "#8A9BB0"} />
@@ -382,6 +399,16 @@ const styles = StyleSheet.create({
   },
   weightBannerText: { fontSize: 13, flex: 1 },
   weightBannerValue: { fontSize: 18 },
+  invalidWeightNotice: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 6,
+    backgroundColor: "#B91C1C",
+  },
+  invalidWeightText: { color: "#FFFFFF", fontSize: 13, flex: 1, lineHeight: 18 },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -423,6 +450,15 @@ const styles = StyleSheet.create({
   maxDoseBox: { padding: 10, borderRadius: 8, alignItems: "center" },
   maxDoseLabel: { fontSize: 10, marginBottom: 2 },
   maxDoseValue: { fontSize: 14 },
+  maxDoseWarning: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    padding: 10,
+    borderRadius: 8,
+    backgroundColor: "#B91C1C",
+  },
+  maxDoseWarningText: { color: "#FFFFFF", fontSize: 13, flex: 1, lineHeight: 18 },
   noteBox: {
     flexDirection: "row",
     alignItems: "flex-start",

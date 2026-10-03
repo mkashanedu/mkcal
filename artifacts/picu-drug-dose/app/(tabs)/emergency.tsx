@@ -236,6 +236,7 @@ export default function EmergencyScreen() {
     setAge: setCtxAge,
     ageInput: ctxAgeInput,
     setAgeInput: setCtxAgeInput,
+    ageConfirmed: ctxAgeConfirmed,
     ageUnit: ctxAgeUnit,
     setAgeUnit: setCtxAgeUnit,
   } = useWeight();
@@ -247,21 +248,31 @@ export default function EmergencyScreen() {
   // Weight
   const [weightInput, setWeightInput] = useState(ctxWeightInput);
   const [weightUnit, setWeightUnit] = useState<"kg" | "lbs">(ctxWeightUnit);
-  const weightNum = parseFloat(weightInput) || 0;
+  const parsedWeight = Number(weightInput);
+  const weightInputIsValid =
+    weightInput.trim() !== "" && Number.isFinite(parsedWeight) && parsedWeight > 0;
+  const weightNum = weightInputIsValid ? parsedWeight : 0;
   const weightKg = weightUnit === "kg" ? weightNum : weightNum * 0.453592;
-  const displayWeightKg = weightUnit === "kg" ? weightNum : +(weightNum * 0.453592).toFixed(2);
+  const weightValid = Number.isFinite(weightKg) && weightKg > 0;
+  const displayWeightKg = weightValid
+    ? weightUnit === "kg" ? weightNum : +(weightNum * 0.453592).toFixed(2)
+    : 0;
+  const weightRangeWarning = weightValid && (weightKg < 0.5 || weightKg > 150);
 
   const handleWeightChange = useCallback(
     (text: string) => {
       setWeightInput(text);
-      const num = parseFloat(text);
-      if (!isNaN(num) && num > 0) {
-        const kg = weightUnit === "kg" ? num : num * 0.453592;
-        if (kg >= 0.5 && kg <= 150) {
-          setCtxWeight(kg);
-          setCtxWeightInput(text);
-        }
+      const num = Number(text);
+      const valid = text.trim() !== "" && Number.isFinite(num) && num > 0;
+      const kg = weightUnit === "kg" ? num : num * 0.453592;
+      if (valid && Number.isFinite(kg) && kg > 0) {
+        setCtxWeight(kg);
+      } else {
+        // A bad entry must invalidate the shared weight instead of leaving an older
+        // patient's value active on another screen.
+        setCtxWeight(0);
       }
+      setCtxWeightInput(text);
     },
     [weightUnit, setCtxWeight, setCtxWeightInput]
   );
@@ -270,8 +281,8 @@ export default function EmergencyScreen() {
     const next = weightUnit === "kg" ? "lbs" : "kg";
     setWeightUnit(next);
     setCtxWeightUnit(next);
-    const currentNum = parseFloat(weightInput) || 0;
-    if (currentNum > 0) {
+    const currentNum = Number(weightInput);
+    if (weightInput.trim() !== "" && Number.isFinite(currentNum) && currentNum > 0) {
       const converted = next === "kg"
         ? +(currentNum * 0.453592).toFixed(1)
         : +(currentNum / 0.453592).toFixed(1);
@@ -279,23 +290,31 @@ export default function EmergencyScreen() {
       setCtxWeightInput(converted.toString());
       const kg = next === "kg" ? converted : converted * 0.453592;
       setCtxWeight(kg);
+    } else {
+      setCtxWeight(0);
     }
   }, [weightUnit, weightInput, setCtxWeight, setCtxWeightUnit, setCtxWeightInput]);
 
   // Age
-  const [ageInput, setAgeInput] = useState(ctxAgeInput);
-  const [ageUnit, setAgeUnit] = useState<"years" | "months">(ctxAgeUnit);
-  const ageNum = parseFloat(ageInput) || 0;
+  const ageInput = ctxAgeConfirmed ? ctxAgeInput : "";
+  const ageUnit = ctxAgeUnit;
+  const parsedAge = Number(ageInput);
+  const ageInputIsValid =
+    ctxAgeConfirmed && ageInput.trim() !== "" && Number.isFinite(parsedAge) && parsedAge >= 0;
+  const ageNum = ageInputIsValid ? parsedAge : 0;
   const ageYears = ageUnit === "years" ? ageNum : ageNum / 12;
+  const ageMonths = ageInputIsValid
+    ? ageUnit === "years" ? ageNum * 12 : ageNum
+    : undefined;
+  const [selectedFluid, setSelectedFluid] = useState<string | undefined>(undefined);
 
   const handleAgeChange = useCallback(
     (text: string) => {
-      setAgeInput(text);
-      const num = parseFloat(text);
-      if (!isNaN(num) && num >= 0) {
+      setCtxAgeInput(text);
+      const num = Number(text);
+      if (text.trim() !== "" && Number.isFinite(num) && num >= 0) {
         const yrs = ageUnit === "years" ? num : num / 12;
         setCtxAge(yrs);
-        setCtxAgeInput(text);
       }
     },
     [ageUnit, setCtxAge, setCtxAgeInput]
@@ -303,14 +322,12 @@ export default function EmergencyScreen() {
 
   const toggleAgeUnit = useCallback(() => {
     const next = ageUnit === "years" ? "months" : "years";
-    setAgeUnit(next);
     setCtxAgeUnit(next);
-    const currentNum = parseFloat(ageInput) || 0;
-    if (currentNum > 0) {
+    const currentNum = Number(ageInput);
+    if (ageInput.trim() !== "" && Number.isFinite(currentNum) && currentNum >= 0) {
       const converted = next === "years"
         ? +(currentNum / 12).toFixed(1)
         : +(currentNum * 12).toFixed(0);
-      setAgeInput(converted.toString());
       setCtxAgeInput(converted.toString());
       const yrs = next === "years" ? converted : converted / 12;
       setCtxAge(yrs);
@@ -318,7 +335,7 @@ export default function EmergencyScreen() {
   }, [ageUnit, ageInput, setCtxAge, setCtxAgeUnit, setCtxAgeInput]);
 
   // Inputs valid?
-  const inputsValid = weightKg > 0 && ageYears > 0;
+  const inputsValid = weightValid && ageYears > 0;
 
   // ── Equipment Calculations ─────────────────────────────────────────────
   const ettube = calcETTube(ageYears);
@@ -342,6 +359,7 @@ export default function EmergencyScreen() {
 
   // ── Critical Code Blue Drugs ───────────────────────────────────────────
   const emergencyCards = useMemo((): EmergencyItem[] => {
+    if (!weightValid) return [];
     const results: EmergencyItem[] = [];
     const w = weightKg;
 
@@ -570,7 +588,7 @@ export default function EmergencyScreen() {
       });
     }
 
-    // 15. Fentanyl IN (1–2 mcg/kg, max 200 mcg)
+    // 15. Fentanyl IN (1–2 mcg/kg, max 100 mcg)
     const fent = DRUGS.find((d) => d.id === "fentanyl");
     if (fent) {
       const calc = calculateDose(fent.doses[2], w);
@@ -579,7 +597,7 @@ export default function EmergencyScreen() {
         dose: calc.dose,
         doseSub: "(1–2 mcg/kg)",
         route: "Intranasal",
-        notes: "Max 0.5 mL per nostril. Max 200 mcg.",
+        notes: "Maximum single dose 100 mcg. Max 0.5 mL per nostril.",
         color: "#6366F1",
         exceedsAdultMax: calc.exceedsAdultMax,
         adultMaxLabel: calc.adultMaxLabel,
@@ -587,7 +605,7 @@ export default function EmergencyScreen() {
     }
 
     return results;
-  }, [weightKg]);
+  }, [weightKg, weightValid]);
 
   // ── CPR Timer State ─────────────────────────────────────────────────
   const [epiInterval, setEpiInterval] = useState(300);
@@ -645,7 +663,7 @@ export default function EmergencyScreen() {
           </TouchableOpacity>
         </View>
         <Text style={[styles.headerSubtitle, { fontFamily: "Inter_400Regular" }]}>
-          Age: {ageYears.toFixed(ageUnit === "months" ? 1 : 0)} {ageUnit === "months" ? "mo" : "yrs"} · Weight: {displayWeightKg.toFixed(1)} kg · HR: {targetVitals.minHR}–{targetVitals.maxHR} · SBP ≥ {targetVitals.minSBP}
+          Age: {ageYears.toFixed(ageUnit === "months" ? 1 : 0)} {ageUnit === "months" ? "mo" : "yrs"} · Weight: {weightValid ? `${displayWeightKg.toFixed(1)} kg` : "invalid"} · HR: {targetVitals.minHR}–{targetVitals.maxHR} · SBP ≥ {targetVitals.minSBP}
         </Text>
         <View style={styles.warningBanner}>
           <Feather name="alert-triangle" size={14} color="#FFFFFF" />
@@ -670,7 +688,7 @@ export default function EmergencyScreen() {
                 style={[styles.inputBox, {
                   color: isDark ? "#FFFFFF" : "#0D1B2A",
                   backgroundColor: isDark ? "#233554" : "#F0F4F8",
-                  borderColor: isDark ? "#3D4770" : "#CBD5E1",
+                  borderColor: !weightValid ? "#DC2626" : isDark ? "#3D4770" : "#CBD5E1",
                 }]}
                 value={weightInput}
                 onChangeText={handleWeightChange}
@@ -703,6 +721,15 @@ export default function EmergencyScreen() {
                 </TouchableOpacity>
               </View>
             </View>
+            {!weightValid ? (
+              <Text style={styles.weightInputError} accessibilityRole="alert">
+                Enter a valid positive weight. Weight-based emergency calculations are disabled.
+              </Text>
+            ) : weightRangeWarning ? (
+              <Text style={styles.weightInputWarning}>
+                Weight is outside the usual 0.5–150 kg range. Verify it; calculations use the entered value.
+              </Text>
+            ) : null}
           </View>
 
           {/* ── AGE ── */}
@@ -911,7 +938,7 @@ export default function EmergencyScreen() {
           </View>
 
           {/* Defibrillator — hard-coded PALS */}
-          <View style={[styles.calcSection, { borderTopColor: isDark ? "#233554" : "#F0F4F8" }]}>
+          {weightValid && <View style={[styles.calcSection, { borderTopColor: isDark ? "#233554" : "#F0F4F8" }]}>
             <Text style={[styles.calcSectionTitle, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_600SemiBold", marginBottom: 10 }]}>
               Defibrillator Energy — {weightKg.toFixed(1)} kg
             </Text>
@@ -949,7 +976,7 @@ export default function EmergencyScreen() {
                 </View>
               </View>
             </View>
-          </View>
+          </View>}
         </View>
 
         {/* Critical Drug Cards */}
@@ -1078,6 +1105,20 @@ const styles = StyleSheet.create({
 
   // Label above each input group
   inputFieldLabel: { fontSize: 10, fontWeight: "800", textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 },
+  weightInputError: {
+    color: "#B91C1C",
+    fontSize: 11,
+    fontWeight: "800",
+    lineHeight: 16,
+    marginTop: 5,
+  },
+  weightInputWarning: {
+    color: "#B45309",
+    fontSize: 11,
+    fontWeight: "700",
+    lineHeight: 16,
+    marginTop: 5,
+  },
 
   // Number box + pill toggle: fixed-height row, never wraps so the two never stack on top of each other
   inputWithToggle: { flexDirection: "row", alignItems: "stretch", gap: 8, minHeight: 44, width: "100%" },

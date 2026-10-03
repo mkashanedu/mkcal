@@ -31,6 +31,8 @@ export default function FormularyScreen() {
   const topPadding = insets.top;
 
   const [profileOpen, setProfileOpen] = useState(false);
+  const [weightInputError, setWeightInputError] = useState("");
+  const [weightRangeWarning, setWeightRangeWarning] = useState(false);
 
   const bg = isDark ? "#0B132B" : "#F0F9FF";
   const cardBg = isDark ? "#112240" : "#FFFFFF";
@@ -47,22 +49,34 @@ export default function FormularyScreen() {
 
   // Weight display helpers
   const displayWeight =
-    weightUnit === "lbs"
-      ? `${(weight * 2.20462).toFixed(1)} lbs`
-      : `${weight} kg`;
+    weight > 0
+      ? weightUnit === "lbs"
+        ? `${(weight * 2.20462).toFixed(1)} lbs`
+        : `${weight} kg`
+      : "Invalid weight";
+  const visibleWeightInputError =
+    weightInputError || (weight <= 0 && weightInput.trim() ? "Enter a valid positive weight." : "");
   const displayAge =
     ageUnit === "months" ? `${age} mo` : `${age} yr`;
 
   function commitWeight(text: string) {
-    const num = parseFloat(text);
-    if (isNaN(num) || num <= 0) return;
-    if (weightUnit === "lbs") {
-      const kg = Math.min(Math.max(num / 2.20462, MIN_WEIGHT_KG), MAX_WEIGHT_KG);
-      setWeight(parseFloat(kg.toFixed(2)));
-    } else {
-      const kg = Math.min(Math.max(num, MIN_WEIGHT_KG), MAX_WEIGHT_KG);
-      setWeight(parseFloat(kg.toFixed(2)));
+    const num = Number(text);
+    if (text.trim() === "" || !Number.isFinite(num) || num <= 0) {
+      setWeight(0);
+      setWeightInputError(`Enter a valid positive weight in ${weightUnit}.`);
+      setWeightRangeWarning(false);
+      return;
     }
+    const kg = weightUnit === "lbs" ? num / 2.20462 : num;
+    if (!Number.isFinite(kg) || kg <= 0) {
+      setWeight(0);
+      setWeightInputError(`Enter a valid positive weight in ${weightUnit}.`);
+      setWeightRangeWarning(false);
+      return;
+    }
+    setWeight(kg);
+    setWeightInputError("");
+    setWeightRangeWarning(kg < MIN_WEIGHT_KG || kg > MAX_WEIGHT_KG);
   }
 
   function commitAge(text: string) {
@@ -165,9 +179,9 @@ export default function FormularyScreen() {
                 </Text>
                 <View style={styles.inputRow}>
                   <TextInput
-                    style={[styles.profileInput, { backgroundColor: inputBg, borderColor: accent + "40", color: textPrimary, fontFamily: "Inter_400Regular" }]}
+                    style={[styles.profileInput, { backgroundColor: inputBg, borderColor: visibleWeightInputError ? "#DC2626" : accent + "40", color: textPrimary, fontFamily: "Inter_400Regular" }]}
                     value={weightInput}
-                    onChangeText={(t) => { setWeightInput(t); }}
+                    onChangeText={(t) => { setWeightInput(t); commitWeight(t); }}
                     onBlur={() => commitWeight(weightInput)}
                     onSubmitEditing={() => commitWeight(weightInput)}
                     keyboardType="decimal-pad"
@@ -190,6 +204,15 @@ export default function FormularyScreen() {
                     ))}
                   </View>
                 </View>
+                {visibleWeightInputError ? (
+                  <Text style={styles.weightInputError} accessibilityRole="alert">
+                    {visibleWeightInputError} Weight-based calculations are disabled until corrected.
+                  </Text>
+                ) : weightRangeWarning ? (
+                  <Text style={styles.weightInputWarning}>
+                    Weight is outside the usual {MIN_WEIGHT_KG}–{MAX_WEIGHT_KG} kg range. Verify it; calculations use the entered value.
+                  </Text>
+                ) : null}
                 {weightUnit === "lbs" && (
                   <Text style={[styles.convertHint, { color: accent, fontFamily: "Inter_400Regular" }]}>
                     = {weight} kg (stored internally)
@@ -371,6 +394,8 @@ const styles = StyleSheet.create({
   },
   unitBtnText: { fontSize: 12 },
   convertHint: { fontSize: 11, marginTop: 2 },
+  weightInputError: { color: "#B91C1C", fontSize: 11, fontWeight: "700", lineHeight: 16 },
+  weightInputWarning: { color: "#B45309", fontSize: 11, fontWeight: "700", lineHeight: 16 },
   profileNote: {
     flexDirection: "row",
     alignItems: "flex-start",

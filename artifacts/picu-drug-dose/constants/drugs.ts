@@ -15,6 +15,27 @@ export type DrugCategory =
   | "vitamin"
   | "gastrointestinal";
 
+export type CompatibilityStatus = "compatible" | "incompatible" | "unknown";
+
+export interface AgeSpecificDoseLimit {
+  minAgeMonths?: number;
+  maxAgeMonths?: number;
+  minAgeExclusive?: boolean;
+  maxAgeExclusive?: boolean;
+  maxDose: number;
+  label: string;
+}
+
+export interface FluidCompatibilityRule {
+  fluid: string;
+  status: Exclude<CompatibilityStatus, "unknown">;
+  minAgeMonths?: number;
+  maxAgeMonths?: number;
+  minAgeExclusive?: boolean;
+  maxAgeExclusive?: boolean;
+  guidance?: string;
+}
+
 export interface DoseRange {
   min?: number;
   max?: number;
@@ -28,6 +49,22 @@ export interface DoseRange {
   label?: string;
   /** Numeric adult maximum in the same computed unit — triggers red alert if calculated dose exceeds this */
   adultMaxDose_num?: number;
+  /** Maximum single dose in the same unit as the calculated dose. */
+  maxSingleDose_num?: number;
+  /** Maximum daily dose in the same unit as the calculated dose. */
+  maxDailyDose_num?: number;
+  /** Weight-based daily ceiling, e.g. 75 mg/kg/day, in the calculated dose unit per kg. */
+  maxDailyDosePerKg_num?: number;
+  /** Minimum age in months for this dose. Bounds are inclusive unless marked exclusive. */
+  minAgeMonths?: number;
+  /** Maximum age in months for this dose. Bounds are inclusive unless marked exclusive. */
+  maxAgeMonths?: number;
+  minAgeExclusive?: boolean;
+  maxAgeExclusive?: boolean;
+  /** Age-banded single-dose caps, in the same unit as the calculated dose. */
+  ageSpecificMaxDose?: AgeSpecificDoseLimit[];
+  /** Explicit carrier-fluid compatibility rules for this dose. */
+  compatibilityRules?: FluidCompatibilityRule[];
 }
 
 export interface RenalAdjustment {
@@ -48,6 +85,7 @@ export interface Drug {
   warnings?: string[];
   formulations?: string[];
   notes?: string;
+  compatibility?: string;
   renalAdjustment?: RenalAdjustment[];
   monitoring?: string[];
   reference?: string;
@@ -72,6 +110,25 @@ export const CATEGORIES: Record<
   vitamin: { label: "Vitamins / Minerals", icon: "plus-circle", color: "#1A7A40" },
   gastrointestinal: { label: "Gastrointestinal", icon: "thermometer", color: "#0E7490" },
 };
+
+function carrierFluidCompatibilityRules(guidance: string): FluidCompatibilityRule[] {
+  const fluids = ["D10W", "D5W", "NS"];
+  return fluids.flatMap((fluid) => [
+    {
+      fluid,
+      status: "compatible" as const,
+      maxAgeMonths: 1,
+      guidance: `${guidance} For patients up to 1 month, follow the neonatal concentration and monitoring protocol.`,
+    },
+    {
+      fluid,
+      status: "compatible" as const,
+      minAgeMonths: 1,
+      minAgeExclusive: true,
+      guidance,
+    },
+  ]);
+}
 
 export const DRUGS: Drug[] = [
   // ════════════════════════════════════════════════════════════
@@ -100,7 +157,7 @@ export const DRUGS: Drug[] = [
     category: "emergency",
     indications: ["Symptomatic bradycardia", "Organophosphate poisoning", "Pre-medication for RSI"],
     doses: [
-      { value: 0.02, unit: "mg/kg", perKg: true, route: "IV/IO", maxDose: "1 mg (child), 3 mg (adolescent)", frequency: "May repeat × 1", label: "Bradycardia", notes: "Minimum dose 0.1 mg (paradoxical bradycardia with smaller doses)", adultMaxDose_num: 3 },
+      { value: 0.02, unit: "mg/kg", perKg: true, route: "IV/IO", maxDose: "1 mg (child ≤12 months), 3 mg (adolescent >12 months)", ageSpecificMaxDose: [{ maxAgeMonths: 12, maxDose: 1, label: "child (≤12 months)" }, { minAgeMonths: 12, minAgeExclusive: true, maxDose: 3, label: "adolescent (>12 months)" }], frequency: "May repeat × 1", label: "Bradycardia", notes: "Minimum dose 0.1 mg (paradoxical bradycardia with smaller doses)", adultMaxDose_num: 3 },
       { min: 0.02, max: 0.05, unit: "mg/kg", perKg: true, route: "IV/IO/ET", maxDose: "2 mg", label: "Organophosphate", notes: "Repeat every 5–10 min until secretions dry; may need very large doses" },
     ],
     warnings: ["MINIMUM dose 0.1 mg — smaller doses may worsen bradycardia (vagotonic effect)", "PALS 2025: Not routinely recommended for asystole"],
@@ -143,9 +200,10 @@ export const DRUGS: Drug[] = [
     category: "emergency",
     highAlert: true,
     indications: ["Pulseless VT/VF (alternative to amiodarone)", "Ventricular arrhythmias"],
+    compatibility: "Compatible with dextrose up to D10W and 0.9% NaCl. For IV use, use a preservative-free formulation and follow neonatal-specific concentration and monitoring protocols.",
     doses: [
-      { value: 1, unit: "mg/kg", perKg: true, route: "IV/IO", maxDose: "100 mg", label: "Loading dose", notes: "PALS 2025: Alternative if amiodarone unavailable", adultMaxDose_num: 100 },
-      { min: 20, max: 50, unit: "mcg/kg/min", perKg: true, route: "IV infusion", label: "Maintenance", notes: "= 1.2–3 mg/kg/hr" },
+      { value: 1, unit: "mg/kg", perKg: true, route: "IV/IO", maxDose: "100 mg", label: "Loading dose", notes: "PALS 2025: Alternative if amiodarone unavailable", adultMaxDose_num: 100, compatibilityRules: carrierFluidCompatibilityRules("CHEO lists lidocaine as compatible with dextrose up to D10W and 0.9% NaCl.") },
+      { min: 20, max: 50, unit: "mcg/kg/min", perKg: true, route: "IV infusion", label: "Maintenance", notes: "= 1.2–3 mg/kg/hr", compatibilityRules: carrierFluidCompatibilityRules("CHEO lists lidocaine as compatible with dextrose up to D10W and 0.9% NaCl.") },
     ],
     warnings: ["Reduce dose 50% in hepatic impairment", "Toxicity: seizures, arrhythmia"],
     formulations: ["10 mg/mL (1%)", "20 mg/mL (2%)"],
@@ -198,7 +256,7 @@ export const DRUGS: Drug[] = [
     category: "emergency",
     indications: ["Opioid overdose/respiratory depression"],
     doses: [
-      { value: 0.01, unit: "mg/kg", perKg: true, route: "IV/IM/SC/IN", maxDose: "0.4 mg (child), 2 mg (adolescent)", frequency: "Repeat every 2–3 min", label: "Standard reversal", notes: "Intranasal: use 4 mg/mL IN (0.5 mL each nostril if < 5 kg)", adultMaxDose_num: 2 },
+      { value: 0.01, unit: "mg/kg", perKg: true, route: "IV/IM/SC/IN", maxDose: "0.4 mg (child ≤12 months), 2 mg (adolescent >12 months)", ageSpecificMaxDose: [{ maxAgeMonths: 12, maxDose: 0.4, label: "child (≤12 months)" }, { minAgeMonths: 12, minAgeExclusive: true, maxDose: 2, label: "adolescent (>12 months)" }], frequency: "Repeat every 2–3 min", label: "Standard reversal", notes: "Intranasal: use 4 mg/mL IN (0.5 mL each nostril if < 5 kg)", adultMaxDose_num: 2 },
       { min: 0.005, max: 0.02, unit: "mg/kg/hr", perKg: true, route: "IV infusion", label: "Continuous infusion", notes: "Use when short-acting naloxone needed repeatedly" },
     ],
     warnings: ["Short duration (30–90 min) — repeat doses often needed for long-acting opioids", "May precipitate acute opioid withdrawal, seizures"],
@@ -222,8 +280,9 @@ export const DRUGS: Drug[] = [
     name: "Magnesium Sulfate (Emergency)",
     category: "emergency",
     indications: ["Torsades de pointes", "Severe asthma", "Hypomagnesemia with symptoms"],
+    compatibility: "Compatible with dextrose solutions (including D10W) and 0.9% NaCl. Follow neonatal-specific concentration, infusion, and monitoring protocols.",
     doses: [
-      { min: 25, max: 50, unit: "mg/kg", perKg: true, route: "IV over 10–20 min", maxDose: "2000 mg (2 g)", label: "Torsades / Severe asthma", notes: "Faster push for Torsades (over 1–2 min); calcium gluconate is antidote", adultMaxDose_num: 2000 },
+      { min: 25, max: 50, unit: "mg/kg", perKg: true, route: "IV over 10–20 min", maxDose: "2000 mg (2 g)", label: "Torsades / Severe asthma", notes: "Faster push for Torsades (over 1–2 min); calcium gluconate is antidote", adultMaxDose_num: 2000, compatibilityRules: carrierFluidCompatibilityRules("CHEO lists magnesium sulfate as compatible with dextrose solutions and 0.9% NaCl.") },
     ],
     warnings: ["Hypotension with rapid infusion", "Respiratory depression at toxic levels", "Have calcium gluconate ready"],
     formulations: ["500 mg/mL (50%)", "200 mg/mL (20%)"],
@@ -295,7 +354,7 @@ export const DRUGS: Drug[] = [
     doses: [
       { min: 1, max: 2, unit: "mcg/kg", perKg: true, route: "IV over 3–5 min", maxDose: "100 mcg", frequency: "Every 1–2 hr", label: "IV bolus", adultMaxDose_num: 100 },
       { min: 1, max: 5, unit: "mcg/kg/hr", perKg: true, route: "IV infusion", label: "Continuous infusion", notes: "Ventilated: 1–5 mcg/kg/hr; adjust for tolerance" },
-      { min: 10, max: 15, unit: "mcg/kg", perKg: true, route: "IN (intranasal)", maxDose: "200 mcg", label: "Intranasal", notes: "Use atomiser device; max 0.5 mL per nostril" },
+      { min: 1, max: 2, unit: "mcg/kg", perKg: true, route: "IN (intranasal)", maxDose: "100 mcg", maxSingleDose_num: 100, label: "Intranasal", notes: "Use atomiser device; maximum single dose 100 mcg; max 0.5 mL per nostril" },
     ],
     warnings: ["Rigid chest syndrome with rapid high-dose bolus — have muscle relaxant ready", "100× more potent than morphine", "Accumulation with prolonged infusion (lipophilic)"],
     formulations: ["50 mcg/mL (0.05 mg/mL) in 2 mL and 10 mL vials"],
@@ -331,8 +390,8 @@ export const DRUGS: Drug[] = [
     category: "analgesic",
     indications: ["Mild–moderate pain", "Fever", "Adjunct analgesia (opioid-sparing)"],
     doses: [
-      { min: 10, max: 15, unit: "mg/kg", perKg: true, route: "IV over 15 min", maxDose: "1000 mg", frequency: "Every 4–6 hr (max 4 doses/day)", label: "IV" },
-      { min: 15, max: 20, unit: "mg/kg", perKg: true, route: "PO", maxDose: "1000 mg", frequency: "Every 4–6 hr", label: "Oral", notes: "Max daily: 75 mg/kg or 4 g (whichever less)" },
+      { min: 10, max: 15, unit: "mg/kg", perKg: true, route: "IV over 15 min", maxDose: "1000 mg", maxSingleDose_num: 1000, maxDailyDose_num: 4000, maxDailyDosePerKg_num: 75, frequency: "Every 4–6 hr (max 4 doses/day)", label: "IV" },
+      { min: 15, max: 20, unit: "mg/kg", perKg: true, route: "PO", maxDose: "1000 mg", maxSingleDose_num: 1000, maxDailyDose_num: 4000, maxDailyDosePerKg_num: 75, frequency: "Every 4–6 hr", label: "Oral", notes: "Max daily: 75 mg/kg or 4 g (whichever less)" },
       { min: 20, max: 30, unit: "mg/kg", perKg: true, route: "PR (rectal)", maxDose: "1000 mg", frequency: "Every 6–8 hr", label: "Rectal (loading dose 30 mg/kg then 20 mg/kg)" },
     ],
     warnings: ["Hepatotoxicity in overdose — N-acetylcysteine antidote", "Reduce dose in hepatic impairment", "WHO 2024: Safe in renal impairment but use minimum effective dose"],
@@ -349,7 +408,7 @@ export const DRUGS: Drug[] = [
     category: "analgesic",
     indications: ["Mild–moderate pain", "Fever", "Inflammatory conditions", "Patent ductus arteriosus closure"],
     doses: [
-      { min: 5, max: 10, unit: "mg/kg", perKg: true, route: "PO", maxDose: "400 mg", frequency: "Every 6–8 hr (max 40 mg/kg/day)", label: "Oral analgesic/antipyretic" },
+      { min: 5, max: 10, unit: "mg/kg", perKg: true, route: "PO", minAgeMonths: 3, maxDose: "400 mg", maxSingleDose_num: 400, maxDailyDosePerKg_num: 40, frequency: "Every 6–8 hr (max 40 mg/kg/day)", label: "Oral analgesic/antipyretic" },
     ],
     contraindications: ["Renal impairment (GFR < 30)", "Active GI bleed", "Dehydration/hypovolemia", "< 3 months age", "Platelet dysfunction", "NSAIDs hypersensitivity"],
     warnings: ["WHO 2024: Avoid in dehydrated children — risk of acute kidney injury", "Avoid concomitant use with other NSAIDs or corticosteroids"],
@@ -464,8 +523,8 @@ export const DRUGS: Drug[] = [
     category: "sedative",
     indications: ["Anesthesia induction", "Procedural sedation", "ICU sedation (> 3 years, short-term)"],
     doses: [
-      { min: 1, max: 2.5, unit: "mg/kg", perKg: true, route: "IV slowly", label: "Induction", notes: "Titrate 40 mg every 10 sec until induction" },
-      { min: 1, max: 4, unit: "mg/kg/hr", perKg: true, route: "IV infusion", label: "Sedation", notes: "PICU: max 48 hr; max 4 mg/kg/hr; daily check for PRIS signs" },
+      { min: 1, max: 2.5, unit: "mg/kg", perKg: true, route: "IV slowly", minAgeMonths: 1, label: "Induction", notes: "Titrate 40 mg every 10 sec until induction" },
+      { min: 1, max: 4, unit: "mg/kg/hr", perKg: true, route: "IV infusion", minAgeMonths: 36, label: "Sedation", notes: "ICU sedation only for age >3 years; max 48 hr; max 4 mg/kg/hr; daily check for PRIS signs" },
     ],
     warnings: ["PROPOFOL INFUSION SYNDROME (PRIS): > 4 mg/kg/hr or > 48 hr — metabolic acidosis, rhabdomyolysis, cardiac failure", "CONTRAINDICATED in < 1 month", "Avoid in egg/soy allergy", "Pain on injection — pre-treat with lidocaine"],
     formulations: ["10 mg/mL (1%) emulsion"],
@@ -1735,10 +1794,198 @@ export const DRUGS: Drug[] = [
   },
 ];
 
+function doseUnitSpec(unit: string): { family: string; factor: number } | undefined {
+  const match = unit.match(/(mg\s*PE|mcg|μg|µg|mic|mg|g|mEq|mL|IU|units?)/i);
+  if (!match) return undefined;
+
+  const token = match[1].toLowerCase().replace(/\s+/g, "");
+  if (token === "g") return { family: "mass", factor: 1000 };
+  if (token === "mg" || token === "mgpe") return { family: token, factor: 1 };
+  if (["mcg", "μg", "µg", "mic"].includes(token)) return { family: "mass", factor: 0.001 };
+  if (token === "ml") return { family: "volume", factor: 1 };
+  if (token === "meq") return { family: "meq", factor: 1 };
+  if (token === "iu") return { family: "iu", factor: 1 };
+  if (token === "unit" || token === "units") return { family: "unit", factor: 1 };
+  return undefined;
+}
+
+function convertDoseLimit(value: number, sourceUnit: string, targetUnit: string): number | undefined {
+  const source = doseUnitSpec(sourceUnit);
+  const target = doseUnitSpec(targetUnit);
+  if (!source || !target || source.family !== target.family) return undefined;
+  return value * source.factor / target.factor;
+}
+
+function parseTextDoseLimit(text: string | undefined, targetUnit: string, weightKg: number): number | undefined {
+  if (!text) return undefined;
+  const matches = [...text.matchAll(/(\d+(?:,\d{3})*(?:\.\d+)?)\s*(mg\s*PE|mcg|μg|µg|mic|mg|g|mEq|mL|IU|units?)\s*(\/\s*kg)?\s*(?:\/\s*(dose|day|hr|hour)|\s+per\s+(dose|day|hr|hour))?/gi)]
+    .map((match) => {
+      const value = Number(match[1].replace(/,/g, ""));
+      const converted = convertDoseLimit(value, match[2], targetUnit);
+      if (converted === undefined || !Number.isFinite(converted) || converted <= 0) return undefined;
+      return {
+        value: converted * (match[3] ? weightKg : 1),
+        perDose: /dose/i.test(match[4] ?? match[5] ?? ""),
+      };
+    })
+    .filter((match): match is { value: number; perDose: boolean } => match !== undefined);
+
+  if (matches.length === 0) return undefined;
+
+  // When both a per-administration and total-course maximum are written, enforce the
+  // explicitly labeled per-dose limit rather than interpreting the total as a single dose.
+  const perDoseMatches = matches.filter((match) => match.perDose);
+  const preferred = perDoseMatches.length > 0 ? perDoseMatches : matches;
+  const values = preferred.map((match) => match.value);
+  const lowest = Math.min(...values);
+  const highest = Math.max(...values);
+
+  // Do not guess between age-specific limits such as "1 mg (child), 3 mg (adolescent)".
+  if (!perDoseMatches.length && /\b(child|adolescent|infant|neonate)\b/i.test(text) && highest - lowest > 0.001) {
+    return undefined;
+  }
+
+  // If the text presents inconsistent equivalent-unit values, use the lower stated
+  // amount as the conservative ceiling.
+  return lowest;
+}
+
+function parseDailyLimit(text: string | undefined, targetUnit: string, weightKg: number): number | undefined {
+  if (!text) return undefined;
+  const match = text.match(/max(?:imum)?(?:\s+daily)?\s*:?\s*(\d+(?:,\d{3})*(?:\.\d+)?)\s*(mg\s*PE|mcg|μg|µg|mic|mg|g|mEq|mL|IU|units?)\s*(\/\s*kg)?\s*(?:\/\s*day|per\s+day)\b/i);
+  if (!match) return undefined;
+  const converted = convertDoseLimit(Number(match[1].replace(/,/g, "")), match[2], targetUnit);
+  if (converted === undefined || !Number.isFinite(converted) || converted <= 0) return undefined;
+  return converted * (match[3] ? weightKg : 1);
+}
+
+function formatDoseNumber(value: number): string {
+  return String(Number(value.toFixed(3)));
+}
+
+function hasValidAge(ageMonths: number | undefined): ageMonths is number {
+  return ageMonths !== undefined && Number.isFinite(ageMonths) && ageMonths >= 0;
+}
+
+function isInAgeBand(
+  ageMonths: number,
+  band: Pick<AgeSpecificDoseLimit, "minAgeMonths" | "maxAgeMonths" | "minAgeExclusive" | "maxAgeExclusive">
+): boolean {
+  if (band.minAgeMonths !== undefined) {
+    if (band.minAgeExclusive ? ageMonths <= band.minAgeMonths : ageMonths < band.minAgeMonths) return false;
+  }
+  if (band.maxAgeMonths !== undefined) {
+    if (band.maxAgeExclusive ? ageMonths >= band.maxAgeMonths : ageMonths > band.maxAgeMonths) return false;
+  }
+  return true;
+}
+
+function normalizeFluid(fluid: string): string {
+  const normalized = fluid.trim().toUpperCase().replace(/\s+/g, "");
+  if (["D10", "D10W", "DEXTROSE10%", "DEXTROSE10%W"].includes(normalized)) return "D10W";
+  if (["D5", "D5W", "DEXTROSE5%", "DEXTROSE5%W"].includes(normalized)) return "D5W";
+  if (["NS", "0.9%NACL", "NACL0.9%", "NORMALSALINE", "SODIUMCHLORIDE0.9%"].includes(normalized)) return "NS";
+  return normalized;
+}
+
+export function getDoseCompatibility(
+  doseRange: DoseRange,
+  ageMonths: number | undefined,
+  fluid: string | undefined
+): { status: CompatibilityStatus; message: string } {
+  if (!hasValidAge(ageMonths)) {
+    return { status: "unknown", message: "Enter a valid patient age to check compatibility." };
+  }
+  if (!fluid?.trim()) {
+    return { status: "unknown", message: "Select a carrier fluid to check compatibility." };
+  }
+
+  const matchingRule = (doseRange.compatibilityRules ?? []).find(
+    (rule) =>
+      normalizeFluid(rule.fluid) === normalizeFluid(fluid) &&
+      isInAgeBand(ageMonths, rule)
+  );
+  if (!matchingRule) {
+    return {
+      status: "unknown",
+      message: "No compatibility rule is recorded for this age and fluid. Verify before administration.",
+    };
+  }
+  return {
+    status: matchingRule.status,
+    message:
+      matchingRule.guidance ??
+      (matchingRule.status === "compatible"
+        ? "Listed as compatible for this patient age."
+        : "Listed as incompatible for this patient age."),
+  };
+}
+
+function formatAgeBoundary(months: number): string {
+  if (months >= 12 && months % 12 === 0) {
+    const years = months / 12;
+    return `${years} ${years === 1 ? "year" : "years"}`;
+  }
+  return `${months} ${months === 1 ? "month" : "months"}`;
+}
+
+export function getDoseAgeRestrictionLabel(doseRange: DoseRange): string | undefined {
+  const restrictions: string[] = [];
+  if (doseRange.minAgeMonths !== undefined) {
+    restrictions.push(
+      `${doseRange.minAgeExclusive ? "older than" : "at least"} ${formatAgeBoundary(doseRange.minAgeMonths)}`
+    );
+  }
+  if (doseRange.maxAgeMonths !== undefined) {
+    restrictions.push(
+      `${doseRange.maxAgeExclusive ? "younger than" : "up to"} ${formatAgeBoundary(doseRange.maxAgeMonths)}`
+    );
+  }
+  return restrictions.length > 0 ? `Age: ${restrictions.join(" and ")}` : undefined;
+}
+
 export function calculateDose(
   doseRange: DoseRange,
-  weightKg: number
-): { dose: string; range: string; exceedsAdultMax?: boolean; adultMaxLabel?: string } {
+  weightKg: number,
+  ageMonths?: number,
+  fluid?: string
+): {
+  dose: string;
+  range: string;
+  exceedsAdultMax?: boolean;
+  adultMaxLabel?: string;
+  ageWarning?: string;
+  compatibilityStatus?: CompatibilityStatus;
+  compatibilityMessage?: string;
+} {
+  const ageRestrictionLabel = getDoseAgeRestrictionLabel(doseRange);
+  if (ageRestrictionLabel && !hasValidAge(ageMonths)) {
+    return {
+      dose: "—",
+      range: "Age required",
+      ageWarning: `Enter a valid age to check this dose restriction (${ageRestrictionLabel.replace(/^Age: /, "")}).`,
+    };
+  }
+  if (ageRestrictionLabel && hasValidAge(ageMonths) && !isInAgeBand(ageMonths, doseRange)) {
+    return {
+      dose: "—",
+      range: "Outside recommended age range",
+      ageWarning: `Not recommended for this age. ${ageRestrictionLabel}.`,
+    };
+  }
+
+  if (doseRange.compatibilityRules?.length) {
+    const compatibility = getDoseCompatibility(doseRange, ageMonths, fluid);
+    if (compatibility.status !== "compatible") {
+      return {
+        dose: "—",
+        range: `Compatibility ${compatibility.status}`,
+        compatibilityStatus: compatibility.status,
+        compatibilityMessage: compatibility.message,
+      };
+    }
+  }
+
   if (!doseRange.perKg) {
     const val = doseRange.value !== undefined
       ? doseRange.value
@@ -1749,38 +1996,80 @@ export function calculateDose(
     return { dose: rangeStr, range: "(fixed dose)" };
   }
 
-  const unitStr = doseRange.unit.replace("/kg", "").replace("kg", "");
+  if (!Number.isFinite(weightKg) || weightKg <= 0) {
+    return { dose: "—", range: "Enter a valid positive weight" };
+  }
+
+  const unitStr = doseRange.unit.replace(/\/kg/g, "").replace(/kg/g, "").trim();
+  const ageLimits = doseRange.ageSpecificMaxDose ?? [];
+  const selectedAgeLimit = hasValidAge(ageMonths)
+    ? ageLimits.find((limit) => isInAgeBand(ageMonths, limit))
+    : undefined;
+  const fallbackAgeLimit =
+    ageLimits.length > 0
+      ? [...ageLimits].sort((a, b) => a.maxDose - b.maxDose)[0]
+      : undefined;
+  const ageLimit = selectedAgeLimit ?? fallbackAgeLimit;
+  const ageWarning =
+    ageLimits.length > 0 && !selectedAgeLimit && fallbackAgeLimit
+      ? hasValidAge(ageMonths)
+        ? `No age-specific limit matches this age. The lowest listed cap (${formatDoseNumber(fallbackAgeLimit.maxDose)} ${unitStr}, ${fallbackAgeLimit.label}) is applied; verify before administration.`
+        : `Age is missing or invalid. The lowest listed cap (${formatDoseNumber(fallbackAgeLimit.maxDose)} ${unitStr}, ${fallbackAgeLimit.label}) is applied; confirm the patient's age before administration.`
+      : undefined;
+  const limits = [
+    ageLimit?.maxDose,
+    doseRange.maxSingleDose_num,
+    doseRange.adultMaxDose_num,
+    doseRange.maxDailyDose_num,
+    doseRange.maxDailyDosePerKg_num !== undefined
+      ? doseRange.maxDailyDosePerKg_num * weightKg
+      : undefined,
+    parseTextDoseLimit(doseRange.maxDose, unitStr, weightKg),
+    parseDailyLimit(doseRange.frequency, unitStr, weightKg),
+    parseDailyLimit(doseRange.notes, unitStr, weightKg),
+  ].filter((limit): limit is number => limit !== undefined && Number.isFinite(limit) && limit > 0);
+  const doseCap = limits.length > 0 ? Math.min(...limits) : undefined;
+
+  const formatCalculatedDose = (rawDose: number) => {
+    const cappedDose = doseCap === undefined ? rawDose : Math.min(rawDose, doseCap);
+    return {
+      value: cappedDose,
+      exceeded: doseCap !== undefined && rawDose > doseCap,
+    };
+  };
+
+  const capMessage = (exceeded: boolean) =>
+    exceeded && doseCap !== undefined
+      ? `Maximum dose reached — capped at ${formatDoseNumber(doseCap)} ${unitStr}. Verify the prescribed interval and daily total.`
+      : undefined;
 
   if (doseRange.value !== undefined) {
-    const calc = +(doseRange.value * weightKg).toFixed(3);
-    const exceedsAdultMax =
-      doseRange.adultMaxDose_num !== undefined && calc > doseRange.adultMaxDose_num;
-    const cappedDose = exceedsAdultMax ? doseRange.adultMaxDose_num : calc;
+    const rawDose = doseRange.value * weightKg;
+    const result = formatCalculatedDose(rawDose);
     return {
-      dose: `${cappedDose} ${unitStr}`,
+      dose: `${formatDoseNumber(result.value)} ${unitStr}`,
       range: `(${doseRange.value} ${doseRange.unit})`,
-      exceedsAdultMax,
-      adultMaxLabel: exceedsAdultMax
-        ? `Adult max: ${doseRange.adultMaxDose_num} ${unitStr} — dose capped`
-        : undefined,
+      exceedsAdultMax: result.exceeded,
+      adultMaxLabel: capMessage(result.exceeded),
+      ageWarning,
     };
   }
 
   if (doseRange.min !== undefined && doseRange.max !== undefined) {
-    const calcMin = +(doseRange.min * weightKg).toFixed(3);
-    const calcMax = +(doseRange.max * weightKg).toFixed(3);
-    const exceedsAdultMax =
-      doseRange.adultMaxDose_num !== undefined && calcMax > doseRange.adultMaxDose_num;
-    const displayMax = exceedsAdultMax
-      ? doseRange.adultMaxDose_num
-      : calcMax;
+    const rawMin = doseRange.min * weightKg;
+    const rawMax = doseRange.max * weightKg;
+    const resultMin = formatCalculatedDose(rawMin);
+    const resultMax = formatCalculatedDose(rawMax);
+    const exceedsMaximum = resultMax.exceeded;
+    const doseText = resultMin.value === resultMax.value
+      ? `${formatDoseNumber(resultMax.value)} ${unitStr}`
+      : `${formatDoseNumber(resultMin.value)} – ${formatDoseNumber(resultMax.value)} ${unitStr}`;
     return {
-      dose: `${calcMin} – ${displayMax} ${unitStr}`,
+      dose: doseText,
       range: `(${doseRange.min} – ${doseRange.max} ${doseRange.unit})`,
-      exceedsAdultMax,
-      adultMaxLabel: exceedsAdultMax
-        ? `Adult max: ${doseRange.adultMaxDose_num} ${unitStr} — upper limit capped`
-        : undefined,
+      exceedsAdultMax: exceedsMaximum,
+      adultMaxLabel: capMessage(exceedsMaximum),
+      ageWarning,
     };
   }
   return { dose: "—", range: "—" };
