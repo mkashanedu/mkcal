@@ -1,0 +1,3 @@
+[build]
+  command = "pnpm install && cd artifacts/picu-drug-dose && npx expo export && sed -i 's|</head>|<link rel=\"manifest\" href=\"/manifest.json\" /></head>|' dist/index.html"
+  publish = "artifacts/picu-drug-dose/dist"
