@@ -1,3 +1,8 @@
 [build]
   command = "pnpm install && cd artifacts/picu-drug-dose && npx expo export && sed -i 's|</head>|<link rel=\"manifest\" href=\"/manifest.json\" /></head>|' dist/index.html"
   publish = "artifacts/picu-drug-dose/dist"
+
+[[redirects]]
+  from = "/assets/__node_modules/.pnpm/@expo+vector-icons@15.1.1_expo-font@14.0.11_expo@54.0.33_react-native@0.81.5_@babel+cor_578ada966b57244f0fb5b55de8754f09/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/*"
+  to = "/font-assets/:splat"
+  status = 200
