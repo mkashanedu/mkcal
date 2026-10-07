@@ -17,7 +17,7 @@ import {
   FORMULARY_CATEGORIES,
   FORMULARY_DRUGS,
   FormularyCategory,
-} from "@/data/formularyData";
+} from "@/data/allFormularyDrugs";
 import { useTheme } from "@/context/ThemeContext";
 import { useWeight } from "@/context/WeightContext";
 
