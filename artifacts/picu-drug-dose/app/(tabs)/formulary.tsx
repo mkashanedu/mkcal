@@ -16,7 +16,7 @@ import Colors from "@/constants/colors";
 import { useTheme } from "@/context/ThemeContext";
 import { useDrawer } from "@/context/DrawerContext";
 import { useWeight, MIN_WEIGHT_KG, MAX_WEIGHT_KG } from "@/context/WeightContext";
-import { FORMULARY_CATEGORIES, FORMULARY_DRUGS, FormularyCategory } from "@/data/formularyData";
+import { FORMULARY_CATEGORIES, FORMULARY_DRUGS, FormularyCategory } from "@/data/allFormularyDrugs";
 import { ProfessionalFooter } from "@/components/ProfessionalFooter";
 
 export default function FormularyScreen() {
