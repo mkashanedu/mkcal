@@ -1390,6 +1390,12 @@ export const DRUGS: Drug[] = [
     doses: [
       { min: 20, max: 30, unit: "mcg/kg total loading", perKg: true, route: "IV", maxDose: "1000 mcg", label: "Total digitalizing dose (TDD) — IV", notes: "Give 50% TDD stat, then 25% at 8 hr and 25% at 16 hr; full digitalization over 24 hr" },
       { min: 5, max: 10, unit: "mcg/kg/day", perKg: true, route: "IV/PO", frequency: "Divided twice daily", label: "Maintenance", notes: "Start 12 hr after loading; level target 0.8–2 ng/mL" },
+      { min: 15, max: 20, unit: "mcg/kg total loading", perKg: true, route: "IV", label: "TDD — Premature neonate (HL)", notes: "Harriet Lane 24e: Premature TDD IV 15 (PO 20); maintenance IV 3–4 (PO 5) mcg/kg/day" },
+      { min: 20, max: 20, unit: "mcg/kg total loading", perKg: true, route: "IV", label: "TDD — Full-term neonate (HL)", notes: "Harriet Lane 24e: Full-term TDD IV 20 (PO 30); maintenance IV 6–8 (PO 8–10) mcg/kg/day" },
+      { min: 30, max: 40, unit: "mcg/kg total loading", perKg: true, route: "IV", label: "TDD — 1 mo to <2 yr (HL)", notes: "Harriet Lane 24e: TDD IV 30–40 (PO 40–50); maintenance IV 7.5–9 (PO 10–12) mcg/kg/day" },
+      { min: 20, max: 30, unit: "mcg/kg total loading", perKg: true, route: "IV", label: "TDD — 2 to 10 yr (HL)", notes: "Harriet Lane 24e: TDD IV 20–30 (PO 30–40); maintenance IV 6–8 (PO 8–10) mcg/kg/day" },
+      { min: 8, max: 12, unit: "mcg/kg total loading", perKg: true, route: "IV", label: "TDD — >10 yr, <100 kg (HL)", notes: "Harriet Lane 24e: TDD IV 8–12 (PO 10–15); maintenance IV 2–3 (PO 2.5–5) mcg/kg/day" },
+      
     ],
     warnings: ["Narrow therapeutic index — toxicity: bradycardia, AV block, vomiting, visual changes", "Hypokalemia increases toxicity — keep K+ > 3.5 mEq/L", "Digoxin immune Fab (Digibind) for toxicity"],
     formulations: ["0.25 mg/mL injection", "50 mcg/mL pediatric elixir", "62.5 mcg tablets"],
@@ -1398,7 +1404,7 @@ export const DRUGS: Drug[] = [
       { gfr: "< 30 mL/min/1.73m²", adjustment: "Reduce maintenance dose by 50%; every 36–48 hr; mandatory level monitoring" },
     ],
     monitoring: ["ECG (PR interval, ST changes)", "Serum potassium (keep K+ > 3.5 mEq/L)", "Digoxin levels 6–8 hr post-dose (target 0.8–2 ng/mL)", "Mg, Ca, renal function"],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
   {
     id: "propranolol",
