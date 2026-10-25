@@ -21,3 +21,8 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
 
 export { FORMULARY_CATEGORIES };
 export type { FormularyDrug, FormularyCategory };
+
+// Re-export the dose-calculation helpers: the drug detail page imports them
+// from this file, but they are defined in formularyData.ts. Without this
+// re-export they are undefined at runtime and the detail page crashes.
+export { calculateFormularyDose, mgToVolumeMl, type FormularyDoseFormula } from './formularyData';
