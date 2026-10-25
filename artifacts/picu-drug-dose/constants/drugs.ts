@@ -647,7 +647,7 @@ export const DRUGS: Drug[] = [
       "No analgesic or sedative effect — ensure adequate sedation before paralysis",
       "Advantage: Hofmann elimination — safe in severe renal AND hepatic failure",
     ],
-    formulations: ["10 mg/mL (2.5 mL = 25 mg amp)", "10 mg/mL (5 mL = 50 mg vial)"],
+    formulations: ["2 mg/mL (5 mL = 10 mg vial)", "2 mg/mL (12.5 mL = 25 mg vial)", "2 mg/mL (25 mL = 50 mg vial)"],
     renalAdjustment: [
       { gfr: "Any (including dialysis)", adjustment: "No dose adjustment needed — Hofmann elimination is spontaneous (pH/temperature-dependent), not organ-dependent. Preferred NMBD in multi-organ failure." },
     ],
