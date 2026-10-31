@@ -8,12 +8,12 @@ import {
   StyleSheet,
   Text,
   View,
-  useColorScheme,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Colors from "@/constants/colors";
 import { CATEGORIES, DRUGS, calculateDose } from "@/constants/allDrugs";
+import { useTheme } from "@/context/ThemeContext";
 import { useWeight } from "@/context/WeightContext";
 import { useFavorites } from "@/context/FavoritesContext";
 import { StarButton } from "@/components/StarButton";
@@ -21,10 +21,15 @@ import { StarButton } from "@/components/StarButton";
 export default function DrugDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { isDark } = useTheme();
   const colors = Colors.light;
-  const { weight } = useWeight();
+  const { weight, age, ageUnit, ageConfirmed } = useWeight();
+  const ageMonths =
+    ageConfirmed && Number.isFinite(age) && age > 0
+      ? ageUnit === "years"
+        ? age * 12
+        : age
+      : undefined;
   const { isFav, toggleFav } = useFavorites();
   const weightValid = Number.isFinite(weight) && weight > 0;
 
@@ -41,6 +46,11 @@ export default function DrugDetailScreen() {
   }
 
   const cat = CATEGORIES[drug.category];
+  // Category colors are tuned for light backgrounds; in dark mode they are
+  // lightened so dose values and badges stay readable on the dark cards.
+  const themed = (hex: string) => (isDark ? lightenColor(hex, 0.5) : hex);
+  const accent = themed(cat.color);
+  const danger = themed(colors.danger);
   const f = isFav(drug.id);
   const topOffset = Platform.OS === "web" ? 67 : insets.top;
 
@@ -117,7 +127,7 @@ export default function DrugDetailScreen() {
           <Text
             style={[
               styles.weightBannerText,
-              { color: isDark ? "#8892B0" : "#4A5568", fontFamily: "Inter_400Regular" },
+              { color: isDark ? "#A8B8DC" : "#4A5568", fontFamily: "Inter_400Regular" },
             ]}
           >
             {weightValid ? "Calculated for" : "Weight invalid — calculations disabled"}
@@ -141,10 +151,10 @@ export default function DrugDetailScreen() {
         )}
 
         {/* Doses */}
-        <SectionHeader title="Dosing" icon="activity" color={cat.color} isDark={isDark} />
+        <SectionHeader title="Dosing" icon="activity" color={accent} isDark={isDark} />
         <View style={[styles.card, { backgroundColor: isDark ? "#112240" : "#FFFFFF" }]}>
           {drug.doses.map((dose, i) => {
-            const calc = calculateDose(dose, weight);
+            const calc = calculateDose(dose, weight, ageMonths);
             return (
               <View
                 key={i}
@@ -157,36 +167,36 @@ export default function DrugDetailScreen() {
                 ]}
               >
                 <View style={styles.doseTop}>
-                  <View style={[styles.routeBadge, { backgroundColor: cat.color + "22" }]}>
-                    <Feather name="arrow-right-circle" size={12} color={cat.color} />
-                    <Text style={[styles.routeText, { color: cat.color, fontFamily: "Inter_600SemiBold" }]}>
+                  <View style={[styles.routeBadge, { backgroundColor: accent + "22" }]}>
+                    <Feather name="arrow-right-circle" size={12} color={accent} />
+                    <Text style={[styles.routeText, { color: accent, fontFamily: "Inter_600SemiBold" }]}>
                       {dose.route}
                     </Text>
                   </View>
                   {dose.frequency && (
-                    <Text style={[styles.freqText, { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" }]}>
+                    <Text style={[styles.freqText, { color: isDark ? "#A8B8DC" : "#8A9BB0", fontFamily: "Inter_400Regular" }]}>
                       {dose.frequency}
                     </Text>
                   )}
                 </View>
                 <View style={styles.doseCalcRow}>
                   <View>
-                    <Text style={[styles.calcLabel, { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" }]}>
+                    <Text style={[styles.calcLabel, { color: isDark ? "#A8B8DC" : "#8A9BB0", fontFamily: "Inter_400Regular" }]}>
                       Calculated Dose
                     </Text>
-                    <Text style={[styles.calcValue, { color: cat.color, fontFamily: "Inter_700Bold" }]}>
+                    <Text style={[styles.calcValue, { color: accent, fontFamily: "Inter_700Bold" }]}>
                       {calc.dose}
                     </Text>
-                    <Text style={[styles.perKgText, { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" }]}>
+                    <Text style={[styles.perKgText, { color: isDark ? "#A8B8DC" : "#8A9BB0", fontFamily: "Inter_400Regular" }]}>
                       {calc.range}
                     </Text>
                   </View>
                   {dose.maxDose && (
-                    <View style={[styles.maxDoseBox, { backgroundColor: colors.danger + "15" }]}>
-                      <Text style={[styles.maxDoseLabel, { color: colors.danger, fontFamily: "Inter_500Medium" }]}>
+                    <View style={[styles.maxDoseBox, { backgroundColor: danger + "15" }]}>
+                      <Text style={[styles.maxDoseLabel, { color: danger, fontFamily: "Inter_500Medium" }]}>
                         Max Dose
                       </Text>
-                      <Text style={[styles.maxDoseValue, { color: colors.danger, fontFamily: "Inter_700Bold" }]}>
+                      <Text style={[styles.maxDoseValue, { color: danger, fontFamily: "Inter_700Bold" }]}>
                         {dose.maxDose}
                       </Text>
                     </View>
@@ -202,8 +212,8 @@ export default function DrugDetailScreen() {
                 )}
                 {dose.notes && (
                   <View style={[styles.noteBox, { backgroundColor: isDark ? "#0A192F" : "#F4F9FC" }]}>
-                    <Feather name="info" size={12} color={isDark ? "#8892B0" : "#8A9BB0"} />
-                    <Text style={[styles.noteText, { color: isDark ? "#8892B0" : "#4A5568", fontFamily: "Inter_400Regular" }]}>
+                    <Feather name="info" size={12} color={isDark ? "#A8B8DC" : "#8A9BB0"} />
+                    <Text style={[styles.noteText, { color: isDark ? "#A8B8DC" : "#4A5568", fontFamily: "Inter_400Regular" }]}>
                       {dose.notes}
                     </Text>
                   </View>
@@ -214,11 +224,11 @@ export default function DrugDetailScreen() {
         </View>
 
         {/* Indications */}
-        <SectionHeader title="Indications" icon="check-circle" color={cat.color} isDark={isDark} />
+        <SectionHeader title="Indications" icon="check-circle" color={accent} isDark={isDark} />
         <View style={[styles.card, { backgroundColor: isDark ? "#112240" : "#FFFFFF" }]}>
           {drug.indications.map((ind, i) => (
             <View key={i} style={[styles.listRow, { borderTopWidth: i === 0 ? 0 : 1, borderTopColor: isDark ? "#0A192F" : "#EBF5FB" }]}>
-              <View style={[styles.listDot, { backgroundColor: cat.color }]} />
+              <View style={[styles.listDot, { backgroundColor: accent }]} />
               <Text style={[styles.listText, { color: isDark ? "#CCD6F6" : "#0D1B2A", fontFamily: "Inter_400Regular" }]}>
                 {ind}
               </Text>
@@ -229,11 +239,11 @@ export default function DrugDetailScreen() {
         {/* Contraindications */}
         {drug.contraindications && drug.contraindications.length > 0 && (
           <>
-            <SectionHeader title="Contraindications" icon="x-circle" color={colors.danger} isDark={isDark} />
+            <SectionHeader title="Contraindications" icon="x-circle" color={danger} isDark={isDark} />
             <View style={[styles.card, { backgroundColor: isDark ? "#112240" : "#FFFFFF" }]}>
               {drug.contraindications.map((c, i) => (
                 <View key={i} style={[styles.listRow, { borderTopWidth: i === 0 ? 0 : 1, borderTopColor: isDark ? "#0A192F" : "#EBF5FB" }]}>
-                  <View style={[styles.listDot, { backgroundColor: colors.danger }]} />
+                  <View style={[styles.listDot, { backgroundColor: danger }]} />
                   <Text style={[styles.listText, { color: isDark ? "#CCD6F6" : "#0D1B2A", fontFamily: "Inter_400Regular" }]}>
                     {c}
                   </Text>
@@ -246,11 +256,11 @@ export default function DrugDetailScreen() {
         {/* Warnings */}
         {drug.warnings && drug.warnings.length > 0 && (
           <>
-            <SectionHeader title="Warnings" icon="alert-triangle" color="#E67E22" isDark={isDark} />
+            <SectionHeader title="Warnings" icon="alert-triangle" color={themed("#E67E22")} isDark={isDark} />
             <View style={[styles.card, { backgroundColor: isDark ? "#112240" : "#FFFFFF" }]}>
               {drug.warnings.map((w, i) => (
                 <View key={i} style={[styles.listRow, { borderTopWidth: i === 0 ? 0 : 1, borderTopColor: isDark ? "#0A192F" : "#EBF5FB" }]}>
-                  <Feather name="alert-triangle" size={14} color="#E67E22" />
+                  <Feather name="alert-triangle" size={14} color={themed("#E67E22")} />
                   <Text style={[styles.listText, { color: isDark ? "#CCD6F6" : "#0D1B2A", fontFamily: "Inter_400Regular" }]}>
                     {w}
                   </Text>
@@ -263,12 +273,12 @@ export default function DrugDetailScreen() {
         {/* Formulations */}
         {drug.formulations && drug.formulations.length > 0 && (
           <>
-            <SectionHeader title="Formulations" icon="package" color={isDark ? "#8892B0" : "#8A9BB0"} isDark={isDark} />
+            <SectionHeader title="Formulations" icon="package" color={isDark ? "#A8B8DC" : "#8A9BB0"} isDark={isDark} />
             <View style={[styles.card, { backgroundColor: isDark ? "#112240" : "#FFFFFF" }]}>
               <View style={styles.formulationsRow}>
                 {drug.formulations.map((f, i) => (
                   <View key={i} style={[styles.formulationTag, { backgroundColor: isDark ? "#0A192F" : "#EBF5FB" }]}>
-                    <Text style={[styles.formulationText, { color: isDark ? "#8892B0" : "#4A5568", fontFamily: "Inter_400Regular" }]}>
+                    <Text style={[styles.formulationText, { color: isDark ? "#A8B8DC" : "#4A5568", fontFamily: "Inter_400Regular" }]}>
                       {f}
                     </Text>
                   </View>
@@ -281,11 +291,11 @@ export default function DrugDetailScreen() {
         {/* Renal Dose Adjustments */}
         {drug.renalAdjustment && drug.renalAdjustment.length > 0 && (
           <>
-            <SectionHeader title="Renal Dose Adjustment" icon="filter" color="#0C7B9C" isDark={isDark} />
+            <SectionHeader title="Renal Dose Adjustment" icon="filter" color={themed("#0C7B9C")} isDark={isDark} />
             <View style={[styles.card, { backgroundColor: isDark ? "#112240" : "#FFFFFF", overflow: "visible" }]}>
-              <View style={[styles.renalHeader, { backgroundColor: "#0C7B9C" + "18", borderBottomWidth: 1, borderBottomColor: isDark ? "#233554" : "#E8F4F8" }]}>
-                <Text style={[styles.renalHeaderCell, { color: "#0C7B9C", flex: 1, fontFamily: "Inter_600SemiBold" }]}>GFR (mL/min/1.73m²)</Text>
-                <Text style={[styles.renalHeaderCell, { color: "#0C7B9C", flex: 2, fontFamily: "Inter_600SemiBold" }]}>Adjustment</Text>
+              <View style={[styles.renalHeader, { backgroundColor: themed("#0C7B9C") + "18", borderBottomWidth: 1, borderBottomColor: isDark ? "#233554" : "#E8F4F8" }]}>
+                <Text style={[styles.renalHeaderCell, { color: themed("#0C7B9C"), flex: 1, fontFamily: "Inter_600SemiBold" }]}>GFR (mL/min/1.73m²)</Text>
+                <Text style={[styles.renalHeaderCell, { color: themed("#0C7B9C"), flex: 2, fontFamily: "Inter_600SemiBold" }]}>Adjustment</Text>
               </View>
               {drug.renalAdjustment.map((r, i) => (
                 <View
@@ -296,7 +306,7 @@ export default function DrugDetailScreen() {
                   ]}
                 >
                   <View style={[styles.renalGfrBox, { flex: 1 }]}>
-                    <Text style={[styles.renalGfr, { color: "#0C7B9C", fontFamily: "Inter_600SemiBold" }]}>
+                    <Text style={[styles.renalGfr, { color: themed("#0C7B9C"), fontFamily: "Inter_600SemiBold" }]}>
                       {r.gfr}
                     </Text>
                   </View>
@@ -312,11 +322,11 @@ export default function DrugDetailScreen() {
         {/* Monitoring Parameters */}
         {drug.monitoring && drug.monitoring.length > 0 && (
           <>
-            <SectionHeader title="Monitoring" icon="eye" color="#6B2D8E" isDark={isDark} />
+            <SectionHeader title="Monitoring" icon="eye" color={themed("#6B2D8E")} isDark={isDark} />
             <View style={[styles.card, { backgroundColor: isDark ? "#112240" : "#FFFFFF" }]}>
               {drug.monitoring.map((m, i) => (
                 <View key={i} style={[styles.listRow, { borderTopWidth: i === 0 ? 0 : 1, borderTopColor: isDark ? "#0A192F" : "#EBF5FB" }]}>
-                  <Feather name="check" size={14} color="#6B2D8E" />
+                  <Feather name="check" size={14} color={themed("#6B2D8E")} />
                   <Text style={[styles.listText, { color: isDark ? "#CCD6F6" : "#0D1B2A", fontFamily: "Inter_400Regular" }]}>
                     {m}
                   </Text>
@@ -329,8 +339,8 @@ export default function DrugDetailScreen() {
         {/* Reference */}
         {drug.reference && (
           <View style={styles.referenceRow}>
-            <Feather name="book-open" size={12} color={isDark ? "#8892B0" : "#8A9BB0"} />
-            <Text style={[styles.referenceText, { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" }]}>
+            <Feather name="book-open" size={12} color={isDark ? "#A8B8DC" : "#8A9BB0"} />
+            <Text style={[styles.referenceText, { color: isDark ? "#A8B8DC" : "#8A9BB0", fontFamily: "Inter_400Regular" }]}>
               {drug.reference}
             </Text>
           </View>
@@ -338,6 +348,17 @@ export default function DrugDetailScreen() {
       </ScrollView>
     </View>
   );
+}
+
+function lightenColor(hex: string, amount: number): string {
+  const n = hex.replace("#", "");
+  const full = n.length === 3 ? n.split("").map((c) => c + c).join("") : n;
+  const num = parseInt(full, 16);
+  const mix = (c: number) => Math.round(c + (255 - c) * amount);
+  const r = mix((num >> 16) & 255);
+  const g = mix((num >> 8) & 255);
+  const b = mix(num & 255);
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 }
 
 function SectionHeader({
