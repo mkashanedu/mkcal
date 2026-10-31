@@ -13,7 +13,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Colors from "@/constants/colors";
-import { CATEGORIES, DRUGS, calculateDose } from "@/constants/drugs";
+import { CATEGORIES, DRUGS, calculateDose } from "@/constants/allDrugs";
 import { useWeight } from "@/context/WeightContext";
 import { useFavorites } from "@/context/FavoritesContext";
 import { StarButton } from "@/components/StarButton";

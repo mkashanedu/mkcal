@@ -13,7 +13,19 @@ export type DrugCategory =
   | "antifungal"
   | "steroid"
   | "vitamin"
-  | "gastrointestinal";
+  | "gastrointestinal"
+  | "antiviral"
+  | "antiparasitic"
+  | "antihistamine"
+  | "diuretic"
+  | "endocrine"
+  | "psychiatric"
+  | "hematologic"
+  | "antidote"
+  | "dermatologic"
+  | "immunosuppressant"
+  | "ophthalmic"
+  | "other";
 
 export type CompatibilityStatus = "compatible" | "incompatible" | "unknown";
 
@@ -109,6 +121,18 @@ export const CATEGORIES: Record<
   steroid: { label: "Steroids", icon: "sun", color: "#C06000" },
   vitamin: { label: "Vitamins / Minerals", icon: "plus-circle", color: "#1A7A40" },
   gastrointestinal: { label: "Gastrointestinal", icon: "thermometer", color: "#0E7490" },
+  antiviral: { label: "Antivirals", icon: "hexagon", color: "#0F766E" },
+  antiparasitic: { label: "Antiparasitics", icon: "slash", color: "#65A30D" },
+  antihistamine: { label: "Antihistamines", icon: "feather", color: "#9333EA" },
+  diuretic: { label: "Diuretics", icon: "droplets", color: "#0284C7" },
+  endocrine: { label: "Endocrine", icon: "refresh-cw", color: "#B45309" },
+  psychiatric: { label: "Psychiatric", icon: "smile", color: "#475569" },
+  hematologic: { label: "Hematologic", icon: "circle", color: "#B91C1C" },
+  antidote: { label: "Antidotes", icon: "life-buoy", color: "#15803D" },
+  dermatologic: { label: "Dermatologic", icon: "layers", color: "#C2410C" },
+  immunosuppressant: { label: "Immunosuppressants", icon: "lock", color: "#6D28D9" },
+  ophthalmic: { label: "Ophthalmic", icon: "eye", color: "#0D9488" },
+  other: { label: "Other", icon: "package", color: "#64748B" },
 };
 
 function carrierFluidCompatibilityRules(guidance: string): FluidCompatibilityRule[] {
@@ -1993,6 +2017,9 @@ export function calculateDose(
   }
 
   if (!doseRange.perKg) {
+    if (doseRange.value === undefined && doseRange.min === undefined && doseRange.max === undefined) {
+      return { dose: "See notes", range: "(non-numeric dose — see notes)" };
+    }
     const val = doseRange.value !== undefined
       ? doseRange.value
       : doseRange.min !== undefined ? doseRange.min : 0;

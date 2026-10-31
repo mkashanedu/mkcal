@@ -18,7 +18,7 @@ export default function Root({ children }: { children: React.ReactNode }) {
         />
         <meta
           name="description"
-          content="PeadsCal — Neonatal, Pediatric & Adult Dose Calculator for clinical professionals. 96+ medications, PICU protocols, offline-capable."
+          content="PeadsCal — Neonatal, Pediatric & Adult Dose Calculator for clinical professionals. 478 medications, PICU protocols, offline-capable."
         />
 
         {/* PWA manifest — display: standalone */}
@@ -47,7 +47,7 @@ export default function Root({ children }: { children: React.ReactNode }) {
         <meta property="og:title" content="PeadsCal — Pediatric Drug Dose Calculator" />
         <meta
           property="og:description"
-          content="96+ medications, weight-based dosing, emergency resuscitation, infusion calculator, ventilator management — for PICU professionals."
+          content="478 medications, weight-based dosing, emergency resuscitation, infusion calculator, ventilator management — for PICU professionals."
         />
         <meta property="og:image" content="/icon.png" />
 

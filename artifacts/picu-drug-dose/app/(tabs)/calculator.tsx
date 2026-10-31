@@ -14,7 +14,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Colors from "@/constants/colors";
-import { CATEGORIES, DRUGS, DrugCategory } from "@/constants/drugs";
+import { CATEGORIES, DRUGS, DrugCategory } from "@/constants/allDrugs";
 import { useTheme } from "@/context/ThemeContext";
 import { useFavorites } from "@/context/FavoritesContext";
 import { MAX_WEIGHT_KG, MIN_WEIGHT_KG, useWeight } from "@/context/WeightContext";
@@ -180,7 +180,7 @@ export default function CalculatorScreen() {
                 { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" },
               ]}
             >
-              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 96+ drugs
+              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 478 drugs
             </Text>
           </View>
           <TouchableOpacity

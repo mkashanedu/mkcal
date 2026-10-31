@@ -174,7 +174,7 @@ export default function ToolsScreen() {
           <View style={{ flex: 1 }}>
             <Text style={[styles.headerTitle, { color: textPrimary }]}>MKashanEdu</Text>
             <Text style={[styles.headerSub, { color: textMuted }]}>
-              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 96+ drugs
+              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 478 drugs
             </Text>
           </View>
           <TouchableOpacity

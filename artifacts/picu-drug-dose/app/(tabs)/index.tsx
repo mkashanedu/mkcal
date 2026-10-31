@@ -15,7 +15,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Colors from "@/constants/colors";
-import { CATEGORIES, DRUGS } from "@/constants/drugs";
+import { CATEGORIES, DRUGS } from "@/constants/allDrugs";
 import { INFUSION_DRUGS } from "@/constants/infusions";
 import { useDrawer } from "@/context/DrawerContext";
 import { useTheme } from "@/context/ThemeContext";
@@ -387,7 +387,7 @@ export default function HomeScreen() {
             <View style={styles.mainButtonText}>
               <Text style={[styles.mainButtonTitle, { color: tp }]}>Dose Calculator</Text>
               <Text style={[styles.mainButtonDesc, { color: tm }]}>
-                Weight-based drug doses · 96+ medications
+                Weight-based drug doses · 478 medications
               </Text>
             </View>
             <Feather name="chevron-right" size={22} color={colors.tint} />
