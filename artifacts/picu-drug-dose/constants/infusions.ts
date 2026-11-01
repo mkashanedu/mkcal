@@ -1150,6 +1150,147 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
     ],
     reference: "ISPAD 2022 | Harriet Lane 23e",
   },
+
+  // ══════════════════════════════════════════════════════════════
+  //  ADDED 2026-11-01 — audit of 478 calculator drugs vs infusion list
+  //  Doses verified: CHEO / Queensland / ANMF / S4S monographs
+  // ══════════════════════════════════════════════════════════════
+  {
+    id: "alprostadil",
+    name: "Alprostadil (PGE1)",
+    category: "Prostaglandin",
+    primaryUnit: "mcg/kg/min",
+    minDose: 0.005,
+    maxDose: 0.1,
+    typicalDose: 0.01,
+    doseStep: 0.005,
+    color: "#E67E22",
+    indication: "Duct-dependent congenital heart disease — maintain ductus arteriosus patency until surgery",
+    vialConc_per_mL: 0.5,
+    vialLabel: "500 mcg/mL ampoule (Prostin VR)",
+    diluent: "NS or D5W",
+    standardConcentrations: [
+      {
+        label: "5 mcg/mL — 250 mcg in 50 mL",
+        totalDrug_mg: 250, totalVolume_mL: 50, concentration_per_mL: 5, unit: "mcg",
+      },
+      {
+        label: "10 mcg/mL — 500 mcg in 50 mL",
+        totalDrug_mg: 500, totalVolume_mL: 50, concentration_per_mL: 10, unit: "mcg",
+      },
+      {
+        label: "60 mcg/kg in 50 mL (weight-based) — 1 mL/hr = 20 ng/kg/min",
+        totalDrug_mg: -1, totalVolume_mL: 50, concentration_per_mL: -1, unit: "mcg",
+      },
+    ],
+    notes: "Start low (0.005–0.01 mcg/kg/min) and titrate to response; use the LOWEST effective dose. Higher starting doses (0.05) only on cardiology advice. Effect is lost within minutes of stopping.",
+    warnings: [
+      "APNEA — commonest in the first hour and in babies < 2 kg; have airway/ventilation ready",
+      "NEVER interrupt the infusion — very short half-life, ductus can close",
+      "Dedicated line preferred; hypotension, fever and flushing are dose-related",
+    ],
+    reference: "CHEO | Queensland Neonatal | ANMF",
+  },
+  {
+    id: "esmolol",
+    name: "Esmolol",
+    category: "Antiarrhythmic",
+    primaryUnit: "mcg/kg/min",
+    minDose: 25,
+    maxDose: 500,
+    typicalDose: 100,
+    doseStep: 25,
+    color: "#8E44AD",
+    indication: "SVT, post-operative hypertension, hypercyanotic spells (cardiology advice)",
+    vialConc_per_mL: 10,
+    vialLabel: "10 mg/mL ampoule (Brevibloc 100 mg/10 mL)",
+    diluent: "Undiluted, or NS / D5W",
+    standardConcentrations: [
+      {
+        label: "Undiluted 10 mg/mL — 500 mg in 50 mL",
+        totalDrug_mg: 500, totalVolume_mL: 50, concentration_per_mL: 10, unit: "mg",
+      },
+      {
+        label: "20 mg/mL — 1000 mg in 50 mL (concentrated)",
+        totalDrug_mg: 1000, totalVolume_mL: 50, concentration_per_mL: 20, unit: "mg",
+      },
+    ],
+    notes: "Optional loading dose 100–500 mcg/kg IV over 1–2 min. Titrate in 25–50 mcg/kg/min steps every ≥5 min. Usual maintenance 50–200 mcg/kg/min; doses above 200 mcg/kg/min only with paediatric cardiology advice. Ultra-short acting (half-life ~9 min).",
+    warnings: [
+      "Central line preferred — vesicant at 10 mg/mL",
+      "Hypotension and bradycardia; avoid in decompensated heart failure and bronchospasm",
+      "Use only on paediatric cardiology recommendation",
+    ],
+    reference: "ANMF Esmolol 2023 | Harriet Lane",
+  },
+  {
+    id: "phenylephrine",
+    name: "Phenylephrine",
+    category: "Inotrope / Vasopressor",
+    primaryUnit: "mcg/kg/min",
+    alternateUnits: ["mcg/min", "mg/hr"],
+    minDose: 0.1,
+    maxDose: 5,
+    typicalDose: 0.5,
+    doseStep: 0.1,
+    color: "#2E86C1",
+    indication: "Hypotension with preserved contractility, hypercyanotic (Tet) spells, peri-arrest vasoplegia",
+    vialConc_per_mL: 10,
+    vialLabel: "10 mg/mL ampoule",
+    diluent: "NS or D5W",
+    standardConcentrations: [
+      {
+        label: "20 mcg/mL — 1 mg in 50 mL",
+        totalDrug_mg: 1, totalVolume_mL: 50, concentration_per_mL: 0.02, unit: "mg",
+      },
+      {
+        label: "40 mcg/mL — 2 mg in 50 mL",
+        totalDrug_mg: 2, totalVolume_mL: 50, concentration_per_mL: 0.04, unit: "mg",
+      },
+      {
+        label: "80 mcg/mL — 4 mg in 50 mL (concentrated)",
+        totalDrug_mg: 4, totalVolume_mL: 50, concentration_per_mL: 0.08, unit: "mg",
+      },
+    ],
+    notes: "Bolus: 5–20 mcg/kg IV every 10–15 min as needed. Pure alpha-agonist — raises afterload without inotropy; first-line infusion for hypercyanotic spells with fluids and knee-chest position.",
+    warnings: [
+      "Reflex bradycardia can occur",
+      "Central line preferred for infusion; extravasation causes tissue necrosis",
+    ],
+    reference: "Harriet Lane | Taketomo",
+  },
+  {
+    id: "isoproterenol",
+    name: "Isoproterenol",
+    category: "Inotrope / Vasopressor",
+    primaryUnit: "mcg/kg/min",
+    alternateUnits: ["mcg/min"],
+    minDose: 0.05,
+    maxDose: 2,
+    typicalDose: 0.1,
+    doseStep: 0.05,
+    color: "#C0392B",
+    indication: "Complete heart block / bradycardia unresponsive to atropine and pacing (post-cardiac surgery), refractory bronchospasm (rare)",
+    vialConc_per_mL: 0.2,
+    vialLabel: "0.2 mg/mL ampoule (Isuprel 1 mg/5 mL)",
+    diluent: "NS or D5W",
+    standardConcentrations: [
+      {
+        label: "20 mcg/mL — 1 mg in 50 mL",
+        totalDrug_mg: 1, totalVolume_mL: 50, concentration_per_mL: 0.02, unit: "mg",
+      },
+      {
+        label: "40 mcg/mL — 2 mg in 50 mL",
+        totalDrug_mg: 2, totalVolume_mL: 50, concentration_per_mL: 0.04, unit: "mg",
+      },
+    ],
+    notes: "Start 0.05–0.1 mcg/kg/min and titrate to heart rate/perfusion. Pure beta-agonist — chronotropy at the cost of myocardial oxygen demand; bridge to pacing in complete heart block.",
+    warnings: [
+      "Arrhythmias and myocardial ischemia — continuous ECG essential",
+      "Hypotension from beta-2 vasodilation at higher doses",
+    ],
+    reference: "PALS | Isuprel PI | Harriet Lane",
+  },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────

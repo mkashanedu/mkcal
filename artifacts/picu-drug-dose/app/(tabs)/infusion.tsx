@@ -87,7 +87,7 @@ export default function InfusionScreen() {
               MKashanEdu
             </Text>
             <Text style={[styles.headerSubtitle, { color: MUTED }]} numberOfLines={1}>
-              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 95+ drugs
+              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 479 drugs
             </Text>
           </View>
           <View style={styles.headerRight}>

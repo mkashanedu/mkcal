@@ -14,6 +14,16 @@ import { Platform } from "react-native";
 
 export type TextSize = "small" | "medium" | "large";
 
+/** Screen the app opens on at launch (user's choice in Settings). */
+export type StartupScreen = "home" | "calculator" | "emergency" | "formulary";
+
+export const STARTUP_SCREEN_OPTIONS: { key: StartupScreen; label: string }[] = [
+  { key: "home", label: "Home" },
+  { key: "calculator", label: "Calculator" },
+  { key: "emergency", label: "Emergency" },
+  { key: "formulary", label: "Formulary" },
+];
+
 export const TEXT_SCALE: Record<TextSize, number> = {
   small:  0.88,
   medium: 1.00,
@@ -29,6 +39,9 @@ interface PreferencesContextValue {
   /** Whether biometric unlock is enabled (native only) */
   biometricEnabled: boolean;
   setBiometricEnabled: (v: boolean) => void;
+  /** Screen shown first when the app launches */
+  startupScreen: StartupScreen;
+  setStartupScreen: (s: StartupScreen) => void;
   /** Whether the biometric preference has loaded from storage */
   prefsLoaded: boolean;
 }
@@ -41,12 +54,15 @@ const PreferencesContext = createContext<PreferencesContextValue>({
   textScale: 1,
   biometricEnabled: false,
   setBiometricEnabled: () => {},
+  startupScreen: "home",
+  setStartupScreen: () => {},
   prefsLoaded: false,
 });
 
 export function PreferencesProvider({ children }: { children: React.ReactNode }) {
   const [textSize, setTextSizeState] = useState<TextSize>("medium");
   const [biometricEnabled, setBiometricEnabledState] = useState(false);
+  const [startupScreen, setStartupScreenState] = useState<StartupScreen>("home");
   const [prefsLoaded, setPrefsLoaded] = useState(false);
 
   // Load persisted preferences on mount
@@ -58,6 +74,7 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
             const parsed = JSON.parse(raw) as Partial<{
               textSize: TextSize;
               biometricEnabled: boolean;
+              startupScreen: StartupScreen;
             }>;
             if (
               parsed.textSize === "small" ||
@@ -65,6 +82,14 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
               parsed.textSize === "large"
             ) {
               setTextSizeState(parsed.textSize);
+            }
+            if (
+              parsed.startupScreen === "home" ||
+              parsed.startupScreen === "calculator" ||
+              parsed.startupScreen === "emergency" ||
+              parsed.startupScreen === "formulary"
+            ) {
+              setStartupScreenState(parsed.startupScreen);
             }
             // Biometric only meaningful on native
             if (Platform.OS !== "web" && typeof parsed.biometricEnabled === "boolean") {
@@ -77,7 +102,7 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
   }, []);
 
   const persist = useCallback(
-    (patch: Partial<{ textSize: TextSize; biometricEnabled: boolean }>) => {
+    (patch: Partial<{ textSize: TextSize; biometricEnabled: boolean; startupScreen: StartupScreen }>) => {
       AsyncStorage.getItem(PREFS_KEY)
         .then((raw) => {
           const current = raw ? JSON.parse(raw) : {};
@@ -105,6 +130,14 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
     [persist]
   );
 
+  const setStartupScreen = useCallback(
+    (s: StartupScreen) => {
+      setStartupScreenState(s);
+      persist({ startupScreen: s });
+    },
+    [persist]
+  );
+
   const textScale = TEXT_SCALE[textSize];
 
   return (
@@ -115,6 +148,8 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
         textScale,
         biometricEnabled,
         setBiometricEnabled,
+        startupScreen,
+        setStartupScreen,
         prefsLoaded,
       }}
     >

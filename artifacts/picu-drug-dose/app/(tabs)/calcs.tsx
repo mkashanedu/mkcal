@@ -360,7 +360,7 @@ export default function CalcsScreen() {
           <View style={{ flex: 1 }}>
             <Text style={[sh.headerTitle, { color: textPrimary }]}>MKashanEdu</Text>
             <Text style={[sh.headerSub, { color: textMuted }]}>
-              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 95+ drugs
+              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 479 drugs
             </Text>
           </View>
           <TouchableOpacity onPress={toggleDark}

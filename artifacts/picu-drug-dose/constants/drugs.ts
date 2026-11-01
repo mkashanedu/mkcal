@@ -1987,6 +1987,11 @@ export function calculateDose(
   ageWarning?: string;
   compatibilityStatus?: CompatibilityStatus;
   compatibilityMessage?: string;
+  /** Numeric cap applied to this calculation (same unit as the dose), if any. */
+  doseCap?: number;
+  doseCapUnit?: string;
+  /** True when the calculated dose is at/above 90% of the cap but not over it. Display-only — never changes the dose. */
+  nearCap?: boolean;
 } {
   const ageRestrictionLabel = getDoseAgeRestrictionLabel(doseRange);
   if (ageRestrictionLabel && !hasValidAge(ageMonths)) {
@@ -2085,6 +2090,12 @@ export function calculateDose(
       exceedsAdultMax: result.exceeded,
       adultMaxLabel: capMessage(result.exceeded),
       ageWarning,
+      doseCap,
+      doseCapUnit: doseCap !== undefined ? unitStr : undefined,
+      nearCap:
+        !result.exceeded && doseCap !== undefined && result.value >= doseCap * 0.9
+          ? true
+          : undefined,
     };
   }
 
@@ -2103,6 +2114,12 @@ export function calculateDose(
       exceedsAdultMax: exceedsMaximum,
       adultMaxLabel: capMessage(exceedsMaximum),
       ageWarning,
+      doseCap,
+      doseCapUnit: doseCap !== undefined ? unitStr : undefined,
+      nearCap:
+        !exceedsMaximum && doseCap !== undefined && resultMax.value >= doseCap * 0.9
+          ? true
+          : undefined,
     };
   }
   return { dose: "—", range: "—" };

@@ -1,29 +1,35 @@
 import { Feather } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Platform,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Colors from "@/constants/colors";
 import { CATEGORIES, DRUGS, calculateDose } from "@/constants/allDrugs";
+import { INFUSION_DRUGS } from "@/constants/infusions";
 import { useTheme } from "@/context/ThemeContext";
 import { useWeight } from "@/context/WeightContext";
 import { useFavorites } from "@/context/FavoritesContext";
+import { useHistory } from "@/context/HistoryContext";
+import { usePreferences } from "@/context/PreferencesContext";
 import { StarButton } from "@/components/StarButton";
+import { highAlertInfo } from "@/lib/highAlert";
 
 export default function DrugDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
   const { isDark } = useTheme();
   const colors = Colors.light;
-  const { weight, age, ageUnit, ageConfirmed } = useWeight();
+  const { weight, age, ageUnit, ageConfirmed, setWeight, setAge, setAgeUnit, weightUnit } = useWeight();
   const ageMonths =
     ageConfirmed && Number.isFinite(age) && age > 0
       ? ageUnit === "years"
@@ -31,9 +37,80 @@ export default function DrugDetailScreen() {
         : age
       : undefined;
   const { isFav, toggleFav } = useFavorites();
+  const { addEntry } = useHistory();
+  const { textScale } = usePreferences();
   const weightValid = Number.isFinite(weight) && weight > 0;
 
   const drug = DRUGS.find((d) => d.id === id);
+
+  // ── Editable patient fields (P6): local text state, committed to the one
+  // global WeightContext on blur/submit, so a change here applies app-wide.
+  const [wText, setWText] = useState<string | null>(null);
+  const [aText, setAText] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const weightDisplay =
+    wText ??
+    (weightUnit === "lbs"
+      ? String(Math.round(weight * 2.20462 * 10) / 10)
+      : String(weight));
+  const ageDisplay = aText ?? (ageConfirmed ? String(age) : "");
+  const commitWeight = () => {
+    if (wText === null) return;
+    const parsed = parseFloat(wText.replace(",", "."));
+    if (Number.isFinite(parsed) && parsed > 0) {
+      setWeight(weightUnit === "lbs" ? parsed * 0.453592 : parsed);
+    }
+    setWText(null);
+  };
+  const commitAge = () => {
+    if (aText === null) return;
+    const parsed = parseFloat(aText.replace(",", "."));
+    if (Number.isFinite(parsed) && parsed >= 0) setAge(parsed);
+    setAText(null);
+  };
+  const switchAgeUnit = (u: "years" | "months") => {
+    if (u === ageUnit) return;
+    if (ageConfirmed && Number.isFinite(age)) {
+      setAge(u === "months" ? age * 12 : Math.round((age / 12) * 10) / 10);
+    }
+    setAgeUnit(u);
+    setAText(null);
+  };
+
+  // ── Infusion match (P8): does this drug have a full infusion setup?
+  const infusionMatch = useMemo(() => {
+    if (!drug) return null;
+    const norm = (s: string) =>
+      s
+        .toLowerCase()
+        .replace(/\(.*?\)/g, "")
+        .replace(/\b(sulfate|sulphate|hydrochloride|hcl|sodium|iv)\b/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+    const dn = norm(drug.name);
+    const dg = drug.genericName ? norm(drug.genericName) : "";
+    return (
+      INFUSION_DRUGS.find((inf) => {
+        const n = norm(inf.name);
+        return n === dn || (dg !== "" && n === dg) || dn.startsWith(n) || n.startsWith(dn);
+      }) ?? null
+    );
+  }, [drug]);
+
+  // ── History (P10): log this calculation (drug + weight + headline dose).
+  useEffect(() => {
+    if (!drug || !weightValid) return;
+    const first = drug.doses[0];
+    if (!first) return;
+    const calc = calculateDose(first, weight, ageMonths);
+    addEntry({
+      drugId: drug.id,
+      drugName: drug.name,
+      weightKg: weight,
+      summary: `${first.route}: ${calc.dose}`,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [drug?.id, weight]);
 
   if (!drug) {
     return (
@@ -53,6 +130,62 @@ export default function DrugDetailScreen() {
   const danger = themed(colors.danger);
   const f = isFav(drug.id);
   const topOffset = Platform.OS === "web" ? 67 : insets.top;
+
+  // ── High-alert (extra batch): badge + double-check banner. Display only.
+  const ha = highAlertInfo(drug);
+
+  // ── Weight plausibility (extra batch): a valid-but-unusual weight gets a
+  // verify banner. Calculations are NOT blocked or changed.
+  const weightWarning: string | null = !weightValid
+    ? null
+    : weight < 1
+      ? `Weight ${weight} kg is extremely low for a child — please re-check the weight before giving any dose.`
+      : weight < 2
+        ? `Weight ${weight} kg is very low — please confirm this weight before giving any dose.`
+        : weight > 80
+          ? `Weight ${weight} kg is unusually high for a child — please re-check the weight; adult maximum doses may apply.`
+          : weight > 60
+            ? `Weight ${weight} kg is high for a child — please confirm the weight; most doses are capped at the adult maximum.`
+            : null;
+
+  // ── Copy / Share dose summary (extra batch): plain-text summary of what
+  // is already on screen, for handover notes / WhatsApp. No patient data.
+  const buildSummary = () => {
+    const lines: string[] = [];
+    lines.push(`PeadsCal — ${drug.name}${drug.genericName ? ` (${drug.genericName})` : ""}`);
+    lines.push(
+      `Patient: ${weight} kg${ageConfirmed ? `, age ${age} ${ageUnit}` : ""}`
+    );
+    if (ha.high) lines.push(`⚠ HIGH ALERT${ha.reason ? ` — ${ha.reason}` : ""}: double-check before giving.`);
+    drug.doses.forEach((dose) => {
+      const calc = calculateDose(dose, weight, ageMonths);
+      let line = `• ${dose.route}: ${calc.dose} ${calc.range}`;
+      if (dose.frequency) line += ` — ${dose.frequency}`;
+      if (dose.maxDose) line += ` (Max: ${dose.maxDose})`;
+      if (calc.exceedsAdultMax && calc.adultMaxLabel) line += ` ⚠ ${calc.adultMaxLabel}`;
+      lines.push(line);
+    });
+    lines.push("Verify against the prescription before administration.");
+    return lines.join("\n");
+  };
+  const handleShareDose = async () => {
+    const text = buildSummary();
+    if (Platform.OS === "web") {
+      try {
+        const nav: any = (globalThis as any).navigator;
+        if (nav?.clipboard?.writeText) {
+          await nav.clipboard.writeText(text);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+          return;
+        }
+      } catch {}
+      // Clipboard unavailable (permissions/insecure context) — fall through to Share.
+    }
+    try {
+      await Share.share({ message: text, title: `${drug.name} dose summary` });
+    } catch {}
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? "#0B132B" : "#F0F9FF" }]}>
@@ -98,6 +231,14 @@ export default function DrugDetailScreen() {
               {cat.label}
             </Text>
           </View>
+          {ha.high && (
+            <View style={[styles.catBadge, { backgroundColor: "#B91C1C", flexDirection: "row", alignItems: "center", gap: 5 }]}>
+              <Feather name="alert-octagon" size={11} color="#FFFFFF" />
+              <Text style={[styles.catBadgeText, { fontFamily: "Inter_700Bold" }]}>
+                HIGH ALERT
+              </Text>
+            </View>
+          )}
           <Text style={[styles.drugTitle, { fontFamily: "Inter_700Bold" }]}>
             {drug.name}
           </Text>
@@ -116,29 +257,91 @@ export default function DrugDetailScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        {/* Weight Banner */}
+        {/* Patient Card — weight & age editable here (P6). One global
+            weight/age for the whole app: editing here updates everywhere. */}
         <View
           style={[
-            styles.weightBanner,
+            styles.patientCard,
             { backgroundColor: isDark ? "#112240" : "#FFFFFF" },
           ]}
         >
-          <Feather name="user" size={16} color={colors.tint} />
-          <Text
-            style={[
-              styles.weightBannerText,
-              { color: isDark ? "#A8B8DC" : "#4A5568", fontFamily: "Inter_400Regular" },
-            ]}
-          >
-            {weightValid ? "Calculated for" : "Weight invalid — calculations disabled"}
-          </Text>
-          <Text
-            style={[
-              styles.weightBannerValue,
-              { color: colors.tint, fontFamily: "Inter_700Bold" },
-            ]}
-          >
-            {weightValid ? `${weight} kg` : "Invalid"}
+          <View style={styles.patientHead}>
+            <Feather name="user" size={15} color={colors.tint} />
+            <Text
+              style={[
+                styles.patientHeadText,
+                { color: isDark ? "#A8B8DC" : "#4A5568", fontFamily: "Inter_600SemiBold" },
+              ]}
+            >
+              {weightValid ? "Calculated for this patient" : "Weight invalid — calculations disabled"}
+            </Text>
+            <Feather name="edit-2" size={12} color={isDark ? "#A8B8DC" : "#8A9BB0"} />
+          </View>
+          <View style={styles.patientRow}>
+            <View style={styles.patientField}>
+              <Text style={[styles.patientLabel, { color: isDark ? "#A8B8DC" : "#8A9BB0", fontFamily: "Inter_500Medium" }]}>
+                Weight ({weightUnit})
+              </Text>
+              <TextInput
+                style={[
+                  styles.patientInput,
+                  {
+                    color: colors.tint,
+                    borderColor: isDark ? "#1E3A5F" : "#D6EAF8",
+                    backgroundColor: isDark ? "#0A192F" : "#F4F9FC",
+                    fontFamily: "Inter_700Bold",
+                  },
+                ]}
+                value={weightDisplay}
+                onChangeText={setWText}
+                onBlur={commitWeight}
+                onSubmitEditing={commitWeight}
+                keyboardType="decimal-pad"
+                selectTextOnFocus
+              />
+            </View>
+            <View style={styles.patientField}>
+              <Text style={[styles.patientLabel, { color: isDark ? "#A8B8DC" : "#8A9BB0", fontFamily: "Inter_500Medium" }]}>
+                Age
+              </Text>
+              <View style={styles.ageRow}>
+                <TextInput
+                  style={[
+                    styles.patientInput,
+                    styles.ageInput,
+                    {
+                      color: colors.tint,
+                      borderColor: isDark ? "#1E3A5F" : "#D6EAF8",
+                      backgroundColor: isDark ? "#0A192F" : "#F4F9FC",
+                      fontFamily: "Inter_700Bold",
+                    },
+                  ]}
+                  value={ageDisplay}
+                  onChangeText={setAText}
+                  onBlur={commitAge}
+                  onSubmitEditing={commitAge}
+                  keyboardType="decimal-pad"
+                  placeholder="—"
+                  placeholderTextColor={isDark ? "#3A5070" : "#B0BEC5"}
+                  selectTextOnFocus
+                />
+                <Pressable
+                  onPress={() => switchAgeUnit("years")}
+                  style={[styles.unitChip, { backgroundColor: ageUnit === "years" ? colors.tint : isDark ? "#0A192F" : "#EDF2F7" }]}
+                >
+                  <Text style={{ fontSize: 11, color: ageUnit === "years" ? "#FFFFFF" : isDark ? "#A8B8DC" : "#4A5568", fontFamily: "Inter_600SemiBold" }}>yrs</Text>
+                </Pressable>
+                <Pressable
+                  onPress={() => switchAgeUnit("months")}
+                  style={[styles.unitChip, { backgroundColor: ageUnit === "months" ? colors.tint : isDark ? "#0A192F" : "#EDF2F7" }]}
+                >
+                  <Text style={{ fontSize: 11, color: ageUnit === "months" ? "#FFFFFF" : isDark ? "#A8B8DC" : "#4A5568", fontFamily: "Inter_600SemiBold" }}>mo</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+          <Text style={[styles.patientHint, { color: isDark ? "#5B6B8C" : "#A0AEC0", fontFamily: "Inter_400Regular" }]}>
+            Tap a value to change it — the new weight &amp; age apply across the whole app.
           </Text>
         </View>
         {!weightValid && (
@@ -146,6 +349,22 @@ export default function DrugDetailScreen() {
             <Feather name="alert-triangle" size={14} color="#FFFFFF" />
             <Text style={[styles.invalidWeightText, { fontFamily: "Inter_600SemiBold" }]}>
               Enter a valid positive weight to calculate weight-based doses.
+            </Text>
+          </View>
+        )}
+        {weightWarning && (
+          <View style={styles.weightWarningNotice}>
+            <Feather name="alert-triangle" size={14} color="#FFFFFF" />
+            <Text style={[styles.invalidWeightText, { fontFamily: "Inter_600SemiBold" }]}>
+              {weightWarning}
+            </Text>
+          </View>
+        )}
+        {ha.high && (
+          <View style={styles.highAlertBanner}>
+            <Feather name="alert-octagon" size={15} color="#FFFFFF" />
+            <Text style={[styles.invalidWeightText, { fontFamily: "Inter_600SemiBold" }]}>
+              HIGH ALERT{ha.reason ? ` — ${ha.reason}` : ""}. Double-check the dose, concentration and calculation with a second nurse before giving.
             </Text>
           </View>
         )}
@@ -184,7 +403,7 @@ export default function DrugDetailScreen() {
                     <Text style={[styles.calcLabel, { color: isDark ? "#A8B8DC" : "#8A9BB0", fontFamily: "Inter_400Regular" }]}>
                       Calculated Dose
                     </Text>
-                    <Text style={[styles.calcValue, { color: accent, fontFamily: "Inter_700Bold" }]}>
+                    <Text style={[styles.calcValue, { color: accent, fontFamily: "Inter_700Bold", fontSize: Math.round(24 * textScale) }]}>
                       {calc.dose}
                     </Text>
                     <Text style={[styles.perKgText, { color: isDark ? "#A8B8DC" : "#8A9BB0", fontFamily: "Inter_400Regular" }]}>
@@ -210,6 +429,14 @@ export default function DrugDetailScreen() {
                     </Text>
                   </View>
                 )}
+                {!calc.exceedsAdultMax && calc.nearCap && calc.doseCap !== undefined && (
+                  <View style={styles.nearCapWarning}>
+                    <Feather name="alert-triangle" size={14} color="#FFFFFF" />
+                    <Text style={[styles.maxDoseWarningText, { fontFamily: "Inter_600SemiBold" }]}>
+                      Close to the maximum dose ({calc.doseCap} {calc.doseCapUnit}) — verify the weight and the prescribed dose.
+                    </Text>
+                  </View>
+                )}
                 {dose.notes && (
                   <View style={[styles.noteBox, { backgroundColor: isDark ? "#0A192F" : "#F4F9FC" }]}>
                     <Feather name="info" size={12} color={isDark ? "#A8B8DC" : "#8A9BB0"} />
@@ -222,6 +449,55 @@ export default function DrugDetailScreen() {
             );
           })}
         </View>
+
+        {/* Copy / Share dose summary (extra batch) */}
+        <Pressable
+          onPress={handleShareDose}
+          style={[
+            styles.card,
+            styles.shareBtn,
+            { backgroundColor: copied ? "#15803D" : isDark ? "#112240" : "#FFFFFF" },
+          ]}
+        >
+          <Feather name={copied ? "check" : "share-2"} size={16} color={copied ? "#FFFFFF" : colors.tint} />
+          <Text
+            style={{
+              fontSize: 14.5,
+              color: copied ? "#FFFFFF" : isDark ? "#CCD6F6" : "#0D1B2A",
+              fontFamily: "Inter_600SemiBold",
+            }}
+          >
+            {copied ? "Copied — paste it in your handover note" : "Copy / Share Dose Summary"}
+          </Text>
+        </Pressable>
+
+        {/* Infusion Setup (P8) — only for drugs that run as infusions;
+            opens the full setup exactly as built in the Infusions section. */}
+        {infusionMatch && (
+          <>
+            <SectionHeader title="Infusion Setup" icon="activity" color={accent} isDark={isDark} />
+            <Pressable
+              onPress={() => router.push(`/infusion/${infusionMatch.id}`)}
+              style={[styles.card, styles.infusionCard, { backgroundColor: isDark ? "#112240" : "#FFFFFF" }]}
+            >
+              <View style={[styles.infusionIcon, { backgroundColor: infusionMatch.color + "22" }]}>
+                <Feather name="droplet" size={18} color={infusionMatch.color} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 15, color: isDark ? "#CCD6F6" : "#0D1B2A", fontFamily: "Inter_600SemiBold" }}>
+                  {infusionMatch.name} infusion
+                </Text>
+                <Text style={{ fontSize: 12.5, color: isDark ? "#A8B8DC" : "#4A5568", fontFamily: "Inter_400Regular", marginTop: 2 }}>
+                  {infusionMatch.minDose}–{infusionMatch.maxDose} {infusionMatch.primaryUnit} · {infusionMatch.standardConcentrations.length} standard concentrations
+                </Text>
+                <Text style={{ fontSize: 12.5, color: colors.tint, fontFamily: "Inter_600SemiBold", marginTop: 4 }}>
+                  Open full infusion setup →
+                </Text>
+              </View>
+              <Feather name="chevron-right" size={18} color={isDark ? "#3A5070" : "#CBD5E0"} />
+            </Pressable>
+          </>
+        )}
 
         {/* Indications */}
         <SectionHeader title="Indications" icon="check-circle" color={accent} isDark={isDark} />
@@ -420,6 +696,36 @@ const styles = StyleSheet.create({
   },
   weightBannerText: { fontSize: 13, flex: 1 },
   weightBannerValue: { fontSize: 18 },
+  patientCard: {
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    marginBottom: 6,
+  },
+  patientHead: { flexDirection: "row", alignItems: "center", gap: 7, marginBottom: 10 },
+  patientHeadText: { fontSize: 13, flex: 1 },
+  patientRow: { flexDirection: "row", gap: 12 },
+  patientField: { flex: 1 },
+  patientLabel: { fontSize: 11.5, marginBottom: 5 },
+  patientInput: {
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 17,
+  },
+  ageRow: { flexDirection: "row", alignItems: "center", gap: 6 },
+  ageInput: { flex: 1 },
+  unitChip: { borderRadius: 8, paddingHorizontal: 9, paddingVertical: 8 },
+  patientHint: { fontSize: 11, marginTop: 9 },
+  infusionCard: { flexDirection: "row", alignItems: "center", gap: 12 },
+  infusionIcon: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   invalidWeightNotice: {
     flexDirection: "row",
     alignItems: "center",
@@ -430,6 +736,40 @@ const styles = StyleSheet.create({
     backgroundColor: "#B91C1C",
   },
   invalidWeightText: { color: "#FFFFFF", fontSize: 13, flex: 1, lineHeight: 18 },
+  weightWarningNotice: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 6,
+    backgroundColor: "#D97706",
+  },
+  highAlertBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 6,
+    backgroundColor: "#B91C1C",
+  },
+  nearCapWarning: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    padding: 10,
+    borderRadius: 8,
+    backgroundColor: "#D97706",
+  },
+  shareBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 9,
+    paddingVertical: 13,
+    marginTop: 8,
+  },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",

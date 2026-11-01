@@ -24,7 +24,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDrawer } from "@/context/DrawerContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useWeight } from "@/context/WeightContext";
-import { usePreferences, TextSize } from "@/context/PreferencesContext";
+import { usePreferences, TextSize, STARTUP_SCREEN_OPTIONS } from "@/context/PreferencesContext";
 import { useFavorites } from "@/context/FavoritesContext";
 import Colors from "@/constants/colors";
 
@@ -43,13 +43,15 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", icon: "home", route: "/", color: "#0891B2", description: "Home screen" },
   { label: "EMERGENCY / RESUSCITATION", icon: "alert-triangle", route: "/emergency", color: "#DC2626", description: "Rapid resuscitation reference", isEmergency: true },
-  { label: "Drug Calculator", icon: "sliders", route: "/calculator", color: "#0891B2", description: "95+ drugs — Harriet Lane & Nelson's" },
+  { label: "Drug Calculator", icon: "sliders", route: "/calculator", color: "#0891B2", description: "479 drugs — Harriet Lane & Nelson's" },
   { label: "Drug Infusions", icon: "activity", route: "/infusion", color: "#7C3AED", description: "IV drip & infusion calculator" },
   { label: "Formulary", icon: "book-open", route: "/formulary", color: "#0D9488", description: "Tablets, syrups, nebulisers & IV" },
   { label: "Electrolytes & Protocols", icon: "zap", route: "/calcs", color: "#0EA5E9", description: "K⁺ / Na⁺ correction, ABG & more" },
   { label: "Toxicology & Antidotes", icon: "shield", route: "/toxicology", color: "#991B1B", description: "16 antidotes with weight-based dosing" },
   { label: "Tools & Protocols", icon: "tool", route: "/tools", color: "#16A34A", description: "Ventilator · BIG · Phoenix Sepsis · GCS" },
   { label: "Favorites", icon: "star", route: "/favorites", color: "#D97706", description: "Your starred drugs & infusions" },
+  { label: "Y-Site Compatibility", icon: "git-merge", route: "/ysite", color: "#0F7668", description: "Can 2 IV drugs share one line?" },
+  { label: "Calculation History", icon: "clock", route: "/history", color: "#64748B", description: "Your recent dose calculations" },
 ];
 
 const TEXT_SIZE_OPTIONS: { key: TextSize; label: string }[] = [
@@ -93,7 +95,7 @@ export function AppDrawer() {
   const { isOpen, closeDrawer } = useDrawer();
   const { isDark, toggleDark }  = useTheme();
   const { weightUnit, setWeightUnit } = useWeight();
-  const { textSize, setTextSize, biometricEnabled, setBiometricEnabled } = usePreferences();
+  const { textSize, setTextSize, biometricEnabled, setBiometricEnabled, startupScreen, setStartupScreen } = usePreferences();
   const { syncNow, syncStatus, syncMessage } = useFavorites();
   const insets = useSafeAreaInsets();
 
@@ -243,10 +245,10 @@ export function AppDrawer() {
 
               {/* ── Theme ── */}
               <SettingsRow
-                icon={isDark ? "sun" : "moon"}
-                label={isDark ? "Day Mode" : "Night Mode"}
-                sublabel="Toggle app appearance"
-                color={isDark ? "#F59E0B" : teal}
+                icon="moon"
+                label="Night Mode"
+                sublabel={isDark ? "On — dark appearance" : "Off — light appearance"}
+                color={teal}
                 onPress={toggleDark}
                 right={
                   <Switch
@@ -309,6 +311,35 @@ export function AppDrawer() {
                       >
                         <Text style={{ fontSize: 11, fontFamily: "Inter_700Bold",
                           color: textSize === opt.key ? "#FFFFFF" : textMuted }}>
+                          {opt.label}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                }
+              />
+
+              <SettingsDivider color={border} />
+
+              {/* ── Startup Screen ── */}
+              <SettingsRow
+                icon="home"
+                label="Startup Screen"
+                sublabel="Which screen opens first"
+                color="#0EA5E9"
+                right={
+                  <View style={styles.segmentRow}>
+                    {STARTUP_SCREEN_OPTIONS.map((opt) => (
+                      <TouchableOpacity
+                        key={opt.key}
+                        onPress={() => setStartupScreen(opt.key)}
+                        style={[
+                          styles.segmentBtn,
+                          { borderColor: border, backgroundColor: startupScreen === opt.key ? "#0EA5E9" : "transparent" },
+                        ]}
+                      >
+                        <Text style={{ fontSize: 10, fontFamily: "Inter_700Bold",
+                          color: startupScreen === opt.key ? "#FFFFFF" : textMuted }}>
                           {opt.label}
                         </Text>
                       </TouchableOpacity>

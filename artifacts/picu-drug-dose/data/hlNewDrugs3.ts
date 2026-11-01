@@ -2214,45 +2214,7 @@ export const HL_NEW_DRUGS_3: FormularyDrug[] = [
   adverseReactions: [],
   reference: "Harriet Lane 24th ed."
 },
-{
-  id: "f-im-sc-syrup",
-  name: "Im/sc",
-  drugClass: "Refer to Harriet Lane 24th ed. monograph",
-  category: "syrup",
-  indications: [],
-  contraindications: ["pheochromocytoma and severe hypertension"],
-  dosing: [
-  {
-    value: 2.5,
-    unit: "mg",
-    perKg: false,
-    route: "Oral",
-    frequency: "Every 4 hours",
-    notes: "2.5 mg (5 mL) PO Q4 hr PRN, up to 15 mg (30 mL)/24 hr ≥ 6–"
-  },
-  {
-    value: 5,
-    unit: "mg",
-    perKg: false,
-    route: "Oral",
-    frequency: "Every 4 hours",
-    notes: "5 mg (10 mL) PO Q4 hr PRN up to 30 mg (60 mL)/24 hr"
-  },
-  {
-    value: 10,
-    unit: "mg",
-    perKg: false,
-    route: "Oral",
-    frequency: "Every 4 hours",
-    notes: "10 mg PO Q4 hr PRN up to 60 mg/24 hr Use with caution in presence of arrhythmias, hyperthyroidism, or hyperglycemia."
-  }
-  ],
-  metabolism: "Metabolized by monoamine oxidase.",
-  excretion: "Refer to Harriet Lane 24th ed. monograph for detailed pharmacokinetics.",
-  monitoring: [],
-  adverseReactions: ["tremor", "insomnia", "or palpitations"],
-  reference: "Harriet Lane 24th ed."
-},
+
 {
   id: "f-phosphorus-supplements-tablet",
   name: "Phosphorus Supplements",

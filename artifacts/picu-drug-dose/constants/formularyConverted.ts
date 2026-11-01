@@ -14882,5 +14882,52 @@ export const CONVERTED_DRUGS: Drug[] = [
   "monitoring": [],
   "notes": "Formulary class: Refer to Harriet Lane 24th ed. monograph. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
   "reference": "Harriet Lane 24th ed."
+ },
+ {
+  "id": "fx-baclofen",
+  "name": "Baclofen",
+  "category": "other",
+  "doses": [
+   {
+    "route": "Oral, divided QID",
+    "frequency": "Every 6 hours",
+    "notes": "Per-dose amount calculated from the maintenance range 0.75–2 mg/kg/day divided by 4 (Every 6 hours). START much lower: ~0.3 mg/kg/day in 2–4 divided doses, titrated up at ~weekly intervals. Daily caps: max 40 mg/day if < 8 years, max 60 mg/day if 8 years or older. Do NOT stop abruptly — taper (withdrawal seizures/hyperthermia).",
+    "maxDose": "Daily cap 40 mg/day (<8 y) / 60 mg/day (≥8 y)",
+    "unit": "mg/kg/dose",
+    "perKg": true,
+    "min": 0.1875,
+    "max": 0.5
+   },
+   {
+    "route": "Oral, divided QID",
+    "frequency": "Every 6 hours",
+    "notes": "Maintenance daily range. Start ~0.3 mg/kg/day and titrate weekly to effect. Max 2 mg/kg/day; absolute caps 40 mg/day (<8 years) and 60 mg/day (8 years and older). Reduce dose in renal impairment.",
+    "maxDose": "Max 60 mg/day",
+    "unit": "mg/kg/day",
+    "perKg": true,
+    "min": 0.75,
+    "max": 2,
+    "adultMaxDose_num": 60
+   }
+  ],
+  "indications": [
+   "Spasticity of cerebral origin (e.g. cerebral palsy)",
+   "Spasticity from spinal cord lesions"
+  ],
+  "contraindications": [
+   "Hypersensitivity to baclofen",
+   "Caution: renal impairment, seizure disorder"
+  ],
+  "formulations": [
+   "10 mg tablet",
+   "5 mg/5 mL oral solution (1 mg/mL)"
+  ],
+  "monitoring": [
+   "Sedation / level of consciousness",
+   "Muscle tone and function",
+   "Withdrawal signs if doses missed"
+  ],
+  "notes": "Added 2026-11-01 in mg (oral dosing) on the clinical lead's decision — the formulary monograph's mcg/day figure was intrathecal-style data and is NOT used here. Full monograph is in the Formulary section.",
+  "reference": "Harriet Lane | Baclofen SmPC (paediatric dosing)"
  }
 ];

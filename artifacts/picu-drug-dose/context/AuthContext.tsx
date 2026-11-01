@@ -7,8 +7,10 @@
  */
 import {
   createUserWithEmailAndPassword,
+  GoogleAuthProvider,
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  signInWithPopup,
   signOut,
   updateProfile,
   type User as FirebaseUser,
@@ -96,6 +98,13 @@ function getErrorMessage(error: unknown): string {
       return "Password must be at least 6 characters.";
     case "auth/too-many-requests":
       return "Too many attempts. Please try again later.";
+    case "auth/operation-not-allowed":
+      return "Google sign-in is not enabled for this app yet. Use email and password, or ask the developer to enable Google in the Firebase console.";
+    case "auth/popup-closed-by-user":
+    case "auth/cancelled-popup-request":
+      return "Google sign-in window was closed before finishing.";
+    case "auth/popup-blocked":
+      return "The browser blocked the Google sign-in window. Allow popups for this site and try again.";
     default:
       return error instanceof Error ? error.message : "Authentication failed.";
   }
@@ -248,10 +257,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const loginSocial = useCallback(
-    async (_provider: "google" | "apple", _name: string, _email: string, _role: ClinicalRole) => ({
-      success: false,
-      error: "Social sign-in is not configured yet. Use email and password.",
-    }),
+    async (provider: "google" | "apple", _name: string, _email: string, role: ClinicalRole) => {
+      if (provider !== "google") {
+        return {
+          success: false,
+          error: "Apple sign-in is not available yet. Use Google or email and password.",
+        };
+      }
+      try {
+        // Real Google sign-in (Firebase popup flow — web build).
+        const googleProvider = new GoogleAuthProvider();
+        googleProvider.setCustomParameters({ prompt: "select_account" });
+        const result = await signInWithPopup(firebaseAuth, googleProvider);
+        // Create/refresh the Firestore profile, preserving any existing role.
+        try {
+          const profileRef = doc(firestore, "users", result.user.uid);
+          const existing = await getDoc(profileRef);
+          await setDoc(
+            profileRef,
+            {
+              uid: result.user.uid,
+              name: result.user.displayName || "Clinical User",
+              email: (result.user.email || "").toLowerCase(),
+              provider: "google",
+              ...(!existing.exists() ? { role, createdAt: new Date().toISOString() } : {}),
+            },
+            { merge: true }
+          );
+        } catch (error) {
+          console.warn("[Auth] Google sign-in succeeded, but profile sync failed.", error);
+        }
+        setUser(await toAuthUser(result.user));
+        return { success: true };
+      } catch (error) {
+        return { success: false, error: getErrorMessage(error) };
+      }
+    },
     []
   );
 

@@ -892,6 +892,52 @@ export default function EmergencyScreen() {
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + (Platform.OS === "web" ? 84 : 90) }]}
         showsVerticalScrollIndicator={false}
       >
+        {/* ── ARREST STRIP (P9): the four numbers a code needs first,
+            all on one screen for the current weight — no scrolling. ── */}
+        {weightValid && (
+          <View style={[styles.arrestStrip, { backgroundColor: "#7F1D1D", borderColor: "#DC2626" }]}>
+            <Text style={[styles.arrestTitle, { fontFamily: "Inter_700Bold" }]}>
+              ARREST — ONE SCREEN · {weightKg} KG
+            </Text>
+            <View style={styles.arrestGrid}>
+              <View style={styles.arrestCell}>
+                <Text style={[styles.arrestLabel, { fontFamily: "Inter_600SemiBold" }]}>EPINEPHRINE IV/IO</Text>
+                <Text style={[styles.arrestValue, { fontFamily: "Inter_700Bold" }]}>
+                  {(() => {
+                    const epi = emergencyCards.find((c) => c.label.startsWith("Epinephrine"));
+                    const mg = epi ? parseFloat(epi.dose) : NaN;
+                    return Number.isFinite(mg)
+                      ? `${mg} mg = ${+(mg * 10).toFixed(1)} mL`
+                      : "—";
+                  })()}
+                </Text>
+                <Text style={[styles.arrestSub, { fontFamily: "Inter_400Regular" }]}>of 1:10,000 · q3–5 min</Text>
+              </View>
+              <View style={styles.arrestCell}>
+                <Text style={[styles.arrestLabel, { fontFamily: "Inter_600SemiBold" }]}>AMIODARONE VF/pVT</Text>
+                <Text style={[styles.arrestValue, { fontFamily: "Inter_700Bold" }]}>
+                  {emergencyCards.find((c) => c.label.startsWith("Amiodarone"))?.dose ?? "—"}
+                </Text>
+                <Text style={[styles.arrestSub, { fontFamily: "Inter_400Regular" }]}>5 mg/kg · max 300 mg</Text>
+              </View>
+              <View style={styles.arrestCell}>
+                <Text style={[styles.arrestLabel, { fontFamily: "Inter_600SemiBold" }]}>DEFIB (UNSYNC)</Text>
+                <Text style={[styles.arrestValue, { fontFamily: "Inter_700Bold" }]}>
+                  {defib.unsync1st} J → {defib.unsyncSub} J
+                </Text>
+                <Text style={[styles.arrestSub, { fontFamily: "Inter_400Regular" }]}>max {defib.unsyncMax} J</Text>
+              </View>
+              <View style={styles.arrestCell}>
+                <Text style={[styles.arrestLabel, { fontFamily: "Inter_600SemiBold" }]}>ETT CUFFED</Text>
+                <Text style={[styles.arrestValue, { fontFamily: "Inter_700Bold" }]}>
+                  {ettube.cuffed} · {ettube.depth}
+                </Text>
+                <Text style={[styles.arrestSub, { fontFamily: "Inter_400Regular" }]}>uncuffed {ettube.uncuffed}</Text>
+              </View>
+            </View>
+          </View>
+        )}
+
         {/* Emergency Calculators */}
         <View style={[styles.palsBanner, { backgroundColor: isDark ? "#0A192F" : "#FFFFFF", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
           <Text style={[styles.palsTitle, { color: colors.tint, fontFamily: "Inter_700Bold" }]}>
@@ -1203,6 +1249,13 @@ const styles = StyleSheet.create({
   adultMaxAlertText: { fontSize: 10, color: "#FFFFFF", flex: 1, letterSpacing: 0.1 },
 
   // Equipment
+  arrestStrip: { borderRadius: 14, padding: 14, borderWidth: 1.5, marginBottom: 10 },
+  arrestTitle: { color: "#FCA5A5", fontSize: 12.5, letterSpacing: 0.6, marginBottom: 10 },
+  arrestGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  arrestCell: { width: "47%", backgroundColor: "#991B1B", borderRadius: 10, padding: 10 },
+  arrestLabel: { color: "#FECACA", fontSize: 10.5, letterSpacing: 0.4, marginBottom: 3 },
+  arrestValue: { color: "#FFFFFF", fontSize: 16.5 },
+  arrestSub: { color: "#FCA5A5", fontSize: 11, marginTop: 2 },
   palsBanner: { borderRadius: 14, padding: 14, borderWidth: 1, shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2, marginBottom: 6 },
   palsTitle: { fontSize: 15, marginBottom: 10 },
   calcSource: { fontSize: 11, marginBottom: 10, marginTop: -6, letterSpacing: 0.3 },

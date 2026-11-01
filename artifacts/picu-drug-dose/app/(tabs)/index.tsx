@@ -19,6 +19,9 @@ import { CATEGORIES, DRUGS } from "@/constants/allDrugs";
 import { INFUSION_DRUGS } from "@/constants/infusions";
 import { useDrawer } from "@/context/DrawerContext";
 import { useTheme } from "@/context/ThemeContext";
+import { useHistory } from "@/context/HistoryContext";
+import { matchesDrugQuery } from "@/lib/search";
+import { isHighAlertDrug } from "@/lib/highAlert";
 
 // ── Search index for Tools ────────────────────────────────────────────────────
 const SEARCH_TOOLS = [
@@ -40,6 +43,27 @@ const SEARCH_TOOLS = [
 
 const EMERGENCY_TERMS = ["emergency", "resus", "cpr", "code", "cardiac", "arrest", "pals", "acls", "defib", "adrenaline", "epinephrine"];
 
+// ── Quick-access strip (P11): everyday PICU drugs, one tap from home ────────
+const QUICK_DRUG_IDS = [
+  "epinephrine",
+  "norepinephrine",
+  "dopamine",
+  "dobutamine",
+  "milrinone",
+  "fentanyl",
+  "morphine",
+  "midazolam",
+  "ketamine-analgesic",
+  "dexmedetomidine",
+  "propofol",
+  "rocuronium",
+  "amiodarone",
+  "adenosine",
+  "atropine",
+  "furosemide",
+  "salbutamol",
+];
+
 interface SearchResult {
   id: string;
   label: string;
@@ -58,7 +82,24 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { isDark, toggleDark } = useTheme();
   const { openDrawer } = useDrawer();
+  const { entries: historyEntries } = useHistory();
   const colors = Colors.light;
+
+  // ── Recently used drugs (extra batch): from calculation history,
+  // deduped by drug, most recent first, max 10 chips.
+  const recentDrugs = useMemo(() => {
+    const seen = new Set<string>();
+    const out: (typeof DRUGS)[number][] = [];
+    for (const e of historyEntries) {
+      if (seen.has(e.drugId)) continue;
+      const d = DRUGS.find((x) => x.id === e.drugId);
+      if (!d) continue;
+      seen.add(e.drugId);
+      out.push(d);
+      if (out.length >= 10) break;
+    }
+    return out;
+  }, [historyEntries]);
 
   const [searchQuery, setSearchQuery] = useState("");
   const inputRef = useRef<TextInput>(null);
@@ -94,11 +135,14 @@ export default function HomeScreen() {
       });
     }
 
-    // Drugs — name match first, then indication match
-    const drugNameHits   = DRUGS.filter((d) => d.name.toLowerCase().includes(q));
+    // Drugs — smart name match (aliases + typos), then indication match
+    const drugNameHits   = DRUGS.filter((d) =>
+      matchesDrugQuery([d.name, d.genericName ?? ""], q)
+    );
+    const drugNameHitIds = new Set(drugNameHits.map((d) => d.id));
     const drugIndHits    = DRUGS.filter(
       (d) =>
-        !d.name.toLowerCase().includes(q) &&
+        !drugNameHitIds.has(d.id) &&
         d.indications.some((i) => i.toLowerCase().includes(q))
     );
     [...drugNameHits, ...drugIndHits].slice(0, 12).forEach((d) => {
@@ -106,7 +150,7 @@ export default function HomeScreen() {
       out.push({
         id: "d-" + d.id,
         label: d.name,
-        sublabel: cat.label + (d.highAlert ? " · ⚠ High Alert" : ""),
+        sublabel: cat.label + (isHighAlertDrug(d) ? " · ⚠ High Alert" : ""),
         color: cat.color,
         icon: cat.icon,
         module: "Calculator",
@@ -116,11 +160,12 @@ export default function HomeScreen() {
       });
     });
 
-    // Infusions — name first, then indication/category
-    const infNameHits  = INFUSION_DRUGS.filter((d) => d.name.toLowerCase().includes(q));
+    // Infusions — smart name match first, then indication/category
+    const infNameHits  = INFUSION_DRUGS.filter((d) => matchesDrugQuery([d.name], q));
+    const infNameHitIds = new Set(infNameHits.map((d) => d.id));
     const infOtherHits = INFUSION_DRUGS.filter(
       (d) =>
-        !d.name.toLowerCase().includes(q) &&
+        !infNameHitIds.has(d.id) &&
         (d.indication.toLowerCase().includes(q) || d.category.toLowerCase().includes(q))
     );
     [...infNameHits, ...infOtherHits].slice(0, 6).forEach((d) => {
@@ -368,6 +413,119 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
+          {/* Quick strip — daily PICU drugs (P11) */}
+          <Text
+            style={{
+              fontSize: 12.5,
+              fontFamily: "Inter_600SemiBold",
+              color: isDark ? "#A8B8DC" : "#4A5568",
+              marginBottom: 8,
+              letterSpacing: 0.4,
+            }}
+          >
+            QUICK ACCESS — DAILY PICU DRUGS
+          </Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={{ marginBottom: 16, flexGrow: 0 }}
+            contentContainerStyle={{ gap: 8, paddingRight: 4 }}
+          >
+            {QUICK_DRUG_IDS.map((qid) => {
+              const d = DRUGS.find((x) => x.id === qid);
+              if (!d) return null;
+              const cat = CATEGORIES[d.category];
+              return (
+                <TouchableOpacity
+                  key={qid}
+                  activeOpacity={0.8}
+                  onPress={() => router.push({ pathname: "/drug/[id]", params: { id: d.id } } as any)}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 7,
+                    paddingHorizontal: 13,
+                    paddingVertical: 9,
+                    borderRadius: 999,
+                    backgroundColor: isDark ? "#112240" : "#FFFFFF",
+                    borderWidth: 1,
+                    borderColor: isDark ? "#1E3A5F" : "#D6EAF8",
+                  }}
+                >
+                  <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: cat.color }} />
+                  <Text
+                    style={{
+                      fontSize: 13.5,
+                      fontFamily: "Inter_600SemiBold",
+                      color: isDark ? "#CCD6F6" : "#0D1B2A",
+                    }}
+                  >
+                    {d.name.split(" (")[0]}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+
+          {/* Recently used — from calculation history (extra batch) */}
+          {recentDrugs.length > 0 && (
+            <>
+              <Text
+                style={{
+                  fontSize: 12.5,
+                  fontFamily: "Inter_600SemiBold",
+                  color: isDark ? "#A8B8DC" : "#4A5568",
+                  marginBottom: 8,
+                  letterSpacing: 0.4,
+                }}
+              >
+                RECENTLY USED
+              </Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={{ marginBottom: 16, flexGrow: 0 }}
+                contentContainerStyle={{ gap: 8, paddingRight: 4 }}
+              >
+                {recentDrugs.map((d) => {
+                  const cat = CATEGORIES[d.category];
+                  return (
+                    <TouchableOpacity
+                      key={"recent-" + d.id}
+                      activeOpacity={0.8}
+                      onPress={() => router.push({ pathname: "/drug/[id]", params: { id: d.id } } as any)}
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 7,
+                        paddingHorizontal: 13,
+                        paddingVertical: 9,
+                        borderRadius: 999,
+                        backgroundColor: isDark ? "#112240" : "#FFFFFF",
+                        borderWidth: 1,
+                        borderColor: isDark ? "#1E3A5F" : "#D6EAF8",
+                      }}
+                    >
+                      <Feather name="clock" size={12} color={cat.color} />
+                      <Text
+                        style={{
+                          fontSize: 13.5,
+                          fontFamily: "Inter_600SemiBold",
+                          color: isDark ? "#CCD6F6" : "#0D1B2A",
+                        }}
+                      >
+                        {d.name.split(" (")[0]}
+                      </Text>
+                      {isHighAlertDrug(d) && (
+                        <Feather name="alert-octagon" size={12} color="#DC2626" />
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+            </>
+          )}
+
           {/* Dose Calculator */}
           <TouchableOpacity
             onPress={() => router.push("/(tabs)/calculator" as any)}
@@ -387,7 +545,7 @@ export default function HomeScreen() {
             <View style={styles.mainButtonText}>
               <Text style={[styles.mainButtonTitle, { color: tp }]}>Dose Calculator</Text>
               <Text style={[styles.mainButtonDesc, { color: tm }]}>
-                Weight-based drug doses · 478 medications
+                Weight-based drug doses · 479 medications
               </Text>
             </View>
             <Feather name="chevron-right" size={22} color={colors.tint} />

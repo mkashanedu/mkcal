@@ -614,8 +614,8 @@ export default function LoginScreen() {
 
           {/* Disclaimer */}
           <Text style={[styles.disclaimer, { color: isDark ? "#3A5070" : "#CBD5E1" }]}>
-            Account data is stored locally on this device.{"\n"}
-            Google &amp; Apple login are UI scaffolding — cloud sync coming soon.{"\n"}
+            Login is optional — the app works fully without an account.{"\n"}
+            Sign in with Google or email to back up your favorites, settings and history to your account.{"\n"}
             For qualified clinical professionals only.
           </Text>
         </ScrollView>

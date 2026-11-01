@@ -332,36 +332,7 @@ export const HL_NEW_DRUGS_2: FormularyDrug[] = [
   adverseReactions: ["headache", "nausea", "seizures", "blood pressure changes", "hyponatremia", "nasal congestion", "abdominal cramps", "hypertension"],
   reference: "Harriet Lane 24th ed."
 },
-{
-  id: "f-6-yr-and-adolescent-tablet",
-  name: "6 YR and Adolescent",
-  drugClass: "Refer to Harriet Lane 24th ed. monograph",
-  category: "tablet",
-  indications: [],
-  contraindications: ["glaucoma, anxiety disorders, motor tics, and Tourette syndrome"],
-  dosing: [
-  {
-    value: 20,
-    unit: "mg/day",
-    perKg: false,
-    route: "Oral",
-    frequency: "Once daily",
-    notes: "Start at 50% of the total daily dose of racemic methylphenidate with the following max. doses: Immediate-release tabs (BID dosing): 20 mg/24 hr; some may require and be able to tolerate 50 mg/24 hr Extended-release caps (once daily dosing):"
-  },
-  {
-    value: 30,
-    unit: "mg/day",
-    perKg: false,
-    route: "Oral",
-    notes: "30 mg/24 hr; some may require and be able to tolerate 50 mg/24 hr"
-  }
-  ],
-  metabolism: "Refer to Harriet Lane 24th ed. monograph for detailed pharmacokinetics.",
-  excretion: "Refer to Harriet Lane 24th ed. monograph for detailed pharmacokinetics.",
-  monitoring: ["Monitor for long-term growth suppression in children and assess for risk of abuse and dependence prior to prescribing"],
-  adverseReactions: ["Abdominal pain, indigestion, appetite suppression, nausea, headache, insomnia", "Anxiety"],
-  reference: "Harriet Lane 24th ed."
-},
+
 {
   id: "f-dextroamphetamine-amphetamine-syrup",
   name: "Dextroamphetamine / Amphetamine",

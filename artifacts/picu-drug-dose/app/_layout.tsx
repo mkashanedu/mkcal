@@ -20,6 +20,8 @@ import { AppDrawer } from "@/components/AppDrawer";
 import { WebIconFonts } from "@/components/WebIconFonts";
 import { AuthProvider } from "@/context/AuthContext";
 import { FavoritesProvider } from "@/context/FavoritesContext";
+import { HistoryProvider } from "@/context/HistoryContext";
+import { StartupRedirect, SyncBridge } from "@/components/SyncBridge";
 import { PreferencesProvider } from "@/context/PreferencesContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { WeightProvider } from "@/context/WeightContext";
@@ -113,6 +115,7 @@ export default function RootLayout() {
             <PreferencesProvider>
             <WeightProvider>
               <FavoritesProvider>
+                <HistoryProvider>
                 <DrawerProvider>
                   <GestureHandlerRootView>
                     <KeyboardProvider>
@@ -120,9 +123,12 @@ export default function RootLayout() {
                       <RootLayoutNav />
                       <DisclaimerModal />
                       <AppDrawer />
+                      <SyncBridge />
+                      <StartupRedirect />
                     </KeyboardProvider>
                   </GestureHandlerRootView>
                 </DrawerProvider>
+                </HistoryProvider>
               </FavoritesProvider>
             </WeightProvider>
             </PreferencesProvider>

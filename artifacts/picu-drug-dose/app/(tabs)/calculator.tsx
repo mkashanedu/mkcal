@@ -20,6 +20,7 @@ import { useFavorites } from "@/context/FavoritesContext";
 import { MAX_WEIGHT_KG, MIN_WEIGHT_KG, useWeight } from "@/context/WeightContext";
 import { useDrawer } from "@/context/DrawerContext";
 import { ProfessionalFooter } from "@/components/ProfessionalFooter";
+import { matchesDrugQuery } from "@/lib/search";
 import { StarButton } from "@/components/StarButton";
 
 const QUICK_WEIGHTS = [0.5, 1, 2, 3, 5, 8, 10, 15, 20, 25, 30, 40, 50, 70, 100, 150];
@@ -135,9 +136,10 @@ export default function CalculatorScreen() {
       const q = search.toLowerCase();
       const matchSearch =
         !q ||
-        d.name.toLowerCase().includes(q) ||
-        (d.genericName?.toLowerCase().includes(q) ?? false) ||
-        d.indications?.some((i) => i.toLowerCase().includes(q));
+        matchesDrugQuery(
+          [d.name, d.genericName ?? "", ...(d.indications ?? [])],
+          search
+        );
       return matchCat && matchSearch;
     });
   }, [selectedCategory, search]);
@@ -180,7 +182,7 @@ export default function CalculatorScreen() {
                 { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" },
               ]}
             >
-              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 478 drugs
+              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 479 drugs
             </Text>
           </View>
           <TouchableOpacity

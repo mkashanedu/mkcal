@@ -20,6 +20,7 @@ import {
 } from "@/data/allFormularyDrugs";
 import { useTheme } from "@/context/ThemeContext";
 import { useWeight } from "@/context/WeightContext";
+import { matchesDrugQuery } from "@/lib/search";
 
 export default function FormularyCategoryScreen() {
   const { category } = useLocalSearchParams<{ category: string }>();
@@ -35,11 +36,7 @@ export default function FormularyCategoryScreen() {
         (d) =>
           d.category === category &&
           (search.trim() === "" ||
-            d.name.toLowerCase().includes(search.toLowerCase()) ||
-            d.drugClass.toLowerCase().includes(search.toLowerCase()) ||
-            d.indications.some((i) =>
-              i.toLowerCase().includes(search.toLowerCase())
-            ))
+            matchesDrugQuery([d.name, d.drugClass, ...d.indications], search))
       ),
     [category, search]
   );
