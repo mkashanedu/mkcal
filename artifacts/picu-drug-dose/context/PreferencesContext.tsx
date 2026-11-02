@@ -25,9 +25,9 @@ export const STARTUP_SCREEN_OPTIONS: { key: StartupScreen; label: string }[] = [
 ];
 
 export const TEXT_SCALE: Record<TextSize, number> = {
-  small:  0.88,
+  small:  0.85,
   medium: 1.00,
-  large:  1.14,
+  large:  1.20,
 };
 
 interface PreferencesContextValue {

@@ -1,5 +1,10 @@
 /**
- * PeadsCal Service Worker — full-app offline support (v3)
+ * PeadsCal Service Worker — full-app offline support (v4)
+ *
+ * v4 note: registration moved into the JS bundle (lib/registerSW.ts) —
+ * the SPA export's default HTML shell never carried the registration
+ * script, so up to v3 the worker was never registered at all and
+ * offline refresh showed the browser's "You're offline" page.
  *
  * Strategy:
  *  - On install, pre-cache the app shell AND the real JS/CSS bundles.
@@ -12,10 +17,10 @@
  *    background revalidation for navigations (unchanged from v2).
  */
 
-const CACHE_NAME = "peadscal-v3";
+const CACHE_NAME = "peadscal-v4";
 const OFFLINE_URL = "/";
 
-const SHELL = ["/", "/manifest.json", "/icon.png", "/favicon.png"];
+const SHELL = ["/", "/manifest.json", "/icon.png", "/favicon.png", "/favicon.ico"];
 
 // Main sections — the SPA serves the same index for each of these, and
 // caching them under their own URLs makes direct offline opens reliable.
@@ -28,6 +33,10 @@ const ROUTES = [
   "/tools",
   "/favorites",
   "/toxicology",
+  "/ysite",
+  "/history",
+  "/login",
+  "/emergency-sheet",
 ];
 
 // Pull every same-origin script/style/asset URL out of the index HTML.
@@ -100,7 +109,9 @@ self.addEventListener("fetch", (event) => {
   const isSameOrigin = url.origin === self.location.origin;
 
   event.respondWith(
-    caches.match(request).then((cached) => {
+    caches
+      .match(request, request.mode === "navigate" ? { ignoreSearch: true } : undefined)
+      .then((cached) => {
       if (cached) {
         if (request.mode === "navigate") {
           fetch(request)

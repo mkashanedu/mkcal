@@ -72,7 +72,7 @@ export default function FavoritesScreen() {
               MKashanEdu
             </Text>
             <Text style={[styles.headerSub, { color: textMuted }]}>
-              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 479 drugs
+              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 480 drugs
             </Text>
           </View>
           <TouchableOpacity

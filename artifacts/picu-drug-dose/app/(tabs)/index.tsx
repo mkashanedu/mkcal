@@ -19,9 +19,11 @@ import { CATEGORIES, DRUGS } from "@/constants/allDrugs";
 import { INFUSION_DRUGS } from "@/constants/infusions";
 import { useDrawer } from "@/context/DrawerContext";
 import { useTheme } from "@/context/ThemeContext";
+import { usePreferences } from "@/context/PreferencesContext";
 import { useHistory } from "@/context/HistoryContext";
 import { matchesDrugQuery } from "@/lib/search";
 import { isHighAlertDrug } from "@/lib/highAlert";
+import { conditionForQuery } from "@/lib/indications";
 
 // ── Search index for Tools ────────────────────────────────────────────────────
 const SEARCH_TOOLS = [
@@ -81,6 +83,7 @@ interface SearchResult {
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const { isDark, toggleDark } = useTheme();
+  const { textScale } = usePreferences();
   const { openDrawer } = useDrawer();
   const { entries: historyEntries } = useHistory();
   const colors = Colors.light;
@@ -135,22 +138,33 @@ export default function HomeScreen() {
       });
     }
 
-    // Drugs — smart name match (aliases + typos), then indication match
+    // Drugs — smart name match (aliases + typos), then condition-group
+    // match (query names a condition: seizure, shock, anaphylaxis…),
+    // then plain indication-substring match.
     const drugNameHits   = DRUGS.filter((d) =>
       matchesDrugQuery([d.name, d.genericName ?? ""], q)
     );
     const drugNameHitIds = new Set(drugNameHits.map((d) => d.id));
+    const condGroup      = conditionForQuery(q);
+    const drugCondHits   = condGroup
+      ? DRUGS.filter((d) => !drugNameHitIds.has(d.id) && condGroup.drugIds.includes(d.id))
+      : [];
+    const drugCondHitIds = new Set(drugCondHits.map((d) => d.id));
     const drugIndHits    = DRUGS.filter(
       (d) =>
         !drugNameHitIds.has(d.id) &&
+        !drugCondHitIds.has(d.id) &&
         d.indications.some((i) => i.toLowerCase().includes(q))
     );
-    [...drugNameHits, ...drugIndHits].slice(0, 12).forEach((d) => {
+    [...drugNameHits, ...drugCondHits, ...drugIndHits].slice(0, 12).forEach((d) => {
       const cat = CATEGORIES[d.category];
       out.push({
         id: "d-" + d.id,
         label: d.name,
-        sublabel: cat.label + (isHighAlertDrug(d) ? " · ⚠ High Alert" : ""),
+        sublabel:
+          cat.label +
+          (drugCondHitIds.has(d.id) && condGroup ? " · for " + condGroup.label : "") +
+          (isHighAlertDrug(d) ? " · ⚠ High Alert" : ""),
         color: cat.color,
         icon: cat.icon,
         module: "Calculator",
@@ -246,7 +260,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
 
           <View style={{ flex: 1, minWidth: 0 }}>
-            <Text style={[styles.headerTitle, { color: tp }]} numberOfLines={1}>
+            <Text style={[styles.headerTitle, { color: tp, fontSize: Math.round(22 * textScale) }]} numberOfLines={1}>
               MKashanEdu
             </Text>
             <Text style={[styles.headerSub, { color: tm }]}>
@@ -371,7 +385,7 @@ export default function HomeScreen() {
                       {/* Text */}
                       <View style={styles.resultText}>
                         <Text
-                          style={[styles.resultLabel, { color: tp }]}
+                          style={[styles.resultLabel, { color: tp, fontSize: Math.round(13 * textScale) }]}
                           numberOfLines={1}
                         >
                           {r.label}
@@ -543,9 +557,9 @@ export default function HomeScreen() {
               <Feather name="sliders" size={32} color={colors.tint} />
             </View>
             <View style={styles.mainButtonText}>
-              <Text style={[styles.mainButtonTitle, { color: tp }]}>Dose Calculator</Text>
-              <Text style={[styles.mainButtonDesc, { color: tm }]}>
-                Weight-based drug doses · 479 medications
+              <Text style={[styles.mainButtonTitle, { color: tp, fontSize: Math.round(20 * textScale) }]}>Dose Calculator</Text>
+              <Text style={[styles.mainButtonDesc, { color: tm, fontSize: Math.round(13 * textScale), lineHeight: Math.round(18 * textScale) }]}>
+                Weight-based drug doses · 480 medications
               </Text>
             </View>
             <Feather name="chevron-right" size={22} color={colors.tint} />
@@ -569,8 +583,8 @@ export default function HomeScreen() {
               <Feather name="alert-triangle" size={32} color="#FFFFFF" />
             </View>
             <View style={styles.mainButtonText}>
-              <Text style={[styles.mainButtonTitle, { color: "#FFFFFF" }]}>EMERGENCY</Text>
-              <Text style={[styles.mainButtonDesc, { color: "rgba(255,255,255,0.8)" }]}>
+              <Text style={[styles.mainButtonTitle, { color: "#FFFFFF", fontSize: Math.round(20 * textScale) }]}>EMERGENCY</Text>
+              <Text style={[styles.mainButtonDesc, { color: "rgba(255,255,255,0.8)", fontSize: Math.round(13 * textScale), lineHeight: Math.round(18 * textScale) }]}>
                 RESUSCITATION · Rapid reference
               </Text>
             </View>
@@ -594,10 +608,10 @@ export default function HomeScreen() {
               <Feather name="tool" size={32} color="#16A34A" />
             </View>
             <View style={styles.mainButtonText}>
-              <Text style={[styles.mainButtonTitle, { color: tp }]}>
+              <Text style={[styles.mainButtonTitle, { color: tp, fontSize: Math.round(20 * textScale) }]}>
                 Tools &amp; Protocols
               </Text>
-              <Text style={[styles.mainButtonDesc, { color: tm }]}>
+              <Text style={[styles.mainButtonDesc, { color: tm, fontSize: Math.round(13 * textScale), lineHeight: Math.round(18 * textScale) }]}>
                 GIR · BIG Score · Phoenix Sepsis · ICU Protocols
               </Text>
             </View>

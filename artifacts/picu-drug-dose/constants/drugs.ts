@@ -1593,6 +1593,21 @@ export const DRUGS: Drug[] = [
     monitoring: ["Serum K+ every 1–2 hr", "Glucose every 30 min", "Continuous ECG"],
     reference: "Harriet Lane 23e",
   },
+  {
+    id: "insulin-regular",
+    name: "Insulin (Regular)",
+    genericName: "Actrapid / Humulin R",
+    category: "endocrine",
+    indications: ["Diabetic ketoacidosis (DKA)", "Hyperkalemia (with glucose — transcellular shift)"],
+    doses: [
+      { min: 0.05, max: 0.1, unit: "units/kg/hr", perKg: true, route: "IV infusion", label: "DKA — insulin infusion", notes: "Start 1–2 hr AFTER initial fluid resuscitation; NO IV bolus; standard 1 unit/mL in 0.9% NaCl; glucose should fall no faster than ~100 mg/dL/hr; add dextrose to IV fluids when glucose < 250–300 mg/dL" },
+      { value: 0.1, unit: "units/kg", perKg: true, route: "IV over 30 min", maxDose: "10 units", label: "Hyperkalemia", notes: "Give WITH glucose 0.5–1 g/kg IV — see the Glucose-Insulin (Hyperkalemia) entry for the combined regimen", adultMaxDose_num: 10 },
+    ],
+    warnings: ["HIGH ALERT — independent double-check of dose and pump programming", "Hypoglycemia: check capillary glucose HOURLY while infusing", "Insulin shifts K+ into cells — monitor K+ closely; in DKA, potassium replacement per protocol runs alongside", "Never give an IV insulin bolus in DKA"],
+    formulations: ["100 units/mL vial (10 mL) — Actrapid / Humulin R"],
+    monitoring: ["Glucose hourly", "Serum K+ every 1–2 hr", "Blood gas + ketones per DKA protocol"],
+    reference: "ISPAD 2022 | Harriet Lane",
+  },
 
   // ════════════════════════════════════════════════════════════
   //  ANTIFUNGALS
@@ -2009,15 +2024,32 @@ export function calculateDose(
     };
   }
 
+  // Compatibility is advisory only — it must never hide the dose
+  // (Lidocaine/Mg fix, approved 2026-11-02). The drug page collects no
+  // carrier fluid, so with no fluid given the old code returned "—" for
+  // every rule-carrying dose. Now the dose always calculates; when every
+  // recorded rule is "compatible", the recorded guidance becomes the note.
+  let compatibilityStatus: CompatibilityStatus | undefined;
+  let compatibilityMessage: string | undefined;
   if (doseRange.compatibilityRules?.length) {
     const compatibility = getDoseCompatibility(doseRange, ageMonths, fluid);
-    if (compatibility.status !== "compatible") {
-      return {
-        dose: "—",
-        range: `Compatibility ${compatibility.status}`,
-        compatibilityStatus: compatibility.status,
-        compatibilityMessage: compatibility.message,
-      };
+    compatibilityStatus = compatibility.status;
+    compatibilityMessage = compatibility.message;
+    if (!fluid?.trim()) {
+      const rules = doseRange.compatibilityRules;
+      if (rules.every((rule) => rule.status === "compatible")) {
+        compatibilityStatus = "compatible";
+        // Prefer the guidance written for this patient's age band; with no
+        // age on record, use the shortest (base) guidance text.
+        const bandRule = hasValidAge(ageMonths)
+          ? rules.find((rule) => rule.guidance && isInAgeBand(ageMonths, rule))
+          : undefined;
+        const baseRule = rules
+          .filter((rule) => rule.guidance)
+          .sort((a, b) => (a.guidance?.length ?? 0) - (b.guidance?.length ?? 0))[0];
+        compatibilityMessage =
+          bandRule?.guidance ?? baseRule?.guidance ?? compatibility.message;
+      }
     }
   }
 
@@ -2031,7 +2063,7 @@ export function calculateDose(
     const rangeStr = doseRange.min !== undefined && doseRange.max !== undefined
       ? `${doseRange.min} – ${doseRange.max} ${doseRange.unit}`
       : `${val} ${doseRange.unit}`;
-    return { dose: rangeStr, range: "(fixed dose)" };
+    return { dose: rangeStr, range: "(fixed dose)", compatibilityStatus, compatibilityMessage };
   }
 
   if (!Number.isFinite(weightKg) || weightKg <= 0) {
@@ -2090,6 +2122,8 @@ export function calculateDose(
       exceedsAdultMax: result.exceeded,
       adultMaxLabel: capMessage(result.exceeded),
       ageWarning,
+      compatibilityStatus,
+      compatibilityMessage,
       doseCap,
       doseCapUnit: doseCap !== undefined ? unitStr : undefined,
       nearCap:
@@ -2114,6 +2148,8 @@ export function calculateDose(
       exceedsAdultMax: exceedsMaximum,
       adultMaxLabel: capMessage(exceedsMaximum),
       ageWarning,
+      compatibilityStatus,
+      compatibilityMessage,
       doseCap,
       doseCapUnit: doseCap !== undefined ? unitStr : undefined,
       nearCap:

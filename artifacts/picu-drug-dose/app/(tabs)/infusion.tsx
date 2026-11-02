@@ -19,6 +19,7 @@ import { router } from "expo-router";
 
 import { useWeight } from "@/context/WeightContext";
 import { useTheme } from "@/context/ThemeContext";
+import { usePreferences } from "@/context/PreferencesContext";
 import { useDrawer } from "@/context/DrawerContext";
 import { INFUSION_DRUGS } from "@/constants/infusions";
 import { ProfessionalFooter } from "@/components/ProfessionalFooter";
@@ -40,6 +41,7 @@ type InfusionCatKey = typeof INFUSION_CATS[number]["key"];
 export default function InfusionScreen() {
   const { weightInput: weight, setWeightInput: setWeight } = useWeight();
   const { isDark, toggleDark } = useTheme();
+  const { textScale } = usePreferences();
   const { openDrawer } = useDrawer();
 
   const [search, setSearch]     = useState("");
@@ -83,11 +85,11 @@ export default function InfusionScreen() {
             <Feather name="menu" size={20} color={isDark ? "#8892B0" : C.tint} />
           </TouchableOpacity>
           <View style={styles.headerLeft}>
-            <Text style={[styles.headerTitle, { color: TEXT }]} numberOfLines={1}>
+            <Text style={[styles.headerTitle, { color: TEXT, fontSize: Math.round(20 * textScale) }]} numberOfLines={1}>
               MKashanEdu
             </Text>
             <Text style={[styles.headerSubtitle, { color: MUTED }]} numberOfLines={1}>
-              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 479 drugs
+              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 480 drugs
             </Text>
           </View>
           <View style={styles.headerRight}>
@@ -202,7 +204,7 @@ export default function InfusionScreen() {
                   >
                     <View style={[styles.drugPillDot, { backgroundColor: drug.color }]} />
                     <Text
-                      style={[styles.drugPillText, { color: isDark ? "#CCD6F6" : "#1E293B" }]}
+                      style={[styles.drugPillText, { color: isDark ? "#CCD6F6" : "#1E293B", fontSize: Math.round(13 * textScale), lineHeight: Math.round(17 * textScale) }]}
                       numberOfLines={2}
                     >
                       {drug.name}

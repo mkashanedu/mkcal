@@ -14,6 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Colors from "@/constants/colors";
 import { useTheme } from "@/context/ThemeContext";
+import { usePreferences } from "@/context/PreferencesContext";
 import { useDrawer } from "@/context/DrawerContext";
 import { useWeight, MIN_WEIGHT_KG, MAX_WEIGHT_KG } from "@/context/WeightContext";
 import { FORMULARY_CATEGORIES, FORMULARY_DRUGS, FormularyCategory } from "@/data/allFormularyDrugs";
@@ -22,6 +23,7 @@ import { ProfessionalFooter } from "@/components/ProfessionalFooter";
 export default function FormularyScreen() {
   const insets = useSafeAreaInsets();
   const { isDark, toggleDark } = useTheme();
+  const { textScale } = usePreferences();
   const { openDrawer } = useDrawer();
   const {
     weight, setWeight, weightInput, setWeightInput, weightUnit, setWeightUnit,
@@ -121,7 +123,7 @@ export default function FormularyScreen() {
           </TouchableOpacity>
           <View style={{ flex: 1, minWidth: 0 }}>
             <Text
-              style={[styles.headerTitle, { color: textPrimary, fontFamily: "Inter_700Bold" }]}
+              style={[styles.headerTitle, { color: textPrimary, fontFamily: "Inter_700Bold", fontSize: Math.round(18 * textScale) }]}
               numberOfLines={1}
             >
               Formulary
@@ -281,10 +283,10 @@ export default function FormularyScreen() {
                 <View style={[styles.tileIconWrap, { backgroundColor: cat.color + "18" }]}>
                   <Feather name={cat.icon as any} size={26} color={cat.color} />
                 </View>
-                <Text style={[styles.tileLabel, { color: textPrimary, fontFamily: "Inter_700Bold" }]}>
+                <Text style={[styles.tileLabel, { color: textPrimary, fontFamily: "Inter_700Bold", fontSize: Math.round(15 * textScale) }]}>
                   {cat.label}
                 </Text>
-                <Text style={[styles.tileDesc, { color: textMuted, fontFamily: "Inter_400Regular" }]} numberOfLines={2}>
+                <Text style={[styles.tileDesc, { color: textMuted, fontFamily: "Inter_400Regular", fontSize: Math.round(12 * textScale), lineHeight: Math.round(16 * textScale) }]} numberOfLines={2}>
                   {cat.description}
                 </Text>
                 <View style={[styles.tileCountBadge, { backgroundColor: cat.color + "18" }]}>

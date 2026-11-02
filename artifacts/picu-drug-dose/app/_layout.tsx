@@ -26,6 +26,7 @@ import { PreferencesProvider } from "@/context/PreferencesContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { WeightProvider } from "@/context/WeightContext";
 import { DrawerProvider } from "@/context/DrawerContext";
+import { registerServiceWorker } from "@/lib/registerSW";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -103,6 +104,20 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [fontsLoaded, fontError]);
+
+  // Offline support: register the service worker from the bundle itself
+  // (the SPA export does not use the custom +html shell — see
+  // lib/registerSW.ts). Web only; no-op on native.
+  useEffect(() => {
+    registerServiceWorker();
+    // Web layout guard: no page may scroll sideways. A stray wide element
+    // (e.g. on /login after using the drawer) otherwise leaves the whole
+    // page shifted a few px off-screen on mobile Chrome.
+    if (typeof document !== "undefined") {
+      document.documentElement.style.overflowX = "hidden";
+      document.body.style.overflowX = "hidden";
+    }
+  }, []);
 
   if (!fontsLoaded && !fontError) return null;
 

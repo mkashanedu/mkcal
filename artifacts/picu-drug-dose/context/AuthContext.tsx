@@ -7,10 +7,12 @@
  */
 import {
   createUserWithEmailAndPassword,
+  getRedirectResult,
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   updateProfile,
   type User as FirebaseUser,
@@ -105,6 +107,11 @@ function getErrorMessage(error: unknown): string {
       return "Google sign-in window was closed before finishing.";
     case "auth/popup-blocked":
       return "The browser blocked the Google sign-in window. Allow popups for this site and try again.";
+    case "auth/argument-error":
+    case "auth/operation-not-supported-in-this-environment":
+      return "Google sign-in could not open in this browser. Please try again — or use email and password below.";
+    case "auth/unauthorized-domain":
+      return "This website is not authorised for sign-in yet. The developer must add it in the Firebase console (Authentication → Settings → Authorised domains).";
     default:
       return error instanceof Error ? error.message : "Authentication failed.";
   }
@@ -143,6 +150,21 @@ async function toAuthUser(firebaseUser: FirebaseUser): Promise<AuthUser> {
     provider: providerFromUser(firebaseUser),
   };
 }
+
+/** Popup sign-in is unreliable on mobile browsers (it fails with
+ *  auth/argument-error on Android Chrome / in-app WebViews), so Google
+ *  sign-in uses the redirect flow there instead. */
+function isMobileBrowser(): boolean {
+  if (typeof window === "undefined") return false;
+  const ua = window.navigator?.userAgent ?? "";
+  return /Android|webOS|iPhone|iPad|iPod|Mobile/i.test(ua) || window.innerWidth <= 820;
+}
+
+const REDIRECT_FALLBACK_CODES = new Set([
+  "auth/argument-error",
+  "auth/popup-blocked",
+  "auth/operation-not-supported-in-this-environment",
+]);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -264,10 +286,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           error: "Apple sign-in is not available yet. Use Google or email and password.",
         };
       }
+      const googleProvider = new GoogleAuthProvider();
+      googleProvider.setCustomParameters({ prompt: "select_account" });
+      // Mobile browsers: redirect flow (popups fail there with
+      // auth/argument-error). The mount effect below finishes the sign-in
+      // when Google sends the user back.
+      if (isMobileBrowser()) {
+        try {
+          sessionStorage.setItem("peadscal_google_role", role);
+        } catch {}
+        try {
+          await signInWithRedirect(firebaseAuth, googleProvider);
+          return { success: true };
+        } catch (error) {
+          return { success: false, error: getErrorMessage(error) };
+        }
+      }
       try {
-        // Real Google sign-in (Firebase popup flow — web build).
-        const googleProvider = new GoogleAuthProvider();
-        googleProvider.setCustomParameters({ prompt: "select_account" });
         const result = await signInWithPopup(firebaseAuth, googleProvider);
         // Create/refresh the Firestore profile, preserving any existing role.
         try {
@@ -290,11 +325,64 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(await toAuthUser(result.user));
         return { success: true };
       } catch (error) {
+        const code =
+          typeof error === "object" && error && "code" in error
+            ? String((error as { code?: string }).code)
+            : "";
+        if (REDIRECT_FALLBACK_CODES.has(code)) {
+          try {
+            sessionStorage.setItem("peadscal_google_role", role);
+            await signInWithRedirect(firebaseAuth, googleProvider);
+            return { success: true };
+          } catch {}
+        }
         return { success: false, error: getErrorMessage(error) };
       }
     },
     []
   );
+
+  // Finish a redirect-based Google sign-in (mobile browsers) on return.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    getRedirectResult(firebaseAuth)
+      .then(async (result) => {
+        if (!result?.user) return;
+        let role: ClinicalRole = "rn";
+        try {
+          const saved = sessionStorage.getItem("peadscal_google_role");
+          if (
+            saved === "physician" ||
+            saved === "rn" ||
+            saved === "respiratory_therapist" ||
+            saved === "paramedic" ||
+            saved === "other"
+          ) {
+            role = saved;
+          }
+          sessionStorage.removeItem("peadscal_google_role");
+        } catch {}
+        try {
+          const profileRef = doc(firestore, "users", result.user.uid);
+          const existing = await getDoc(profileRef);
+          await setDoc(
+            profileRef,
+            {
+              uid: result.user.uid,
+              name: result.user.displayName || "Clinical User",
+              email: (result.user.email || "").toLowerCase(),
+              provider: "google",
+              ...(!existing.exists() ? { role, createdAt: new Date().toISOString() } : {}),
+            },
+            { merge: true }
+          );
+        } catch (error) {
+          console.warn("[Auth] Google redirect sign-in succeeded, but profile sync failed.", error);
+        }
+        setUser(await toAuthUser(result.user));
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <AuthContext.Provider

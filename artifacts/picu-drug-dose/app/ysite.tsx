@@ -128,12 +128,14 @@ export default function YSiteScreen() {
                 ? "COMPATIBLE — may share a Y-site"
                 : v.status === "I"
                   ? "INCOMPATIBLE — do NOT run together"
-                  : "NO VERIFIED DATA";
+                  : v.status === "COND"
+                    ? "CONDITIONAL — depends on concentration"
+                    : "NO VERIFIED DATA";
             return (
               <View key={`${a}|${b}`} style={[styles.verdict, { backgroundColor: card, borderLeftColor: color }]}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                   <Feather
-                    name={v.status === "C" ? "check-circle" : v.status === "I" ? "x-octagon" : "help-circle"}
+                    name={v.status === "C" ? "check-circle" : v.status === "I" ? "x-octagon" : v.status === "COND" ? "alert-circle" : "help-circle"}
                     size={19}
                     color={color}
                   />

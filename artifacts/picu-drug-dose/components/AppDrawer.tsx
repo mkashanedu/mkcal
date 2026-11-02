@@ -43,7 +43,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", icon: "home", route: "/", color: "#0891B2", description: "Home screen" },
   { label: "EMERGENCY / RESUSCITATION", icon: "alert-triangle", route: "/emergency", color: "#DC2626", description: "Rapid resuscitation reference", isEmergency: true },
-  { label: "Drug Calculator", icon: "sliders", route: "/calculator", color: "#0891B2", description: "479 drugs — Harriet Lane & Nelson's" },
+  { label: "Drug Calculator", icon: "sliders", route: "/calculator", color: "#0891B2", description: "480 drugs — Harriet Lane & Nelson's" },
   { label: "Drug Infusions", icon: "activity", route: "/infusion", color: "#7C3AED", description: "IV drip & infusion calculator" },
   { label: "Formulary", icon: "book-open", route: "/formulary", color: "#0D9488", description: "Tablets, syrups, nebulisers & IV" },
   { label: "Electrolytes & Protocols", icon: "zap", route: "/calcs", color: "#0EA5E9", description: "K⁺ / Na⁺ correction, ABG & more" },
@@ -66,19 +66,36 @@ function SettingsDivider({ color }: { color: string }) {
 }
 
 function SettingsRow({
-  icon, label, sublabel, color, right, onPress,
+  icon, label, sublabel, color, right, onPress, stackRight,
 }: {
   icon: string; label: string; sublabel?: string; color: string;
   right?: React.ReactNode; onPress?: () => void;
+  /** Render `right` on its own line below the label — for wide controls
+   *  (e.g. 4 word chips) that would otherwise crush the label column. */
+  stackRight?: boolean;
 }) {
-  const Inner = (
+  const { textScale } = usePreferences();
+  const Inner = stackRight ? (
+    <View style={[styles.settingsRow, { flexWrap: "wrap" }]}>
+      <View style={[styles.settingsIcon, { backgroundColor: color + "18" }]}>
+        <Feather name={icon as any} size={15} color={color} />
+      </View>
+      <View style={{ flex: 1, minWidth: 0 }}>
+        <Text style={[styles.settingsRowLabel, { fontSize: Math.round(13 * textScale) }]}>{label}</Text>
+        {sublabel ? <Text style={[styles.settingsRowSub, { fontSize: Math.round(11 * textScale) }]}>{sublabel}</Text> : null}
+      </View>
+      <View style={{ width: "100%", marginTop: 8, paddingLeft: 42 }}>
+        {right}
+      </View>
+    </View>
+  ) : (
     <View style={styles.settingsRow}>
       <View style={[styles.settingsIcon, { backgroundColor: color + "18" }]}>
         <Feather name={icon as any} size={15} color={color} />
       </View>
       <View style={{ flex: 1, minWidth: 0 }}>
-        <Text style={styles.settingsRowLabel}>{label}</Text>
-        {sublabel ? <Text style={styles.settingsRowSub}>{sublabel}</Text> : null}
+        <Text style={[styles.settingsRowLabel, { fontSize: Math.round(13 * textScale) }]}>{label}</Text>
+        {sublabel ? <Text style={[styles.settingsRowSub, { fontSize: Math.round(11 * textScale) }]}>{sublabel}</Text> : null}
       </View>
       {right}
     </View>
@@ -95,7 +112,7 @@ export function AppDrawer() {
   const { isOpen, closeDrawer } = useDrawer();
   const { isDark, toggleDark }  = useTheme();
   const { weightUnit, setWeightUnit } = useWeight();
-  const { textSize, setTextSize, biometricEnabled, setBiometricEnabled, startupScreen, setStartupScreen } = usePreferences();
+  const { textSize, setTextSize, textScale, biometricEnabled, setBiometricEnabled, startupScreen, setStartupScreen } = usePreferences();
   const { syncNow, syncStatus, syncMessage } = useFavorites();
   const insets = useSafeAreaInsets();
 
@@ -210,12 +227,13 @@ export function AppDrawer() {
                   style={[styles.navLabel, {
                     color: item.isEmergency ? "#DC2626" : textPrimary,
                     fontFamily: item.isEmergency ? "Inter_700Bold" : "Inter_600SemiBold",
+                    fontSize: Math.round(13 * textScale),
                   }]}
                   numberOfLines={1} adjustsFontSizeToFit
                 >
                   {item.label}
                 </Text>
-                <Text style={[styles.navDesc, { color: item.isEmergency ? "#DC262699" : textMuted }]} numberOfLines={1}>
+                <Text style={[styles.navDesc, { color: item.isEmergency ? "#DC262699" : textMuted, fontSize: Math.round(11 * textScale) }]} numberOfLines={1}>
                   {item.description}
                 </Text>
               </View>
@@ -323,6 +341,7 @@ export function AppDrawer() {
 
               {/* ── Startup Screen ── */}
               <SettingsRow
+                stackRight
                 icon="home"
                 label="Startup Screen"
                 sublabel="Which screen opens first"
@@ -512,7 +531,7 @@ const styles = StyleSheet.create({
   settingsRowLabel: { fontSize: 13, fontFamily: "Inter_600SemiBold", color: "#0D1B2A" },
   settingsRowSub: { fontSize: 11, fontFamily: "Inter_400Regular", marginTop: 1, color: "#64748B" },
 
-  segmentRow: { flexDirection: "row", gap: 4 },
+  segmentRow: { flexDirection: "row", gap: 4, flexWrap: "wrap" },
   segmentBtn: {
     paddingHorizontal: 9, paddingVertical: 5, borderRadius: 6, borderWidth: 1.5,
     alignItems: "center", justifyContent: "center",

@@ -23,6 +23,7 @@ import { useHistory } from "@/context/HistoryContext";
 import { usePreferences } from "@/context/PreferencesContext";
 import { StarButton } from "@/components/StarButton";
 import { highAlertInfo } from "@/lib/highAlert";
+import { renalCaution } from "@/lib/renal";
 
 export default function DrugDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -129,10 +130,14 @@ export default function DrugDetailScreen() {
   const accent = themed(cat.color);
   const danger = themed(colors.danger);
   const f = isFav(drug.id);
-  const topOffset = Platform.OS === "web" ? 67 : insets.top;
+  // Web: no native status-bar/header above this screen — a large top offset
+  // was leaving a tall empty band in the coloured header (user feedback
+  // 2026-11-01). Native keeps the safe-area inset.
+  const topOffset = Platform.OS === "web" ? 10 : insets.top;
 
   // ── High-alert (extra batch): badge + double-check banner. Display only.
   const ha = highAlertInfo(drug);
+  const renal = renalCaution(drug);
 
   // ── Weight plausibility (extra batch): a valid-but-unusual weight gets a
   // verify banner. Calculations are NOT blocked or changed.
@@ -226,19 +231,30 @@ export default function DrugDetailScreen() {
         </View>
 
         <View style={styles.headerContent}>
-          <View style={[styles.catBadge, { backgroundColor: "rgba(255,255,255,0.25)" }]}>
-            <Text style={[styles.catBadgeText, { fontFamily: "Inter_600SemiBold" }]}>
-              {cat.label}
-            </Text>
-          </View>
-          {ha.high && (
-            <View style={[styles.catBadge, { backgroundColor: "#B91C1C", flexDirection: "row", alignItems: "center", gap: 5 }]}>
-              <Feather name="alert-octagon" size={11} color="#FFFFFF" />
-              <Text style={[styles.catBadgeText, { fontFamily: "Inter_700Bold" }]}>
-                HIGH ALERT
+          {/* Category + HIGH ALERT badges share ONE row (compact header). */}
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+            <View style={[styles.catBadge, { backgroundColor: "rgba(255,255,255,0.25)", marginBottom: 0 }]}>
+              <Text style={[styles.catBadgeText, { fontFamily: "Inter_600SemiBold" }]}>
+                {cat.label}
               </Text>
             </View>
-          )}
+            {ha.high && (
+              <View style={[styles.catBadge, { backgroundColor: "#B91C1C", flexDirection: "row", alignItems: "center", gap: 5, marginBottom: 0 }]}>
+                <Feather name="alert-octagon" size={11} color="#FFFFFF" />
+                <Text style={[styles.catBadgeText, { fontFamily: "Inter_700Bold" }]}>
+                  HIGH ALERT
+                </Text>
+              </View>
+            )}
+            {renal && (
+              <View style={[styles.catBadge, { backgroundColor: "#D97706", flexDirection: "row", alignItems: "center", gap: 5, marginBottom: 0 }]}>
+                <Feather name="alert-triangle" size={11} color="#FFFFFF" />
+                <Text style={[styles.catBadgeText, { fontFamily: "Inter_700Bold" }]}>
+                  RENAL — CHECK DOSE
+                </Text>
+              </View>
+            )}
+          </View>
           <Text style={[styles.drugTitle, { fontFamily: "Inter_700Bold" }]}>
             {drug.name}
           </Text>
@@ -257,6 +273,29 @@ export default function DrugDetailScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
+        {/* Renal caution (this batch): amber note under the header when the
+            drug needs renal dose attention. */}
+        {renal && (
+          <View
+            style={{
+              flexDirection: "row",
+              gap: 8,
+              alignItems: "flex-start",
+              backgroundColor: isDark ? "#1A1407" : "#FFFBEB",
+              borderWidth: 1,
+              borderColor: "#D97706",
+              borderRadius: 12,
+              padding: 11,
+              marginBottom: 12,
+            }}
+          >
+            <Feather name="alert-triangle" size={14} color="#D97706" />
+            <Text style={{ color: isDark ? "#FCD34D" : "#92400E", fontFamily: "Inter_500Medium", fontSize: 12.5, flex: 1, lineHeight: 17 }}>
+              {renal.text}
+            </Text>
+          </View>
+        )}
+
         {/* Patient Card — weight & age editable here (P6). One global
             weight/age for the whole app: editing here updates everywhere. */}
         <View
@@ -406,7 +445,7 @@ export default function DrugDetailScreen() {
                     <Text style={[styles.calcValue, { color: accent, fontFamily: "Inter_700Bold", fontSize: Math.round(24 * textScale) }]}>
                       {calc.dose}
                     </Text>
-                    <Text style={[styles.perKgText, { color: isDark ? "#A8B8DC" : "#8A9BB0", fontFamily: "Inter_400Regular" }]}>
+                    <Text style={[styles.perKgText, { color: isDark ? "#A8B8DC" : "#8A9BB0", fontFamily: "Inter_400Regular", fontSize: Math.round(11 * textScale) }]}>
                       {calc.range}
                     </Text>
                   </View>
@@ -415,7 +454,7 @@ export default function DrugDetailScreen() {
                       <Text style={[styles.maxDoseLabel, { color: danger, fontFamily: "Inter_500Medium" }]}>
                         Max Dose
                       </Text>
-                      <Text style={[styles.maxDoseValue, { color: danger, fontFamily: "Inter_700Bold" }]}>
+                      <Text style={[styles.maxDoseValue, { color: danger, fontFamily: "Inter_700Bold", fontSize: Math.round(14 * textScale) }]}>
                         {dose.maxDose}
                       </Text>
                     </View>
@@ -440,8 +479,16 @@ export default function DrugDetailScreen() {
                 {dose.notes && (
                   <View style={[styles.noteBox, { backgroundColor: isDark ? "#0A192F" : "#F4F9FC" }]}>
                     <Feather name="info" size={12} color={isDark ? "#A8B8DC" : "#8A9BB0"} />
-                    <Text style={[styles.noteText, { color: isDark ? "#A8B8DC" : "#4A5568", fontFamily: "Inter_400Regular" }]}>
+                    <Text style={[styles.noteText, { color: isDark ? "#A8B8DC" : "#4A5568", fontFamily: "Inter_400Regular", fontSize: Math.round(12 * textScale), lineHeight: Math.round(17 * textScale) }]}>
                       {dose.notes}
+                    </Text>
+                  </View>
+                )}
+                {calc.compatibilityMessage && (
+                  <View style={[styles.noteBox, { backgroundColor: isDark ? "#0A192F" : "#F4F9FC" }]}>
+                    <Feather name="droplet" size={12} color={isDark ? "#A8B8DC" : "#8A9BB0"} />
+                    <Text style={[styles.noteText, { color: isDark ? "#A8B8DC" : "#4A5568", fontFamily: "Inter_400Regular", fontSize: Math.round(12 * textScale), lineHeight: Math.round(17 * textScale) }]}>
+                      {calc.compatibilityMessage}
                     </Text>
                   </View>
                 )}
@@ -660,12 +707,12 @@ function SectionHeader({
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: { paddingBottom: 20 },
+  header: { paddingBottom: 12 },
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
-    marginBottom: 8,
+    marginBottom: 4,
   },
   backBtn: {
     width: 38,
@@ -675,11 +722,11 @@ const styles = StyleSheet.create({
     borderRadius: 19,
     backgroundColor: "rgba(0,0,0,0.15)",
   },
-  headerContent: { paddingHorizontal: 20, gap: 6 },
+  headerContent: { paddingHorizontal: 20, gap: 4 },
   catBadge: { alignSelf: "flex-start", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, marginBottom: 4 },
   catBadgeText: { color: "#FFFFFF", fontSize: 11 },
-  drugTitle: { fontSize: 28, color: "#FFFFFF", letterSpacing: -0.5 },
-  genericTitle: { fontSize: 16, color: "rgba(255,255,255,0.75)" },
+  drugTitle: { fontSize: 23, color: "#FFFFFF", letterSpacing: -0.5 },
+  genericTitle: { fontSize: 14, color: "rgba(255,255,255,0.75)" },
   scrollContent: { padding: 12, gap: 6 },
   weightBanner: {
     flexDirection: "row",

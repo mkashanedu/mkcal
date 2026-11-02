@@ -16,11 +16,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { CATEGORIES, DRUGS, DrugCategory } from "@/constants/allDrugs";
 import { useTheme } from "@/context/ThemeContext";
+import { usePreferences } from "@/context/PreferencesContext";
 import { useFavorites } from "@/context/FavoritesContext";
 import { MAX_WEIGHT_KG, MIN_WEIGHT_KG, useWeight } from "@/context/WeightContext";
 import { useDrawer } from "@/context/DrawerContext";
 import { ProfessionalFooter } from "@/components/ProfessionalFooter";
 import { matchesDrugQuery } from "@/lib/search";
+import { drugIdsForConditionQuery } from "@/lib/indications";
 import { StarButton } from "@/components/StarButton";
 
 const QUICK_WEIGHTS = [0.5, 1, 2, 3, 5, 8, 10, 15, 20, 25, 30, 40, 50, 70, 100, 150];
@@ -29,6 +31,7 @@ const LBS_TO_KG = 0.453592;
 export default function CalculatorScreen() {
   const insets = useSafeAreaInsets();
   const { isDark, toggleDark } = useTheme();
+  const { textScale } = usePreferences();
   const colors = Colors.light;
   const {
     weight,
@@ -131,11 +134,15 @@ export default function CalculatorScreen() {
     weightError || (weight <= 0 && displayInput.trim() ? "Enter a valid positive weight." : "");
 
   const drugsToShow = useMemo(() => {
+    // Indication search: if the query names a condition (seizure, shock,
+    // anaphylaxis…), its curated drug group also matches.
+    const conditionIds = drugIdsForConditionQuery(search);
     return DRUGS.filter((d) => {
       const matchCat = !selectedCategory || d.category === selectedCategory;
       const q = search.toLowerCase();
       const matchSearch =
         !q ||
+        conditionIds.has(d.id) ||
         matchesDrugQuery(
           [d.name, d.genericName ?? "", ...(d.indications ?? [])],
           search
@@ -170,7 +177,7 @@ export default function CalculatorScreen() {
             <Text
               style={[
                 styles.headerTitle,
-                { color: isDark ? "#FFFFFF" : "#0D1B2A", fontFamily: "Inter_700Bold" },
+                { color: isDark ? "#FFFFFF" : "#0D1B2A", fontFamily: "Inter_700Bold", fontSize: Math.round(24 * textScale) },
               ]}
               numberOfLines={1}
             >
@@ -182,7 +189,7 @@ export default function CalculatorScreen() {
                 { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" },
               ]}
             >
-              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 479 drugs
+              Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 480 drugs
             </Text>
           </View>
           <TouchableOpacity
@@ -456,7 +463,7 @@ export default function CalculatorScreen() {
                       <Text
                         style={[
                           styles.drugBlockName,
-                          { color: isDark ? "#FFFFFF" : "#0D1B2A", fontFamily: "Inter_600SemiBold" },
+                          { color: isDark ? "#FFFFFF" : "#0D1B2A", fontFamily: "Inter_600SemiBold", fontSize: Math.round(15 * textScale) },
                         ]}
                       >
                         {drug.name}
@@ -471,7 +478,7 @@ export default function CalculatorScreen() {
                       <Text
                         style={[
                           styles.drugBlockGeneric,
-                          { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" },
+                          { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular", fontSize: Math.round(12 * textScale) },
                         ]}
                       >
                         {drug.genericName}

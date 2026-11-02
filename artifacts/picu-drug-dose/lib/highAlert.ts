@@ -55,6 +55,7 @@ const HIGH_ALERT_BY_NAME: Record<string, string> = {
   "alteplase": "Thrombolytic",
   // Insulin
   "glucose insulin": "Insulin — hypoglycaemia risk",
+  "insulin": "Insulin — hypoglycaemia risk",
   // Concentrated electrolytes
   "potassium chloride kcl": "Concentrated electrolyte",
   "potassium chloride": "Concentrated electrolyte",

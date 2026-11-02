@@ -1,9 +1,11 @@
 import { Feather } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   Animated,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -17,6 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "@/constants/colors";
 import { DRUGS, calculateDose } from "@/constants/drugs";
 import { useTheme } from "@/context/ThemeContext";
+import { usePreferences } from "@/context/PreferencesContext";
 import { useFavorites } from "@/context/FavoritesContext";
 import { useWeight } from "@/context/WeightContext";
 import { useDrawer } from "@/context/DrawerContext";
@@ -224,6 +227,7 @@ export default function EmergencyScreen() {
   const { width: screenWidth } = useWindowDimensions();
   const isNarrow = screenWidth < 600;
   const { isDark, toggleDark } = useTheme();
+  const { textScale } = usePreferences();
   const colors = Colors.light;
   const {
     weight: ctxWeight,
@@ -793,7 +797,7 @@ export default function EmergencyScreen() {
             ) : (
               <>
                 <Text style={[styles.statusTimerLabel, { color: cprColor + "BB" }]}>CPR</Text>
-                <Text style={[styles.statusTimerValue, { color: cprColor }]}>{fmtTime(cpr.cprSecs)}</Text>
+                <Text style={[styles.statusTimerValue, { color: cprColor, fontSize: Math.round(22 * textScale) }]}>{fmtTime(cpr.cprSecs)}</Text>
               </>
             )}
           </Animated.View>
@@ -813,7 +817,7 @@ export default function EmergencyScreen() {
             ) : (
               <>
                 <Text style={[styles.statusTimerLabel, { color: "#7C3AED" }]}>EPI</Text>
-                <Text style={[styles.statusTimerValue, { color: "#7C3AED" }]}>{fmtTime(cpr.epiSecs)}</Text>
+                <Text style={[styles.statusTimerValue, { color: "#7C3AED", fontSize: Math.round(22 * textScale) }]}>{fmtTime(cpr.epiSecs)}</Text>
               </>
             )}
           </Animated.View>
@@ -902,7 +906,7 @@ export default function EmergencyScreen() {
             <View style={styles.arrestGrid}>
               <View style={styles.arrestCell}>
                 <Text style={[styles.arrestLabel, { fontFamily: "Inter_600SemiBold" }]}>EPINEPHRINE IV/IO</Text>
-                <Text style={[styles.arrestValue, { fontFamily: "Inter_700Bold" }]}>
+                <Text style={[styles.arrestValue, { fontFamily: "Inter_700Bold", fontSize: Math.round(16.5 * textScale) }]}>
                   {(() => {
                     const epi = emergencyCards.find((c) => c.label.startsWith("Epinephrine"));
                     const mg = epi ? parseFloat(epi.dose) : NaN;
@@ -915,21 +919,21 @@ export default function EmergencyScreen() {
               </View>
               <View style={styles.arrestCell}>
                 <Text style={[styles.arrestLabel, { fontFamily: "Inter_600SemiBold" }]}>AMIODARONE VF/pVT</Text>
-                <Text style={[styles.arrestValue, { fontFamily: "Inter_700Bold" }]}>
+                <Text style={[styles.arrestValue, { fontFamily: "Inter_700Bold", fontSize: Math.round(16.5 * textScale) }]}>
                   {emergencyCards.find((c) => c.label.startsWith("Amiodarone"))?.dose ?? "—"}
                 </Text>
                 <Text style={[styles.arrestSub, { fontFamily: "Inter_400Regular" }]}>5 mg/kg · max 300 mg</Text>
               </View>
               <View style={styles.arrestCell}>
                 <Text style={[styles.arrestLabel, { fontFamily: "Inter_600SemiBold" }]}>DEFIB (UNSYNC)</Text>
-                <Text style={[styles.arrestValue, { fontFamily: "Inter_700Bold" }]}>
+                <Text style={[styles.arrestValue, { fontFamily: "Inter_700Bold", fontSize: Math.round(16.5 * textScale) }]}>
                   {defib.unsync1st} J → {defib.unsyncSub} J
                 </Text>
                 <Text style={[styles.arrestSub, { fontFamily: "Inter_400Regular" }]}>max {defib.unsyncMax} J</Text>
               </View>
               <View style={styles.arrestCell}>
                 <Text style={[styles.arrestLabel, { fontFamily: "Inter_600SemiBold" }]}>ETT CUFFED</Text>
-                <Text style={[styles.arrestValue, { fontFamily: "Inter_700Bold" }]}>
+                <Text style={[styles.arrestValue, { fontFamily: "Inter_700Bold", fontSize: Math.round(16.5 * textScale) }]}>
                   {ettube.cuffed} · {ettube.depth}
                 </Text>
                 <Text style={[styles.arrestSub, { fontFamily: "Inter_400Regular" }]}>uncuffed {ettube.uncuffed}</Text>
@@ -937,6 +941,28 @@ export default function EmergencyScreen() {
             </View>
           </View>
         )}
+
+        {/* Printable one-page emergency sheet for this weight */}
+        <Pressable
+          onPress={() => router.push("/emergency-sheet" as any)}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
+            backgroundColor: isDark ? "#112240" : "#FFFFFF",
+            borderWidth: 1,
+            borderColor: "#DC2626",
+            borderRadius: 12,
+            paddingVertical: 11,
+            marginBottom: 12,
+          }}
+        >
+          <Feather name="printer" size={15} color="#DC2626" />
+          <Text style={{ color: "#DC2626", fontFamily: "Inter_600SemiBold", fontSize: 13.5 }}>
+            Printable Emergency Sheet — {weightKg} kg
+          </Text>
+        </Pressable>
 
         {/* Emergency Calculators */}
         <View style={[styles.palsBanner, { backgroundColor: isDark ? "#0A192F" : "#FFFFFF", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
@@ -995,15 +1021,15 @@ export default function EmergencyScreen() {
                   <Text style={[styles.shockType, { color: isDark ? "#FCA5A5" : "#991B1B" }]}>Unsynchronized — VF / pVT</Text>
                 </View>
                 <View style={{ flexDirection: "row", gap: 12, alignItems: "baseline" }}>
-                  <Text style={[styles.shockJoules, { color: isDark ? "#FECACA" : "#DC2626" }]}>{defib.unsync1st} J</Text>
+                  <Text style={[styles.shockJoules, { color: isDark ? "#FECACA" : "#DC2626", fontSize: Math.round(18 * textScale) }]}>{defib.unsync1st} J</Text>
                   <Text style={[styles.shockFormula, { color: isDark ? "#FCA5A5" : "#991B1B" }]}>1st = 2 J/kg (max 200)</Text>
                 </View>
                 <View style={{ flexDirection: "row", gap: 12, alignItems: "baseline", marginTop: 4 }}>
-                  <Text style={[styles.shockJoules, { color: isDark ? "#FECACA" : "#DC2626" }]}>{defib.unsyncSub} J</Text>
+                  <Text style={[styles.shockJoules, { color: isDark ? "#FECACA" : "#DC2626", fontSize: Math.round(18 * textScale) }]}>{defib.unsyncSub} J</Text>
                   <Text style={[styles.shockFormula, { color: isDark ? "#FCA5A5" : "#991B1B" }]}>2nd+ = 4 J/kg (max 360)</Text>
                 </View>
                 <View style={{ flexDirection: "row", gap: 12, alignItems: "baseline", marginTop: 4 }}>
-                  <Text style={[styles.shockJoules, { color: isDark ? "#FECACA" : "#DC2626" }]}>{defib.unsyncMax} J</Text>
+                  <Text style={[styles.shockJoules, { color: isDark ? "#FECACA" : "#DC2626", fontSize: Math.round(18 * textScale) }]}>{defib.unsyncMax} J</Text>
                   <Text style={[styles.shockFormula, { color: isDark ? "#FCA5A5" : "#991B1B" }]}>Max = 10 J/kg (max 360)</Text>
                 </View>
               </View>
@@ -1013,11 +1039,11 @@ export default function EmergencyScreen() {
                   <Text style={[styles.shockType, { color: isDark ? "#FCD34D" : "#92400E" }]}>Synchronized — SVT / VT with pulse</Text>
                 </View>
                 <View style={{ flexDirection: "row", gap: 12, alignItems: "baseline" }}>
-                  <Text style={[styles.shockJoules, { color: isDark ? "#FDE68A" : "#B45309" }]}>{defib.sync1st} J</Text>
+                  <Text style={[styles.shockJoules, { color: isDark ? "#FDE68A" : "#B45309", fontSize: Math.round(18 * textScale) }]}>{defib.sync1st} J</Text>
                   <Text style={[styles.shockFormula, { color: isDark ? "#FCD34D" : "#92400E" }]}>1st = 0.5 J/kg (max 50)</Text>
                 </View>
                 <View style={{ flexDirection: "row", gap: 12, alignItems: "baseline", marginTop: 4 }}>
-                  <Text style={[styles.shockJoules, { color: isDark ? "#FDE68A" : "#B45309" }]}>{defib.syncSub} J</Text>
+                  <Text style={[styles.shockJoules, { color: isDark ? "#FDE68A" : "#B45309", fontSize: Math.round(18 * textScale) }]}>{defib.syncSub} J</Text>
                   <Text style={[styles.shockFormula, { color: isDark ? "#FCD34D" : "#92400E" }]}>Subsequent = 2 J/kg (max 100)</Text>
                 </View>
               </View>

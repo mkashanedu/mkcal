@@ -369,7 +369,7 @@ export default function ToolDetailScreen() {
   const [maintTarget,setMaintTarget] = useState<100|75|66|50>(100);
   const [scenario,setScenario] = useState<"maintenance"|"neonatal"|"dehydration"|"resuscitation"|"dka">("maintenance");
   const [kClToggle,setKClToggle] = useState(false);
-  const fluidWtNum = Math.min(parseFloat(fluidWt)||0,60);
+  const fluidWtNum = Math.min(parseFloat(fluidWt)||0,100);
   const rawMaint = fluidWtNum>0 ? hollidaySegar(fluidWtNum) : null;
   const multiplier = maintTarget/100;
   const maintenance = rawMaint ? {daily:Math.round(rawMaint.daily*multiplier),hourly:+(rawMaint.hourly*multiplier).toFixed(1)} : null;
@@ -737,10 +737,19 @@ export default function ToolDetailScreen() {
           </View>
           {maintenance&&(
             <>
+              {fluidWtNum>60&&(
+                <Text style={{fontSize:11.5,color:"#D97706",fontWeight:"600"}}>⚠ Weight above 60 kg — Holliday-Segar is shown in full; many units cap total fluids in larger children. Confirm with your unit protocol.</Text>
+              )}
               <View style={{backgroundColor:"#0EA5E915",borderColor:"#0EA5E940",borderWidth:1.5,borderRadius:12,padding:14}}>
                 <Text style={{fontSize:13,fontWeight:"700",color:"#0EA5E9",marginBottom:8}}>Maintenance Fluids {maintTarget<100?`(${maintTarget}% of Holliday-Segar)`:""}</Text>
                 <Row label="24-hour total" value={`${maintenance.daily} mL/day`} isDark={isDark}/>
-                <Row label="Hourly rate" value={`${maintenance.hourly} mL/hr`} isDark={isDark}/>
+                <Row label="Hourly rate (4-2-1)" value={`${maintenance.hourly} mL/hr`} isDark={isDark}/>
+              </View>
+              <View style={{backgroundColor:"#DC262615",borderColor:"#DC262640",borderWidth:1.5,borderRadius:12,padding:14}}>
+                <Text style={{fontSize:13,fontWeight:"700",color:"#DC2626",marginBottom:8}}>Resuscitation Bolus (crystalloid)</Text>
+                <Row label="10 mL/kg" value={`${Math.round(fluidWtNum*10)} mL`} isDark={isDark}/>
+                <Row label="20 mL/kg" value={`${Math.round(fluidWtNum*20)} mL`} isDark={isDark}/>
+                <Text style={{fontSize:11,color:tm,marginTop:6}}>Reassess after every bolus — perfusion, lungs, liver edge.</Text>
               </View>
               <Text style={{fontSize:12,fontWeight:"700",color:tm}}>Dehydration Severity</Text>
               <View style={{flexDirection:"row",gap:8}}>
