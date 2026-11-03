@@ -771,6 +771,12 @@ export default function ToolDetailScreen() {
       // ── GROWTH CHARTS ─────────────────────────────────────────────────────
       // ── DOSE DOUBLE-CHECK ─────────────────────────────────────────────
       case "dose-check": {
+        const c = {
+          card: { backgroundColor: card, borderRadius: 14, borderWidth: 1, borderColor: border, padding: 14 },
+          cardTitle: { fontSize: Math.round(15 * activeTextScale), fontWeight: "800" as const, color: tp, marginBottom: 6 },
+          note: { fontSize: Math.round(12.5 * activeTextScale), color: tm, lineHeight: Math.round(18 * activeTextScale) },
+          ref: { fontSize: Math.round(11 * activeTextScale), color: tm, fontStyle: "italic" as const, marginTop: 10, lineHeight: Math.round(16 * activeTextScale) },
+        };
         const dcDrug = DRUGS.find(d=>d.id===dcDrugId) || null;
         const dcMatches = dcQuery.trim() ? DRUGS.filter(d=>matchesDrugQuery([d.name, d.genericName ?? ""], dcQuery)).slice(0,8) : [];
         const dcDose = dcDrug ? dcDrug.doses[Math.min(dcDoseIdx, dcDrug.doses.length-1)] : null;
