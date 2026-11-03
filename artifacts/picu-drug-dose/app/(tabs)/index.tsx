@@ -727,7 +727,7 @@ export default function HomeScreen() {
             <View style={styles.mainButtonText}>
               <Text style={[styles.mainButtonTitle, { color: tp, fontSize: Math.round(20 * textScale) }]}>Dose Calculator</Text>
               <Text style={[styles.mainButtonDesc, { color: tm, fontSize: Math.round(13 * textScale), lineHeight: Math.round(18 * textScale) }]}>
-                Weight-based drug doses · 544 medications
+                Weight-based drug doses · 548 medications
               </Text>
             </View>
             <Feather name="chevron-right" size={22} color={colors.tint} />
