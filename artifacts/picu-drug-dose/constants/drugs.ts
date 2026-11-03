@@ -1,4 +1,4 @@
-// PICU Drug Reference — Harriet Lane Handbook 23rd Ed, PALS 2025, WHO Pediatric Formulary
+// PICU Drug Reference — Harriet Lane Handbook 24th Ed, PALS 2025, WHO Pediatric Formulary
 export type DrugCategory =
   | "emergency"
   | "analgesic"
@@ -166,14 +166,14 @@ export const DRUGS: Drug[] = [
     highAlert: true,
     indications: ["Cardiac arrest", "Anaphylaxis", "Severe bradycardia"],
     doses: [
-      { value: 10, unit: "mic/kg", perKg: true, route: "IV/IO", maxDose: "1000 mic", frequency: "Every 3–5 min", label: "Cardiac Arrest / Bradycardia", notes: "= 0.1 mL/kg of 1:10,000 solution. Repeat every 3-5 min.", adultMaxDose_num: 1000 },
-      { value: 10, unit: "mic/kg", perKg: true, route: "IM Anterolateral thigh", maxDose: "500 mic", frequency: "May repeat after 5–15 min", label: "Anaphylaxis", notes: "Use 1:1,000 solution; may repeat after 5-15 min.", adultMaxDose_num: 500 },
-      { min: 0.1, max: 1.0, unit: "mic/kg/min", perKg: true, route: "IV infusion (Central)", label: "Continuous infusion", notes: "Titrate to effect." },
+      { value: 10, unit: "mcg/kg", perKg: true, route: "IV/IO", maxDose: "1000 mcg", frequency: "Every 3–5 min", label: "Cardiac Arrest / Bradycardia", notes: "= 0.1 mL/kg of 1:10,000 solution. Repeat every 3-5 min.", adultMaxDose_num: 1000 },
+      { value: 10, unit: "mcg/kg", perKg: true, route: "IM Anterolateral thigh", maxDose: "500 mcg", frequency: "May repeat after 5–15 min", label: "Anaphylaxis", notes: "Use 1:1,000 solution; may repeat after 5-15 min.", adultMaxDose_num: 500 },
+      { min: 0.1, max: 1.0, unit: "mcg/kg/min", perKg: true, route: "IV infusion (Central)", label: "Continuous infusion", notes: "Titrate to effect." },
     ],
     warnings: ["PALS 2025: IO route equally effective as IV", "Tissue necrosis with peripheral extravasation", "Ensure adequate IO/IV access before use"],
     formulations: ["1:1,000 (1 mg/mL) — Anaphylaxis IM", "1:10,000 (0.1 mg/mL) — Cardiac arrest IV"],
     monitoring: ["HR, BP, perfusion every 2–5 min", "Urine output, glucose"],
-    reference: "PALS 2020 updated 2025 | Harriet Lane 23e",
+    reference: "PALS 2020 updated 2025 | Harriet Lane 24e",
   },
   {
     id: "atropine",
@@ -187,7 +187,7 @@ export const DRUGS: Drug[] = [
     warnings: ["MINIMUM dose 0.1 mg — smaller doses may worsen bradycardia (vagotonic effect)", "PALS 2025: Not routinely recommended for asystole"],
     formulations: ["0.1 mg/mL", "0.4 mg/mL", "1 mg/mL"],
     monitoring: ["HR, rhythm, secretions"],
-    reference: "PALS 2025 | Harriet Lane 23e",
+    reference: "PALS 2025 | Harriet Lane 24e",
   },
   {
     id: "adenosine",
@@ -201,7 +201,7 @@ export const DRUGS: Drug[] = [
     warnings: ["PALS 2025: Do NOT use for irregular wide-complex tachycardia", "May cause transient AV block, asystole — warn patient", "Ineffective with caffeine (competitive antagonist)"],
     formulations: ["3 mg/mL (2 mL vial)"],
     monitoring: ["Continuous ECG during and after administration"],
-    reference: "PALS 2025 | Harriet Lane 23e",
+    reference: "PALS 2025 | Harriet Lane 24e",
   },
   {
     id: "amiodarone",
@@ -216,7 +216,7 @@ export const DRUGS: Drug[] = [
     warnings: ["Dilute in D5W ONLY — precipitates in NS", "Hypotension with rapid infusion", "QT prolongation — monitor ECG", "PALS 2025 preferred over lidocaine for shock-refractory VF/pVT"],
     formulations: ["50 mg/mL (3 mL amp)"],
     monitoring: ["ECG, BP every 5 min during infusion", "LFTs, TFTs with prolonged use"],
-    reference: "PALS 2025 | Harriet Lane 23e",
+    reference: "PALS 2025 | Harriet Lane 24e",
   },
   {
     id: "lidocaine",
@@ -244,7 +244,7 @@ export const DRUGS: Drug[] = [
     warnings: ["WHO 2024: Only after securing airway — worsens intracellular acidosis in respiratory acidosis", "Hyperosmolarity, hypernatremia", "Neonates: use 4.2% (0.5 mEq/mL) to avoid IVH"],
     formulations: ["4.2% (0.5 mEq/mL) — neonates", "8.4% (1 mEq/mL) — infants/children"],
     monitoring: ["Blood gas 15–30 min after each dose", "Serum sodium"],
-    reference: "Harriet Lane 23e | WHO Formulary 2024",
+    reference: "Harriet Lane 24e | WHO Formulary 2024",
   },
   {
     id: "calcium-gluconate",
@@ -257,7 +257,7 @@ export const DRUGS: Drug[] = [
     warnings: ["NEVER give by IV push — fatal bradycardia/asystole", "Incompatible with bicarbonate (precipitates)", "Tissue necrosis with extravasation (use central line if possible)"],
     formulations: ["100 mg/mL (10% solution)"],
     monitoring: ["Continuous ECG during infusion", "Serum calcium after"],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
   {
     id: "dextrose",
@@ -271,7 +271,7 @@ export const DRUGS: Drug[] = [
     warnings: ["WHO 2024: D10 preferred in neonates to prevent hyperglycemia and brain injury", "Avoid D50 in children < 12 years"],
     formulations: ["D10W (100 mg/mL)", "D25W (250 mg/mL)", "D50W (500 mg/mL)"],
     monitoring: ["Glucose check 15 min after treatment", "Repeat until glucose > 3.5 mmol/L"],
-    reference: "WHO PF 2024 | Harriet Lane 23e",
+    reference: "WHO PF 2024 | Harriet Lane 24e",
   },
   {
     id: "naloxone",
@@ -285,7 +285,7 @@ export const DRUGS: Drug[] = [
     ],
     warnings: ["Short duration (30–90 min) — repeat doses often needed for long-acting opioids", "May precipitate acute opioid withdrawal, seizures"],
     formulations: ["0.4 mg/mL", "1 mg/mL", "4 mg/0.1 mL intranasal"],
-    reference: "Harriet Lane 23e | WHO PF 2024",
+    reference: "Harriet Lane 24e | WHO PF 2024",
   },
   {
     id: "flumazenil",
@@ -297,7 +297,7 @@ export const DRUGS: Drug[] = [
     ],
     warnings: ["Contraindicated in chronic BZD users — seizure risk", "Do NOT use for TCA overdose"],
     formulations: ["0.1 mg/mL (10 mL vial)"],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
   {
     id: "magnesium-sulfate-emergency",
@@ -311,7 +311,7 @@ export const DRUGS: Drug[] = [
     warnings: ["Hypotension with rapid infusion", "Respiratory depression at toxic levels", "Have calcium gluconate ready"],
     formulations: ["500 mg/mL (50%)", "200 mg/mL (20%)"],
     monitoring: ["Reflexes, RR, BP", "Serum Mg target 2–3.5 mmol/L"],
-    reference: "PALS 2025 | Harriet Lane 23e",
+    reference: "PALS 2025 | Harriet Lane 24e",
   },
 
   {
@@ -329,7 +329,7 @@ export const DRUGS: Drug[] = [
     warnings: ["INCOMPATIBLE with blood products and penicillins — use separate IV line", "Rapid IV push may cause hypotension — always infuse over 10 min"],
     monitoring: ["BP", "Signs of thrombosis", "Renal function", "Urine output"],
     formulations: ["100 mg/mL (5 mL and 10 mL vials)"],
-    reference: "Harriet Lane 23e | CRASH-2 / CRASH-3",
+    reference: "Harriet Lane 24e | CRASH-2 / CRASH-3",
   },
   {
     id: "calcium-chloride",
@@ -344,7 +344,7 @@ export const DRUGS: Drug[] = [
     warnings: ["CENTRAL LINE ONLY — vesicant, causes severe tissue necrosis peripherally", "INCOMPATIBLE with Bicarbonate (precipitates)", "3× more elemental calcium than calcium gluconate per mL"],
     monitoring: ["Continuous ECG", "Ionized calcium", "IV site for extravasation"],
     formulations: ["100 mg/mL (10% solution, 10 mL vials)"],
-    reference: "Harriet Lane 23e | PALS 2025",
+    reference: "Harriet Lane 24e | PALS 2025",
   },
 
   // ════════════════════════════════════════════════════════════
@@ -368,7 +368,7 @@ export const DRUGS: Drug[] = [
       { gfr: "< 10 mL/min/1.73m²", adjustment: "AVOID or use extreme caution — switch to fentanyl; M6G accumulates and causes prolonged CNS/respiratory depression" },
     ],
     monitoring: ["Pain score, RR, SpO₂, sedation level"],
-    reference: "WHO PF 2024 | Harriet Lane 23e",
+    reference: "WHO PF 2024 | Harriet Lane 24e",
   },
   {
     id: "fentanyl",
@@ -386,7 +386,7 @@ export const DRUGS: Drug[] = [
       { gfr: "< 10 mL/min/1.73m²", adjustment: "PREFERRED opioid in renal failure — no active metabolite accumulation; may need dose reduction 25–50% with prolonged use" },
     ],
     monitoring: ["RR, SpO₂, pain score, sedation score (COMFORT-B or FLACC)"],
-    reference: "Harriet Lane 23e | WHO PF 2024",
+    reference: "Harriet Lane 24e | WHO PF 2024",
   },
   {
     id: "ketamine-analgesic",
@@ -405,7 +405,7 @@ export const DRUGS: Drug[] = [
       { gfr: "< 30 mL/min/1.73m²", adjustment: "Use with caution; norketamine metabolite may accumulate; no specific dose adjustment required for single doses" },
     ],
     monitoring: ["BP, HR, SpO₂, emergence reactions"],
-    reference: "Harriet Lane 23e | WHO PF 2024",
+    reference: "Harriet Lane 24e | WHO PF 2024",
   },
   {
     id: "paracetamol",
@@ -424,7 +424,7 @@ export const DRUGS: Drug[] = [
       { gfr: "10–50 mL/min/1.73m²", adjustment: "Increase dosing interval to every 6 hr" },
       { gfr: "< 10 mL/min/1.73m²", adjustment: "Increase interval to every 8 hr; no dose reduction needed" },
     ],
-    reference: "WHO PF 2024 | Harriet Lane 23e",
+    reference: "WHO PF 2024 | Harriet Lane 24e",
   },
   {
     id: "ibuprofen",
@@ -441,7 +441,7 @@ export const DRUGS: Drug[] = [
       { gfr: "30–50 mL/min/1.73m²", adjustment: "Use with extreme caution; reduce dose and ensure adequate hydration" },
       { gfr: "< 30 mL/min/1.73m²", adjustment: "AVOID — risk of acute kidney injury, fluid retention, hyperkalemia" },
     ],
-    reference: "WHO PF 2024 | Harriet Lane 23e",
+    reference: "WHO PF 2024 | Harriet Lane 24e",
   },
   {
     id: "tramadol",
@@ -457,7 +457,7 @@ export const DRUGS: Drug[] = [
       { gfr: "30–50 mL/min/1.73m²", adjustment: "Reduce dose by 25%; increase interval to every 8 hr" },
       { gfr: "< 30 mL/min/1.73m²", adjustment: "AVOID or use with extreme caution; halve dose and give every 12 hr maximum" },
     ],
-    reference: "WHO PF 2024 | Harriet Lane 23e",
+    reference: "WHO PF 2024 | Harriet Lane 24e",
   },
 
   {
@@ -497,7 +497,7 @@ export const DRUGS: Drug[] = [
       "1 mg/mL ampoule (10 mg/10 mL)",
       "2 mg/mL ampoule (20 mg/10 mL)",
     ],
-    reference: "Harriet Lane 23e | Nelson's Pediatrics 22e",
+    reference: "Harriet Lane 24e | Nelson's Pediatrics 22e",
   },
 
   // ════════════════════════════════════════════════════════════
@@ -521,7 +521,7 @@ export const DRUGS: Drug[] = [
       { gfr: "< 30 mL/min/1.73m²", adjustment: "Reduce dose by 25–50%; active metabolite (1-OH-midazolam) accumulates — risk of prolonged sedation" },
     ],
     monitoring: ["SpO₂, RR, RASS/Comfort-B score, BP"],
-    reference: "PALS 2025 | Harriet Lane 23e",
+    reference: "PALS 2025 | Harriet Lane 24e",
   },
   {
     id: "dexmedetomidine",
@@ -539,7 +539,7 @@ export const DRUGS: Drug[] = [
       { gfr: "< 30 mL/min/1.73m²", adjustment: "Start at lower end (0.2 mcg/kg/hr); metabolites may accumulate — titrate carefully" },
     ],
     monitoring: ["HR, BP every 30 min", "Sedation score (RASS/Comfort-B)"],
-    reference: "Harriet Lane 23e | SCCM PADIS 2024",
+    reference: "Harriet Lane 24e | SCCM PADIS 2024",
   },
   {
     id: "propofol",
@@ -556,7 +556,7 @@ export const DRUGS: Drug[] = [
       { gfr: "Any", adjustment: "No dose adjustment needed; however monitor acid-base balance as PRIS mimics lactic acidosis" },
     ],
     monitoring: ["CK, lactate, TG daily if prolonged use", "ECG for new RBBB/ST changes (early PRIS sign)"],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
   {
     id: "chloral-hydrate",
@@ -571,7 +571,7 @@ export const DRUGS: Drug[] = [
     renalAdjustment: [
       { gfr: "< 50 mL/min/1.73m²", adjustment: "AVOID — trichloroethanol metabolite accumulates; use alternative agent" },
     ],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
 
   // ════════════════════════════════════════════════════════════
@@ -605,7 +605,7 @@ export const DRUGS: Drug[] = [
     ],
     formulations: ["50 mg/mL (2 mL amp = 100 mg)", "20 mg/mL multi-dose vial"],
     monitoring: ["SpO₂, HR, ETCO₂, train-of-four (TOF) for repeat dosing"],
-    reference: "PALS 2025 | Harriet Lane 23e | Miller's Anesthesia",
+    reference: "PALS 2025 | Harriet Lane 24e | Miller's Anesthesia",
   },
   {
     id: "ketamine-rsi",
@@ -626,7 +626,7 @@ export const DRUGS: Drug[] = [
     ],
     formulations: ["10 mg/mL (20 mL vial)", "50 mg/mL (10 mL vial)", "100 mg/mL (10 mL vial)"],
     monitoring: ["BP, HR, SpO₂, airway secretions"],
-    reference: "PALS 2025 | Harriet Lane 23e",
+    reference: "PALS 2025 | Harriet Lane 24e",
   },
   {
     id: "rocuronium",
@@ -651,7 +651,7 @@ export const DRUGS: Drug[] = [
       { gfr: "Any", adjustment: "Primarily hepatic metabolism — no renal dose adjustment. Severe hepatic impairment: prolonged duration, reduce maintenance dose by 30–50%" },
     ],
     monitoring: ["Train-of-four (TOF) monitoring — target 0–1/4 twitches during ICU paralysis", "Sedation level (BIS if available)", "ETCO₂, airway pressures"],
-    reference: "PALS 2025 | Harriet Lane 23e | Miller's Anesthesia",
+    reference: "PALS 2025 | Harriet Lane 24e | Miller's Anesthesia",
   },
   {
     id: "atracurium",
@@ -676,7 +676,7 @@ export const DRUGS: Drug[] = [
       { gfr: "Any (including dialysis)", adjustment: "No dose adjustment needed — Hofmann elimination is spontaneous (pH/temperature-dependent), not organ-dependent. Preferred NMBD in multi-organ failure." },
     ],
     monitoring: ["TOF monitoring (target 0–1/4 twitch for ICU paralysis)", "Temperature and pH (affect Hofmann elimination rate)", "Laudanosine levels if prolonged use > 72 hr (reference lab)"],
-    reference: "Harriet Lane 23e | Miller's Anesthesia",
+    reference: "Harriet Lane 24e | Miller's Anesthesia",
   },
   {
     id: "cisatracurium",
@@ -701,7 +701,7 @@ export const DRUGS: Drug[] = [
       { gfr: "Any (including dialysis)", adjustment: "No dose adjustment — Hofmann elimination. PREFERRED NMBD for ICU patients with multi-organ failure (less laudanosine than atracurium)." },
     ],
     monitoring: ["TOF monitoring (target 0/4 for ARDS protocol)", "Sedation depth (RASS −4 to −5 during paralysis)", "Spontaneous breathing efforts during ARDS paralysis"],
-    reference: "Harriet Lane 23e | ACURASYS Trial | PALICC 2023",
+    reference: "Harriet Lane 24e | ACURASYS Trial | PALICC 2023",
   },
   {
     id: "vecuronium",
@@ -724,7 +724,7 @@ export const DRUGS: Drug[] = [
       { gfr: "< 30 mL/min/1.73m²", adjustment: "Prolonged block — active 3-OH metabolite accumulates. Use atracurium or cisatracurium instead in severe renal failure." },
     ],
     monitoring: ["TOF monitoring mandatory in ICU", "Duration prolonged in renal/hepatic failure"],
-    reference: "Harriet Lane 23e | Miller's Anesthesia",
+    reference: "Harriet Lane 24e | Miller's Anesthesia",
   },
   {
     id: "sugammadex",
@@ -748,7 +748,7 @@ export const DRUGS: Drug[] = [
       { gfr: "< 30 mL/min/1.73m²", adjustment: "Use with caution — sugammadex-rocuronium complex may accumulate; however reversal still effective. Avoid re-dosing within 24 hr." },
     ],
     monitoring: ["TOF monitoring before and after reversal", "SpO₂, RR after reversal"],
-    reference: "PALS 2025 | Harriet Lane 23e | Miller's Anesthesia",
+    reference: "PALS 2025 | Harriet Lane 24e | Miller's Anesthesia",
   },
   {
     id: "neostigmine",
@@ -766,7 +766,7 @@ export const DRUGS: Drug[] = [
       "Bronchospasm risk — use glycopyrrolate (not atropine) in asthmatic patients",
     ],
     formulations: ["0.5 mg/mL (1 mL amp)", "2.5 mg/mL (1 mL amp)"],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
 
   // ════════════════════════════════════════════════════════════
@@ -778,14 +778,14 @@ export const DRUGS: Drug[] = [
     category: "inotrope",
     indications: ["Cardiogenic shock", "Septic shock (2nd line)", "Symptomatic bradycardia (refractory to atropine)"],
     doses: [
-      { min: 2, max: 5, unit: "mic/kg/min", perKg: true, route: "IV infusion (Central preferred)", label: "Renal / Mesenteric (low dose)", notes: "PALS 2025: 'Renal dose' concept no longer supported — this range has inotropic effect" },
-      { min: 5, max: 10, unit: "mic/kg/min", perKg: true, route: "IV infusion (Central preferred)", label: "Inotropic dose", notes: "Increases cardiac output; β1-adrenergic effect dominant" },
-      { min: 10, max: 20, unit: "mic/kg/min", perKg: true, route: "IV infusion (Central line)", label: "Vasopressor dose", notes: "α1-adrenergic; consider adding norepinephrine for vasopressor effect" },
+      { min: 2, max: 5, unit: "mcg/kg/min", perKg: true, route: "IV infusion (Central preferred)", label: "Renal / Mesenteric (low dose)", notes: "PALS 2025: 'Renal dose' concept no longer supported — this range has inotropic effect" },
+      { min: 5, max: 10, unit: "mcg/kg/min", perKg: true, route: "IV infusion (Central preferred)", label: "Inotropic dose", notes: "Increases cardiac output; β1-adrenergic effect dominant" },
+      { min: 10, max: 20, unit: "mcg/kg/min", perKg: true, route: "IV infusion (Central line)", label: "Vasopressor dose", notes: "α1-adrenergic; consider adding norepinephrine for vasopressor effect" },
     ],
     warnings: ["PALS 2025: Norepinephrine preferred over dopamine for septic shock in children", "Central line MANDATORY at > 10 mcg/kg/min", "Tissue necrosis with extravasation — use phentolamine 5 mg/5 mL NS if extravasated"],
     formulations: ["40 mg/mL (5 mL)", "160 mg/mL (5 mL)"],
     monitoring: ["HR, BP, cardiac rhythm, urine output every 15–30 min", "Peripheral perfusion"],
-    reference: "PALS 2025 | Harriet Lane 23e",
+    reference: "PALS 2025 | Harriet Lane 24e",
   },
   {
     id: "dobutamine",
@@ -793,12 +793,12 @@ export const DRUGS: Drug[] = [
     category: "inotrope",
     indications: ["Cardiogenic shock", "Low cardiac output syndrome (post-cardiac surgery)", "Septic shock with myocardial dysfunction"],
     doses: [
-      { min: 2, max: 20, unit: "mic/kg/min", perKg: true, route: "IV infusion", label: "Inotropic support", notes: "Start at 5 mic/kg/min; titrate to hemodynamic response; max 40 mic/kg/min reported" },
+      { min: 2, max: 20, unit: "mcg/kg/min", perKg: true, route: "IV infusion", label: "Inotropic support", notes: "Start at 5 mcg/kg/min; titrate to hemodynamic response; max 40 mcg/kg/min reported" },
     ],
     warnings: ["May worsen hypotension (vasodilatory) — use with vasopressor if MAP low", "Tachycardia and arrhythmias at high doses", "NOT a vasopressor — no vasoconstrictive effect"],
     formulations: ["12.5 mg/mL (20 mL vial)"],
     monitoring: ["Cardiac output, SvO₂, HR, BP, lactate"],
-    reference: "PALS 2025 | Harriet Lane 23e",
+    reference: "PALS 2025 | Harriet Lane 24e",
   },
   {
     id: "norepinephrine",
@@ -807,7 +807,7 @@ export const DRUGS: Drug[] = [
     category: "inotrope",
     indications: ["Vasodilatory/distributive shock (first-line)", "Septic shock", "Anaphylaxis (after epinephrine)"],
     doses: [
-      { min: 0.01, max: 2.0, unit: "mic/kg/min", perKg: true, route: "IV infusion (Central line)", label: "Vasopressor", notes: "PALS 2025: First-line vasopressor for fluid-refractory septic shock; start 0.05–0.1 mic/kg/min" },
+      { min: 0.01, max: 2.0, unit: "mcg/kg/min", perKg: true, route: "IV infusion (Central line)", label: "Vasopressor", notes: "PALS 2025: First-line vasopressor for fluid-refractory septic shock; start 0.05–0.1 mcg/kg/min" },
     ],
     warnings: ["MANDATORY central line — significant necrosis risk with peripheral extravasation", "PALS 2025: Higher doses (> 1 mcg/kg/min) signal need for additional agents or ECMO consideration"],
     formulations: ["1 mg/mL (4 mL amp)", "4 mg/mL concentrate"],
@@ -821,7 +821,7 @@ export const DRUGS: Drug[] = [
     category: "inotrope",
     indications: ["Refractory septic shock", "Anaphylaxis (post-initial IM)", "Cardiogenic shock", "Post-cardiac arrest"],
     doses: [
-      { min: 0.01, max: 1.0, unit: "mic/kg/min", perKg: true, route: "IV infusion (Central line)", label: "Inotrope / vasopressor", notes: "Low: 0.01–0.1 (inotropic); High: 0.1–1.0 (vasopressor/inotrope combined)" },
+      { min: 0.01, max: 1.0, unit: "mcg/kg/min", perKg: true, route: "IV infusion (Central line)", label: "Inotrope / vasopressor", notes: "Low: 0.01–0.1 (inotropic); High: 0.1–1.0 (vasopressor/inotrope combined)" },
     ],
     warnings: ["Higher doses may increase myocardial oxygen demand and cause arrhythmias", "Monitor for hyperglycemia and hypokalemia at high doses"],
     formulations: ["1 mg/mL (1 mL amp) — dilute for infusion"],
@@ -834,8 +834,8 @@ export const DRUGS: Drug[] = [
     category: "inotrope",
     indications: ["Low cardiac output post-cardiac surgery", "Cardiomyopathy with high SVR", "Refractory heart failure"],
     doses: [
-      { value: 50, unit: "mic/kg", perKg: true, route: "IV over 30–60 min (loading)", label: "Loading dose (optional)", notes: "OMIT loading dose if hypotensive — causes vasodilation" },
-      { min: 0.25, max: 0.75, unit: "mic/kg/min", perKg: true, route: "IV infusion", label: "Maintenance infusion", notes: "Start 0.25 mic/kg/min; increase by 0.25 every 30 min; typical target 0.5 mic/kg/min" },
+      { value: 50, unit: "mcg/kg", perKg: true, route: "IV over 30–60 min (loading)", label: "Loading dose (optional)", notes: "OMIT loading dose if hypotensive — causes vasodilation" },
+      { min: 0.25, max: 0.75, unit: "mcg/kg/min", perKg: true, route: "IV infusion", label: "Maintenance infusion", notes: "Start 0.25 mcg/kg/min; increase by 0.25 every 30 min; typical target 0.5 mcg/kg/min" },
     ],
     warnings: ["Vasodilation and hypotension — withhold loading dose if MAP borderline", "PDE3 inhibitor (different mechanism from catecholamines — useful in catecholamine resistance)"],
     formulations: ["1 mg/mL (10 mL, 20 mL vials)"],
@@ -844,7 +844,7 @@ export const DRUGS: Drug[] = [
       { gfr: "< 20 mL/min/1.73m²", adjustment: "Reduce infusion to 0.1–0.15 mcg/kg/min; milrinone renally cleared" },
     ],
     monitoring: ["Cardiac output monitoring, BP every 15 min", "UO, renal function"],
-    reference: "Harriet Lane 23e | AHA Pediatric HF 2024",
+    reference: "Harriet Lane 24e | AHA Pediatric HF 2024",
   },
   {
     id: "vasopressin",
@@ -857,7 +857,7 @@ export const DRUGS: Drug[] = [
     warnings: ["Mesenteric, digital ischemia at high doses", "Hyponatremia risk (antidiuretic effect)", "Not a pure vasopressor — also has V2 receptor antidiuretic effect"],
     formulations: ["20 units/mL (1 mL amp)"],
     monitoring: ["Serum sodium, UO, peripheral circulation (digital ischemia monitoring)"],
-    reference: "SSC Pediatric 2024 | Harriet Lane 23e",
+    reference: "SSC Pediatric 2024 | Harriet Lane 24e",
   },
   {
     id: "levosimendan",
@@ -931,7 +931,7 @@ export const DRUGS: Drug[] = [
       "Peripheral perfusion: capillary refill, limb colour, digital temperature",
       "Serum creatinine / urea every 24–48 hr (HRS response monitoring)",
     ],
-    reference: "Harriet Lane 22e | Nelson's Pediatrics 22e | EASL Variceal Bleeding Guidelines 2022 | ICA HRS Consensus 2015",
+    reference: "Harriet Lane 24e | Nelson's Pediatrics 22e | EASL Variceal Bleeding Guidelines 2022 | ICA HRS Consensus 2015",
   },
 
   // ════════════════════════════════════════════════════════════
@@ -951,7 +951,7 @@ export const DRUGS: Drug[] = [
       { gfr: "10–30 mL/min/1.73m²", adjustment: "Every 6–8 hr (standard), every 8–12 hr (meningitis doses)" },
       { gfr: "< 10 mL/min/1.73m²", adjustment: "Every 8–12 hr; seizure risk with accumulation" },
     ],
-    reference: "Harriet Lane 23e | WHO PF 2024",
+    reference: "Harriet Lane 24e | WHO PF 2024",
   },
   {
     id: "gentamicin",
@@ -970,7 +970,7 @@ export const DRUGS: Drug[] = [
       { gfr: "< 20 mL/min/1.73m²", adjustment: "Extend to every 72–96 hr OR dose by drug level monitoring; consider alternative" },
     ],
     monitoring: ["Serum creatinine and gentamicin levels every 48–72 hr", "Urine output"],
-    reference: "Harriet Lane 23e | WHO PF 2024",
+    reference: "Harriet Lane 24e | WHO PF 2024",
   },
   {
     id: "ceftriaxone",
@@ -986,7 +986,7 @@ export const DRUGS: Drug[] = [
     renalAdjustment: [
       { gfr: "Any", adjustment: "No dose adjustment needed (predominantly hepatic elimination); increase interval if severe combined renal+hepatic impairment" },
     ],
-    reference: "PALS 2025 | Harriet Lane 23e | WHO PF 2024",
+    reference: "PALS 2025 | Harriet Lane 24e | WHO PF 2024",
   },
   {
     id: "vancomycin",
@@ -994,7 +994,7 @@ export const DRUGS: Drug[] = [
     category: "antibiotic",
     indications: ["MRSA infections", "CoNS bacteremia", "CNS infections (with rifampicin)", "Confirmed/suspected resistant gram-positive infection"],
     doses: [
-      { min: 15, max: 20, unit: "mg/kg/dose", perKg: true, route: "IV over 60–90 min", maxDose: "3000 mg/day", frequency: "Every 6 hr", label: "Standard dosing", notes: "Harriet Lane 23e: AUC/MIC 400–600 mg·h/L is target (preferred over trough-only)" },
+      { min: 15, max: 20, unit: "mg/kg/dose", perKg: true, route: "IV over 60–90 min", maxDose: "3000 mg/day", frequency: "Every 6 hr", label: "Standard dosing", notes: "Harriet Lane 24e: AUC/MIC 400–600 mg·h/L is target (preferred over trough-only)" },
       { min: 40, max: 60, unit: "mg/kg/day", perKg: true, route: "IV", maxDose: "3000 mg/day", frequency: "Divided every 6 hr", label: "CNS infections", notes: "Higher doses for meningitis; adjust by AUC monitoring" },
     ],
     warnings: ["Red man syndrome with rapid infusion (histamine release) — slow to > 60 min", "Nephrotoxicity — especially with aminoglycosides", "AUC-guided monitoring preferred over trough-only; target AUC 400–600"],
@@ -1005,7 +1005,7 @@ export const DRUGS: Drug[] = [
       { gfr: "< 20 mL/min/1.73m²", adjustment: "Every 24–72 hr; dose only after level < 10 mcg/mL; IDSA recommends AUC-guided dosing" },
     ],
     monitoring: ["AUC/MIC or trough levels, SCr every 48–72 hr"],
-    reference: "Harriet Lane 23e | IDSA Vancomycin TDM 2020",
+    reference: "Harriet Lane 24e | IDSA Vancomycin TDM 2020",
   },
   {
     id: "meropenem",
@@ -1024,7 +1024,7 @@ export const DRUGS: Drug[] = [
       { gfr: "10–25 mL/min/1.73m²", adjustment: "50% dose every 12 hr" },
       { gfr: "< 10 mL/min/1.73m²", adjustment: "50% dose every 24 hr; supplement after HD" },
     ],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
   {
     id: "piperacillin-tazobactam",
@@ -1041,7 +1041,7 @@ export const DRUGS: Drug[] = [
       { gfr: "20–40 mL/min/1.73m²", adjustment: "Reduce to every 8 hr" },
       { gfr: "< 20 mL/min/1.73m²", adjustment: "Reduce to every 12 hr; supplement post-dialysis" },
     ],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
   {
     id: "acyclovir",
@@ -1060,7 +1060,7 @@ export const DRUGS: Drug[] = [
       { gfr: "< 10 mL/min/1.73m²", adjustment: "50% dose every 24 hr; supplement post-HD" },
     ],
     monitoring: ["Serum creatinine and urine output daily", "BUN"],
-    reference: "WHO PF 2024 | Harriet Lane 23e",
+    reference: "WHO PF 2024 | Harriet Lane 24e",
   },
   {
     id: "linezolid",
@@ -1075,7 +1075,7 @@ export const DRUGS: Drug[] = [
     renalAdjustment: [
       { gfr: "Any", adjustment: "No dose adjustment required; however two primary metabolites accumulate in severe renal failure — significance uncertain" },
     ],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
 
   // ════════════════════════════════════════════════════════════
@@ -1092,7 +1092,7 @@ export const DRUGS: Drug[] = [
     ],
     warnings: ["Respiratory depression — airway management ready", "PALS 2025: If IV unavailable, use IN midazolam 0.2 mg/kg or IM midazolam 0.2 mg/kg"],
     formulations: ["2 mg/mL", "4 mg/mL"],
-    reference: "PALS 2025 | Harriet Lane 23e",
+    reference: "PALS 2025 | Harriet Lane 24e",
   },
   {
     id: "midazolam-seizure",
@@ -1104,7 +1104,7 @@ export const DRUGS: Drug[] = [
       { min: 0.1, max: 0.2, unit: "mg/kg", perKg: true, route: "IM", maxDose: "10 mg", label: "IM alternative" },
       { value: 0.5, unit: "mg/kg", perKg: true, route: "Buccal", maxDose: "10 mg", label: "Buccal midazolam", notes: "Licensed formulation preferred" },
     ],
-    reference: "PALS 2025 | Harriet Lane 23e",
+    reference: "PALS 2025 | Harriet Lane 24e",
   },
   {
     id: "levetiracetam",
@@ -1113,7 +1113,7 @@ export const DRUGS: Drug[] = [
     category: "antiepileptic",
     indications: ["Status epilepticus (2nd line after BZD)", "Seizure maintenance therapy"],
     doses: [
-      { min: 40, max: 60, unit: "mg/kg", perKg: true, route: "IV over 5–15 min", maxDose: "4500 mg", label: "Loading — Status epilepticus 2nd line", notes: "Harriet Lane 23e: 40–60 mg/kg IV is now evidence-based loading dose" },
+      { min: 40, max: 60, unit: "mg/kg", perKg: true, route: "IV over 5–15 min", maxDose: "4500 mg", label: "Loading — Status epilepticus 2nd line", notes: "Harriet Lane 24e: 40–60 mg/kg IV is now evidence-based loading dose" },
       { min: 20, max: 40, unit: "mg/kg/day", perKg: true, route: "IV / PO", maxDose: "3000 mg/day", frequency: "Divided every 12 hr", label: "Maintenance dose", notes: "Adjust based on seizure control and tolerance" },
     ],
     warnings: ["Behavioral side effects: agitation, aggression (especially in children)", "Few drug interactions — advantage over phenytoin"],
@@ -1123,7 +1123,7 @@ export const DRUGS: Drug[] = [
       { gfr: "< 30 mL/min/1.73m²", adjustment: "Reduce dose by 50%; supplement post-dialysis" },
     ],
     monitoring: ["Renal function", "CBC (rare cytopenias)"],
-    reference: "Harriet Lane 23e | PALS 2025",
+    reference: "Harriet Lane 24e | PALS 2025",
   },
   {
     id: "phenobarbital",
@@ -1131,7 +1131,7 @@ export const DRUGS: Drug[] = [
     category: "antiepileptic",
     indications: ["Status epilepticus (3rd line)", "Neonatal seizures (1st line)", "Seizure maintenance"],
     doses: [
-      { min: 20, max: 40, unit: "mg/kg", perKg: true, route: "IV at ≤ 2 mg/kg/min", maxDose: "1000 mg", label: "SE loading dose", notes: "Harriet Lane 23e: Up to 40 mg/kg for refractory SE; max infusion rate 1–2 mg/kg/min" },
+      { min: 20, max: 40, unit: "mg/kg", perKg: true, route: "IV at ≤ 2 mg/kg/min", maxDose: "1000 mg", label: "SE loading dose", notes: "Harriet Lane 24e: Up to 40 mg/kg for refractory SE; max infusion rate 1–2 mg/kg/min" },
       { min: 20, max: 40, unit: "mg/kg", perKg: true, route: "IV at ≤ 1 mg/kg/min", maxDose: "400 mg", label: "Neonatal seizures", notes: "First-line for neonates; may need 40 mg/kg total" },
       { min: 3, max: 5, unit: "mg/kg/day", perKg: true, route: "IV / PO", frequency: "Once daily", label: "Maintenance", notes: "Target level 20–40 mcg/mL" },
     ],
@@ -1141,7 +1141,7 @@ export const DRUGS: Drug[] = [
       { gfr: "< 10 mL/min/1.73m²", adjustment: "Increase interval to every 24–48 hr; monitor levels" },
     ],
     monitoring: ["Drug levels (target 20–40 mcg/mL)", "RR, BP during loading"],
-    reference: "PALS 2025 | Harriet Lane 23e",
+    reference: "PALS 2025 | Harriet Lane 24e",
   },
   {
     id: "fosphenytoin",
@@ -1158,7 +1158,7 @@ export const DRUGS: Drug[] = [
       { gfr: "Any", adjustment: "No fosphenytoin dose adjustment; phenytoin free fraction increases in renal failure — target unbound level 1–2 mcg/mL" },
     ],
     monitoring: ["ECG, BP during infusion", "Drug levels (total 10–20, free 1–2 mcg/mL)"],
-    reference: "PALS 2025 | Harriet Lane 23e",
+    reference: "PALS 2025 | Harriet Lane 24e",
   },
   {
     id: "pyridoxine",
@@ -1171,7 +1171,7 @@ export const DRUGS: Drug[] = [
       { value: 1, unit: "g per gram of INH ingested", perKg: false, route: "IV", maxDose: "5 g", label: "INH overdose", notes: "If unknown INH dose: give 5 g IV; may repeat" },
     ],
     formulations: ["50 mg/mL injection"],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
   {
     id: "sodium-valproate-iv",
@@ -1191,7 +1191,7 @@ export const DRUGS: Drug[] = [
     renalAdjustment: [
       { gfr: "Any", adjustment: "No dose adjustment; monitor free fraction (protein binding decreased in renal failure)" },
     ],
-    reference: "Harriet Lane 23e | Nelson's Pediatrics 22e",
+    reference: "Harriet Lane 24e | Nelson's Pediatrics 22e",
   },
 
   // ════════════════════════════════════════════════════════════
@@ -1210,7 +1210,7 @@ export const DRUGS: Drug[] = [
     warnings: ["Hyperglycemia, hypertension, immunosuppression with prolonged use"],
     formulations: ["100 mg/2 mL", "200 mg/2 mL vials"],
     monitoring: ["Blood glucose every 2–4 hr", "BP, electrolytes"],
-    reference: "SSC Pediatric 2024 | WHO PF 2024 | Harriet Lane 23e",
+    reference: "SSC Pediatric 2024 | WHO PF 2024 | Harriet Lane 24e",
   },
   {
     id: "dexamethasone",
@@ -1228,7 +1228,7 @@ export const DRUGS: Drug[] = [
     renalAdjustment: [
       { gfr: "Any", adjustment: "No dose adjustment; monitor glucose and electrolytes" },
     ],
-    reference: "WHO PF 2024 | Harriet Lane 23e",
+    reference: "WHO PF 2024 | Harriet Lane 24e",
   },
   {
     id: "methylprednisolone",
@@ -1246,7 +1246,7 @@ export const DRUGS: Drug[] = [
     renalAdjustment: [
       { gfr: "Any", adjustment: "No dose adjustment; monitor glucose and electrolytes" },
     ],
-    reference: "WHO PF 2024 | Harriet Lane 23e",
+    reference: "WHO PF 2024 | Harriet Lane 24e",
   },
   {
     id: "prednisolone",
@@ -1258,7 +1258,7 @@ export const DRUGS: Drug[] = [
       { value: 2, unit: "mg/kg/day", perKg: true, route: "PO", maxDose: "60 mg/day", frequency: "Once daily for 4 weeks", label: "Nephrotic syndrome induction", notes: "WHO 2024: 2 mg/kg/day × 4 weeks, then 1.5 mg/kg alt day × 4 weeks" },
     ],
     formulations: ["5 mg/5 mL solution", "5 mg tablets", "25 mg tablets"],
-    reference: "WHO PF 2024 | Harriet Lane 23e",
+    reference: "WHO PF 2024 | Harriet Lane 24e",
   },
 
   // ════════════════════════════════════════════════════════════
@@ -1294,7 +1294,7 @@ export const DRUGS: Drug[] = [
     ],
     warnings: ["Not for maintenance — only acute use", "Avoid contact with eyes (pupil dilation, angle-closure glaucoma risk)"],
     formulations: ["250 mcg/mL (1 mL nebules)", "500 mcg/2 mL (2 mL nebules)"],
-    reference: "GINA 2024 | Harriet Lane 23e",
+    reference: "GINA 2024 | Harriet Lane 24e",
   },
   {
     id: "aminophylline",
@@ -1312,7 +1312,7 @@ export const DRUGS: Drug[] = [
       { gfr: "Any", adjustment: "Mainly hepatic metabolism; reduce dose in hepatic impairment; levels guide dosing" },
     ],
     monitoring: ["Theophylline levels (target 10–20 mcg/mL for asthma; 5–10 mcg/mL for apnea)", "ECG, HR, RR"],
-    reference: "BTS 2023 | Harriet Lane 23e",
+    reference: "BTS 2023 | Harriet Lane 24e",
   },
   {
     id: "magnesium-asthma",
@@ -1341,7 +1341,7 @@ export const DRUGS: Drug[] = [
     warnings: ["SpO₂ may transiently drop during instillation — monitor closely", "Endotracheal tube must be confirmed in correct position", "Prophylaxis: < 27 wk within 30 min of birth"],
     formulations: ["Beractant 25 mg/mL (4 mL/kg)", "Poractant 80 mg/mL (1.25 mL/kg)"],
     monitoring: ["SpO₂, chest Xray, ABG within 1–2 hr", "Reduce FiO₂ and ventilator settings promptly after dose"],
-    reference: "WHO PF 2024 | Harriet Lane 23e | ERS 2023",
+    reference: "WHO PF 2024 | Harriet Lane 24e | ERS 2023",
   },
   {
     id: "heliox",
@@ -1380,7 +1380,7 @@ export const DRUGS: Drug[] = [
       { gfr: "20–50 mL/min/1.73m²", adjustment: "Higher doses may be needed (reduced tubular secretion)" },
       { gfr: "< 20 mL/min/1.73m²", adjustment: "Use IV route; very high doses may be required; consider combined with metolazone" },
     ],
-    reference: "Harriet Lane 23e | AHA 2024",
+    reference: "Harriet Lane 24e | AHA 2024",
   },
 
   // ════════════════════════════════════════════════════════════
@@ -1404,7 +1404,7 @@ export const DRUGS: Drug[] = [
       { gfr: "< 20 mL/min/1.73m²", adjustment: "High doses often required; IV preferred; combine with spironolactone" },
     ],
     monitoring: ["UO (target 1–3 mL/kg/hr)", "Electrolytes daily", "Weight"],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
   {
     id: "digoxin",
@@ -1445,7 +1445,7 @@ export const DRUGS: Drug[] = [
     renalAdjustment: [
       { gfr: "Any", adjustment: "Primarily hepatic; reduce dose in severe hepatic impairment; no renal dose adjustment" },
     ],
-    reference: "Harriet Lane 23e | WHO PF 2024",
+    reference: "Harriet Lane 24e | WHO PF 2024",
   },
   {
     id: "captopril",
@@ -1463,7 +1463,7 @@ export const DRUGS: Drug[] = [
       { gfr: "< 10 mL/min/1.73m²", adjustment: "Reduce dose by 75%; every 24 hr; monitor K+ and Cr closely" },
     ],
     monitoring: ["BP, serum Cr, K+ 1 week after starting and after each dose change"],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
   {
     id: "sodium-nitroprusside",
@@ -1479,7 +1479,7 @@ export const DRUGS: Drug[] = [
       { gfr: "< 30 mL/min/1.73m²", adjustment: "Thiocyanate accumulates — limit to < 72 hr; monitor lactate and cyanide levels" },
     ],
     monitoring: ["Invasive arterial BP continuously", "Lactate, thiocyanate levels if > 2 mcg/kg/min > 48 hr"],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
   {
     id: "labetalol",
@@ -1497,7 +1497,7 @@ export const DRUGS: Drug[] = [
     renalAdjustment: [
       { gfr: "Any", adjustment: "Primarily hepatic metabolism; use with caution in severe hepatic impairment; no renal dose change" },
     ],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
 
   // ════════════════════════════════════════════════════════════
@@ -1539,7 +1539,7 @@ export const DRUGS: Drug[] = [
     warnings: ["⚠️ NEVER GIVE IV BOLUS — fatal cardiac arrest", "Continuous cardiac monitoring at > 0.3 mEq/kg/hr", "Max peripheral concentration: 40 mEq/L"],
     formulations: ["2 mEq/mL concentrate (must dilute before use)"],
     monitoring: ["Serum K+ every 2–4 hr during IV correction", "Continuous ECG"],
-    reference: "Harriet Lane 23e | WHO PF 2024",
+    reference: "Harriet Lane 24e | WHO PF 2024",
   },
   {
     id: "calcium-maintenance",
@@ -1552,7 +1552,7 @@ export const DRUGS: Drug[] = [
     ],
     formulations: ["100 mg/mL (10% solution) IV", "500 mg tablets", "1000 mg effervescent tablets"],
     monitoring: ["Serum calcium 8–12 hrly during IV", "Phosphate, magnesium (cofactors)"],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
   {
     id: "sodium-correction",
@@ -1565,7 +1565,7 @@ export const DRUGS: Drug[] = [
     warnings: ["Overcorrection risk: Osmotic Demyelination Syndrome if Na raised > 12 mEq/L in 24 hr", "Central line STRONGLY preferred — hypertonic causes severe phlebitis", "Monitor Na every 2–4 hr"],
     formulations: ["3% NaCl (513 mEq/L) — prepared in pharmacy"],
     monitoring: ["Serum Na every 2 hr initially", "Neurological status"],
-    reference: "Harriet Lane 23e | Neurocritical Care Society 2024",
+    reference: "Harriet Lane 24e | Neurocritical Care Society 2024",
   },
   {
     id: "albumin",
@@ -1578,7 +1578,7 @@ export const DRUGS: Drug[] = [
     ],
     warnings: ["SSC Pediatric 2024: Albumin may be used for fluid resuscitation but not routinely preferred over balanced crystalloids"],
     formulations: ["4.5% (human albumin solution 45 g/L)", "20% (human albumin solution 200 g/L)"],
-    reference: "SSC Pediatric 2024 | Harriet Lane 23e",
+    reference: "SSC Pediatric 2024 | Harriet Lane 24e",
   },
   {
     id: "glucose-insulin",
@@ -1591,7 +1591,7 @@ export const DRUGS: Drug[] = [
     warnings: ["Onset 30–60 min; duration 4–6 hr — temporary measure only", "Monitor glucose every 30 min — risk of hypoglycemia", "Must treat underlying cause concurrently"],
     formulations: ["D10W or D25W + Regular Insulin (Actrapid) 1 unit/10 mL D10"],
     monitoring: ["Serum K+ every 1–2 hr", "Glucose every 30 min", "Continuous ECG"],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
   {
     id: "insulin-regular",
@@ -1627,7 +1627,7 @@ export const DRUGS: Drug[] = [
       { gfr: "< 50 mL/min/1.73m²", adjustment: "Reduce maintenance dose by 50%; loading dose unchanged" },
     ],
     monitoring: ["ECG (QTc)", "LFTs, renal function", "Drug interactions review"],
-    reference: "Harriet Lane 23e | IDSA 2024",
+    reference: "Harriet Lane 24e | IDSA 2024",
   },
   {
     id: "amphotericin-b",
@@ -1645,7 +1645,7 @@ export const DRUGS: Drug[] = [
       { gfr: "< 30 mL/min/1.73m²", adjustment: "Liposomal form preferred (less nephrotoxicity); reduce dose by 25–50% if Cr rises > 2× baseline; ensure adequate hydration" },
     ],
     monitoring: ["Serum Cr daily", "K+, Mg twice weekly", "Full blood count"],
-    reference: "Harriet Lane 23e | IDSA 2024",
+    reference: "Harriet Lane 24e | IDSA 2024",
   },
   {
     id: "caspofungin",
@@ -1662,7 +1662,7 @@ export const DRUGS: Drug[] = [
       { gfr: "Any", adjustment: "No renal dose adjustment required — echinocandins are not renally eliminated" },
     ],
     monitoring: ["LFTs weekly"],
-    reference: "Harriet Lane 23e | IDSA 2024",
+    reference: "Harriet Lane 24e | IDSA 2024",
   },
 
   // ════════════════════════════════════════════════════════════
@@ -1680,7 +1680,7 @@ export const DRUGS: Drug[] = [
     ],
     warnings: ["IV anaphylaxis risk — always dilute and give slowly; have epinephrine ready", "Only partially corrects anticoagulant reversal — FFP/PCC for acute bleed"],
     formulations: ["10 mg/mL (1 mL)", "Neonatal 1 mg/0.5 mL"],
-    reference: "WHO PF 2024 | Harriet Lane 23e",
+    reference: "WHO PF 2024 | Harriet Lane 24e",
   },
   {
     id: "zinc-sulfate",
@@ -1704,7 +1704,7 @@ export const DRUGS: Drug[] = [
     ],
     warnings: ["IV anaphylaxis risk (dilute; give slowly over 30 min)", "Give BEFORE glucose in Wernicke's risk — glucose alone can precipitate acute deficiency"],
     formulations: ["100 mg/mL injection (2 mL amp)", "100 mg tablets"],
-    reference: "WHO PF 2024 | Harriet Lane 23e",
+    reference: "WHO PF 2024 | Harriet Lane 24e",
   },
   {
     id: "vitamin-d",
@@ -1735,7 +1735,7 @@ export const DRUGS: Drug[] = [
     warnings: ["QTc prolongation — obtain baseline ECG in high-risk patients (hypokalemia, hypomagnesemia, cardiac disease)", "Serotonin syndrome risk with other serotonergic agents"],
     monitoring: ["ECG (QTc interval) in high-risk patients", "Electrolytes (K+, Mg)"],
     formulations: ["2 mg/mL injection (2 mL, 4 mL vials)", "4 mg/5 mL oral solution", "4 mg and 8 mg ODT tablets"],
-    reference: "Harriet Lane 23e | Nelson's Pediatrics 22e",
+    reference: "Harriet Lane 24e | Nelson's Pediatrics 22e",
   },
   {
     id: "pantoprazole-iv",
@@ -1752,7 +1752,7 @@ export const DRUGS: Drug[] = [
     renalAdjustment: [
       { gfr: "Any", adjustment: "No dose adjustment required" },
     ],
-    reference: "Harriet Lane 23e | Nelson's Pediatrics 22e",
+    reference: "Harriet Lane 24e | Nelson's Pediatrics 22e",
   },
 
   // ════════════════════════════════════════════════════════════
@@ -1771,7 +1771,7 @@ export const DRUGS: Drug[] = [
     warnings: ["Reconstitute each 20 mg vial with 60 mL sterile water — takes time; prepare multiple vials simultaneously in MH crisis", "Hepatotoxicity with prolonged oral use", "Call MH hotline immediately: 1-800-MH-HYPER (in US)"],
     monitoring: ["Core temperature (target < 38°C)", "Muscle tone and rigidity", "LFTs", "CPK", "ABG (metabolic acidosis)", "Electrolytes"],
     formulations: ["20 mg vials (lyophilized, reconstitute with 60 mL sterile water for injection)"],
-    reference: "Harriet Lane 23e | Malignant Hyperthermia Association (MHAUS) Guidelines",
+    reference: "Harriet Lane 24e | Malignant Hyperthermia Association (MHAUS) Guidelines",
   },
 
   // ════════════════════════════════════════════════════════════
@@ -1789,7 +1789,7 @@ export const DRUGS: Drug[] = [
     ],
     monitoring: ["Heart rate (watch for tachycardia)", "Secretions", "BP"],
     formulations: ["200 mcg/mL (0.2 mg/mL) injection"],
-    reference: "Harriet Lane 23e | Nelson's Pediatrics 22e",
+    reference: "Harriet Lane 24e | Nelson's Pediatrics 22e",
   },
 
   // ════════════════════════════════════════════════════════════
@@ -1811,7 +1811,7 @@ export const DRUGS: Drug[] = [
     ],
     monitoring: ["Renal function (creatinine, BUN)", "Signs of infection resolution", "Drug levels if augmented dosing"],
     formulations: ["500 mg and 2 g vials for injection"],
-    reference: "Harriet Lane 23e | Nelson's Pediatrics 22e",
+    reference: "Harriet Lane 24e | Nelson's Pediatrics 22e",
   },
 
   // ════════════════════════════════════════════════════════════
@@ -1825,7 +1825,8 @@ export const DRUGS: Drug[] = [
     indications: ["Deep vein thrombosis (DVT) treatment", "Pulmonary embolism", "ECMO / CPB anticoagulation", "Central line flush (prophylaxis)", "Antiphospholipid syndrome"],
     doses: [
       { value: 75, unit: "units/kg", perKg: true, route: "IV bolus over 10 min", maxDose: "5000 units", label: "Loading dose (therapeutic)", notes: "Followed immediately by maintenance infusion; adjust based on APTT/Anti-Xa" },
-      { min: 28, max: 20, unit: "units/kg/hr", perKg: true, route: "IV infusion", label: "Maintenance — neonates (28 units/kg/hr) / children (20 units/kg/hr)", notes: "Neonates: start 28 units/kg/hr; children: start 20 units/kg/hr; titrate to target APTT 60–85 sec or Anti-Xa 0.3–0.7 units/mL" },
+      { value: 28, unit: "units/kg/hr", perKg: true, route: "IV infusion", label: "Maintenance — infants (<1 yr)", notes: "Infants under 1 year: start 28 units/kg/hr; titrate to target APTT 60–85 sec or Anti-Xa 0.3–0.7 units/mL" },
+      { value: 20, unit: "units/kg/hr", perKg: true, route: "IV infusion", label: "Maintenance — children (>1 yr)", notes: "Children over 1 year: start 20 units/kg/hr; titrate to target APTT 60–85 sec or Anti-Xa 0.3–0.7 units/mL" },
       { min: 0.5, max: 1, unit: "units/kg/hr", perKg: true, route: "IV infusion (central line)", label: "Prophylaxis — central line patency", notes: "Low-dose flush protocol; institution-specific" },
     ],
     contraindications: ["Active major bleeding", "Heparin-induced thrombocytopenia (HIT)", "Severe thrombocytopenia (platelets < 20×10⁹/L)"],
@@ -1835,7 +1836,7 @@ export const DRUGS: Drug[] = [
     renalAdjustment: [
       { gfr: "Any", adjustment: "Primarily hepatic/reticuloendothelial clearance; monitor APTT/Anti-Xa closely in renal failure — effect may be prolonged" },
     ],
-    reference: "Harriet Lane 23e | Nelson's Pediatrics 22e | ASH 2024 Guidelines",
+    reference: "Harriet Lane 24e | Nelson's Pediatrics 22e | ASH 2024 Guidelines",
   },
 ];
 

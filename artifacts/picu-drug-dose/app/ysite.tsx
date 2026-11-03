@@ -6,6 +6,7 @@
  */
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { goBack } from "@/lib/nav";
 import React, { useMemo, useState } from "react";
 import {
   Platform,
@@ -60,7 +61,7 @@ export default function YSiteScreen() {
   return (
     <View style={[styles.container, { backgroundColor: bg }]}>
       <View style={[styles.header, { paddingTop: topOffset + 8 }]}>
-        <Pressable onPress={() => router.back()} style={[styles.backBtn, { backgroundColor: isDark ? "#1A2F4A" : "#E8F1F8" }]}>
+        <Pressable onPress={() => goBack(router)} style={[styles.backBtn, { backgroundColor: isDark ? "#1A2F4A" : "#E8F1F8" }]}>
           <Feather name="arrow-left" size={18} color={text} />
         </Pressable>
         <View style={{ flex: 1 }}>

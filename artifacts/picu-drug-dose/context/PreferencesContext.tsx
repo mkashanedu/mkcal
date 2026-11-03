@@ -42,6 +42,9 @@ interface PreferencesContextValue {
   /** Screen shown first when the app launches */
   startupScreen: StartupScreen;
   setStartupScreen: (s: StartupScreen) => void;
+  /** HIGH ALERT drugs hide their dose until the user confirms (Point 6) */
+  highAlertConfirm: boolean;
+  setHighAlertConfirm: (v: boolean) => void;
   /** Whether the biometric preference has loaded from storage */
   prefsLoaded: boolean;
 }
@@ -56,6 +59,8 @@ const PreferencesContext = createContext<PreferencesContextValue>({
   setBiometricEnabled: () => {},
   startupScreen: "home",
   setStartupScreen: () => {},
+  highAlertConfirm: true,
+  setHighAlertConfirm: () => {},
   prefsLoaded: false,
 });
 
@@ -63,6 +68,7 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
   const [textSize, setTextSizeState] = useState<TextSize>("medium");
   const [biometricEnabled, setBiometricEnabledState] = useState(false);
   const [startupScreen, setStartupScreenState] = useState<StartupScreen>("home");
+  const [highAlertConfirm, setHighAlertConfirmState] = useState(true);
   const [prefsLoaded, setPrefsLoaded] = useState(false);
 
   // Load persisted preferences on mount
@@ -75,6 +81,7 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
               textSize: TextSize;
               biometricEnabled: boolean;
               startupScreen: StartupScreen;
+              highAlertConfirm: boolean;
             }>;
             if (
               parsed.textSize === "small" ||
@@ -91,6 +98,9 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
             ) {
               setStartupScreenState(parsed.startupScreen);
             }
+            if (typeof parsed.highAlertConfirm === "boolean") {
+              setHighAlertConfirmState(parsed.highAlertConfirm);
+            }
             // Biometric only meaningful on native
             if (Platform.OS !== "web" && typeof parsed.biometricEnabled === "boolean") {
               setBiometricEnabledState(parsed.biometricEnabled);
@@ -102,7 +112,7 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
   }, []);
 
   const persist = useCallback(
-    (patch: Partial<{ textSize: TextSize; biometricEnabled: boolean; startupScreen: StartupScreen }>) => {
+    (patch: Partial<{ textSize: TextSize; biometricEnabled: boolean; startupScreen: StartupScreen; highAlertConfirm: boolean }>) => {
       AsyncStorage.getItem(PREFS_KEY)
         .then((raw) => {
           const current = raw ? JSON.parse(raw) : {};
@@ -138,6 +148,14 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
     [persist]
   );
 
+  const setHighAlertConfirm = useCallback(
+    (v: boolean) => {
+      setHighAlertConfirmState(v);
+      persist({ highAlertConfirm: v });
+    },
+    [persist]
+  );
+
   const textScale = TEXT_SCALE[textSize];
 
   return (
@@ -150,6 +168,8 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
         setBiometricEnabled,
         startupScreen,
         setStartupScreen,
+        highAlertConfirm,
+        setHighAlertConfirm,
         prefsLoaded,
       }}
     >

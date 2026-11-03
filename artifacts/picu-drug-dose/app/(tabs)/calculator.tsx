@@ -22,7 +22,7 @@ import { MAX_WEIGHT_KG, MIN_WEIGHT_KG, useWeight } from "@/context/WeightContext
 import { useDrawer } from "@/context/DrawerContext";
 import { ProfessionalFooter } from "@/components/ProfessionalFooter";
 import { matchesDrugQuery } from "@/lib/search";
-import { drugIdsForConditionQuery } from "@/lib/indications";
+import { conditionForQuery, drugIdsForConditionQuery } from "@/lib/indications";
 import { StarButton } from "@/components/StarButton";
 
 const QUICK_WEIGHTS = [0.5, 1, 2, 3, 5, 8, 10, 15, 20, 25, 30, 40, 50, 70, 100, 150];
@@ -150,6 +150,8 @@ export default function CalculatorScreen() {
       return matchCat && matchSearch;
     });
   }, [selectedCategory, search]);
+
+  const activeCondition = conditionForQuery(search);
 
   const categories = Object.entries(CATEGORIES) as [DrugCategory, typeof CATEGORIES[DrugCategory]][];
 
@@ -439,6 +441,31 @@ export default function CalculatorScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
+        {/* Condition banner — when the search names a condition (DKA, sepsis…),
+            label it clearly above the medicines that belong to its group. */}
+        {activeCondition ? (
+          <View
+            style={{
+              paddingVertical: 9,
+              paddingHorizontal: 12,
+              borderRadius: 10,
+              borderLeftWidth: 4,
+              borderLeftColor: "#7C3AED",
+              backgroundColor: isDark ? "#7C3AED22" : "#EDE9FE",
+            }}
+          >
+            <Text style={{ fontSize: 9, fontWeight: "800", letterSpacing: 1.2, color: "#7C3AED" }}>
+              CONDITION
+            </Text>
+            <Text style={{ fontSize: 15, fontWeight: "800", color: isDark ? "#FFFFFF" : "#0D1B2A", marginTop: 1 }}>
+              {activeCondition.label}
+            </Text>
+            <Text style={{ fontSize: 11, color: isDark ? "#8892B0" : "#64748B", marginTop: 1 }}>
+              Medicines for this condition are included in the list below.
+            </Text>
+          </View>
+        ) : null}
+
         {/* Drug list */}
         {drugsToShow.map((drug) => {
           const cat = CATEGORIES[drug.category];

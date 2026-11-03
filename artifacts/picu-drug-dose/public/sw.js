@@ -17,7 +17,7 @@
  *    background revalidation for navigations (unchanged from v2).
  */
 
-const CACHE_NAME = "peadscal-v4";
+const CACHE_NAME = "peadscal-v5";
 const OFFLINE_URL = "/";
 
 const SHELL = ["/", "/manifest.json", "/icon.png", "/favicon.png", "/favicon.ico"];
@@ -37,6 +37,7 @@ const ROUTES = [
   "/history",
   "/login",
   "/emergency-sheet",
+  "/drug-chart",
 ];
 
 // Pull every same-origin script/style/asset URL out of the index HTML.

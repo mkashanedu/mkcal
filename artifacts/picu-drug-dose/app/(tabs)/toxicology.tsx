@@ -14,6 +14,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { StarButton } from "@/components/StarButton";
+import { ProfessionalFooter } from "@/components/ProfessionalFooter";
 import { useFavorites } from "@/context/FavoritesContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useWeight } from "@/context/WeightContext";
@@ -431,7 +432,7 @@ export default function ToxicologyScreen() {
           </TouchableOpacity>
           <View style={{ flex: 1 }}>
             <Text style={[sh.headerTitle, { color: textPrimary }]}>Toxicology & Antidotes</Text>
-            <Text style={[sh.headerSub, { color: textMuted }]}>16 antidotes • Weight-based dosing • Ref: Harriet Lane 23e / Nelson's</Text>
+            <Text style={[sh.headerSub, { color: textMuted }]}>16 antidotes • Weight-based dosing • Ref: Harriet Lane 24e / Nelson's</Text>
           </View>
         </View>
       </View>
@@ -513,9 +514,10 @@ export default function ToxicologyScreen() {
           <View style={[sh.citationBox, { backgroundColor: isDark ? "#0A192F" : "#F8FAFD", borderColor: isDark ? "#1E3A5F" : "#E2E8F0" }]}>
             <Feather name="book-open" size={13} color={textMuted} style={{ marginTop: 1 }} />
             <Text style={{ flex: 1, fontSize: 11, color: textMuted, fontFamily: "Inter_400Regular", lineHeight: 16, fontStyle: "italic" }}>
-              Reference: All antidote protocols derived from Harriet Lane 23e / Nelson's Pediatrics • Pediatric doses apply to ages ≤1 year unless specified.
+              Reference: All antidote protocols derived from Harriet Lane 24e / Nelson's Pediatrics • Pediatric doses apply to ages ≤1 year unless specified.
             </Text>
           </View>
+          <ProfessionalFooter />
         </View>
       </ScrollView>
     </View>

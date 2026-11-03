@@ -63,6 +63,12 @@ function useCPRTimers(epiIntervalSec: number) {
 
   const acknowledgeEpi = useCallback(() => setEpiDue(false), []);
 
+  const markEpiGiven = useCallback(() => {
+    setEpiSecs(epiIntervalRef.current);
+    setEpiDue(false);
+    setEpiCount((c) => c + 1);
+  }, []);
+
   useEffect(() => {
     if (!running) {
       if (intervalRef.current) clearInterval(intervalRef.current);
@@ -100,7 +106,7 @@ function useCPRTimers(epiIntervalSec: number) {
     };
   }, []);
 
-  return { running, cprSecs, cprCycle, switchAlert, epiSecs, epiDue, epiCount, start, stop, acknowledgeEpi };
+  return { running, cprSecs, cprCycle, switchAlert, epiSecs, epiDue, epiCount, start, stop, acknowledgeEpi, markEpiGiven };
 }
 
 function fmtTime(s: number) {
@@ -109,7 +115,7 @@ function fmtTime(s: number) {
   return `${m}:${ss.toString().padStart(2, "0")}`;
 }
 
-// ── ET Tube, Airway, Defibrillation (Harriet Lane 23e · PALS 2025 · NALS) ───────────
+// ── ET Tube, Airway, Defibrillation (Harriet Lane 24e · PALS 2025 · NALS) ───────────
 function calcETTube(ageYears: number) {
   // PALS standard: Cuffed = Age/4 + 3.5, Uncuffed = Age/4 + 4
   const cuffed = ageYears / 4 + 3.5;
@@ -147,14 +153,15 @@ function calcBlade(ageYears: number) {
   return "Mac 3";
 }
 
-// LMA size by AGE (PALS 2025)
-function calcLMA(ageYears: number) {
-  if (ageYears < 1)   return "1";
-  if (ageYears < 5)   return "1.5";
-  if (ageYears < 10)  return "2";
-  if (ageYears < 15)  return "2.5";
-  if (ageYears < 20)  return "3";
-  return "4";
+// LMA size by WEIGHT (manufacturer / PALS standard sizing)
+function calcLMA(weightKg: number) {
+  if (weightKg < 5)   return "1";
+  if (weightKg < 10)  return "1.5";
+  if (weightKg < 20)  return "2";
+  if (weightKg < 30)  return "2.5";
+  if (weightKg < 50)  return "3";
+  if (weightKg < 70)  return "4";
+  return "5";
 }
 
 function calcTargetVitals(ageYears: number) {
@@ -191,6 +198,7 @@ const HsItems: HsTsItem[] = [
   { label: "Hypovolemia", action: "20 mL/kg NS/RL Bolus" },
   { label: "Hypoxia", action: "100% O2, verify ET Tube / DOPE" },
   { label: "Hydrogen Ion (Acidosis)", action: "Ensure ventilation, consider NaBicarb" },
+  { label: "Hypoglycemia", action: "Check glucose — D10 2 mL/kg IV" },
   { label: "Hypo- / Hyperkalemia", action: "CaGluconate for HyperK, Insulin+Dextrose" },
   { label: "Hypothermia", action: "Active warming" },
 ];
@@ -199,7 +207,8 @@ const TsItems: HsTsItem[] = [
   { label: "Tension pneumothorax", action: "Needle decompression" },
   { label: "Tamponade (cardiac)", action: "Pericardiocentesis" },
   { label: "Toxins", action: "Identify antidote" },
-  { label: "Thrombosis (pulmonary / coronary)", action: "Thrombolytics / Consult" },
+  { label: "Thrombosis (pulmonary)", action: "Thrombolytics / Consult" },
+  { label: "Thrombosis (coronary)", action: "Thrombolytics / Consult" },
 ];
 
 const PostCodeItems = [
@@ -346,7 +355,7 @@ export default function EmergencyScreen() {
   const defib = calcDefib(weightKg);
   const suctionFr = calcSuctionCatheter(ettube.cuffedNum);
   const blade = calcBlade(ageYears);
-  const lma = calcLMA(ageYears);
+  const lma = calcLMA(weightKg);
   const targetVitals = calcTargetVitals(ageYears);
   const mismatchWarning = useMemo(() => checkWeightAge(weightKg, ageYears), [weightKg, ageYears]);
 
@@ -378,7 +387,7 @@ export default function EmergencyScreen() {
         dose: `${cappedMg} mg`,
         doseSub: "(0.01 mg/kg = 10 mcg/kg)",
         route: "IV / IO",
-        notes: `0.1 mL/kg of 1:10,000. Repeat q3–5 min. Adult max 1 mg.`,
+        notes: `0.1 mL/kg of 1:10,000 (0.1 mg/mL). Repeat q3–5 min. Non-shockable: give ASAP. Shockable: after the 2nd shock. Adult max 1 mg.`,
         color: "#DC2626",
         warning: true,
         exceedsAdultMax: mgDose > 1,
@@ -395,7 +404,7 @@ export default function EmergencyScreen() {
         dose: calc.dose,
         doseSub: "(5 mg/kg)",
         route: "IV/IO bolus",
-        notes: "Give rapidly. Dilute D5W only. Max 300 mg.",
+        notes: "Rapid bolus during CPR. Max 300 mg per dose. May repeat up to 3 total doses (later doses max 150 mg each).",
         color: "#6366F1",
         exceedsAdultMax: calc.exceedsAdultMax,
         adultMaxLabel: calc.adultMaxLabel,
@@ -411,7 +420,7 @@ export default function EmergencyScreen() {
         dose: calc.dose,
         doseSub: "(0.02 mg/kg)",
         route: "IV / IO",
-        notes: "Min 0.1 mg. Max 1 mg child / 3 mg adolescent.",
+        notes: "Min 0.1 mg · Max single dose 0.5 mg (may repeat once). Epinephrine is FIRST for bradycardia — atropine only if increased vagal tone or primary AV block.",
         color: "#6366F1",
         exceedsAdultMax: calc.exceedsAdultMax,
         adultMaxLabel: calc.adultMaxLabel,
@@ -443,7 +452,7 @@ export default function EmergencyScreen() {
         dose: calc.dose,
         doseSub: "(1 mEq/kg)",
         route: "IV slow push",
-        notes: "Over 5–10 min. After airway secured. Max 50 mEq.",
+        notes: "NOT routine in arrest. Only for: severe metabolic acidosis with good ventilation, sodium-channel blocker toxicity, hyperkalemia. Over 5–10 min, after airway secured. Max 50 mEq.",
         color: "#6366F1",
         exceedsAdultMax: calc.exceedsAdultMax,
         adultMaxLabel: calc.adultMaxLabel,
@@ -459,7 +468,7 @@ export default function EmergencyScreen() {
         dose: calc.dose,
         doseSub: "(100–200 mg/kg)",
         route: "IV over 5–10 min",
-        notes: "10% solution. Cardiac monitor. Max 2000 mg.",
+        notes: "NOT routine in arrest. Only for: hyperkalemia, hypocalcemia, calcium-channel blocker overdose, hypermagnesemia. 10% solution, cardiac monitor. Max 2000 mg.",
         color: "#6366F1",
         exceedsAdultMax: calc.exceedsAdultMax,
         adultMaxLabel: calc.adultMaxLabel,
@@ -646,8 +655,84 @@ export default function EmergencyScreen() {
 
   const cprColor = cpr.cprSecs <= 15 ? "#DC2626" : cpr.cprSecs <= 30 ? "#EA580C" : "#0891B2";
 
+  // ── Alert sounds (Point 7): epi-due and compressor-switch beeps ──
+  const alertBeep = (freq: number, times: number) => {
+    try {
+      const AC = (globalThis as any).AudioContext || (globalThis as any).webkitAudioContext;
+      if (!AC) return;
+      if (!audioCtx.current) audioCtx.current = new AC();
+      const ctx = audioCtx.current;
+      if (ctx.state === "suspended") ctx.resume();
+      for (let i = 0; i < times; i++) {
+        const t0 = ctx.currentTime + i * 0.28;
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.type = "square";
+        o.frequency.value = freq;
+        g.gain.value = 0.09;
+        o.connect(g);
+        g.connect(ctx.destination);
+        o.start(t0);
+        o.stop(t0 + 0.12);
+      }
+    } catch {}
+  };
+  useEffect(() => { if (cpr.epiDue) alertBeep(880, 3); }, [cpr.epiDue]);
+  useEffect(() => { if (cpr.switchAlert) alertBeep(620, 2); }, [cpr.switchAlert]);
+
   // Show post-code when stopped AND at least one cycle completed
   const showPostCode = !cpr.running && cpr.cprCycle > 0;
+
+  // ── 2025 PALS upgrade: pathways, code log, metronome ──
+  const [pathway, setPathway] = useState<"vf" | "pea" | "brady" | "tachy" | "postop">("vf");
+  const [codeLog, setCodeLog] = useState<{ kind: string; at: string; detail: string }[]>([]);
+  const [metroOn, setMetroOn] = useState(false);
+  const metroTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const audioCtx = useRef<any>(null);
+  const codeElapsed = cpr.cprCycle * CPR_CYCLE_SECS + (CPR_CYCLE_SECS - cpr.cprSecs);
+  const epiGivenCount = codeLog.filter((e) => e.kind === "EPI").length;
+  const shockGivenCount = codeLog.filter((e) => e.kind === "SHOCK").length;
+  const logEpi = () => {
+    cpr.markEpiGiven();
+    setCodeLog((l) => [...l, { kind: "EPI", at: fmtTime(codeElapsed), detail: `${+Math.min(0.01 * weightKg, 1).toFixed(3)} mg IV/IO` }]);
+  };
+  const logShock = () => {
+    const n = shockGivenCount;
+    const j = n === 0 ? defib.unsync1st : defib.unsyncSub;
+    setCodeLog((l) => [...l, { kind: "SHOCK", at: fmtTime(codeElapsed), detail: `${j} J — shock ${n + 1}` }]);
+  };
+  const toggleMetronome = () => {
+    if (metroOn) {
+      if (metroTimer.current) clearInterval(metroTimer.current);
+      metroTimer.current = null;
+      setMetroOn(false);
+      return;
+    }
+    try {
+      const AC = (globalThis as any).AudioContext || (globalThis as any).webkitAudioContext;
+      if (!AC) return;
+      if (!audioCtx.current) audioCtx.current = new AC();
+      const ctx = audioCtx.current;
+      const beep = () => {
+        try {
+          const o = ctx.createOscillator();
+          const g = ctx.createGain();
+          o.type = "square";
+          o.frequency.value = 880;
+          g.gain.value = 0.08;
+          o.connect(g);
+          g.connect(ctx.destination);
+          o.start();
+          o.stop(ctx.currentTime + 0.06);
+        } catch {}
+      };
+      if (ctx.state === "suspended") ctx.resume();
+      beep();
+      metroTimer.current = setInterval(beep, 545);
+      setMetroOn(true);
+    } catch {}
+  };
+  useEffect(() => () => { if (metroTimer.current) clearInterval(metroTimer.current); }, []);
 
   return (
     <View style={[styles.container, { backgroundColor: isDark ? "#0B132B" : "#F0F4F8" }]}>
@@ -938,7 +1023,58 @@ export default function EmergencyScreen() {
                 </Text>
                 <Text style={[styles.arrestSub, { fontFamily: "Inter_400Regular" }]}>uncuffed {ettube.uncuffed}</Text>
               </View>
+              <View style={styles.arrestCell}>
+                <Text style={[styles.arrestLabel, { fontFamily: "Inter_600SemiBold" }]}>FLUID BOLUS NS/RL</Text>
+                <Text style={[styles.arrestValue, { fontFamily: "Inter_700Bold", fontSize: Math.round(16.5 * textScale) }]}>
+                  {Math.round(20 * weightKg)} mL
+                </Text>
+                <Text style={[styles.arrestSub, { fontFamily: "Inter_400Regular" }]}>20 mL/kg · reassess · up to 40–60 mL/kg</Text>
+              </View>
             </View>
+          </View>
+        )}
+
+        {/* ── HIGH-QUALITY CPR strip + metronome + code log (2025) ── */}
+        {weightValid && (
+          <View style={[styles.palsBanner, { backgroundColor: isDark ? "#0A192F" : "#FFFFFF", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
+            <Text style={[styles.palsTitle, { color: "#DC2626", fontFamily: "Inter_700Bold" }]}>High-Quality CPR — AHA 2025</Text>
+            <Text style={{ fontSize: Math.round(12.5 * textScale), lineHeight: 19, color: isDark ? "#CCD6F6" : "#0D1B2A", fontFamily: "Inter_400Regular" }}>
+              Rate 100–120/min · Depth ≥ ⅓ of chest (infant ≈ 4 cm · child ≈ 5 cm · max 6 cm){"\n"}
+              Full recoil · Interruptions &lt; 10 s · Change compressor every 2 min{"\n"}
+              Ratio 15:2 (2 rescuers) · 30:2 (single rescuer){"\n"}
+              Advanced airway: continuous compressions + 1 breath every 2–3 s (20–30/min){"\n"}
+              Monitor ETCO2 + diastolic BP — DBP targets: ≥ 25 mmHg (infant) · ≥ 30 mmHg (child)
+            </Text>
+            <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
+              <TouchableOpacity onPress={toggleMetronome} activeOpacity={0.8} style={{ flex: 1, backgroundColor: metroOn ? "#DC2626" : (isDark ? "#112240" : "#F1F5F9"), borderWidth: 1, borderColor: "#DC2626", borderRadius: 10, paddingVertical: 10, alignItems: "center" }}>
+                <Text style={{ fontFamily: "Inter_700Bold", fontSize: 13, color: metroOn ? "#FFFFFF" : "#DC2626" }}>{metroOn ? "■ STOP METRONOME" : "▶ METRONOME 110/min"}</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={{ flexDirection: "row", gap: 8, marginTop: 8 }}>
+              <TouchableOpacity onPress={logEpi} activeOpacity={0.8} style={{ flex: 1, backgroundColor: "#DC2626", borderRadius: 10, paddingVertical: 12, alignItems: "center" }}>
+                <Text style={{ fontFamily: "Inter_800ExtraBold", fontSize: 14, color: "#FFFFFF" }}>EPI DIYA ✓</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={logShock} activeOpacity={0.8} style={{ flex: 1, backgroundColor: "#B45309", borderRadius: 10, paddingVertical: 12, alignItems: "center" }}>
+                <Text style={{ fontFamily: "Inter_800ExtraBold", fontSize: 14, color: "#FFFFFF" }}>SHOCK DIYA ⚡</Text>
+              </TouchableOpacity>
+              {codeLog.length > 0 && (
+                <TouchableOpacity onPress={() => setCodeLog([])} activeOpacity={0.8} style={{ paddingHorizontal: 12, borderRadius: 10, paddingVertical: 12, alignItems: "center", borderWidth: 1, borderColor: isDark ? "#233554" : "#E2E8F0" }}>
+                  <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 12, color: isDark ? "#8892B0" : "#64748B" }}>Clear</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+            {codeLog.length > 0 && (
+              <View style={{ marginTop: 10, backgroundColor: isDark ? "#112240" : "#F8FAFC", borderRadius: 10, padding: 10 }}>
+                <Text style={{ fontFamily: "Inter_700Bold", fontSize: 12.5, color: isDark ? "#FFFFFF" : "#0D1B2A" }}>
+                  CODE LOG — Epi ×{epiGivenCount} · Shocks ×{shockGivenCount} · Elapsed ~{fmtTime(codeElapsed)}
+                </Text>
+                {codeLog.slice(-6).map((e, i) => (
+                  <Text key={i} style={{ fontSize: 12, marginTop: 3, color: isDark ? "#A8B8DC" : "#475569", fontFamily: "Inter_400Regular" }}>
+                    {e.at} — {e.kind} {e.detail}
+                  </Text>
+                ))}
+              </View>
+            )}
           </View>
         )}
 
@@ -964,13 +1100,116 @@ export default function EmergencyScreen() {
           </Text>
         </Pressable>
 
+        {/* ── PATHWAYS — AHA PALS 2025, step by step for this weight ── */}
+        {weightValid && (
+          <View style={[styles.palsBanner, { backgroundColor: isDark ? "#0A192F" : "#FFFFFF", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
+            <Text style={[styles.palsTitle, { color: "#DC2626", fontFamily: "Inter_700Bold" }]}>Pathways — AHA PALS 2025</Text>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
+              {([
+                { k: "vf", l: "VF / pVT" },
+                { k: "pea", l: "Asystole / PEA" },
+                { k: "brady", l: "Bradycardia" },
+                { k: "tachy", l: "Tachycardia" },
+                { k: "postop", l: "★ Post-Op Cardiac" },
+              ] as const).map((c) => (
+                <TouchableOpacity key={c.k} onPress={() => setPathway(c.k)} activeOpacity={0.8} style={{ paddingHorizontal: 13, paddingVertical: 9, borderRadius: 999, backgroundColor: pathway === c.k ? "#DC2626" : "transparent", borderWidth: 1, borderColor: "#DC2626" }}>
+                  <Text style={{ fontFamily: "Inter_700Bold", fontSize: 12.5, color: pathway === c.k ? "#FFFFFF" : "#DC2626" }}>{c.l}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            {(() => {
+              const epiMg = +Math.min(0.01 * weightKg, 1).toFixed(3);
+              const epiMl = +(epiMg * 10).toFixed(1);
+              const amioMg = Math.min(5 * weightKg, 300);
+              const lidoMg = Math.min(1 * weightKg, 100);
+              const atropMg = +Math.min(Math.max(0.02 * weightKg, 0.1), 0.5).toFixed(2);
+              const aden1 = +Math.min(0.1 * weightKg, 6).toFixed(1);
+              const aden2 = +Math.min(0.2 * weightKg, 12).toFixed(1);
+              const syncLo = Math.round(0.5 * weightKg);
+              const syncHi = Math.round(1 * weightKg);
+              const sync2 = Math.min(2 * weightKg, 100);
+              const steps: Record<string, string[]> = {
+                vf: [
+                  `Shock ${defib.unsync1st} J (2 J/kg) — then CPR 2 min`,
+                  "IV / IO access during CPR — do not interrupt compressions",
+                  `Shock ${defib.unsyncSub} J (4 J/kg) — then CPR 2 min`,
+                  `Epinephrine ${epiMg} mg (${epiMl} mL of 0.1 mg/mL) ASAP — then CPR 2 min`,
+                  `Shock ${defib.unsyncSub} J or more (≥ 4 J/kg · max ${defib.unsyncMax} J)`,
+                  `Amiodarone ${amioMg} mg (or Lidocaine ${lidoMg} mg) — then CPR 2 min`,
+                  "Repeat the cycle: epinephrine every 3–5 min · treat reversible causes (Hs & Ts below)",
+                ],
+                pea: [
+                  `Epinephrine ${epiMg} mg (${epiMl} mL of 0.1 mg/mL) IV/IO — ASAP, repeat every 3–5 min`,
+                  "CPR in 2-min cycles — rhythm + pulse check every 2 min",
+                  "IV / IO access — consider advanced airway + waveform capnography",
+                  "Find and treat the cause — Hs & Ts below (hypovolemia, hypoxia, hypoglycemia, electrolytes…)",
+                  `Fluid bolus ${Math.round(20 * weightKg)} mL NS/RL if hypovolemia is possible — reassess`,
+                ],
+                brady: [
+                  "HR < 60/min WITH poor perfusion — hypotension, altered consciousness, signs of shock?",
+                  "Support airway + give oxygen — ventilate if needed",
+                  "Still < 60 with poor perfusion → START CPR",
+                  `Epinephrine ${epiMg} mg IV/IO — repeat every 3–5 min (the FIRST drug)`,
+                  `Atropine ${atropMg} mg IV/IO — ONLY if increased vagal tone or primary AV block (may repeat once)`,
+                  "Consider cardiac pacing · treat causes: hypoxia, hypothermia, toxins, raised ICP",
+                ],
+                postop: [
+                  "YE RAASTA SIRF UN KE LIYE HE jinki haal hi me cardiac surgery (sternotomy) hui ho — aam PALS se mukhtalif he (CSU-ALS protocol).",
+                  "Arrest confirm karo: arterial line waveform flat + pulse nahi. SURGEON aur poori team ko foran bulao — 6 roles pehle se taqseem hon.",
+                  `VF / pVT → pehle 3 STACKED shocks, compressions se PEHLE (defib tayyar ho to, 1 minute ke andar): ${defib.unsync1st} J → ${defib.unsyncSub} J → ${defib.unsyncSub} J`,
+                  "Asystole / shadeed bradycardia → pehle PACING: epicardial wires pacing box se joro, DDD mode, maximum output — compressions se pehle (wires mojood hon to).",
+                  "PEA → pacing OFF karke rhythm dobara dekho (pacing spikes fine VF ko chhupa sakte hein). Fori wajuhat dekho: ventilator disconnect, tension pneumothorax, TAMPONADE, andar khoon behna.",
+                  "ROSC na aye → EMERGENCY RESTERNOTOMY 5 MINUTE KE ANDAR, bedside par — tamponade khulega; internal massage, internal defib (external se bohat kam energy) aur epicardial pacing mumkin hogi.",
+                  "Epinephrine: routine FULL dose NAHI do — cause theek hote hi shadeed hypertension naye grafts / suture lines ko nuqsan de sakta he. Chhoti titrated dose sirf surgeon / senior clinician ke kehne par (adult protocol reference: 50–100 mcg increments).",
+                  "Agar compressions chal rahi hon: arterial systolic > 60 mmHg ka target — na pahunche to tamponade ya bleeding samjho, resternotomy ki taraf barho.",
+                  "ROSC ke bad bhi surgeon lazmi maujood rahe — dobara bleeding / tamponade ka khatra. ROSC na aye to ECPR / circulatory support par ghaur.",
+                ],
+                tachy: [
+                  "Pulse present — cardiopulmonary compromise? (hypotension, altered consciousness, shock)",
+                  `UNSTABLE → Synchronized cardioversion ${syncLo}–${syncHi} J (0.5–1 J/kg); if no response ${sync2} J (2 J/kg). Sedate if possible — do NOT delay the shock`,
+                  `STABLE narrow (QRS ≤ 0.09 s) → sinus tachycardia: treat the cause · SVT: vagal maneuvers, then Adenosine ${aden1} mg rapid IV + flush; 2nd dose ${aden2} mg`,
+                  `STABLE wide (QRS > 0.09 s) → expert consultation · consider adenosine if regular + monomorphic · Amiodarone ${amioMg} mg over 20–60 min`,
+                ],
+              };
+              return steps[pathway].map((t, i) => (
+                <View key={i} style={{ flexDirection: "row", gap: 10, marginBottom: 8 }}>
+                  <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: "#DC2626", alignItems: "center", justifyContent: "center" }}>
+                    <Text style={{ color: "#FFFFFF", fontFamily: "Inter_800ExtraBold", fontSize: 12 }}>{i + 1}</Text>
+                  </View>
+                  <Text style={{ flex: 1, fontSize: Math.round(13 * textScale), lineHeight: 19, color: isDark ? "#CCD6F6" : "#0D1B2A", fontFamily: "Inter_500Medium" }}>{t}</Text>
+                </View>
+              ));
+            })()}
+            {pathway === "postop" && (
+              <Text style={{ fontSize: 11, color: isDark ? "#8892B0" : "#64748B", fontStyle: "italic", marginTop: 8, lineHeight: 15 }}>
+                Reference: EACTS / STS Cardiac Surgery Arrest (CSU-ALS) protocol · ERC 2025 — cardiac arrest after cardiac surgery
+              </Text>
+            )}
+          </View>
+        )}
+
+        {/* Patient drug chart (Point 10) */}
+        <Pressable
+          onPress={() => router.push("/drug-chart" as any)}
+          style={{
+            flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
+            backgroundColor: isDark ? "#112240" : "#FFFFFF", borderWidth: 1, borderColor: "#059669",
+            borderRadius: 12, paddingVertical: 11, marginBottom: 12,
+          }}
+        >
+          <Feather name="clipboard" size={15} color="#059669" />
+          <Text style={{ color: "#059669", fontFamily: "Inter_600SemiBold", fontSize: 13.5 }}>
+            Patient Drug Chart — print (favorites se)
+          </Text>
+        </Pressable>
+
         {/* Emergency Calculators */}
         <View style={[styles.palsBanner, { backgroundColor: isDark ? "#0A192F" : "#FFFFFF", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
           <Text style={[styles.palsTitle, { color: colors.tint, fontFamily: "Inter_700Bold" }]}>
             Emergency Calculators
           </Text>
           <Text style={[styles.calcSource, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_400Regular" }]}>
-            PALS 2025 · Harriet Lane 23e · ACLS
+            PALS 2025 · Harriet Lane 24e · ACLS
           </Text>
 
           {/* ET Tube + Airway */}
@@ -1051,8 +1290,17 @@ export default function EmergencyScreen() {
           </View>}
         </View>
 
-        {/* Critical Drug Cards */}
-        {emergencyCards.map((item, idx) => (
+        {/* Critical Drug Cards — grouped: arrest drugs first */}
+        {[
+          { title: "ARREST — FIRST-LINE DRUGS", arrest: true },
+          { title: "MORE EMERGENCY DRUGS", arrest: false },
+        ].map((grp) => (
+          <View key={grp.title}>
+            <Text style={{ fontSize: 12.5, fontFamily: "Inter_700Bold", letterSpacing: 0.5, color: isDark ? "#A8B8DC" : "#4A5568", marginTop: 10, marginBottom: 8 }}>{grp.title}</Text>
+            {emergencyCards
+              .map((item, idx) => ({ item, idx }))
+              .filter(({ item }) => grp.arrest === (item.label.startsWith("Epinephrine") || item.label.startsWith("Amiodarone") || item.label.startsWith("Lidocaine")))
+              .map(({ item, idx }) => (
           <View
             key={idx}
             style={[
@@ -1106,7 +1354,28 @@ export default function EmergencyScreen() {
               />
             </View>
           </View>
+            ))}
+          </View>
         ))}
+
+        {/* Choking + Neonatal cards */}
+        <View style={[styles.palsBanner, { backgroundColor: isDark ? "#0A192F" : "#FFFFFF", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
+          <Text style={[styles.palsTitle, { color: colors.tint, fontFamily: "Inter_700Bold" }]}>Choking — Foreign-Body Airway Obstruction (BLS 2025)</Text>
+          <Text style={{ fontSize: Math.round(12.5 * textScale), lineHeight: 19, color: isDark ? "#CCD6F6" : "#0D1B2A", fontFamily: "Inter_400Regular" }}>
+            Conscious infant (&lt; 1 yr): 5 back blows ↔ 5 chest thrusts — repeat. NO abdominal thrusts. NO blind finger sweeps.{"\n"}
+            Child ≥ 1 yr: 5 back blows, then 5 abdominal thrusts — alternate until the object clears or the child becomes unconscious.{"\n"}
+            If unconscious: start CPR. Look into the mouth before each ventilation — remove the object only if you can see it.
+          </Text>
+        </View>
+        <View style={[styles.palsBanner, { backgroundColor: isDark ? "#0A192F" : "#FFFFFF", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
+          <Text style={[styles.palsTitle, { color: colors.tint, fontFamily: "Inter_700Bold" }]}>Neonatal Corner — NRP</Text>
+          <Text style={{ fontSize: Math.round(12.5 * textScale), lineHeight: 19, color: isDark ? "#CCD6F6" : "#0D1B2A", fontFamily: "Inter_400Regular" }}>
+            Warm · dry · stimulate. HR &lt; 100 → PPV (room air for term babies). HR &lt; 60 despite 30 s of effective PPV → chest compressions.{"\n"}
+            Compressions : Ventilation = 3 : 1 (90 + 30 = 120 events/min) · 100% O2 during compressions.{"\n"}
+            Epinephrine IV/IO 0.02–0.03 mg/kg (0.2–0.3 mL/kg of 0.1 mg/mL) if HR stays &lt; 60 — repeat every 3–5 min.{"\n"}
+            Volume: NS 10 mL/kg if blood loss or shock. Pre-ductal SpO2 targets: 1 min 60–65% · 3 min 70–75% · 5 min 80–85% · 10 min 85–95%.
+          </Text>
+        </View>
 
         {/* Hs & Ts */}
         <View style={[styles.palsBanner, { backgroundColor: isDark ? "#0A192F" : "#FFFFFF", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
@@ -1141,6 +1410,19 @@ export default function EmergencyScreen() {
               ))}
             </View>
           </View>
+        </View>
+
+        {/* ── After ROSC targets ── */}
+        <View style={[styles.palsBanner, { backgroundColor: isDark ? "#0A192F" : "#FFFFFF", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
+          <Text style={[styles.palsTitle, { color: "#16A34A", fontFamily: "Inter_700Bold" }]}>After ROSC — Post-Arrest Targets (PALS 2025)</Text>
+          <Text style={{ fontSize: Math.round(12.5 * textScale), lineHeight: 19, color: isDark ? "#CCD6F6" : "#0D1B2A", fontFamily: "Inter_400Regular" }}>
+            SpO2 94–98% — avoid hypoxia AND hyperoxia.{"\n"}
+            Blood pressure: keep SBP above the age floor (≥ {targetVitals.minSBP} mmHg for this age) — continuous arterial BP monitoring if available.{"\n"}
+            Temperature: prevent fever — keep ≤ 37.5°C.{"\n"}
+            Ventilation: normocapnia — PaCO2 / ETCO2 35–45 mmHg. Do not hyperventilate.{"\n"}
+            Glucose: check early — treat hypoglycemia.{"\n"}
+            Continuous ECG · BP · SpO2 · ETCO2 monitoring — watch for seizures (consider EEG).
+          </Text>
         </View>
 
         <ProfessionalFooter />

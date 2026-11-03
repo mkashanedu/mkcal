@@ -24,6 +24,20 @@ interface WeightContextValue {
   favorites: string[];
   toggleFavorite: (drugId: string) => void;
   isFavorite: (drugId: string) => boolean;
+
+  /** Patient profiles (Point 1) — several saved weight/age sets, one tap switch */
+  profiles: PatientProfile[];
+  activeProfileId: string | null;
+  saveCurrentAsProfile: (name: string) => void;
+  switchProfile: (id: string) => void;
+  deleteProfile: (id: string) => void;
+}
+
+export interface PatientProfile {
+  id: string;
+  name: string;
+  weightKg: number;
+  ageYears: number;
 }
 
 const WeightContext = createContext<WeightContextValue | null>(null);
@@ -41,6 +55,8 @@ export function WeightProvider({ children }: { children: React.ReactNode }) {
   const ageMutationVersion = useRef(0);
 
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [profiles, setProfiles] = useState<PatientProfile[]>([]);
+  const [activeProfileId, setActiveProfileId] = useState<string | null>(null);
 
   useEffect(() => {
     const initialWeightMutationVersion = weightMutationVersion.current;
@@ -73,6 +89,17 @@ export function WeightProvider({ children }: { children: React.ReactNode }) {
           setAgeInputState(loadedUnit === "months" ? (num * 12).toString() : num.toString());
         }
       }
+    });
+    AsyncStorage.getItem("picu_profiles_v1").then((val) => {
+      if (val) {
+        try {
+          const arr = JSON.parse(val);
+          if (Array.isArray(arr)) setProfiles(arr.filter((p) => p && p.id && p.name && Number.isFinite(p.weightKg)));
+        } catch {}
+      }
+    });
+    AsyncStorage.getItem("picu_active_profile").then((val) => {
+      if (val) setActiveProfileId(val);
     });
     AsyncStorage.getItem("picu_favorites").then((val) => {
       if (val) {
@@ -160,6 +187,57 @@ export function WeightProvider({ children }: { children: React.ReactNode }) {
     [favorites]
   );
 
+  const saveCurrentAsProfile = useCallback(
+    (name: string) => {
+      const n = name.trim();
+      if (!n || !(weight > 0)) return;
+      const prof: PatientProfile = {
+        id: "p" + Date.now().toString(36),
+        name: n,
+        weightKg: weight,
+        ageYears: age,
+      };
+      setProfiles((prev) => {
+        const updated = [...prev, prof].slice(-12);
+        AsyncStorage.setItem("picu_profiles_v1", JSON.stringify(updated));
+        return updated;
+      });
+      setActiveProfileId(prof.id);
+      AsyncStorage.setItem("picu_active_profile", prof.id);
+    },
+    [weight, age]
+  );
+
+  const switchProfile = useCallback(
+    (id: string) => {
+      const p = profiles.find((x) => x.id === id);
+      if (!p) return;
+      setWeight(p.weightKg);
+      setWeightInput(p.weightKg.toString());
+      setAgeUnit("years");
+      setAge(p.ageYears);
+      setAgeInput(p.ageYears.toString());
+      setActiveProfileId(id);
+      AsyncStorage.setItem("picu_active_profile", id);
+    },
+    [profiles, setWeight, setWeightInput, setAge, setAgeInput, setAgeUnit]
+  );
+
+  const deleteProfile = useCallback((id: string) => {
+    setProfiles((prev) => {
+      const updated = prev.filter((x) => x.id !== id);
+      AsyncStorage.setItem("picu_profiles_v1", JSON.stringify(updated));
+      return updated;
+    });
+    setActiveProfileId((cur) => {
+      if (cur === id) {
+        AsyncStorage.removeItem("picu_active_profile");
+        return null;
+      }
+      return cur;
+    });
+  }, []);
+
   return (
     <WeightContext.Provider
       value={{
@@ -180,6 +258,11 @@ export function WeightProvider({ children }: { children: React.ReactNode }) {
         favorites,
         toggleFavorite,
         isFavorite,
+        profiles,
+        activeProfileId,
+        saveCurrentAsProfile,
+        switchProfile,
+        deleteProfile,
       }}
     >
       {children}

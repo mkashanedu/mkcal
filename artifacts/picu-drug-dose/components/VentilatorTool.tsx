@@ -1,7 +1,7 @@
 /**
  * VentilatorTool.tsx
  * Ventilator & ABG Management Module
- * Based on PALICC 2023 · Harriet Lane 22e/23e · Hamilton C3 Standards
+ * Based on PALICC 2023 · Harriet Lane 24e · Hamilton C3 Standards
  */
 import { Feather } from "@expo/vector-icons";
 import React, { useState } from "react";
@@ -17,15 +17,17 @@ import {
 
 import { useTheme } from "@/context/ThemeContext";
 import { useWeight } from "@/context/WeightContext";
+import { WaveformGuide } from "@/components/WaveformGuide";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
-type Pathology = "normal" | "mild-moderate" | "severe";
-type VentTab = "calculator" | "modes" | "protocols";
+type Pathology = "normal" | "asthma" | "mild-moderate" | "severe";
+type VentTab = "calculator" | "modes" | "protocols" | "waveforms";
 
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 // PALICC 2023 / Harriet Lane Vt targets (mL/kg IBW)
 const VT_TARGETS: Record<Pathology, { min: number; max: number; label: string; color: string; description: string }> = {
-  "normal":         { min: 8,  max: 10, label: "Normal Lungs / Asthma", color: "#0891B2", description: "Physiological tidal volume · Overcome airway resistance · Prolonged expiratory time" },
+  "normal":         { min: 6,  max: 8,  label: "Normal Lungs", color: "#0891B2", description: "Physiological tidal volume · Standard I:E 1:2 · PEEP 5 cmH₂O" },
+  "asthma":         { min: 8,  max: 10, label: "Asthma", color: "#7C3AED", description: "Prolonged expiratory time · Low RR · Avoid dynamic hyperinflation" },
   "mild-moderate":  { min: 6,  max: 8,  label: "Mild / Moderate PARDS", color: "#D97706", description: "Lung-protective ventilation · PALICC 2023 · Pplat < 28 cmH₂O" },
   "severe":         { min: 4,  max: 6,  label: "Severe PARDS",          color: "#DC2626", description: "Ultra-protective LPV · Permissive hypercapnia · SpO₂ 88–92% acceptable" },
 };
@@ -40,6 +42,21 @@ const PEEP_FIO2_TABLE = [
   { fio2: "70–80%",  peepLow: 14, peepHigh: 14 },
   { fio2: "80–90%",  peepLow: 14, peepHigh: 18 },
   { fio2: "90–100%", peepLow: 18, peepHigh: 24 },
+];
+
+// I:E ratio options for the timing calculator
+const IE_OPTIONS = ["1:1", "1:1.5", "1:2", "1:3", "1:4", "1:5"];
+
+// Extubation readiness — daily screen criteria
+const EXTUB_ITEMS = [
+  "Underlying disease improving",
+  "FiO₂ ≤ 0.4–0.5 with SpO₂ in target",
+  "PEEP ≤ 5–8 cmH₂O",
+  "pH > 7.25",
+  "Adequate cough/gag and manageable secretions",
+  "Awake / appropriately responsive — sedation lightened",
+  "Haemodynamically stable (no or low-dose inotropes)",
+  "No planned procedure needing deep sedation today",
 ];
 
 // Hamilton C3 Modes Dictionary
@@ -182,7 +199,7 @@ const PARDS_PROTOCOL = {
 
 const ASTHMA_PROTOCOL = {
   title: "Status Asthmaticus — Ventilator Strategy",
-  guideline: "Harriet Lane 22e/23e",
+  guideline: "Harriet Lane 24e",
   color: "#7C3AED",
   icon: "wind" as const,
   strategy: [
@@ -254,6 +271,14 @@ export function VentilatorTool() {
   const [peep, setPeep]     = useState("");
   const [rr, setRr]         = useState("");
   const [fio2, setFio2]     = useState("");
+  const [vtMeas, setVtMeas] = useState("");
+  const [mapP, setMapP]     = useState("");
+  const [pao2, setPao2]     = useState("");
+  const [spo2, setSpo2]     = useState("");
+  const [autoPeep, setAutoPeep] = useState("");
+  const [ieRatio, setIeRatio]   = useState("1:2");
+  const [extub, setExtub]   = useState<boolean[]>(() => EXTUB_ITEMS.map(() => false));
+  const [hfovWt, setHfovWt] = useState("");
   const [expandedMode, setExpandedMode] = useState<string | null>(null);
   const [expandedSection, setExpandedSection] = useState<string | null>("definition");
 
@@ -271,19 +296,77 @@ export function VentilatorTool() {
   const vtMax   = wt > 0 ? +(wt * target.max).toFixed(0) : null;
   const vtMid   = vtMin !== null && vtMax !== null ? Math.round((vtMin + vtMax) / 2) : null;
 
-  // Minute ventilation (using midpoint Vt)
-  const mv = vtMid !== null && rrNum > 0 ? +((rrNum * vtMid) / 1000).toFixed(2) : null;
+  // Lung mechanics & oxygenation inputs
+  const vtMeasNum   = parseFloat(vtMeas) || 0;
+  const mapNum      = parseFloat(mapP) || 0;
+  const pao2Num     = parseFloat(pao2) || 0;
+  const spo2Num     = parseFloat(spo2) || 0;
+  const autoPeepNum = parseFloat(autoPeep) || 0;
+  const peepSet     = peep.trim() !== "";
+  const totalPeep   = peepSet ? +(peepNum + autoPeepNum).toFixed(1) : null;
 
-  // Pressure checks
-  const drivingPressure = pplatNum > 0 && peepNum >= 0 ? +(pplatNum - peepNum).toFixed(1) : null;
+  // Minute ventilation — measured Vt when available, else target midpoint (estimate)
+  const mvVt = vtMeasNum > 0 ? vtMeasNum : vtMid;
+  const mv = mvVt !== null && rrNum > 0 ? +((rrNum * mvVt) / 1000).toFixed(2) : null;
+
+  // Pressure checks — driving pressure uses TOTAL PEEP (set PEEP + auto-PEEP)
+  const drivingPressure = pplatNum > 0 && totalPeep !== null ? +(pplatNum - totalPeep).toFixed(1) : null;
   const pplatOk  = pplatNum > 0 ? pplatNum < 28 : null;
   const dpOk     = drivingPressure !== null ? drivingPressure <= 15 : null;
   const pipOk    = pipNum > 0 ? pipNum < 30 : null;
   const peepOk   = peepNum > 0 ? peepNum >= 5 : null;
 
-  // PEEP-FiO₂ suggestion for severe PARDS
+  // Static & dynamic compliance (need measured Vt and pressures above total PEEP)
+  const staticComp  = vtMeasNum > 0 && pplatNum > 0 && totalPeep !== null && pplatNum > totalPeep
+    ? +(vtMeasNum / (pplatNum - totalPeep)).toFixed(1) : null;
+  const dynamicComp = vtMeasNum > 0 && pipNum > 0 && totalPeep !== null && pipNum > totalPeep
+    ? +(vtMeasNum / (pipNum - totalPeep)).toFixed(1) : null;
+  const staticCompKg = staticComp !== null && wt > 0 ? +(staticComp / wt).toFixed(2) : null;
+
+  // Oxygenation indices — OI = (MAP × FiO₂ × 100) / PaO₂ · OSI = (MAP × FiO₂ × 100) / SpO₂ (FiO₂ as fraction)
+  const oi  = mapNum > 0 && pao2Num > 0 && fio2Num > 0
+    ? +((mapNum * (fio2Num / 100) * 100) / pao2Num).toFixed(1) : null;
+  const osi = mapNum > 0 && spo2Num > 0 && spo2Num <= 97 && fio2Num > 0
+    ? +((mapNum * (fio2Num / 100) * 100) / spo2Num).toFixed(1) : null;
+  const oiBand = oi === null ? null
+    : oi < 4  ? { label: "Below PARDS range (OI < 4)", color: "#16A34A" }
+    : oi < 8  ? { label: "Mild PARDS (OI 4–8)", color: "#D97706" }
+    : oi < 16 ? { label: "Moderate PARDS (OI 8–16)", color: "#EA580C" }
+    :           { label: "Severe PARDS (OI ≥ 16)", color: "#DC2626" };
+  const osiBand = osi === null ? null
+    : osi < 5    ? { label: "Below PARDS range (OSI < 5)", color: "#16A34A" }
+    : osi < 7.5  ? { label: "Mild PARDS (OSI 5–7.5)", color: "#D97706" }
+    : osi < 12.3 ? { label: "Moderate PARDS (OSI 7.5–12.3)", color: "#EA580C" }
+    :              { label: "Severe PARDS (OSI ≥ 12.3)", color: "#DC2626" };
+
+  // I:E timing — cycle = 60/RR, split by the selected ratio
+  const [ieI, ieE] = ieRatio.split(":").map((x) => parseFloat(x) || 0);
+  const cycleT = rrNum > 0 ? 60 / rrNum : null;
+  const ti = cycleT !== null && ieI + ieE > 0 ? +(cycleT * (ieI / (ieI + ieE))).toFixed(2) : null;
+  const te = cycleT !== null && ti !== null ? +(cycleT - ti).toFixed(2) : null;
+
+  // HFOV starting points (SensorMedics 3100A bands — see reference file)
+  const hfovWtNum = parseFloat(hfovWt) || 0;
+  const hfovFreq = hfovWtNum <= 0 ? null
+    : hfovWtNum < 2  ? "15 Hz — preterm neonate"
+    : hfovWtNum <= 5 ? "12 Hz — term neonate"
+    : hfovWtNum <= 20 ? "10 Hz — infant / child"
+    : "8 Hz — older child";
+  const hfovPower = hfovWtNum <= 0 ? null
+    : hfovWtNum < 2   ? "2–2.5"
+    : hfovWtNum <= 2.5 ? "3"
+    : hfovWtNum <= 4  ? "4"
+    : hfovWtNum <= 5  ? "5"
+    : hfovWtNum <= 10 ? "6"
+    : hfovWtNum <= 20 ? "6–7 (no explicit band — titrate to chest wiggle)"
+    : "7";
+  const hfovMapStart = hfovWtNum <= 0 ? null
+    : hfovWtNum <= 5 ? "8–10 cmH₂O (neonate, direct start)"
+    : "15–20 cmH₂O (infant/child, direct start)";
+
+  // PEEP-FiO₂ suggestion (severe = high-PEEP column, mild-moderate = low-PEEP column)
   const peepSuggestion = (() => {
-    if (pathology !== "severe" || fio2Num <= 0) return null;
+    if ((pathology !== "severe" && pathology !== "mild-moderate") || fio2Num <= 0) return null;
     const row = PEEP_FIO2_TABLE.find((r, i) => {
       if (i === 0) return fio2Num <= 30;
       const prevMax = [30, 40, 50, 60, 70, 80, 90][i - 1];
@@ -360,12 +443,12 @@ export function VentilatorTool() {
             <Text style={[s.cardTitle, { color: tp }]}>Pathology / Ventilation Strategy</Text>
           </View>
           <View style={{ gap: 8, marginTop: 10 }}>
-            {(["normal", "mild-moderate", "severe"] as Pathology[]).map((p) => {
+            {(["normal", "asthma", "mild-moderate", "severe"] as Pathology[]).map((p) => {
               const t = VT_TARGETS[p];
               const sel = pathology === p;
               return (
                 <TouchableOpacity
-                  key={p} onPress={() => setPathology(p)}
+                  key={p} onPress={() => { setPathology(p); setIeRatio(p === "asthma" ? "1:3" : "1:2"); }}
                   style={[s.pathBtn, {
                     borderColor: sel ? t.color : border,
                     backgroundColor: sel ? t.color + "14" : isDark ? "#0A192F" : "#F8FAFC",
@@ -464,11 +547,11 @@ export function VentilatorTool() {
                   borderWidth: 1, borderColor: "#0891B230" }}>
                   <Feather name="activity" size={16} color="#0891B2" />
                   <View>
-                    <Text style={{ fontSize: 11, color: tm }}>Estimated Minute Ventilation (using midpoint Vt)</Text>
+                    <Text style={{ fontSize: 11, color: tm }}>{vtMeasNum > 0 ? "Minute Ventilation (measured Vt)" : "Estimated Minute Ventilation (using midpoint Vt)"}</Text>
                     <Text style={{ fontSize: 18, fontWeight: "800", color: "#0891B2" }}>
                       {mv} L/min
                     </Text>
-                    <Text style={{ fontSize: 11, color: tm }}>{rrNum} breaths/min × {vtMid} mL</Text>
+                    <Text style={{ fontSize: 11, color: tm }}>{rrNum} breaths/min × {mvVt} mL</Text>
                   </View>
                 </View>
               )}
@@ -487,6 +570,31 @@ export function VentilatorTool() {
           <View style={{ marginTop: 10, gap: 8 }}>
             <InputRow label="Respiratory Rate" value={rr} onChange={setRr} unit="breaths/min" placeholder="e.g. 20" />
 
+            {/* I:E selector */}
+            <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 6 }}>
+              <Text style={{ fontSize: 12, color: tm, fontWeight: "600", marginRight: 2 }}>I:E Ratio</Text>
+              {IE_OPTIONS.map((opt) => {
+                const sel = ieRatio === opt;
+                return (
+                  <TouchableOpacity key={opt} onPress={() => setIeRatio(opt)} activeOpacity={0.75}
+                    style={{ paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16, borderWidth: 1.5,
+                      borderColor: sel ? "#16A34A" : border, backgroundColor: sel ? "#16A34A18" : "transparent" }}>
+                    <Text style={{ fontSize: 12, fontWeight: sel ? "800" : "600", color: sel ? "#16A34A" : tm }}>{opt}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            {/* Ti / Te from RR + I:E */}
+            {ti !== null && te !== null && (
+              <View style={[s.infoBanner, { backgroundColor: "#16A34A10", borderColor: "#16A34A30" }]}>
+                <Feather name="clock" size={13} color="#16A34A" />
+                <Text style={{ fontSize: 12, color: isDark ? "#8892B0" : "#475569", flex: 1, fontWeight: "600" }}>
+                  Ti {ti} s · Te {te} s — full cycle {cycleT?.toFixed(2)} s at RR {rrNum}/min (I:E {ieRatio})
+                </Text>
+              </View>
+            )}
+
             {/* Age-based RR guidance */}
             <View style={[s.infoBanner, { backgroundColor: "#16A34A10", borderColor: "#16A34A30" }]}>
               <Feather name="info" size={13} color="#16A34A" />
@@ -497,17 +605,21 @@ export function VentilatorTool() {
 
             {/* I:E guidance */}
             <View style={[s.infoBanner, {
-              backgroundColor: pathology === "normal" ? "#7C3AED10" : "#0891B210",
-              borderColor: pathology === "normal" ? "#7C3AED30" : "#0891B230",
+              backgroundColor: pathology === "asthma" ? "#7C3AED10" : "#0891B210",
+              borderColor: pathology === "asthma" ? "#7C3AED30" : "#0891B230",
             }]}>
-              <Feather name="sliders" size={13} color={pathology === "normal" ? "#7C3AED" : "#0891B2"} />
+              <Feather name="sliders" size={13} color={pathology === "asthma" ? "#7C3AED" : "#0891B2"} />
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 12, fontWeight: "700", color: pathology === "normal" ? "#7C3AED" : "#0891B2", marginBottom: 2 }}>
-                  {pathology === "normal" ? "Asthma I:E Target: 1:3 to 1:4 (prolonged expiration)" : "Standard I:E: 1:2"}
+                <Text style={{ fontSize: 12, fontWeight: "700", color: pathology === "asthma" ? "#7C3AED" : "#0891B2", marginBottom: 2 }}>
+                  {pathology === "asthma" ? "Asthma I:E Target: 1:3 to 1:4 (prolonged expiration)"
+                    : pathology === "normal" ? "Normal Lungs I:E: 1:2 (standard)"
+                    : "Standard I:E: 1:2"}
                 </Text>
                 <Text style={{ fontSize: 11, color: isDark ? "#8892B0" : "#475569", lineHeight: 16 }}>
-                  {pathology === "normal"
-                    ? "Critical in asthma: prolonged expiratory time prevents auto-PEEP and dynamic hyperinflation. Low PEEP (3–5 cmH₂O) or even 0."
+                  {pathology === "asthma"
+                    ? "Critical in asthma: prolonged expiratory time prevents auto-PEEP and dynamic hyperinflation. Keep RR low (10–14/min) to allow full exhalation. Low PEEP (3–5 cmH₂O) or even 0."
+                    : pathology === "normal"
+                    ? "Standard timing for normal lungs. Adjust Ti to optimise gas distribution."
                     : "Adjust Ti to optimise gas distribution. In PARDS, avoid auto-PEEP."}
                 </Text>
               </View>
@@ -527,8 +639,8 @@ export function VentilatorTool() {
             <InputRow label="FiO₂" value={fio2} onChange={setFio2} unit="%" placeholder="e.g. 40" />
             <InputRow label="PEEP" value={peep} onChange={setPeep} unit="cmH₂O" placeholder="e.g. 8" />
 
-            {/* PEEP check */}
-            {peepNum > 0 && (
+            {/* PEEP check — PARDS strategies only (in asthma, low PEEP is intended) */}
+            {(pathology === "mild-moderate" || pathology === "severe") && peepNum > 0 && (
               <View style={[s.infoBanner, {
                 backgroundColor: peepOk === false ? "#DC262610" : "#16A34A10",
                 borderColor: peepOk === false ? "#DC262630" : "#16A34A30",
@@ -542,47 +654,62 @@ export function VentilatorTool() {
                 </Text>
               </View>
             )}
+            {pathology === "asthma" && peepNum > 0 && (
+              <View style={[s.infoBanner, { backgroundColor: "#7C3AED10", borderColor: "#7C3AED30" }]}>
+                <Feather name="info" size={13} color="#7C3AED" />
+                <Text style={{ fontSize: 12, color: "#7C3AED", flex: 1, fontWeight: "600" }}>
+                  Low PEEP is intended in asthma (3–5 cmH₂O) — higher PEEP can worsen air trapping.
+                </Text>
+              </View>
+            )}
 
-            {/* PEEP-FiO₂ table for severe PARDS */}
-            {pathology === "severe" && (
+            {/* PEEP-FiO₂ table — severe uses the high-PEEP side, mild-moderate the low-PEEP column */}
+            {(pathology === "severe" || pathology === "mild-moderate") && (() => {
+              const tc = pathology === "severe" ? "#DC2626" : "#D97706";
+              return (
               <View style={{ marginTop: 4 }}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8 }}>
-                  <Feather name="table" size={13} color="#DC2626" />
-                  <Text style={{ fontSize: 12, fontWeight: "700", color: "#DC2626" }}>
-                    ARDSNet PEEP-FiO₂ Table — Severe PARDS
+                  <Feather name="table" size={13} color={tc} />
+                  <Text style={{ fontSize: 12, fontWeight: "700", color: tc }}>
+                    {pathology === "severe" ? "ARDSNet PEEP-FiO₂ Table — Severe PARDS" : "ARDSNet PEEP-FiO₂ Table — Mild/Moderate PARDS (Low PEEP)"}
                   </Text>
                 </View>
                 {PEEP_FIO2_TABLE.map((row, i) => {
                   const highlighted = peepSuggestion === row;
                   return (
                     <View key={i} style={[s.tableRow, {
-                      backgroundColor: highlighted ? "#DC262615" : (i % 2 === 0 ? (isDark ? "#0A192F" : "#F8FAFC") : "transparent"),
-                      borderColor: highlighted ? "#DC2626" : "transparent",
+                      backgroundColor: highlighted ? tc + "15" : (i % 2 === 0 ? (isDark ? "#0A192F" : "#F8FAFC") : "transparent"),
+                      borderColor: highlighted ? tc : "transparent",
                       borderWidth: highlighted ? 1.5 : 0,
                       borderRadius: highlighted ? 8 : 0,
                     }]}>
-                      <Text style={{ fontSize: 12, color: highlighted ? "#DC2626" : tp, fontWeight: highlighted ? "700" : "500", flex: 1 }}>
+                      <Text style={{ fontSize: 12, color: highlighted ? tc : tp, fontWeight: highlighted ? "700" : "500", flex: 1 }}>
                         FiO₂ {row.fio2}
                       </Text>
-                      <Text style={{ fontSize: 12, color: highlighted ? "#DC2626" : tm, fontWeight: highlighted ? "700" : "500" }}>
-                        PEEP {row.peepLow === row.peepHigh ? row.peepLow : `${row.peepLow}–${row.peepHigh}`} cmH₂O
+                      <Text style={{ fontSize: 12, color: highlighted ? tc : tm, fontWeight: highlighted ? "700" : "500" }}>
+                        PEEP {pathology === "severe"
+                          ? (row.peepLow === row.peepHigh ? row.peepLow : `${row.peepLow}–${row.peepHigh}`)
+                          : row.peepLow} cmH₂O
                       </Text>
-                      {highlighted && <Feather name="arrow-left" size={12} color="#DC2626" style={{ marginLeft: 6 }} />}
+                      {highlighted && <Feather name="arrow-left" size={12} color={tc} style={{ marginLeft: 6 }} />}
                     </View>
                   );
                 })}
                 {peepSuggestion && (
-                  <View style={[s.infoBanner, { backgroundColor: "#DC262610", borderColor: "#DC262630", marginTop: 8 }]}>
-                    <Feather name="target" size={13} color="#DC2626" />
-                    <Text style={{ fontSize: 12, color: "#DC2626", flex: 1, fontWeight: "600" }}>
-                      For FiO₂ {fio2}%: Target PEEP {peepSuggestion.peepLow === peepSuggestion.peepHigh
-                        ? peepSuggestion.peepLow
-                        : `${peepSuggestion.peepLow}–${peepSuggestion.peepHigh}`} cmH₂O
+                  <View style={[s.infoBanner, { backgroundColor: tc + "10", borderColor: tc + "30", marginTop: 8 }]}>
+                    <Feather name="target" size={13} color={tc} />
+                    <Text style={{ fontSize: 12, color: tc, flex: 1, fontWeight: "600" }}>
+                      {pathology === "severe"
+                        ? `For FiO₂ ${fio2}%: Target PEEP ${peepSuggestion.peepLow === peepSuggestion.peepHigh
+                            ? peepSuggestion.peepLow
+                            : `${peepSuggestion.peepLow}–${peepSuggestion.peepHigh}`} cmH₂O`
+                        : `For FiO₂ ${fio2}%: Target PEEP ${peepSuggestion.peepLow} cmH₂O (low-PEEP table)`}
                     </Text>
                   </View>
                 )}
               </View>
-            )}
+              );
+            })()}
           </View>
         </View>
 
@@ -615,7 +742,7 @@ export function VentilatorTool() {
                 />
                 {drivingPressure !== null && (
                   <PressureCheck
-                    label="Driving Pressure (Pplat − PEEP)"
+                    label="Driving Pressure (Pplat − Total PEEP)"
                     value={`${drivingPressure} cmH₂O`}
                     ok={drivingPressure <= 15}
                     target="≤ 15 cmH₂O"
@@ -651,6 +778,92 @@ export function VentilatorTool() {
           </View>
         </View>
 
+        {/* Lung Mechanics & Oxygenation */}
+        <View style={[s.card, { backgroundColor: card, borderColor: border }]}>
+          <View style={s.cardHeader}>
+            <View style={[s.iconBadge, { backgroundColor: "#0D948815" }]}>
+              <Feather name="activity" size={16} color="#0D9488" />
+            </View>
+            <Text style={[s.cardTitle, { color: tp }]}>Lung Mechanics & Oxygenation</Text>
+          </View>
+          <View style={{ marginTop: 10, gap: 8 }}>
+            <InputRow label="Measured (exhaled) Vt" value={vtMeas} onChange={setVtMeas} unit="mL" placeholder="e.g. 120" />
+            <InputRow label="Auto-PEEP (intrinsic, optional)" value={autoPeep} onChange={setAutoPeep} unit="cmH₂O" placeholder="0" />
+            <InputRow label="Mean Airway Pressure (MAP)" value={mapP} onChange={setMapP} unit="cmH₂O" placeholder="e.g. 12" />
+            <InputRow label="PaO₂ (from ABG)" value={pao2} onChange={setPao2} unit="mmHg" placeholder="e.g. 80" />
+            <InputRow label="SpO₂" value={spo2} onChange={setSpo2} unit="%" placeholder="e.g. 94" />
+
+            {totalPeep !== null && (
+              <View style={[s.pressureRow, { borderColor: "#0D948840" }]}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 11, color: tm, fontWeight: "600" }}>Total PEEP (set + auto-PEEP)</Text>
+                  <Text style={{ fontSize: 10, color: tm, marginTop: 1 }}>Set {peepNum} + Auto {autoPeepNum} cmH₂O — used for driving pressure & compliance</Text>
+                </View>
+                <Text style={{ fontSize: 18, fontWeight: "800", color: "#0D9488" }}>{totalPeep} cmH₂O</Text>
+              </View>
+            )}
+
+            {staticComp !== null && (
+              <View style={[s.pressureRow, { borderColor: "#0D948840" }]}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 11, color: tm, fontWeight: "600" }}>Static compliance</Text>
+                  <Text style={{ fontSize: 10, color: tm, marginTop: 1 }}>Measured Vt ÷ (Pplat − Total PEEP){staticCompKg !== null ? ` · ${staticCompKg} mL/cmH₂O/kg` : ""}</Text>
+                </View>
+                <Text style={{ fontSize: 18, fontWeight: "800", color: "#0D9488" }}>{staticComp} mL/cmH₂O</Text>
+              </View>
+            )}
+            {dynamicComp !== null && (
+              <View style={[s.pressureRow, { borderColor: "#0D948840" }]}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 11, color: tm, fontWeight: "600" }}>Dynamic compliance</Text>
+                  <Text style={{ fontSize: 10, color: tm, marginTop: 1 }}>Measured Vt ÷ (PIP − Total PEEP)</Text>
+                </View>
+                <Text style={{ fontSize: 18, fontWeight: "800", color: "#0D9488" }}>{dynamicComp} mL/cmH₂O</Text>
+              </View>
+            )}
+            {vtMeasNum <= 0 && (
+              <Text style={{ fontSize: 11, color: tm, lineHeight: 16 }}>
+                Enter measured Vt for compliance (static & dynamic).
+              </Text>
+            )}
+
+            {oi !== null && oiBand && (
+              <View style={[s.pressureRow, { borderColor: oiBand.color + "40" }]}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 11, color: tm, fontWeight: "600" }}>Oxygenation Index (OI)</Text>
+                  <Text style={{ fontSize: 10, color: tm, marginTop: 1 }}>OI = (MAP × FiO₂ × 100) ÷ PaO₂</Text>
+                </View>
+                <View style={{ alignItems: "flex-end" }}>
+                  <Text style={{ fontSize: 18, fontWeight: "800", color: oiBand.color }}>{oi}</Text>
+                  <Text style={{ fontSize: 10, color: oiBand.color, fontWeight: "700", marginTop: 2 }}>{oiBand.label}</Text>
+                </View>
+              </View>
+            )}
+            {osi !== null && osiBand && (
+              <View style={[s.pressureRow, { borderColor: osiBand.color + "40" }]}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 11, color: tm, fontWeight: "600" }}>Oxygen Saturation Index (OSI)</Text>
+                  <Text style={{ fontSize: 10, color: tm, marginTop: 1 }}>OSI = (MAP × FiO₂ × 100) ÷ SpO₂</Text>
+                </View>
+                <View style={{ alignItems: "flex-end" }}>
+                  <Text style={{ fontSize: 18, fontWeight: "800", color: osiBand.color }}>{osi}</Text>
+                  <Text style={{ fontSize: 10, color: osiBand.color, fontWeight: "700", marginTop: 2 }}>{osiBand.label}</Text>
+                </View>
+              </View>
+            )}
+            {mapNum > 0 && fio2Num > 0 && spo2Num > 97 && (
+              <Text style={{ fontSize: 11, color: tm, lineHeight: 16 }}>
+                OSI valid when SpO₂ ≤ 97% — not calculated above 97%.
+              </Text>
+            )}
+            {oi === null && osi === null && (
+              <Text style={{ fontSize: 11, color: tm, lineHeight: 16 }}>
+                Enter MAP + PaO₂ (or SpO₂) with FiO₂ above to calculate OI / OSI (PALICC severity).
+              </Text>
+            )}
+          </View>
+        </View>
+
         {/* Summary Box */}
         {wt > 0 && (
           <View style={[s.card, { backgroundColor: isDark ? "#0F1F2E" : "#F0F9FF", borderColor: "#0891B240", borderWidth: 1.5 }]}>
@@ -659,14 +872,15 @@ export function VentilatorTool() {
               <Text style={[s.cardTitle, { color: "#0891B2" }]}>Initial Settings Summary</Text>
             </View>
             {[
-              { label: "Mode", value: pathology === "normal" ? "APVcmv (Volume control)" : "APVcmv or PCV+" },
+              { label: "Mode", value: pathology === "asthma" ? "APVcmv (Volume control)" : "APVcmv or PCV+" },
               { label: "Tidal Volume", value: vtMin && vtMax ? `${vtMin}–${vtMax} mL  (${target.min}–${target.max} mL/kg)` : "—" },
-              { label: "PEEP", value: pathology === "severe" ? "Titrate to FiO₂ (ARDSNet table)" : pathology === "normal" ? "3–5 cmH₂O (low)" : "5–10 cmH₂O" },
+              { label: "Respiratory Rate", value: rrNum > 0 ? `${rrNum} breaths/min` : "—" },
+              { label: "PEEP", value: pathology === "severe" ? "Titrate to FiO₂ (ARDSNet table)" : pathology === "asthma" ? "3–5 cmH₂O (low)" : pathology === "normal" ? "5 cmH₂O" : "5–10 cmH₂O" },
               { label: "Pplat target", value: "< 28 cmH₂O" },
               { label: "Driving Pressure", value: "≤ 15 cmH₂O" },
               { label: "PIP limit", value: "< 28–30 cmH₂O" },
-              { label: "I:E Ratio", value: pathology === "normal" ? "1:3 to 1:4 (prolonged exp.)" : "1:2" },
-              { label: "SpO₂ target", value: pathology === "severe" ? "88–92% (permissive hypoxaemia)" : "92–98%" },
+              { label: "I:E Ratio", value: pathology === "asthma" ? `${ieRatio} (prolonged exp.)` : ieRatio },
+              { label: "SpO₂ target", value: pathology === "severe" ? "88–92% (permissive hypoxaemia)" : pathology === "normal" ? "94–98%" : pathology === "asthma" ? "≥ 92%" : "92–98%" },
               { label: "pH target", value: "≥ 7.20 (permissive hypercapnia)" },
             ].map((row) => (
               <View key={row.label} style={{ flexDirection: "row", paddingVertical: 5, borderBottomWidth: 1, borderBottomColor: isDark ? "#1A2A4A" : "#E2F4FB" }}>
@@ -681,7 +895,7 @@ export function VentilatorTool() {
         <View style={[s.disclaimer, { backgroundColor: isDark ? "#1E293B" : "#F8FAFC", borderColor: isDark ? "#334155" : "#E2E8F0" }]}>
           <Feather name="shield" size={14} color={tm} style={{ marginTop: 1 }} />
           <Text style={{ fontSize: 11, color: tm, flex: 1, lineHeight: 16, fontStyle: "italic" }}>
-            Calculations based on PALICC 2023, Harriet Lane 22e/23e. Hamilton C3 is a registered trademark of Hamilton Medical. For educational use only. Verify all settings with physician orders before implementation.
+            Calculations based on PALICC 2023, Harriet Lane 24e. Hamilton C3 is a registered trademark of Hamilton Medical. For educational use only. Verify all settings with physician orders before implementation.
           </Text>
         </View>
       </View>
@@ -920,11 +1134,174 @@ export function VentilatorTool() {
           </View>
         </View>
 
+        {/* ── Extubation Readiness — Daily Screen ── */}
+        <View style={[s.card, { backgroundColor: card, borderColor: "#16A34A40", borderWidth: 1.5 }]}>
+          <View style={[s.stripe, { backgroundColor: "#16A34A" }]} />
+          <View style={{ paddingLeft: 10 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 10 }}>
+              <View style={[s.iconBadge, { backgroundColor: "#16A34A15" }]}>
+                <Feather name="check-circle" size={18} color="#16A34A" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 15, fontWeight: "900", color: "#16A34A" }}>Extubation Readiness — Daily Screen</Text>
+                <Text style={{ fontSize: 11, color: tm, marginTop: 2 }}>Tick every criterion — all must be met</Text>
+              </View>
+            </View>
+            <View style={{ gap: 6 }}>
+              {EXTUB_ITEMS.map((item, i) => {
+                const on = extub[i];
+                return (
+                  <TouchableOpacity key={item} activeOpacity={0.75}
+                    onPress={() => setExtub((prev) => prev.map((v, idx) => (idx === i ? !v : v)))}
+                    style={{ flexDirection: "row", alignItems: "center", gap: 10, padding: 10, borderRadius: 8,
+                      borderWidth: 1, borderColor: on ? "#16A34A50" : border,
+                      backgroundColor: on ? "#16A34A10" : (isDark ? "#0A192F" : "#F8FAFC") }}>
+                    <Feather name={on ? "check-square" : "square"} size={17} color={on ? "#16A34A" : tm} />
+                    <Text style={{ fontSize: 12, color: tp, flex: 1, lineHeight: 17 }}>{item}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            {extub.every(Boolean) ? (
+              <View style={[s.infoBanner, { backgroundColor: "#16A34A15", borderColor: "#16A34A", marginTop: 10 }]}>
+                <Feather name="check-circle" size={14} color="#16A34A" />
+                <Text style={{ fontSize: 12, color: "#16A34A", flex: 1, fontWeight: "800" }}>
+                  Ready for SBT / extubation assessment
+                </Text>
+              </View>
+            ) : (
+              <Text style={{ fontSize: 11, color: tm, marginTop: 10 }}>
+                {extub.filter(Boolean).length}/{EXTUB_ITEMS.length} criteria met — all must be ticked.
+              </Text>
+            )}
+            <Text style={{ fontSize: 11, color: tm, fontStyle: "italic", marginTop: 8, lineHeight: 16 }}>
+              Screen only — final decision with the treating team.
+            </Text>
+          </View>
+        </View>
+
+        {/* ── High-Pressure Alarm — Troubleshooting ── */}
+        <View style={[s.card, { backgroundColor: card, borderColor: "#EA580C40", borderWidth: 1.5 }]}>
+          <View style={[s.stripe, { backgroundColor: "#EA580C" }]} />
+          <View style={{ paddingLeft: 10 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 12 }}>
+              <View style={[s.iconBadge, { backgroundColor: "#EA580C15" }]}>
+                <Feather name="alert-octagon" size={18} color="#EA580C" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 15, fontWeight: "900", color: "#EA580C" }}>High-Pressure Alarm — Troubleshooting</Text>
+                <Text style={{ fontSize: 11, color: tm, marginTop: 2 }}>Sudden rise in PIP — work through DOPE first</Text>
+              </View>
+            </View>
+            <View style={{ gap: 8 }}>
+              <ProtocolSection title="DOPE — check first" color="#EA580C" items={[
+                "D — Displacement: ETT slipped out or into a main bronchus — check depth marking, equal chest rise, EtCO₂ trace",
+                "O — Obstruction: kinked or bitten tube, secretions, mucus plug — pass a suction catheter to test patency",
+                "P — Pneumothorax: sudden desaturation, asymmetric breath sounds, hypotension — decompress immediately if tension",
+                "E — Equipment: circuit leak/disconnection, water in the tubing, ventilator or valve fault",
+              ]} />
+              <ProtocolSection title="Circuit & patient causes" color="#EA580C" items={[
+                "Biting the ETT — bite block; review sedation and pain",
+                "Secretions / mucus plug — suction, then reassess pressures",
+                "Bronchospasm — slow, prolonged expiratory flow on the waveform; treat the cause",
+                "Water condensed in the circuit — drain it away from the patient",
+                "Patient dyssynchrony / fighting the ventilator — pain, sedation depth, trigger settings",
+                "Read the gap: wide PIP–Pplat gap = resistance problem · PIP and Pplat both high and close = compliance problem",
+              ]} />
+              <ProtocolSection title="Immediate actions" color="#EA580C" items={[
+                "If unsure — disconnect and hand-ventilate with 100% O₂ (bag with PEEP valve) while you assess",
+                "Asthma with suspected auto-PEEP: disconnect briefly and watch the chest fall",
+                "Call for help early — confirm the EtCO₂ waveform is present",
+                "Re-check PIP, Pplat and compliance after every intervention",
+              ]} />
+            </View>
+          </View>
+        </View>
+
+        {/* ── HFOV ── */}
+        <View style={[s.card, { backgroundColor: card, borderColor: "#0D948840", borderWidth: 1.5 }]}>
+          <View style={[s.stripe, { backgroundColor: "#0D9488" }]} />
+          <View style={{ paddingLeft: 10 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 12 }}>
+              <View style={[s.iconBadge, { backgroundColor: "#0D948815" }]}>
+                <Feather name="activity" size={18} color="#0D9488" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ fontSize: 15, fontWeight: "900", color: "#0D9488" }}>HFOV — High-Frequency Oscillatory Ventilation</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 3 }}>
+                  <View style={{ backgroundColor: "#0D948820", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4 }}>
+                    <Text style={{ fontSize: 10, fontWeight: "800", color: "#0D9488" }}>3100A · PALICC 2023</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+
+            <View style={[s.infoBanner, { backgroundColor: "#0D948810", borderColor: "#0D948830", marginBottom: 10 }]}>
+              <Feather name="info" size={13} color="#0D9488" />
+              <Text style={{ fontSize: 11, color: isDark ? "#8892B0" : "#475569", flex: 1, lineHeight: 16 }}>
+                PALICC 2023: HFOV is a rescue / salvage option in severe PARDS when conventional lung-protective ventilation fails — not first line.
+              </Text>
+            </View>
+
+            {/* HFOV starting-settings mini calculator */}
+            <Text style={{ fontSize: 12, fontWeight: "800", color: tm, letterSpacing: 0.5, marginBottom: 6 }}>STARTING SETTINGS — BY WEIGHT</Text>
+            <InputRow label="Weight" value={hfovWt} onChange={setHfovWt} unit="kg" placeholder="kg" />
+            {hfovWtNum > 0 && (
+              <View style={{ marginTop: 6, marginBottom: 4 }}>
+                {[
+                  { label: "Frequency", value: hfovFreq ?? "—" },
+                  { label: "Power (3100A start)", value: hfovPower ?? "—" },
+                  { label: "MAP (direct start)", value: hfovMapStart ?? "—" },
+                  { label: "Bias flow (by age)", value: "Neonate 15–20 · <1 yr 15–25 · 1–8 yr 15–30 · ≥8 yr 25–40 L/min" },
+                ].map((row) => (
+                  <View key={row.label} style={{ flexDirection: "row", paddingVertical: 5, borderBottomWidth: 1, borderBottomColor: isDark ? "#1A2A4A" : "#E2E8F0" }}>
+                    <Text style={{ fontSize: 12, color: tm, flex: 1 }}>{row.label}</Text>
+                    <Text style={{ fontSize: 12, fontWeight: "700", color: tp, flex: 1.6, textAlign: "right" }}>{row.value}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            <View style={{ gap: 8, marginTop: 8 }}>
+              <ProtocolSection title="MAP Strategy" color="#0D9488" items={[
+                "FiO₂: start 1.0, then wean to the SpO₂ target",
+                "From conventional ventilation: MAP = CMV MAP + 2–5 cmH₂O (neonates) · + 5–8 cmH₂O (infants/children); PICU open-lung protocols use +3–5",
+                "Starting directly on HFOV: neonate MAP 8–10 cmH₂O · infant/child 15–20 cmH₂O",
+                "Adjust MAP in 1–2 cmH₂O steps for oxygenation — CXR expansion target ≈ 8–9 posterior ribs",
+              ]} />
+              <ProtocolSection title="Amplitude & Chest Wiggle" color="#0D9488" items={[
+                "Set the 3100A power from the weight band above, then titrate amplitude (ΔP) until chest wiggle (CWF) is seen from the nipple line to the umbilicus / upper thigh",
+                "Inspiratory time: 33% (standard)",
+                "Frequency by size: preterm neonate 15 Hz · term neonate 12 Hz · infant/child 10 Hz · older child 8 Hz — LOWER frequency = MORE CO₂ clearance",
+                "Bias flow by age: neonate 15–20 · <1 yr 15–25 · 1–8 yr 15–30 · ≥8 yr 25–40 L/min",
+              ]} />
+              <ProtocolSection title="Adjustment Rules" color="#0D9488" items={[
+                "PaCO₂ high → increase amplitude FIRST, then DECREASE frequency",
+                "Oxygenation poor → increase MAP (recruitment) and/or FiO₂",
+              ]} />
+              <ProtocolSection title="Weaning" color="#0D9488" items={[
+                "FiO₂ < 0.40–0.45 AND MAP < 16–17 cmH₂O → consider switching back to conventional ventilation at a MAP 3–4 cmH₂O lower",
+              ]} />
+              <ProtocolSection title="Cautions" color="#0D9488" items={[
+                "High MAP can drop blood pressure — watch haemodynamics closely",
+                "Air-leak syndromes — reassess if a new leak appears",
+                "Needs deep sedation ± neuromuscular blockade",
+                "Suction sparingly — derecruitment; re-recruit after suction",
+                "Sudden desaturation: run DOPE and check the piston / bias flow",
+              ]} />
+            </View>
+
+            <Text style={{ fontSize: 11, color: tm, fontStyle: "italic", marginTop: 10, lineHeight: 16 }}>
+              SensorMedics 3100A framework · PALICC 2023 — verify with unit protocol
+            </Text>
+          </View>
+        </View>
+
         {/* Disclaimer */}
         <View style={[s.disclaimer, { backgroundColor: isDark ? "#1E293B" : "#F8FAFC", borderColor: isDark ? "#334155" : "#E2E8F0" }]}>
           <Feather name="shield" size={14} color={tm} style={{ marginTop: 1 }} />
           <Text style={{ fontSize: 11, color: tm, flex: 1, lineHeight: 16, fontStyle: "italic" }}>
-            Calculations based on PALICC 2023, Harriet Lane 22e/23e. Hamilton C3 is a registered trademark of Hamilton Medical. For educational use only. Verify with physician orders.
+            Calculations based on PALICC 2023, Harriet Lane 24e. Hamilton C3 is a registered trademark of Hamilton Medical. For educational use only. Verify with physician orders.
           </Text>
         </View>
       </View>
@@ -938,6 +1315,7 @@ export function VentilatorTool() {
     { key: "calculator", label: "Calculator",  icon: "sliders",   color: "#0891B2" },
     { key: "modes",      label: "C3 Modes",    icon: "cpu",       color: "#7C3AED" },
     { key: "protocols",  label: "Protocols",   icon: "file-text", color: "#DC2626" },
+    { key: "waveforms",  label: "Waveforms",   icon: "activity",  color: "#0D9488" },
   ];
 
   return (
@@ -971,6 +1349,7 @@ export function VentilatorTool() {
         {activeTab === "calculator" && renderCalculator()}
         {activeTab === "modes"      && renderModes()}
         {activeTab === "protocols"  && renderProtocols()}
+        {activeTab === "waveforms"  && <WaveformGuide isDark={isDark} />}
       </View>
     </View>
   );

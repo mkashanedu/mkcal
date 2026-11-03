@@ -41,57 +41,6 @@ const CLINICAL_CALCULATORS = [
     badge: "NEW",
   },
   {
-    key: "big-score",
-    title: "BIG Score — Pediatric Trauma",
-    subtitle: "Base Deficit + (2.5 × INR) + (15 − GCS) · Mortality prediction",
-    icon: "trending-up",
-    color: "#DC2626",
-    badge: "NEW",
-  },
-  {
-    key: "phoenix-sepsis",
-    title: "Phoenix Sepsis Score 2024",
-    subtitle: "Respiratory · Cardiovascular · Coagulation · Neurological domains",
-    icon: "activity",
-    color: "#7C3AED",
-    badge: "NEW",
-  },
-];
-
-const ICU_PROTOCOLS = [
-  {
-    key: "streptokinase-empyema",
-    title: "Streptokinase — Empyema Thoracis",
-    subtitle: "Intrapleural fibrinolysis · Age-based dosing · 3-day protocol",
-    icon: "shield",
-    color: "#0D9488",
-    badge: "NEW",
-  },
-];
-
-const TOOL_SECTIONS = [
-  {
-    key: "growth",
-    title: "Growth Charts — WHO Standards",
-    subtitle: "Weight-for-age · Z-score · Nutritional status · FTT detection",
-    icon: "bar-chart-2",
-    color: "#0D9488",
-  },
-  {
-    key: "vis",
-    title: "VIS / Cardiac & Haemodynamic",
-    subtitle: "Vasoactive-Inotropic Score · BP Percentile · Normal Vitals",
-    icon: "heart",
-    color: "#E53E3E",
-  },
-  {
-    key: "bundles",
-    title: "PICU Care Bundles",
-    subtitle: "FASTHUG · VAP · CLABSI · CAUTI daily checklists",
-    icon: "check-square",
-    color: "#7C3AED",
-  },
-  {
     key: "fluids",
     title: "IV Fluids & Dehydration",
     subtitle: "Holliday-Segar · Maintenance · Deficit · DKA · Resuscitation",
@@ -101,9 +50,67 @@ const TOOL_SECTIONS = [
   {
     key: "electrolytes",
     title: "Electrolyte Correction — K⁺",
-    subtitle: "Potassium deficit · KCl recipe · Safety checklist",
+    subtitle: "K⁺ & Na⁺ correction — Protocols tab me",
     icon: "zap",
     color: "#0891B2",
+  },
+  {
+    key: "growth",
+    title: "Growth Charts — WHO Standards",
+    subtitle: "Weight-for-age · Z-score · Nutritional status · FTT detection",
+    icon: "bar-chart-2",
+    color: "#0D9488",
+  },
+  {
+    key: "dose-check",
+    title: "Dose Double-Check",
+    subtitle: "Doosre ki banayi dose verify karo · Weight ke hisaab se sahi range",
+    icon: "check-circle",
+    color: "#059669",
+  },
+];
+
+const ICU_PROTOCOLS = [
+  {
+    key: "phoenix-sepsis",
+    title: "Phoenix Sepsis Score 2024",
+    subtitle: "Respiratory · Cardiovascular · Coagulation · Neurological domains",
+    icon: "activity",
+    color: "#7C3AED",
+    badge: "NEW",
+  },
+  {
+    key: "big-score",
+    title: "BIG Score — Pediatric Trauma",
+    subtitle: "Base Deficit + (2.5 × INR) + (15 − GCS) · Mortality prediction",
+    icon: "trending-up",
+    color: "#DC2626",
+    badge: "NEW",
+  },
+  {
+    key: "streptokinase-empyema",
+    title: "Streptokinase — Empyema Thoracis",
+    subtitle: "Intrapleural fibrinolysis · Age-based dosing · 3-day protocol",
+    icon: "shield",
+    color: "#0D9488",
+    badge: "NEW",
+  },
+  {
+    key: "bundles",
+    title: "PICU Care Bundles",
+    subtitle: "FASTHUG · VAP · CLABSI · CAUTI daily checklists",
+    icon: "check-square",
+    color: "#7C3AED",
+  },
+];
+
+const TOOL_SECTIONS = [
+  {
+    key: "pews",
+    title: "PEWS Score",
+    subtitle: "Pediatric Early Warning Score · Rapid Response trigger",
+    icon: "activity",
+    color: "#FF4C60",
   },
   {
     key: "gcs",
@@ -120,6 +127,27 @@ const TOOL_SECTIONS = [
     color: "#FF4C60",
   },
   {
+    key: "apgar",
+    title: "APGAR Score (1 & 5 min)",
+    subtitle: "Neonatal assessment · Appearance · Pulse · Grimace · Activity · Respiration",
+    icon: "heart",
+    color: "#EC4899",
+  },
+  {
+    key: "pain-sedation",
+    title: "Pain & Sedation Scores",
+    subtitle: "FLACC · COMFORT-B · SAS (Riker) — bedside nursing scores",
+    icon: "thermometer",
+    color: "#DB2777",
+  },
+  {
+    key: "vis",
+    title: "VIS / Cardiac & Haemodynamic",
+    subtitle: "Vasoactive-Inotropic Score · BP Percentile · Normal Vitals",
+    icon: "heart",
+    color: "#E53E3E",
+  },
+  {
     key: "renal",
     title: "Renal & Hepatic Adjustments",
     subtitle: "Schwartz eGFR · Drug dose adjustments by organ function",
@@ -127,18 +155,25 @@ const TOOL_SECTIONS = [
     color: "#DC2626",
   },
   {
-    key: "pews",
-    title: "PEWS Score",
-    subtitle: "Pediatric Early Warning Score · Rapid Response trigger",
-    icon: "activity",
-    color: "#FF4C60",
+    key: "braden-q",
+    title: "Braden Q — Pressure Injury Risk",
+    subtitle: "7 subscales · Total 7–28 · ≤16 at risk",
+    icon: "layers",
+    color: "#B45309",
   },
   {
-    key: "apgar",
-    title: "APGAR Score (1 & 5 min)",
-    subtitle: "Neonatal assessment · Appearance · Pulse · Grimace · Activity · Respiration",
-    icon: "heart",
-    color: "#EC4899",
+    key: "humpty-dumpty",
+    title: "Humpty Dumpty — Falls Risk",
+    subtitle: "Score 7–23 · ≥12 high risk · JCI IPSG Goal 6",
+    icon: "alert-triangle",
+    color: "#65A30D",
+  },
+  {
+    key: "fluid-balance",
+    title: "Fluid Balance — I/O Chart",
+    subtitle: "Intake & output chart · Urine mL/kg/hr · Saved on device",
+    icon: "clipboard",
+    color: "#0369A1",
   },
 ];
 

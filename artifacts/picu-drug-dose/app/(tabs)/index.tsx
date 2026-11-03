@@ -20,10 +20,11 @@ import { INFUSION_DRUGS } from "@/constants/infusions";
 import { useDrawer } from "@/context/DrawerContext";
 import { useTheme } from "@/context/ThemeContext";
 import { usePreferences } from "@/context/PreferencesContext";
+import { useWeight } from "@/context/WeightContext";
 import { useHistory } from "@/context/HistoryContext";
 import { matchesDrugQuery } from "@/lib/search";
 import { isHighAlertDrug } from "@/lib/highAlert";
-import { conditionForQuery } from "@/lib/indications";
+import { CONDITION_GROUPS, conditionForQuery } from "@/lib/indications";
 
 // ── Search index for Tools ────────────────────────────────────────────────────
 const SEARCH_TOOLS = [
@@ -35,7 +36,7 @@ const SEARCH_TOOLS = [
   { key: "vis",                   title: "VIS / Cardiac & Haemodynamic",    subtitle: "Vasoactive-Inotropic Score · BP Percentile",            icon: "heart",      color: "#E53E3E" },
   { key: "bundles",               title: "PICU Care Bundles",               subtitle: "FASTHUG · VAP · CLABSI · CAUTI daily checklists",       icon: "check-square",color: "#7C3AED" },
   { key: "fluids",                title: "IV Fluids & Dehydration",         subtitle: "Holliday-Segar · Maintenance · Deficit · DKA",          icon: "droplet",    color: "#0EA5E9" },
-  { key: "electrolytes",          title: "Electrolyte Correction — K⁺",     subtitle: "Potassium deficit · KCl recipe · Safety checklist",     icon: "zap",        color: "#0891B2" },
+  { key: "electrolytes",          title: "Electrolyte Correction — K⁺",     subtitle: "K⁺ & Na⁺ correction — Protocols tab me",     icon: "zap",        color: "#0891B2" },
   { key: "gcs",                   title: "Pediatric GCS (pGCS)",            subtitle: "Modified GCS for children & infants",                   icon: "activity",   color: "#16A34A" },
   { key: "scores",                title: "Advanced ICU Scores",             subtitle: "FOUR Score · OSI · SIPA · WAT-1 withdrawal scale",      icon: "activity",   color: "#FF4C60" },
   { key: "renal",                 title: "Renal & Hepatic Adjustments",     subtitle: "Schwartz eGFR · Drug dose adjustments by organ fn",     icon: "shield",     color: "#DC2626" },
@@ -86,6 +87,7 @@ export default function HomeScreen() {
   const { textScale } = usePreferences();
   const { openDrawer } = useDrawer();
   const { entries: historyEntries } = useHistory();
+  const { profiles, activeProfileId, switchProfile, weight: currentWeightKg } = useWeight();
   const colors = Colors.light;
 
   // ── Recently used drugs (extra batch): from calculation history,
@@ -117,6 +119,7 @@ export default function HomeScreen() {
 
   const q = searchQuery.trim().toLowerCase();
   const showResults = q.length >= 1;
+  const activeCondition = conditionForQuery(searchQuery);
 
   // ── Search across all modules ───────────────────────────────────────
   const results = useMemo((): SearchResult[] => {
@@ -364,6 +367,33 @@ export default function HomeScreen() {
                     </Text>
                   </View>
 
+                  {/* Condition banner — when the query names a condition (DKA, sepsis…),
+                      say so loudly; the group's medicines are in the results below. */}
+                  {activeCondition ? (
+                    <View
+                      style={{
+                        marginHorizontal: 12,
+                        marginBottom: 8,
+                        paddingVertical: 9,
+                        paddingHorizontal: 12,
+                        borderRadius: 10,
+                        borderLeftWidth: 4,
+                        borderLeftColor: "#7C3AED",
+                        backgroundColor: isDark ? "#7C3AED22" : "#EDE9FE",
+                      }}
+                    >
+                      <Text style={{ fontSize: 9, fontWeight: "800", letterSpacing: 1.2, color: "#7C3AED" }}>
+                        CONDITION
+                      </Text>
+                      <Text style={{ fontSize: 15, fontWeight: "800", color: tp, marginTop: 1 }}>
+                        {activeCondition.label}
+                      </Text>
+                      <Text style={{ fontSize: 11, color: tm, marginTop: 1 }}>
+                        Medicines for this condition are included in the results below.
+                      </Text>
+                    </View>
+                  ) : null}
+
                   {results.map((r) => (
                     <TouchableOpacity
                       key={r.id}
@@ -427,6 +457,106 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
+          {/* ── PATIENTS — saved weights, one-tap switch (Point 1) ── */}
+          {profiles.length > 0 && (
+            <>
+              <Text style={{ fontSize: 12.5, fontFamily: "Inter_600SemiBold", color: isDark ? "#A8B8DC" : "#4A5568", marginBottom: 8, letterSpacing: 0.4 }}>
+                MAREEZ — WAZAN BADLO
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16, flexGrow: 0 }} contentContainerStyle={{ gap: 8, paddingRight: 4 }}>
+                {profiles.map((p) => (
+                  <TouchableOpacity
+                    key={p.id}
+                    activeOpacity={0.8}
+                    onPress={() => switchProfile(p.id)}
+                    style={{
+                      paddingHorizontal: 13, paddingVertical: 9, borderRadius: 999,
+                      backgroundColor: activeProfileId === p.id ? "#0EA5E9" : isDark ? "#112240" : "#FFFFFF",
+                      borderWidth: 1, borderColor: activeProfileId === p.id ? "#0EA5E9" : isDark ? "#1E3A5F" : "#D6EAF8",
+                    }}
+                  >
+                    <Text style={{ fontSize: 13.5, fontFamily: "Inter_600SemiBold", color: activeProfileId === p.id ? "#FFFFFF" : isDark ? "#CCD6F6" : "#0D1B2A" }}>
+                      {p.name} · {p.weightKg} kg
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </>
+          )}
+
+          {/* ── EMERGENCY — one big tap target, always first ── */}
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => router.push("/(tabs)/emergency" as any)}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 12,
+              backgroundColor: "#DC2626",
+              borderRadius: 14,
+              paddingVertical: 15,
+              paddingHorizontal: 16,
+              marginBottom: 18,
+            }}
+          >
+            <Feather name="alert-triangle" size={26} color="#FFFFFF" />
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: Math.round(17 * textScale), fontWeight: "900", color: "#FFFFFF", letterSpacing: 0.5 }}>
+                EMERGENCY
+              </Text>
+              <Text style={{ fontSize: Math.round(11.5 * textScale), color: "#FECACA", marginTop: 1 }}>
+                Code Blue · PALS · arrest doses, one screen
+              </Text>
+            </View>
+            <Feather name="chevron-right" size={22} color="#FFFFFF" />
+          </TouchableOpacity>
+
+          {/* ── CONDITIONS — tap a disease, get its medicines (no typing) ── */}
+          <Text
+            style={{
+              fontSize: 12.5,
+              fontFamily: "Inter_600SemiBold",
+              color: isDark ? "#A8B8DC" : "#4A5568",
+              marginBottom: 2,
+              letterSpacing: 0.4,
+            }}
+          >
+            CONDITIONS — TAP A DISEASE
+          </Text>
+          <Text style={{ fontSize: 11.5, color: tm, marginBottom: 8 }}>
+            Bimari par tap karo — us ki dawaiyan upar search me khul jayengi.
+          </Text>
+          <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 18 }}>
+            {CONDITION_GROUPS.map((g) => (
+              <TouchableOpacity
+                key={g.id}
+                activeOpacity={0.8}
+                onPress={() => {
+                  setSearchQuery(g.aliases[0]);
+                  inputRef.current?.focus();
+                }}
+                style={{
+                  paddingHorizontal: 13,
+                  paddingVertical: 9,
+                  borderRadius: 999,
+                  backgroundColor: isDark ? "#7C3AED22" : "#EDE9FE",
+                  borderWidth: 1,
+                  borderColor: isDark ? "#7C3AED55" : "#C4B5FD",
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: Math.round(13 * textScale),
+                    fontFamily: "Inter_600SemiBold",
+                    color: isDark ? "#C4B5FD" : "#5B21B6",
+                  }}
+                >
+                  {g.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
           {/* Quick strip — daily PICU drugs (P11) */}
           <Text
             style={{
@@ -565,32 +695,6 @@ export default function HomeScreen() {
             <Feather name="chevron-right" size={22} color={colors.tint} />
           </TouchableOpacity>
 
-          {/* Emergency */}
-          <TouchableOpacity
-            onPress={() => router.push("/(tabs)/emergency" as any)}
-            activeOpacity={0.85}
-            style={[
-              styles.mainButton,
-              styles.emergencyButton,
-              {
-                backgroundColor: "#DC2626",
-                borderColor: "#B91C1C",
-                shadowColor: "#DC2626",
-              },
-            ]}
-          >
-            <View style={[styles.mainButtonIcon, { backgroundColor: "rgba(255,255,255,0.18)" }]}>
-              <Feather name="alert-triangle" size={32} color="#FFFFFF" />
-            </View>
-            <View style={styles.mainButtonText}>
-              <Text style={[styles.mainButtonTitle, { color: "#FFFFFF", fontSize: Math.round(20 * textScale) }]}>EMERGENCY</Text>
-              <Text style={[styles.mainButtonDesc, { color: "rgba(255,255,255,0.8)", fontSize: Math.round(13 * textScale), lineHeight: Math.round(18 * textScale) }]}>
-                RESUSCITATION · Rapid reference
-              </Text>
-            </View>
-            <Feather name="chevron-right" size={22} color="#FFFFFF" />
-          </TouchableOpacity>
-
           {/* Tools & Protocols */}
           <TouchableOpacity
             onPress={() => router.push("/(tabs)/tools" as any)}
@@ -627,7 +731,7 @@ export default function HomeScreen() {
       {/* ── Footer ── */}
       <View style={[styles.footer, { paddingBottom: insets.bottom + 16 }]}>
         <Text style={[styles.footerText, { color: isDark ? "#3A5070" : "#B0C4D8" }]}>
-          Prepared By: M. Kashan, RN
+          Developed by M. Kashan, RN · PeadsCal v1.0
         </Text>
       </View>
     </View>

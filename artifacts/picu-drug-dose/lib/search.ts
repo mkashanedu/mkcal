@@ -40,6 +40,18 @@ export const DRUG_ALIASES: Record<string, string> = {
   decadron: "dexamethasone",
   aminophylline: "aminophylline",
   theophylline: "aminophylline",
+  // Pakistani market brand names (verified present in the dataset, Nov 2026)
+  panadol: "paracetamol",
+  lanoxin: "digoxin",
+  inderal: "propranolol",
+  aldactone: "spironolactone",
+  tegral: "carbamazepine",
+  epilim: "sodium valproate",
+  rivotril: "clonazepam",
+  septran: "co-trimoxazole",
+  gravinate: "dimenhydrinate",
+  risek: "omeprazole",
+  deltacortril: "prednisolone",
 };
 
 function normalize(s: string): string {

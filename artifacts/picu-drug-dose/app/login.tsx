@@ -5,6 +5,7 @@
  */
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { goBack } from "@/lib/nav";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -252,7 +253,7 @@ export default function LoginScreen() {
       <View style={[styles.container, { backgroundColor: bg }]}>
         {/* Header */}
         <View style={[styles.header, { paddingTop: insets.top + 12, backgroundColor: card, borderBottomColor: border }]}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
+          <TouchableOpacity onPress={() => goBack(router)} style={styles.backBtn} activeOpacity={0.7}>
             <Feather name="arrow-left" size={20} color={teal} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: tp }]}>Account</Text>
@@ -322,8 +323,8 @@ export default function LoginScreen() {
           </TouchableOpacity>
 
           <Text style={[styles.disclaimer, { color: isDark ? "#3A5070" : "#CBD5E1" }]}>
-            PeadsCal v1.0.0 · For clinical professionals only{"\n"}
-            Prepared By: M. Kashan, RN
+            PeadsCal v1.0 · For clinical professionals only{"\n"}
+            Developed by M. Kashan, RN
           </Text>
         </ScrollView>
       </View>
@@ -373,7 +374,7 @@ export default function LoginScreen() {
       <View style={[styles.container, { backgroundColor: bg }]}>
         {/* Header */}
         <View style={[styles.header, { paddingTop: insets.top + 12, backgroundColor: card, borderBottomColor: border }]}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.7}>
+          <TouchableOpacity onPress={() => goBack(router)} style={styles.backBtn} activeOpacity={0.7}>
             <Feather name="arrow-left" size={20} color={teal} />
           </TouchableOpacity>
           <Text style={[styles.headerTitle, { color: tp }]}>Account</Text>

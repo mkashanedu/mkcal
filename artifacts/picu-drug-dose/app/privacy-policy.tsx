@@ -1,5 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { goBack } from "@/lib/nav";
 import React from "react";
 import {
   Platform,
@@ -74,7 +75,7 @@ export default function PrivacyPolicyScreen() {
       >
         <View style={styles.headerRow}>
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={() => goBack(router)}
             style={[styles.backBtn, { backgroundColor: isDark ? "#1A2F4A" : "#F0F4F8" }]}
             activeOpacity={0.7}
           >
@@ -128,10 +129,10 @@ export default function PrivacyPolicyScreen() {
         {/* Footer */}
         <View style={[styles.footerCard, { backgroundColor: isDark ? "#112240" : "#F8FAFD", borderColor: border }]}>
           <Text style={[styles.footerText, { color: textMuted }]}>
-            Prepared By: M. Kashan, RN
+            Developed by M. Kashan, RN
           </Text>
           <Text style={[styles.footerSub, { color: isDark ? "#2D4A6A" : "#CBD5E0" }]}>
-            Pediatric Clinical Suite · Educational Use Only
+            PeadsCal · Educational Use Only
           </Text>
         </View>
       </ScrollView>

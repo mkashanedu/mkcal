@@ -1,5 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
+import { goBack } from "@/lib/nav";
 import React, { useMemo, useState } from "react";
 import {
   FlatList,
@@ -65,7 +66,7 @@ export default function FormularyCategoryScreen() {
       <View style={[styles.header, { paddingTop: topPadding + 12, backgroundColor: isDark ? "#0A192F" : "#FFFFFF", borderBottomColor: borderColor }]}>
         <View style={styles.headerRow}>
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={() => goBack(router)}
             style={[styles.backBtn, { backgroundColor: isDark ? "#233554" : "#F0F4F8" }]}
             activeOpacity={0.7}
           >

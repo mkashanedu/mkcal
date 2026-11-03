@@ -6,6 +6,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
   TextInput,
@@ -13,6 +14,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { router } from "expo-router";
 
 import Colors from "@/constants/colors";
 import { StarButton } from "@/components/StarButton";
@@ -115,7 +117,9 @@ function Chip({ label, selected, color, onPress }: { label: string; selected: bo
 // ─── ABG Interpretation ───────────────────────────────────────────────────────
 function interpretABG(
   pH: number, pco2: number, hco3: number, source: "arterial" | "venous" | "capillary" = "arterial",
-  na: number, cl: number, bd: number, wt: number
+  na: number, cl: number, bd: number, wt: number,
+  pao2: number = NaN, fio2: number = NaN, lactate: number = NaN, albumin: number = NaN,
+  ageBand: "neonate" | "child" = "child"
 ) {
   if (!pH || !pco2 || !hco3) return null;
   const base = {
@@ -124,33 +128,124 @@ function interpretABG(
     capillary: { phMin: 7.35, phMax: 7.45, pco2Min: 35, pco2Max: 45, pco2Normal: 40 },
   };
   const b = base[source];
+  // Age-band HCO₃ baselines: neonate 20, infant–child 24 (venous keeps its own pH/pCO₂ offsets above).
+  const hco3Base = ageBand === "neonate" ? 20 : 24;
+  const hco3Min = ageBand === "neonate" ? 20 : 22;
+  const hco3Max = 26;
   const acidBase = pH < b.phMin ? "Acidosis" : pH > b.phMax ? "Alkalosis" : "Normal pH";
   let primary = "";
   let compensation = "";
   let color = "#16A34A";
   let ag: number | null = null;
+  let agCorrected: number | null = null;
   let agLabel = "";
+  let agHigh = false;
+  let deltaRatio: number | null = null;
+  let deltaLabel = "";
   let mixed = "";
   let bicarbDose: number | null = null;
   let kWarning = "";
   let critical = "";
+  let hhWarning = "";
+  let pfRatio: number | null = null;
+  let pfLabel = "";
+  let aaGradient: number | null = null;
+  let pao2Note = "";
+  let lactateValue: number | null = null;
+  let lactateLabel = "";
+  let lactateColor = "#16A34A";
+
+  // ── Henderson–Hasselbalch consistency check ──────────────────────────────
+  const expectedPH = 6.1 + Math.log10(hco3 / (0.03 * pco2));
+  if (Math.abs(pH - expectedPH) > 0.05) {
+    hhWarning = "Values are not fully consistent — check for transcription/lab error (entered pH differs from Henderson–Hasselbalch expected pH)";
+  }
+
+  // ── Anion gap — calculated whenever Na, Cl and HCO₃ are present ──────────
+  if (na > 0 && cl > 0) {
+    ag = Math.round(na - (cl + hco3));
+    if (albumin > 0) agCorrected = +(ag + 2.5 * (4.0 - albumin)).toFixed(1);
+    const agEff = agCorrected !== null ? agCorrected : ag;
+    agHigh = agEff > 14;
+    agLabel = agHigh ? `High Anion Gap (HAGMA) = ${agEff}` : `Normal Anion Gap (NAGMA) = ${agEff}`;
+    if (agCorrected !== null) agLabel += " (albumin-corrected)";
+    // ── Delta ratio (only when AG is high) ──
+    if (agHigh) {
+      const denom = 24 - hco3;
+      if (denom > 0) {
+        deltaRatio = +((agEff - 12) / denom).toFixed(2);
+        deltaLabel = deltaRatio < 0.4 ? "HAGMA + NAGMA together (combined high + normal gap acidosis)"
+          : deltaRatio <= 0.8 ? "Combined HAGMA + NAGMA possible"
+          : deltaRatio <= 2.0 ? "Pure HAGMA"
+          : "HAGMA + metabolic alkalosis together";
+      } else {
+        deltaLabel = "HCO₃ not reduced despite high AG — HAGMA + metabolic alkalosis together";
+      }
+    }
+  }
+
+  // ── Oxygenation (PaO₂ / FiO₂) ────────────────────────────────────────────
+  if (pao2 > 0 && fio2 > 0) {
+    pfRatio = Math.round(pao2 / (fio2 / 100));
+    pfLabel = pfRatio > 300 ? "Normal oxygenation" : pfRatio >= 200 ? "Mild impairment" : pfRatio >= 100 ? "Moderate impairment" : "Severe impairment";
+    if (source === "arterial") {
+      const PAO2 = (fio2 / 100) * (760 - 47) - pco2 / 0.8;
+      aaGradient = +(PAO2 - pao2).toFixed(1);
+    }
+  }
+  if (pao2 > 0 && source !== "arterial") {
+    pao2Note = "PaO₂ interpretation needs an arterial sample — venous/capillary PaO₂ does not reflect oxygenation reliably. P/F shown for reference only; A–a gradient not calculated.";
+  } else if (pao2 > 0 && !(fio2 > 0)) {
+    pao2Note = "Enter FiO₂ to calculate the P/F ratio and A–a gradient.";
+  }
+
+  // ── Lactate ──────────────────────────────────────────────────────────────
+  if (lactate > 0) {
+    lactateValue = lactate;
+    if (lactate < 2) { lactateLabel = "Normal"; lactateColor = "#16A34A"; }
+    else if (lactate <= 4) { lactateLabel = "Elevated — raised, sepsis/hypoperfusion check"; lactateColor = "#D97706"; }
+    else { lactateLabel = "High — severe, urgent review"; lactateColor = "#DC2626"; }
+  }
+
+  // ── Compensation helpers: acute vs chronic for respiratory disorders ────
+  const respAcidosisComp = (): string => {
+    const d = pco2 - b.pco2Normal;
+    const expAcute = hco3Base + 0.1 * d;
+    const expChronic = hco3Base + 0.35 * d;
+    if (Math.abs(hco3 - expAcute) <= 3) return `Fits acute compensation (expected HCO₃ ~${Math.round(expAcute)})`;
+    if (Math.abs(hco3 - expChronic) <= 3) return `Fits chronic compensation (expected HCO₃ ~${Math.round(expChronic)})`;
+    if (hco3 > expAcute + 3 && hco3 < expChronic - 3) return "Between acute and chronic — acute-on-chronic or partially compensated";
+    if (hco3 > expChronic + 3) { mixed = "Mixed: Respiratory Acidosis + Metabolic Alkalosis"; return "HCO₃ above even chronic expectation — added metabolic alkalosis"; }
+    mixed = "Mixed: Respiratory Acidosis + Metabolic Acidosis";
+    return "HCO₃ below acute expectation — added metabolic acidosis";
+  };
+  const respAlkalosisComp = (): string => {
+    const d = b.pco2Normal - pco2;
+    const expAcute = hco3Base - 0.2 * d;
+    const expChronic = hco3Base - 0.4 * d;
+    if (Math.abs(hco3 - expAcute) <= 3) return `Fits acute compensation (expected HCO₃ ~${Math.round(expAcute)})`;
+    if (Math.abs(hco3 - expChronic) <= 3) return `Fits chronic compensation (expected HCO₃ ~${Math.round(expChronic)})`;
+    if (hco3 < expAcute - 3 && hco3 > expChronic + 3) return "Between acute and chronic — acute-on-chronic or partially compensated";
+    if (hco3 > expAcute + 3) { mixed = "Mixed: Respiratory Alkalosis + Metabolic Alkalosis"; return "HCO₃ above acute expectation — added metabolic alkalosis"; }
+    mixed = "Mixed: Respiratory Alkalosis + Metabolic Acidosis";
+    return "HCO₃ below even chronic expectation — added metabolic acidosis";
+  };
+  const wintersComp = (): string => {
+    const expPCO2 = 1.5 * hco3 + 8;
+    if (Math.abs(pco2 - expPCO2) < 2) return "Appropriate compensation (Winter's formula)";
+    if (pco2 > expPCO2 + 2) { mixed = "Mixed: Metabolic Acidosis + Respiratory Acidosis"; return "Inadequate resp. compensation"; }
+    mixed = "Mixed: Metabolic Acidosis + Respiratory Alkalosis";
+    return "Over-compensation";
+  };
 
   if (pH < b.phMin) {
     color = "#DC2626";
     if (pco2 > b.pco2Max) {
       primary = "Respiratory Acidosis";
-      const expHCO3 = 24 + (pco2 - b.pco2Normal) * 0.1;
-      compensation = Math.abs(hco3 - expHCO3) < 3 ? "Appropriate acute compensation" : hco3 > expHCO3 + 3 ? "± Metabolic alkalosis" : "± Metabolic acidosis";
+      compensation = respAcidosisComp();
     } else {
       primary = "Metabolic Acidosis";
-      const expPCO2 = 1.5 * hco3 + 8;
-      if (Math.abs(pco2 - expPCO2) < 2) compensation = "Appropriate compensation (Winter's formula)";
-      else if (pco2 > expPCO2 + 2) { compensation = "Inadequate resp. compensation"; mixed = "Mixed: Metabolic Acidosis + Respiratory Acidosis"; }
-      else { compensation = "Over-compensation"; mixed = "Mixed: Metabolic Acidosis + Respiratory Alkalosis"; }
-      if (na > 0 && cl > 0) {
-        ag = Math.round(na - (cl + hco3));
-        agLabel = ag > 14 ? `High Anion Gap (HAGMA) = ${ag}` : `Normal Anion Gap (NAGMA) = ${ag}`;
-      }
+      compensation = wintersComp();
       if (wt > 0 && bd > 0) bicarbDose = +(0.3 * wt * bd).toFixed(1);
       kWarning = "Serum K\u207a drops as acidosis corrects. Monitor for hypokalemia.";
       color = "#E53E3E";
@@ -159,21 +254,52 @@ function interpretABG(
     color = "#D97706";
     if (pco2 < b.pco2Min) {
       primary = "Respiratory Alkalosis";
-      const expHCO3 = 24 - (b.pco2Normal - pco2) * 0.2;
-      compensation = Math.abs(hco3 - expHCO3) < 3 ? "Appropriate acute compensation" : "Chronic or mixed disorder";
+      compensation = respAlkalosisComp();
     } else {
       primary = "Metabolic Alkalosis";
-      const expPCO2 = 40 + (hco3 - 24) * 0.7;
+      const expPCO2 = 40 + (hco3 - hco3Base) * 0.7;
       compensation = Math.abs(pco2 - expPCO2) < 2 ? "Appropriate compensation" : "Inadequate or mixed disorder";
     }
   } else {
-    primary = "Normal acid-base status";
+    // Normal pH — still detect compensated / mixed disorders.
+    const co2Abn = pco2 > b.pco2Max || pco2 < b.pco2Min;
+    const hco3Abn = hco3 > hco3Max || hco3 < hco3Min;
+    if (co2Abn && hco3Abn && ((pco2 > b.pco2Max && hco3 > hco3Max) || (pco2 < b.pco2Min && hco3 < hco3Min))) {
+      primary = "Compensated / mixed disorder — pH normal but pCO₂ & HCO₃ abnormal";
+      color = "#D97706";
+      if (pco2 > b.pco2Max) {
+        const metAlkExp = 40 + (hco3 - hco3Base) * 0.7;
+        compensation = Math.abs(pco2 - metAlkExp) < 2
+          ? "Fits compensation for metabolic alkalosis (expected pCO₂ by formula)"
+          : respAcidosisComp();
+      } else {
+        // Both low: compensated metabolic acidosis (Winter's) vs compensated respiratory alkalosis.
+        const expW = 1.5 * hco3 + 8;
+        const fitsW = Math.abs(pco2 - expW) < 2;
+        const dA = b.pco2Normal - pco2;
+        const fitsR = Math.abs(hco3 - (hco3Base - 0.2 * dA)) <= 3 || Math.abs(hco3 - (hco3Base - 0.4 * dA)) <= 3;
+        if (fitsW && !fitsR) compensation = wintersComp();
+        else if (fitsR && !fitsW) compensation = respAlkalosisComp();
+        else if (fitsW && fitsR) compensation = "Fits both compensation patterns — fully compensated; primary disorder by clinical picture";
+        else { compensation = "Fits neither compensation pattern — likely mixed disorder"; mixed = "Mixed disorder with normal pH — correlate clinically"; }
+      }
+    } else if (co2Abn || hco3Abn) {
+      primary = "Compensated / mixed disorder — pH normal but pCO₂ or HCO₃ abnormal";
+      color = "#D97706";
+      compensation = "Interpret with the clinical picture — a normal pH does not exclude a significant disorder";
+    } else {
+      primary = "Normal acid-base status";
+      if (agHigh) {
+        mixed = "High anion gap present despite normal pH/pCO₂/HCO₃ — possible masked metabolic acidosis";
+        color = "#D97706";
+      }
+    }
   }
 
   if (pH < 7.20 || pH > 7.60) critical = "CRITICAL: Severe Acid-Base Derangement. Immediate intervention required.";
 
   const hypoxia = pco2 > 50 ? "Hypercapnia present" : pco2 < b.pco2Min ? "Hypocapnia present" : "pCO\u2082 normal";
-  return { acidBase, primary, compensation, color, hypoxia, ag, agLabel, mixed, bicarbDose, kWarning, critical };
+  return { acidBase, primary, compensation, color, hypoxia, ag, agCorrected, agLabel, agHigh, deltaRatio, deltaLabel, mixed, bicarbDose, kWarning, critical, hhWarning, pfRatio, pfLabel, aaGradient, pao2Note, lactateValue, lactateLabel, lactateColor };
 }
 
 // ─── Status Epilepticus timer ──────────────────────────────────────────────────
@@ -233,6 +359,18 @@ export default function CalcsScreen() {
   const naDeficit = eIon === "Na" ? +((parseFloat(targetNa) - parseFloat(actualNa)) * 0.6 * eWtN).toFixed(1) : 0;
   const kMaxPeriph = +(eWtN * 0.3).toFixed(1);
   const kMaxCentral = +(eWtN * 0.5).toFixed(1);
+  // KCl recipe + pre-infusion checklist (ported from the Tools electrolytes screen)
+  const [kCentral, setKCentral] = useState(false);
+  const [kRestrict, setKRestrict] = useState(false);
+  const [kChecklist, setKChecklist] = useState({ renal: false, ecg: false, mg: false });
+  const kChecklistDone = kChecklist.renal && kChecklist.ecg && kChecklist.mg;
+  const kConc = (kCentral || kRestrict) ? 0.08 : 0.04;
+  const kKClML = kDeficit > 0 ? Math.round((kDeficit / 2) * 10) / 10 : 0;
+  const kTotalVol = kKClML > 0 ? Math.round(kDeficit / kConc) : 0;
+  const kNSML = Math.max(0, kTotalVol - kKClML);
+  const kRateMEqHr = eWtN > 0 ? (kCentral ? 0.5 : 0.3) * eWtN : 0;
+  const kRateMLHr = kConc > 0 && kRateMEqHr > 0 ? Math.round(kRateMEqHr / kConc * 10) / 10 : 0;
+  const kDurationHr = kRateMLHr > 0 && kTotalVol > 0 ? Math.round(kTotalVol / kRateMLHr * 10) / 10 : 0;
 
   // ── 2. ABG state ──────────────────────────────────────────────────────────
   const [abgPH, setAbgPH] = useState("");
@@ -243,7 +381,63 @@ export default function CalcsScreen() {
   const [abgCl, setAbgCl] = useState("");
   const [abgBD, setAbgBD] = useState("");
   const [abgWt, setAbgWt] = useState(ctxWeight > 0 ? ctxWeight.toString() : "");
-  const abgResult = interpretABG(parseFloat(abgPH), parseFloat(abgPCO2), parseFloat(abgHCO3), abgSource, parseFloat(abgNa), parseFloat(abgCl), parseFloat(abgBD), parseFloat(abgWt));
+  const [abgPaO2, setAbgPaO2] = useState("");
+  const [abgFiO2, setAbgFiO2] = useState("");
+  const [abgLactate, setAbgLactate] = useState("");
+  const [abgAlbumin, setAbgAlbumin] = useState("");
+  const [abgAgeBand, setAbgAgeBand] = useState<"neonate" | "child">("child");
+  const [abgCopied, setAbgCopied] = useState(false);
+  const abgResult = interpretABG(parseFloat(abgPH), parseFloat(abgPCO2), parseFloat(abgHCO3), abgSource, parseFloat(abgNa), parseFloat(abgCl), parseFloat(abgBD), parseFloat(abgWt), parseFloat(abgPaO2), parseFloat(abgFiO2), parseFloat(abgLactate), parseFloat(abgAlbumin), abgAgeBand);
+
+  const buildAbgSummary = () => {
+    if (!abgResult) return "";
+    const lines: string[] = [];
+    lines.push("PeadsCal — ABG Result");
+    lines.push(`Source: ${abgSource[0].toUpperCase() + abgSource.slice(1)} · Age band: ${abgAgeBand === "neonate" ? "Neonate" : "Infant–Child"}`);
+    const vals: string[] = [`pH ${abgPH}`, `pCO₂ ${abgPCO2} mmHg`, `HCO₃ ${abgHCO3} mEq/L`];
+    if (abgPaO2) vals.push(`PaO₂ ${abgPaO2} mmHg`);
+    if (abgFiO2) vals.push(`FiO₂ ${abgFiO2}%`);
+    if (abgNa) vals.push(`Na ${abgNa}`);
+    if (abgCl) vals.push(`Cl ${abgCl}`);
+    if (abgBD) vals.push(`Base deficit ${abgBD}`);
+    if (abgLactate) vals.push(`Lactate ${abgLactate} mmol/L`);
+    if (abgAlbumin) vals.push(`Albumin ${abgAlbumin} g/dL`);
+    lines.push(`Values: ${vals.join(" · ")}`);
+    lines.push(`Status: ${abgResult.acidBase}`);
+    lines.push(`Primary: ${abgResult.primary}`);
+    if (abgResult.mixed) lines.push(`Mixed: ${abgResult.mixed}`);
+    if (abgResult.compensation) lines.push(`Compensation: ${abgResult.compensation}`);
+    if (abgResult.ag !== null) lines.push(`Anion gap: ${abgResult.agLabel}`);
+    if (abgResult.agCorrected !== null) lines.push(`Corrected AG (albumin): ${abgResult.agCorrected}`);
+    if (abgResult.deltaLabel) lines.push(`Delta ratio: ${abgResult.deltaRatio !== null ? abgResult.deltaRatio + " — " : ""}${abgResult.deltaLabel}`);
+    if (abgResult.pfRatio !== null) lines.push(`P/F ratio: ${abgResult.pfRatio} (${abgResult.pfLabel})`);
+    if (abgResult.aaGradient !== null) lines.push(`A–a gradient: ${abgResult.aaGradient} mmHg`);
+    if (abgResult.lactateValue !== null) lines.push(`Lactate: ${abgResult.lactateValue} mmol/L — ${abgResult.lactateLabel}`);
+    if (abgResult.bicarbDose !== null) lines.push(`Bicarbonate: consider ${abgResult.bicarbDose} mEq slow IV`);
+    if (abgResult.hhWarning) lines.push(`⚠ ${abgResult.hhWarning}`);
+    if (abgResult.critical) lines.push(`⚠ ${abgResult.critical}`);
+    lines.push("Verify against the prescription before administration.");
+    return lines.join("\n");
+  };
+  const handleShareAbg = async () => {
+    const text = buildAbgSummary();
+    if (!text) return;
+    if (Platform.OS === "web") {
+      try {
+        const nav: any = (globalThis as any).navigator;
+        if (nav?.clipboard?.writeText) {
+          await nav.clipboard.writeText(text);
+          setAbgCopied(true);
+          setTimeout(() => setAbgCopied(false), 2000);
+          return;
+        }
+      } catch {}
+      // Clipboard unavailable — fall through to Share.
+    }
+    try {
+      await Share.share({ message: text, title: "ABG result" });
+    } catch {}
+  };
 
   // ── 3. Osmotherapy state ──────────────────────────────────────────────────
   const [osmoWt, setOsmoWt] = useState(ctxWeight > 0 ? ctxWeight.toString() : "");
@@ -308,19 +502,7 @@ export default function CalcsScreen() {
   const propranololTet = +(0.015 * cardWtN).toFixed(2);
   const phenylephrineTet = +(0.02 * cardWtN).toFixed(2);
 
-  // ── 9. GIR & TPN state ───────────────────────────────────────────────────
-  const [girWt, setGirWt] = useState(ctxWeight > 0 ? ctxWeight.toString() : "");
-  const [dextPct, setDextPct] = useState("10");
-  const [girRate, setGirRate] = useState("");
-  const [targetGir, setTargetGir] = useState("");
-  const girWtN = parseFloat(girWt) || 0;
-  const dextN = parseFloat(dextPct) || 10;
-  const girRateN = parseFloat(girRate) || 0;
-  const targetGirN = parseFloat(targetGir) || 0;
-  const calcGir = girWtN > 0 && girRateN > 0
-    ? +((dextN * girRateN * 10) / (girWtN * 60)).toFixed(2) : null;
-  const calcRate = girWtN > 0 && targetGirN > 0
-    ? +((targetGirN * girWtN * 60) / (dextN * 10)).toFixed(1) : null;
+  // ── 9. GIR & TPN — calculator ka single home ab Tools tab he (yahan sirf pointer he) ──
 
   // ── 10. Burns state ───────────────────────────────────────────────────────
   const [burnWt, setBurnWt] = useState(ctxWeight > 0 ? ctxWeight.toString() : "");
@@ -379,6 +561,7 @@ export default function CalcsScreen() {
             open={openSection === "elec"} onToggle={() => toggle("elec")} isDark={isDark} />
           {openSection === "elec" && (
             <Body>
+              <Text style={[sh.refText, { color: textMuted }]}>Ref: Harriet Lane 24e · Nelson 22e</Text>
               <View style={sh.chipRow}>
                 <Chip label="K⁺ Potassium" selected={eIon === "K"} color="#0D9488" onPress={() => setEIon("K")} />
                 <Chip label="Na⁺ Sodium" selected={eIon === "Na"} color="#1E3A8A" onPress={() => setEIon("Na")} />
@@ -394,6 +577,34 @@ export default function CalcsScreen() {
                       <ResultRow label="K⁺ Deficit" value={`${kDeficit} mEq`} color="#0D9488" large />
                       <ResultRow label="Max peripheral rate" value={`${kMaxPeriph} mEq/hr`} color="#0D9488" />
                       <ResultRow label="Max central rate" value={`${kMaxCentral} mEq/hr`} color="#0D9488" />
+                    </ResultBox>
+                  )}
+                  <View style={sh.chipRow}>
+                    <Chip label="🏥 Central Line" selected={kCentral} color="#0891B2" onPress={() => setKCentral(!kCentral)} />
+                    <Chip label="💧 Restrict Fluids" selected={kRestrict} color="#7C3AED" onPress={() => setKRestrict(!kRestrict)} />
+                  </View>
+                  <View style={[sh.infoBox, { backgroundColor: "#D9770612", borderColor: "#D9770650" }]}>
+                    <Text style={[sh.infoTitle, { color: "#D97706" }]}>⚠ Safety Checklist — Required Before Infusion</Text>
+                    {([{ key: "renal", label: "Renal function (Cr / BUN) checked?" }, { key: "ecg", label: "Baseline ECG performed?" }, { key: "mg", label: "Magnesium levels normal (≥ 0.7 mmol/L)?" }] as { key: keyof typeof kChecklist; label: string }[]).map((item) => (
+                      <TouchableOpacity key={item.key} onPress={() => setKChecklist((p) => ({ ...p, [item.key]: !p[item.key] }))} style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 6 }}>
+                        <View style={{ width: 22, height: 22, borderRadius: 6, borderWidth: 2, borderColor: kChecklist[item.key] ? "#16A34A" : "#D97706", backgroundColor: kChecklist[item.key] ? "#16A34A" : "transparent", justifyContent: "center", alignItems: "center" }}>
+                          {kChecklist[item.key] && <Feather name="check" size={13} color="#FFFFFF" />}
+                        </View>
+                        <Text style={{ flex: 1, fontSize: 13, color: kChecklist[item.key] ? "#16A34A" : textPrimary }}>{item.label}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                  {kDeficit > 0 && eWtN > 0 && kChecklistDone && (
+                    <ResultBox color="#0891B2">
+                      <Text style={[sh.infoTitle, { color: "#2563EB", marginBottom: 4 }]}>{(kCentral || kRestrict) ? "Central / Fluid-Restricted Recipe" : "Peripheral Line Recipe"}</Text>
+                      <ResultRow label="KCl drawn (from 2 mEq/mL ampoule)" value={`${kKClML} mL`} color="#0891B2" />
+                      <ResultRow label="Add NS" value={`${kNSML} mL`} color="#0891B2" />
+                      <ResultRow label="Total syringe" value={`${kTotalVol} mL`} color="#0891B2" />
+                      <ResultRow label="Concentration" value={`${(kCentral || kRestrict) ? 80 : 40} mEq/L`} color="#0891B2" />
+                      <ResultRow label="Infusion rate" value={`${kRateMLHr} mL/hr`} color="#0891B2" />
+                      <ResultRow label="Infusion duration" value={`~${kDurationHr} hr`} color="#0891B2" />
+                      <ResultRow label="Rate" value={`${kCentral ? 0.5 : 0.3} mEq/kg/hr`} color="#0891B2" />
+                      <Text style={[sh.refText, { color: textMuted, marginTop: 6 }]}>Recheck K⁺ level 1–2 hr after infusion</Text>
                     </ResultBox>
                   )}
                   <InfoBox color="#D97706" title="Safety Rules — K⁺" isDark={isDark}
@@ -423,14 +634,18 @@ export default function CalcsScreen() {
           {openSection === "abg" && (
             <Body>
               <Text style={[sh.refText, { color: textMuted }]}>
-                {abgSource === "arterial" ? "Normal: pH 7.35–7.45 · pCO₂ 35–45 · HCO₃ 22–26" :
-                 abgSource === "venous" ? "Normal VBG: pH 7.31–7.41 · pCO₂ 40–50 · HCO₃ 22–26" :
-                 "Normal: pH 7.35–7.45 · pCO₂ 35–45 · HCO₃ 22–26"}
+                {abgSource === "venous"
+                  ? `Normal VBG${abgAgeBand === "neonate" ? " (neonate)" : ""}: pH 7.31–7.41 · pCO₂ 40–50 · HCO₃ ${abgAgeBand === "neonate" ? "20" : "22"}–26`
+                  : `Normal${abgAgeBand === "neonate" ? " (neonate)" : ""}: pH 7.35–7.45 · pCO₂ 35–45 · HCO₃ ${abgAgeBand === "neonate" ? "20" : "22"}–26`}
               </Text>
               <View style={sh.chipRow}>
                 {(["arterial", "venous", "capillary"] as const).map((s) => (
                   <Chip key={s} label={s[0].toUpperCase() + s.slice(1)} color="#7C3AED" selected={abgSource === s} onPress={() => setAbgSource(s)} />
                 ))}
+              </View>
+              <View style={sh.chipRow}>
+                <Chip label="Neonate" color="#7C3AED" selected={abgAgeBand === "neonate"} onPress={() => setAbgAgeBand("neonate")} />
+                <Chip label="Infant–Child" color="#7C3AED" selected={abgAgeBand === "child"} onPress={() => setAbgAgeBand("child")} />
               </View>
               <View style={sh.triRow}>
                 <View style={{ flex: 1 }}>
@@ -459,6 +674,22 @@ export default function CalcsScreen() {
                   <InputField label="Weight (kg)" value={abgWt} onChange={setAbgWt} placeholder="e.g. 15" isDark={isDark} />
                 </View>
               </View>
+              <View style={sh.triRow}>
+                <View style={{ flex: 1 }}>
+                  <InputField label="PaO₂ (mmHg, optional)" value={abgPaO2} onChange={setAbgPaO2} placeholder="e.g. 80" isDark={isDark} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <InputField label="FiO₂ % (optional)" value={abgFiO2} onChange={setAbgFiO2} placeholder="e.g. 40" isDark={isDark} />
+                </View>
+              </View>
+              <View style={sh.triRow}>
+                <View style={{ flex: 1 }}>
+                  <InputField label="Lactate (mmol/L, optional)" value={abgLactate} onChange={setAbgLactate} placeholder="e.g. 1.2" isDark={isDark} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <InputField label="Albumin (g/dL, optional)" value={abgAlbumin} onChange={setAbgAlbumin} placeholder="e.g. 3.5" isDark={isDark} />
+                </View>
+              </View>
               {abgResult && (
                 <>
                   {abgResult.critical ? (
@@ -466,15 +697,44 @@ export default function CalcsScreen() {
                       <Text style={[sh.resultValue, { color: "#FF4C60", fontSize: 14 }]}>⚠ {abgResult.critical}</Text>
                     </View>
                   ) : null}
+                  {abgResult.hhWarning ? (
+                    <View style={[sh.resultBox, { backgroundColor: "#D9770615", borderColor: "#D9770640", marginBottom: 6 }]}>
+                      <Text style={[sh.resultValue, { color: "#D97706", fontSize: 13 }]}>⚠ {abgResult.hhWarning}</Text>
+                    </View>
+                  ) : null}
                   <ResultBox color={abgResult.color}>
                     <ResultRow label="Status" value={abgResult.acidBase} color={abgResult.color} large />
-                    <ResultRow label="Primary disorder" value={abgResult.agLabel ? `${abgResult.primary} — ${abgResult.agLabel}` : abgResult.primary} color={abgResult.color} />
+                    <ResultRow label="Primary disorder" value={abgResult.primary} color={abgResult.color} />
                     {abgResult.mixed ? <ResultRow label="Mixed disorder" value={abgResult.mixed} color={abgResult.color} /> : null}
                     {abgResult.compensation ? (
                       <ResultRow label="Compensation" value={abgResult.compensation} color={abgResult.color} />
                     ) : null}
+                    {abgResult.ag !== null ? (
+                      <ResultRow label="Anion gap" value={abgResult.agLabel} color={abgResult.color} />
+                    ) : null}
+                    {abgResult.agCorrected !== null ? (
+                      <ResultRow label="Corrected AG" value={`${abgResult.agCorrected} (albumin-corrected — used for classification)`} color={abgResult.color} />
+                    ) : null}
+                    {abgResult.deltaLabel ? (
+                      <ResultRow label="Delta ratio" value={abgResult.deltaRatio !== null ? `${abgResult.deltaRatio} — ${abgResult.deltaLabel}` : abgResult.deltaLabel} color={abgResult.color} />
+                    ) : null}
+                    {abgResult.pfRatio !== null ? (
+                      <ResultRow label="P/F ratio" value={`${abgResult.pfRatio} — ${abgResult.pfLabel}`} color={abgResult.color} />
+                    ) : null}
+                    {abgResult.aaGradient !== null ? (
+                      <ResultRow label="A–a gradient" value={`${abgResult.aaGradient} mmHg (expected roughly <15–20 mmHg on room air in children; rises with FiO₂)`} color={abgResult.color} />
+                    ) : null}
+                    {abgResult.lactateValue !== null ? (
+                      <ResultRow label="Lactate" value={`${abgResult.lactateValue} mmol/L — ${abgResult.lactateLabel}`} color={abgResult.lactateColor} />
+                    ) : null}
                     <ResultRow label="CO₂ note" value={abgResult.hypoxia} color={abgResult.color} />
                   </ResultBox>
+                  {abgResult.pao2Note ? (
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 4 }}>
+                      <Feather name="alert-triangle" size={12} color="#D97706" />
+                      <Text style={[sh.refText, { color: "#D97706", flex: 1 }]}>⚠ {abgResult.pao2Note}</Text>
+                    </View>
+                  ) : null}
                   {abgResult.bicarbDose !== null ? (
                     <View style={[sh.resultBox, { backgroundColor: "#7C3AED15", borderColor: "#7C3AED40" }]}>
                       <Text style={[sh.resultValue, { color: "#7C3AED", fontSize: 14 }]}>ℹ Bicarbonate Replacement: Consider {abgResult.bicarbDose} mEq (or mL of 8.4% NaHCO₃) slow IV infusion</Text>
@@ -486,10 +746,17 @@ export default function CalcsScreen() {
                       <Text style={[sh.refText, { color: "#D97706" }]}>⚠ {abgResult.kWarning}</Text>
                     </View>
                   ) : null}
+                  <TouchableOpacity onPress={handleShareAbg}
+                    style={{ marginTop: 10, paddingVertical: 12, borderRadius: 10, alignItems: "center", backgroundColor: "#7C3AED" }}>
+                    <Text style={{ fontSize: 13, fontWeight: "700", color: "#FFFFFF" }}>{abgCopied ? "Copied ✓" : "Copy / Share result"}</Text>
+                  </TouchableOpacity>
                 </>
               )}
               <InfoBox color="#7C3AED" title="Stepwise ABG Interpretation" isDark={isDark}
-                text={"1. pH → Acidosis or Alkalosis (source-adjusted)\n2. pCO₂ → Primary if matches pH direction\n3. HCO₃ → Primary if matches pH direction\n4. Anion Gap = Na – (Cl + HCO₃) · Normal ~12 (±2)\n5. Winter's formula: Expected pCO₂ = 1.5×HCO₃ + 8 (±2)\n6. Assess mixed disorders · Bicarbonate only if pH < 7.15"} />
+                text={"1. pH → Acidosis or Alkalosis (source-adjusted)\n2. pCO₂ → Primary if matches pH direction\n3. HCO₃ → Primary if matches pH direction\n4. Anion Gap = Na – (Cl + HCO₃) · Normal ~12 (±2) · Correct for albumin: AG + 2.5×(4.0 − albumin)\n5. Delta ratio = (AG − 12) / (24 − HCO₃) → hidden second disorder\n6. Winter's formula: Expected pCO₂ = 1.5×HCO₃ + 8 (±2)\n7. Oxygenation: P/F = PaO₂ ÷ FiO₂ fraction · A–a gradient (arterial only)\n8. Assess mixed disorders · Bicarbonate only if pH < 7.15"} />
+              <Text style={[sh.refText, { color: textMuted, marginTop: 6 }]}>
+                Neonatal ranges vary with postnatal age — educational values, verify with unit ranges.
+              </Text>
             </Body>
           )}
         </View>
@@ -500,6 +767,7 @@ export default function CalcsScreen() {
             open={openSection === "osmo"} onToggle={() => toggle("osmo")} isDark={isDark} />
           {openSection === "osmo" && (
             <Body>
+              <Text style={[sh.refText, { color: textMuted }]}>Ref: Harriet Lane 24e · Nelson 22e</Text>
               <InputField label="Weight (kg)" value={osmoWt} onChange={setOsmoWt} placeholder="e.g. 20" isDark={isDark} />
               <Text style={[sh.sectionLabel, { color: textPrimary }]}>Mannitol (20% or 25%)</Text>
               <InputField label="Dose (0.5–1.0 g/kg)" value={mDose} onChange={setMDose} placeholder="0.75" isDark={isDark} />
@@ -563,6 +831,7 @@ export default function CalcsScreen() {
             open={openSection === "tran"} onToggle={() => toggle("tran")} isDark={isDark} />
           {openSection === "tran" && (
             <Body>
+              <Text style={[sh.refText, { color: textMuted }]}>Ref: Harriet Lane 24e · Nelson 22e</Text>
               <InputField label="Weight (kg)" value={tranWt} onChange={setTranWt} placeholder="e.g. 20" isDark={isDark} />
               <Text style={[sh.refText, { color: textMuted }]}>Optional: Use haematocrit formula for PRBC volume</Text>
               <View style={sh.triRow}>
@@ -596,6 +865,7 @@ export default function CalcsScreen() {
             open={openSection === "seiz"} onToggle={() => toggle("seiz")} isDark={isDark} />
           {openSection === "seiz" && (
             <Body>
+              <Text style={[sh.refText, { color: textMuted }]}>Ref: Neurocritical Care Society status epilepticus guideline · Harriet Lane 24e</Text>
               <InputField label="Weight (kg, 0.5–150)" value={seWt} onChange={setSeWt} placeholder="e.g. 18" isDark={isDark} />
 
               {/* Timer */}
@@ -668,6 +938,7 @@ export default function CalcsScreen() {
             open={openSection === "card"} onToggle={() => toggle("card")} isDark={isDark} />
           {openSection === "card" && (
             <Body>
+              <Text style={[sh.refText, { color: textMuted }]}>Ref: Harriet Lane 24e · Nelson 22e</Text>
               <InputField label="Weight (kg)" value={cardWt} onChange={setCardWt} placeholder="e.g. 5" isDark={isDark} />
               <Text style={[sh.sectionLabel, { color: textPrimary }]}>PGE1 (Alprostadil) Infusion</Text>
               <Text style={[sh.refText, { color: textMuted }]}>Standard: 500 mcg in 50 mL = 10 mcg/mL</Text>
@@ -717,31 +988,11 @@ export default function CalcsScreen() {
             open={openSection === "gir"} onToggle={() => toggle("gir")} isDark={isDark} />
           {openSection === "gir" && (
             <Body>
-              <Text style={[sh.refText, { color: textMuted }]}>GIR (mg/kg/min) = (%Dextrose × Rate × 10) / (Weight × 60)</Text>
-              <View style={sh.triRow}>
-                <View style={{ flex: 1 }}>
-                  <InputField label="Weight (kg)" value={girWt} onChange={setGirWt} placeholder="15" isDark={isDark} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <InputField label="Dextrose %" value={dextPct} onChange={setDextPct} placeholder="10" isDark={isDark} />
-                </View>
-              </View>
-              <InputField label="Current Rate (mL/hr) → calculates GIR" value={girRate} onChange={setGirRate} placeholder="e.g. 25" isDark={isDark} />
-              {calcGir !== null && (
-                <ResultBox color="#059669">
-                  <ResultRow label="Glucose Infusion Rate" value={`${calcGir} mg/kg/min`} color="#059669" large />
-                  <ResultRow label="Neonatal target" value="4–8 mg/kg/min" color="#059669" />
-                  <ResultRow label="PICU target" value="3–6 mg/kg/min" color="#059669" />
-                </ResultBox>
-              )}
-              <InputField label="Target GIR (mg/kg/min) → calculates required rate" value={targetGir} onChange={setTargetGir} placeholder="e.g. 5" isDark={isDark} />
-              {calcRate !== null && (
-                <ResultBox color="#0D9488">
-                  <ResultRow label="Required infusion rate" value={`${calcRate} mL/hr`} color="#0D9488" large />
-                </ResultBox>
-              )}
-              <InfoBox color="#059669" title="TPN / GIR Reference" isDark={isDark}
-                text={"• Neonates: start GIR 4–6, increase by 1–2 mg/kg/min/day\n• PICU: target GIR 3–5; avoid >8 mg/kg/min (risk of hepatic steatosis)\n• Amino acids: neonates 3–4 g/kg/day; PICU 1.5–2 g/kg/day\n• Lipids (20%): 1–3 g/kg/day; start low and increase\n• Monitor glucose q4–6h; target 5–8 mmol/L (90–145 mg/dL)"} />
+              <Text style={[sh.infoText, { color: textPrimary, lineHeight: 20 }]}>GIR calculator ab Tools tab me he — rate se GIR aur target GIR se rate, dono wahan milte hein.</Text>
+              <TouchableOpacity onPress={() => router.push({ pathname: "/tool/[id]", params: { id: "gir" } })}
+                style={{ marginTop: 10, paddingVertical: 12, borderRadius: 10, alignItems: "center", backgroundColor: "#059669" }}>
+                <Text style={{ fontSize: 13, fontWeight: "700", color: "#FFFFFF" }}>GIR Calculator kholo (Tools)</Text>
+              </TouchableOpacity>
             </Body>
           )}
         </View>
@@ -786,6 +1037,7 @@ export default function CalcsScreen() {
             open={openSection === "bloods"} onToggle={() => toggle("bloods")} isDark={isDark} />
           {openSection === "bloods" && (
             <Body>
+              <Text style={[sh.refText, { color: textMuted }]}>Ref: Normal values & volumes — Harriet Lane 24e · Nelson 22e</Text>
               <View style={sh.resultBox}>
                 {[
                   { label: "Packed Red Blood Cells", val: "10–15 mL/kg" },

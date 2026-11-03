@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
+import { goBack } from "@/lib/nav";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -22,10 +23,19 @@ import Colors from "@/constants/colors";
 import { useTheme } from "@/context/ThemeContext";
 import { useWeight } from "@/context/WeightContext";
 import { useFavorites } from "@/context/FavoritesContext";
+import { usePreferences } from "@/context/PreferencesContext";
 import { StarButton } from "@/components/StarButton";
 import { ProfessionalFooter } from "@/components/ProfessionalFooter";
+import { DRUGS } from "@/constants/allDrugs";
+import { matchesDrugQuery } from "@/lib/search";
 import { BPGrowthCalc } from "@/components/BPGrowthCalc";
 import { VentilatorTool } from "@/components/VentilatorTool";
+import Svg, { Circle, Path, Ellipse } from "react-native-svg";
+
+// Text-size setting (Settings > Text Size) — module helpers below the main
+// component read this; the component refreshes it from PreferencesContext
+// on every render, before any child renders.
+let activeTextScale = 1;
 
 const C = Colors.light;
 
@@ -204,9 +214,11 @@ const FOUR_RESP = [
   {label:"0 — Breathes at ventilator rate or apnea",value:0},
 ];
 function sipaThreshold(ageMonths: number) {
-  if (ageMonths<=12) return 1.0; if (ageMonths<=24) return 0.9;
-  if (ageMonths<=48) return 0.85; if (ageMonths<=72) return 0.75;
-  if (ageMonths<=144) return 0.7; return 0.6;
+  // Acker et al., J Pediatr Surg 2015 — SIPA sirf 4-16 saal (blunt trauma) ke liye validated he.
+  if (ageMonths < 48 || ageMonths >= 204) return null;
+  if (ageMonths < 84) return 1.22;
+  if (ageMonths < 156) return 1.0;
+  return 0.9;
 }
 const WAT1_PAST12 = [
   {label:"Loose/watery stools",points:1},{label:"Vomiting / retching / gagging",points:1},{label:"Temperature > 37.8°C",points:1},
@@ -223,6 +235,182 @@ const WAT1_CALM_TIME = [
 ];
 
 // ─── Tool metadata ─────────────────────────────────────────────────────────────
+// ─── Pain & Sedation scales (verified content — see nursing-scales-research.md) ──
+// FLACC — Merkel et al., Pediatr Nurs 1997. Each category scored 0–2; total 0–10.
+const FLACC_ITEMS: {name:string;options:string[]}[] = [
+  {name:"Face",options:["No particular expression or smile","Occasional grimace or frown, withdrawn, disinterested","Frequent to constant quivering chin, clenched jaw"]},
+  {name:"Legs",options:["Normal position or relaxed","Uneasy, restless, tense","Kicking, or legs drawn up"]},
+  {name:"Activity",options:["Lying quietly, normal position, moves easily","Squirming, shifting back and forth, tense","Arched, rigid or jerking"]},
+  {name:"Cry",options:["No cry (awake or asleep)","Moans or whimpers; occasional complaint","Crying steadily, screams or sobs, frequent complaints"]},
+  {name:"Consolability",options:["Content, relaxed","Reassured by occasional touching, hugging or being talked to, distractible","Difficult to console or comfort"]},
+];
+// COMFORT-B — Ista et al., Intensive Care Med 2005. Six items scored 1–5 after a
+// 2-minute observation; total 6–30. Only ONE of Respiratory response / Crying is scored.
+const COMFORTB_FIXED: {name:string;options:string[]}[] = [
+  {name:"Alertness",options:["Deeply asleep","Lightly asleep","Drowsy","Fully awake and alert","Hyperalert"]},
+  {name:"Calmness / Agitation",options:["Calm","Slightly anxious","Anxious","Very anxious","Panicky"]},
+];
+const COMFORTB_RESP: string[] = ["No coughing and no spontaneous respiration","Spontaneous respiration with little or no response to ventilation","Occasional cough or resistance to ventilator","Actively breathes against ventilator or coughs regularly","Fights ventilator, cough or choking"];
+const COMFORTB_CRYING: string[] = ["Quiet breathing, no crying","Sobbing or gasping","Moaning","Crying","Screaming"];
+const COMFORTB_REST: {name:string;options:string[]}[] = [
+  {name:"Physical movement",options:["No movement","Occasional, slight movements","Frequent, slight movements","Vigorous movement limited to extremities","Vigorous movements including torso and head"]},
+  {name:"Muscle tone",options:["Muscles totally relaxed, no muscle tone","Reduced muscle tone","Normal muscle tone","Increased muscle tone and flexion of fingers and toes","Extreme muscle rigidity and flexion of fingers and toes"]},
+  {name:"Facial tension",options:["Facial muscle totally relaxed","Facial muscle tone normal; no facial muscle tension evident","Tension evident in some facial muscles","Tension evident throughout facial muscles","Facial muscles contorted and grimacing"]},
+];
+// SAS — Riker Sedation-Agitation Scale, Riker et al., Crit Care Med 1999. Plain 1–7.
+const SAS_LEVELS: {score:number;level:string;desc:string}[] = [
+  {score:7,level:"Dangerous agitation",desc:"Pulling at ET tube, trying to remove catheters, climbing over bedrails, striking at staff, thrashing side-to-side"},
+  {score:6,level:"Very agitated",desc:"Does not calm despite frequent verbal reminding of limits, requires physical restraints, may bite the ETT"},
+  {score:5,level:"Agitated",desc:"Anxious or mildly agitated, attempts to sit up, calms down to verbal instructions"},
+  {score:4,level:"Calm and cooperative",desc:"Calm, awakens easily, follows commands"},
+  {score:3,level:"Sedated",desc:"Difficult to arouse; awakens to verbal stimuli or gentle shaking but drifts off again; follows simple commands"},
+  {score:2,level:"Very sedated",desc:"Arouses to physical stimuli but does not communicate or follow commands"},
+  {score:1,level:"Unarousable",desc:"Minimal or no response to noxious stimuli, does not communicate or follow commands"},
+];
+// Wong-Baker FACES — Wong & Baker 1988. Self-report faces scale, usually age ≥3 years.
+// Six faces scored 0,2,4,6,8,10. Faces are drawn with react-native-svg (flat design).
+const WONGBAKER_FACES: {score:number;label:string;band:string;hint:string;color:string}[] = [
+  {score:0,label:"No hurt",band:"No pain",hint:"Routine reassessment",color:"#16A34A"},
+  {score:2,label:"Hurts a little bit",band:"Mild pain",hint:"Comfort measures, reassess",color:"#65A30D"},
+  {score:4,label:"Hurts a little more",band:"Mild pain",hint:"Comfort measures, reassess",color:"#D97706"},
+  {score:6,label:"Hurts even more",band:"Moderate pain",hint:"Analgesia per orders, reassess",color:"#EA580C"},
+  {score:8,label:"Hurts a whole lot",band:"Severe pain",hint:"Urgent analgesia, notify prescriber, close reassessment",color:"#DC2626"},
+  {score:10,label:"Hurts worst",band:"Severe pain",hint:"Urgent analgesia, notify prescriber, close reassessment",color:"#DC2626"},
+];
+// Face artwork per score: head fill grades green → yellow → orange → red; the mouth
+// curve flattens from a smile into a deep frown; 8 adds downturned brows, 10 adds
+// raised inner brows + tears (crying).
+const WB_FACE_ART: Record<number,{fill:string;stroke:string;mouth:string;brows?:string[];tears?:boolean}> = {
+  0:{fill:"#4ADE80",stroke:"#16A34A",mouth:"M 30 60 Q 50 82 70 60"},
+  2:{fill:"#A3E635",stroke:"#65A30D",mouth:"M 32 63 Q 50 76 68 63"},
+  4:{fill:"#FACC15",stroke:"#CA8A04",mouth:"M 33 66 Q 50 71 67 66"},
+  6:{fill:"#FB923C",stroke:"#EA580C",mouth:"M 33 69 Q 50 65 67 69"},
+  8:{fill:"#F97316",stroke:"#C2410C",mouth:"M 30 68 Q 40 61 50 68 Q 60 75 70 68",brows:["M 26 34 L 44 38","M 74 34 L 56 38"]},
+  10:{fill:"#EF4444",stroke:"#B91C1C",mouth:"M 30 77 Q 50 57 70 77",brows:["M 26 37 L 44 30","M 74 37 L 56 30"],tears:true},
+};
+function WongBakerFace({score,size}:{score:number;size:number}) {
+  const art = WB_FACE_ART[score];
+  const feature = "#1F2937";
+  return (
+    <Svg width={size} height={size} viewBox="0 0 100 100">
+      <Circle cx={50} cy={50} r={46} fill={art.fill} stroke={art.stroke} strokeWidth={2.5}/>
+      {art.brows?.map((d,i)=>(
+        <Path key={i} d={d} stroke={feature} strokeWidth={3.5} strokeLinecap="round" fill="none"/>
+      ))}
+      <Circle cx={35} cy={44} r={4.2} fill={feature}/>
+      <Circle cx={65} cy={44} r={4.2} fill={feature}/>
+      {art.tears&&(<>
+        <Ellipse cx={35} cy={58} rx={3.4} ry={6} fill="#38BDF8"/>
+        <Ellipse cx={65} cy={58} rx={3.4} ry={6} fill="#38BDF8"/>
+      </>)}
+      <Path d={art.mouth} stroke={feature} strokeWidth={4} strokeLinecap="round" fill="none"/>
+    </Svg>
+  );
+}
+// ─── Braden Q & Humpty Dumpty (verified content — see nursing-scales-supplement.md) ──
+// Braden Q — Curley et al., Nurs Res 2003. Seven subscales, each scored 1–4
+// (1 = most impaired); total 7–28; ≤16 = at risk. Albumin printed in g/dL.
+const BRADENQ_SUBSCALES: {name:string;options:string[]}[] = [
+  {name:"Mobility",options:[
+    "Completely immobile: does not make even slight changes in body or extremity position without assistance",
+    "Very limited: makes occasional slight changes in body or extremity position but unable to completely turn self",
+    "Slightly limited: makes frequent though slight changes in body or extremity position independently",
+    "No limitations: makes major and frequent changes in position without assistance"]},
+  {name:"Activity",options:[
+    "Bedfast: confined to bed",
+    "Chair fast: ability to walk severely limited or nonexistent; cannot bear own weight and/or must be assisted into chair or wheelchair",
+    "Walks occasionally: walks occasionally during day, but for very short distances, with or without assistance; spends majority of each shift in bed or chair",
+    "Walks frequently: all patients too young to ambulate OR walks outside the room at least twice a day and inside room at least once every 2 hours during waking hours"]},
+  {name:"Sensory Perception",options:[
+    "Completely limited: unresponsive (does not moan, flinch, or grasp) to painful stimuli due to diminished level of consciousness or sedation, OR limited ability to feel pain over most of body surface",
+    "Very limited: responds only to painful stimuli; cannot communicate discomfort except by moaning or restlessness, OR has a sensory impairment which limits the ability to feel pain or discomfort over ½ of body",
+    "Slightly limited: responds to verbal commands, but cannot always communicate discomfort or need to be turned, OR has some sensory impairment which limits ability to feel pain or discomfort in 1 or 2 extremities",
+    "No impairment: responds to verbal commands; has no sensory deficit which limits ability to feel or communicate pain or discomfort"]},
+  {name:"Moisture",options:[
+    "Constantly moist: skin kept moist almost constantly by perspiration, urine, drainage etc.; dampness detected every time patient is moved or turned",
+    "Very moist: skin often, but not always, moist; linen must be changed at least every 8 hours",
+    "Occasionally moist: skin occasionally moist, requiring a linen change every 12 hours",
+    "Rarely moist: skin usually dry; routine diaper changes; linen only requires changing every 24 hours"]},
+  {name:"Friction–Shear",options:[
+    "Significant problem: spasticity, contracture, itching or agitation leads to almost constant thrashing and friction; requires moderate to maximum assistance in moving; complete lifting without sliding against sheets is impossible; frequently slides down in bed or chair, requiring frequent repositioning with maximum assistance",
+    "Problem: moves feebly or requires minimum assistance; during a move skin probably slides to some extent against sheets, chair, restraints or other devices; maintains relatively good position in chair or bed most of the time but occasionally slides down",
+    "Potential problem: moves in bed and in chair independently and has sufficient muscle strength to lift up completely during a move; maintains good position in bed or chair at all times",
+    "No apparent problem: moves in bed and chair independently and can be lifted completely during a position change; maintains good position at all times"]},
+  {name:"Nutrition",options:[
+    "Very poor: NPO and/or maintained on clear liquids or IVs for more than 5 days, OR albumin <2.5 g/dL, OR never eats a complete meal; rarely eats more than ½ of any food offered; protein intake includes only 2 servings of meat or dairy products per day; takes fluids poorly; does not take a liquid dietary supplement",
+    "Inadequate: is on liquid diet or tube feedings/TPN which provide inadequate calories and minerals for age, OR albumin <3 g/dL, OR rarely eats a complete meal and generally eats only about ½ of any food offered; protein intake includes only 3 servings of meat or dairy products per day; occasionally will take a dietary supplement",
+    "Adequate: is on tube feedings or TPN which provide adequate calories and minerals for age, OR eats over half of most meals; eats a total of 4 servings of protein (meat, dairy products) each day; occasionally will refuse a meal but will usually take a supplement if offered",
+    "Excellent: is on a normal diet providing adequate calories for age (e.g., eats/drinks most of every meal/feeding); never refuses a meal; usually eats a total of 4 or more servings of meat and dairy products; occasionally eats between meals; does not require supplementation"]},
+  {name:"Tissue Perfusion & Oxygenation",options:[
+    "Extremely compromised: hypotensive (MAP <50 mmHg; <40 in a newborn) OR the patient does not physiologically tolerate position changes",
+    "Compromised: normotensive; oxygen saturation may be <95% OR hemoglobin may be <10 g/dL OR capillary refill may be >2 seconds; serum pH is <7.40",
+    "Adequate: normotensive; oxygen saturation may be <95% OR hemoglobin may be <10 g/dL OR capillary refill may be >2 seconds; serum pH is normal",
+    "Excellent: normotensive; oxygen saturation >95%; normal hemoglobin; capillary refill <2 seconds"]},
+];
+const BRADENQ_PREVENTION: string[] = [
+  "Follow a regular repositioning schedule",
+  "Use an appropriate support surface",
+  "Inspect skin regularly, including under devices",
+  "Check device sites — tubes, masks, leads, splints",
+  "Review nutrition and hydration",
+];
+// Humpty Dumpty Falls Scale — Hill-Rodriguez et al., J Spec Pediatr Nurs 2009.
+// Seven parameters, pick ONE criterion each; total 7–23; ≥12 = high risk.
+const HDFS_PARAMS: {name:string;options:{label:string;points:number}[]}[] = [
+  {name:"Age",options:[
+    {label:"<3 years",points:4},{label:"3 to <7 years",points:3},{label:"7 to <13 years",points:2},{label:"≥13 years",points:1}]},
+  {name:"Gender",options:[
+    {label:"Male",points:2},{label:"Female",points:1}]},
+  {name:"Diagnosis",options:[
+    {label:"Neurological diagnosis",points:4},
+    {label:"Alterations in oxygenation (respiratory diagnosis, dehydration, anemia, anorexia, syncope, dizziness, etc.)",points:3},
+    {label:"Psych / behavioral disorders",points:2},
+    {label:"Other diagnosis",points:1}]},
+  {name:"Cognitive Impairments",options:[
+    {label:"Not aware of limitations",points:3},{label:"Forgets limitations",points:2},{label:"Oriented to own ability",points:1}]},
+  {name:"Environmental Factors",options:[
+    {label:"History of falls, OR infant-toddler placed in bed",points:4},
+    {label:"Patient uses assistive devices, OR infant-toddler in crib / furniture / lighting",points:3},
+    {label:"Patient placed in bed",points:2},
+    {label:"Outpatient area",points:1}]},
+  {name:"Response to Surgery / Sedation / Anesthesia",options:[
+    {label:"Within 24 hours",points:3},{label:"Within 48 hours",points:2},{label:"More than 48 hours / none",points:1}]},
+  {name:"Medication Usage",options:[
+    {label:"Multiple (2 or more) of: sedatives (excluding ICU patients sedated and paralyzed), hypnotics, barbiturates, phenothiazines, antidepressants, laxatives/diuretics, narcotics",points:3},
+    {label:"One of the medications listed above",points:2},
+    {label:"Other medications / none",points:1}]},
+];
+const HDFS_LOW_RISK: string[] = [
+  "Orient patient to the room",
+  "Bed in low position, brakes on",
+  "Side rails ×2 or ×4 up — assess gaps for entrapment",
+  "Non-skid footwear for ambulating patients; appropriate-size clothing",
+  "Assess elimination needs and assist as needed",
+  "Call light within reach — educate patient/family on its use",
+  "Environment clear of unused equipment and hazards; furniture in place",
+  "Assess lighting; leave nightlight on",
+  "Patient & family education available",
+  "Document fall-prevention teaching in the plan of care",
+];
+const HDFS_HIGH_RISK: string[] = [
+  "Identify patient with a “Humpty Dumpty” armband (if ambulatory) and a sign at head of bed/crib",
+  "Educate patient/parents on falls-protocol precautions",
+  "Check patient at minimum every 1 hour",
+  "Accompany patient with ambulation",
+  "Place patient in a developmentally appropriate bed",
+  "Consider moving the patient closer to the nurses' station",
+  "Assess need for 1:1 supervision",
+  "Evaluate medication administration times",
+  "Remove all unused equipment from the room",
+  "Keep bed in the lowest position",
+  "Document in the education record / high-risk care plan",
+];
+
+// ─── Fluid Balance (I/O chart) ────────────────────────────────────────────────
+const IO_INTAKE_TYPES: string[] = ["IV fluids","Enteral feed","Oral","IV meds & flushes","Blood products"];
+const IO_OUTPUT_TYPES: string[] = ["Urine","Stool","Vomitus","Drain","Insensible / other"];
+interface IOEntry { id:string; kind:"in"|"out"; type:string; volume:number; time:string }
+
 const TOOL_META: Record<string,{title:string;icon:string;color:string;subtitle:string}> = {
   growth:{title:"Growth Charts",icon:"bar-chart-2",color:"#0D9488",subtitle:"WHO Child Growth Standards"},
   vis:{title:"VIS / Cardiac",icon:"heart",color:"#E53E3E",subtitle:"Vasoactive-Inotropic Score"},
@@ -242,14 +430,19 @@ const TOOL_META: Record<string,{title:string;icon:string;color:string;subtitle:s
   "streptokinase-empyema":{title:"Streptokinase — Empyema",icon:"shield",color:"#0D9488",subtitle:"Intrapleural Fibrinolysis Protocol"},
   // ── Ventilator & ABG Management ────────────────────────────────────────────
   "ventilator":{title:"Ventilator & ABG Management",icon:"wind",color:"#0891B2",subtitle:"PALICC 2023 · Harriet Lane · Hamilton C3"},
+  // ── New: Nursing batch ─────────────────────────────────────────────────────
+  "pain-sedation":{title:"Pain & Sedation Scores",icon:"thermometer",color:"#DB2777",subtitle:"FLACC · COMFORT-B · SAS (Riker) · Faces"},
+  "fluid-balance":{title:"Fluid Balance — I/O Chart",icon:"clipboard",color:"#0369A1",subtitle:"Intake & Output · Urine mL/kg/hr"},
+  "braden-q":{title:"Braden Q — Pressure Injury Risk",icon:"layers",color:"#B45309",subtitle:"7 subscales · Total 7–28 · ≤16 at risk"},
+  "humpty-dumpty":{title:"Humpty Dumpty — Falls Risk",icon:"alert-triangle",color:"#65A30D",subtitle:"Score 7–23 · ≥12 high risk · JCI IPSG 6"},
 };
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 function Row({label,value,isDark}:{label:string;value:string;isDark:boolean}) {
   return (
     <View style={{flexDirection:"row",justifyContent:"space-between",paddingVertical:4}}>
-      <Text style={{fontSize:13,color:isDark?"#8892B0":"#64748B"}}>{label}</Text>
-      <Text style={{fontSize:13,fontWeight:"700",color:isDark?"#CCD6F6":"#0D1B2A"}}>{value}</Text>
+      <Text style={{fontSize: Math.round(13 * activeTextScale),color:isDark?"#8892B0":"#64748B"}}>{label}</Text>
+      <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:isDark?"#CCD6F6":"#0D1B2A"}}>{value}</Text>
     </View>
   );
 }
@@ -266,7 +459,7 @@ function GCSOption({options,selected,onSelect,isDark}:{options:{val:number;label
             borderColor:selected===o.val?C.tint:isDark?"#3D5470":"#CBD5E1"}}>
             {selected===o.val&&<View style={{width:8,height:8,borderRadius:4,backgroundColor:C.tint}}/>}
           </View>
-          <Text style={{flex:1,fontSize:13,color:isDark?"#CBD5E1":"#334155"}}>{o.label}</Text>
+          <Text style={{flex:1,fontSize: Math.round(13 * activeTextScale),color:isDark?"#CBD5E1":"#334155"}}>{o.label}</Text>
         </TouchableOpacity>
       ))}
     </View>
@@ -279,7 +472,7 @@ function Chip({label,color,selected,onPress,isDark}:{label:string;color:string;s
       style={{paddingHorizontal:12,paddingVertical:7,borderRadius:20,borderWidth:1.5,
         backgroundColor:selected?color:isDark?"#0A192F":"#F1F5F9",
         borderColor:selected?color:isDark?"#2D4456":"#CBD5E1"}}>
-      <Text style={{fontSize:12,fontWeight:"600",color:selected?"#FFF":isDark?"#8892B0":"#64748B"}}>{label}</Text>
+      <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"600",color:selected?"#FFF":isDark?"#8892B0":"#64748B"}}>{label}</Text>
     </TouchableOpacity>
   );
 }
@@ -295,12 +488,12 @@ function ScenarioFluidPanel({scenario,kCl,isDark,textMuted,textPrimary}:{scenari
   const d=data[scenario]||data.maintenance;
   return (
     <View style={{borderRadius:12,padding:12,borderWidth:1.5,marginTop:10,backgroundColor:d.bg,borderColor:d.border}}>
-      <Text style={{fontSize:11,color:textMuted,fontWeight:"700",marginBottom:4}}>RECOMMENDED FLUID</Text>
-      <Text style={{fontSize:14,fontWeight:"800",color:d.alertColor}}>{d.fluid}</Text>
+      <Text style={{fontSize: Math.round(11 * activeTextScale),color:textMuted,fontWeight:"700",marginBottom:4}}>RECOMMENDED FLUID</Text>
+      <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"800",color:d.alertColor}}>{d.fluid}</Text>
       {d.alert?(
         <View style={{flexDirection:"row",alignItems:"center",gap:6,marginTop:6}}>
           <Feather name="alert-triangle" size={14} color={d.alertColor}/>
-          <Text style={{flex:1,fontSize:12,color:d.alertColor}}>{d.alert}</Text>
+          <Text style={{flex:1,fontSize: Math.round(12 * activeTextScale),color:d.alertColor}}>{d.alert}</Text>
         </View>
       ):null}
     </View>
@@ -313,6 +506,8 @@ export default function ToolDetailScreen() {
   const { isDark } = useTheme();
   const { weight } = useWeight();
   const { isFav, toggleFav } = useFavorites();
+  const { textScale } = usePreferences();
+  activeTextScale = textScale;
 
   const bg   = isDark ? "#0B132B" : "#F0F4F8";
   const card = isDark ? "#112240" : "#FFFFFF";
@@ -325,6 +520,12 @@ export default function ToolDetailScreen() {
 
   // ── Growth state ──────────────────────────────────────────────────────────
   const [growthSex, setGrowthSex] = useState<"M"|"F">("M");
+  // ── Dose Double-Check (Point 3) ──
+  const [dcQuery, setDcQuery] = useState("");
+  const [dcDrugId, setDcDrugId] = useState<string>("");
+  const [dcDoseIdx, setDcDoseIdx] = useState(0);
+  const [dcAmount, setDcAmount] = useState("");
+  const [dcUnit, setDcUnit] = useState("mg");
   const [growthAge, setGrowthAge] = useState("");
   const [growthAgeUnit, setGrowthAgeUnit] = useState<"months"|"years">("months");
   const [growthWeight, setGrowthWeight] = useState(weight>0?weight.toString():"");
@@ -376,24 +577,6 @@ export default function ToolDetailScreen() {
   const deficit = fluidWtNum>0 ? Math.round((dehydPct/100)*fluidWtNum*1000) : 0;
   const total48h = maintenance ? Math.round(maintenance.daily+deficit/2) : 0;
 
-  // ── Electrolytes state ────────────────────────────────────────────────────
-  const [elActualK,setElActualK] = useState("");
-  const [elTargetK,setElTargetK] = useState("4.0");
-  const [elWt,setElWt] = useState(weight>0?weight.toString():"");
-  const [elCentral,setElCentral] = useState(false);
-  const [elRestrictFluids,setElRestrictFluids] = useState(false);
-  const [elChecklist,setElChecklist] = useState({renal:false,ecg:false,mg:false});
-  const elActualKNum=parseFloat(elActualK)||0, elTargetKNum=parseFloat(elTargetK)||4.0, elWtNum=parseFloat(elWt)||0;
-  const elDeficit = elWtNum>0&&elActualKNum>0&&elTargetKNum>elActualKNum ? Math.round((elTargetKNum-elActualKNum)*elWtNum*0.4*10)/10 : 0;
-  const elChecklistDone = elChecklist.renal&&elChecklist.ecg&&elChecklist.mg;
-  const elConc = (elCentral||elRestrictFluids) ? 0.08 : 0.04;
-  const elKClML = elDeficit>0 ? Math.round((elDeficit/2)*10)/10 : 0;
-  const elTotalVol = elKClML>0 ? Math.round(elDeficit/elConc) : 0;
-  const elNSML = Math.max(0,elTotalVol-elKClML);
-  const elRateMEqHr = elWtNum>0 ? (elCentral?0.5:0.3)*elWtNum : 0;
-  const elRateMLHr = elConc>0&&elRateMEqHr>0 ? Math.round(elRateMEqHr/elConc*10)/10 : 0;
-  const elDurationHr = elRateMLHr>0&&elTotalVol>0 ? Math.round(elTotalVol/elRateMLHr*10)/10 : 0;
-
   // ── GCS state ─────────────────────────────────────────────────────────────
   const [eye,setEye] = useState(4);
   const [verbal,setVerbal] = useState(5);
@@ -417,8 +600,8 @@ export default function ToolDetailScreen() {
   const sipaAgeMonths = sipaAgeUnit==="years"?(parseFloat(sipaAge)||0)*12:parseFloat(sipaAge)||0;
   const sipaHrNum=parseFloat(sipaHR)||0, sipaSbpNum=parseFloat(sipaSBP)||0;
   const sipaSi = sipaSbpNum>0 ? +(sipaHrNum/sipaSbpNum).toFixed(2) : null;
-  const sipaThresholdVal = sipaAgeMonths>0 ? sipaThreshold(sipaAgeMonths) : 0.6;
-  const sipaAlert = sipaSi!==null&&sipaSi>sipaThresholdVal;
+  const sipaThresholdVal = sipaAgeMonths>0 ? sipaThreshold(sipaAgeMonths) : null;
+  const sipaAlert = sipaSi!==null&&sipaThresholdVal!==null&&sipaSi>sipaThresholdVal;
   const [wat1Past12,setWat1Past12] = useState<boolean[]>(WAT1_PAST12.map(()=>false));
   const [wat1Obs2,setWat1Obs2] = useState<boolean[]>(WAT1_OBS2MIN.map(()=>false));
   const [wat1Stim,setWat1Stim] = useState<boolean[]>(WAT1_STIMULUS.map(()=>false));
@@ -470,6 +653,9 @@ export default function ToolDetailScreen() {
   const girRateNum=parseFloat(girRate)||0, girDexNum=parseFloat(girDextrose)||0, girWtNum=parseFloat(girWeight)||0;
   const girResult = girRateNum>0&&girDexNum>0&&girWtNum>0 ? +((girRateNum*girDexNum)/(girWtNum*6)).toFixed(2) : null;
   const girInterpret = girResult===null?null:girResult<4?{label:"Low — may need ↑ glucose supplementation",color:"#D97706"}:girResult<=8?{label:"Normal neonatal/infant range",color:"#16A34A"}:girResult<=12?{label:"Acceptable — monitor glucose closely",color:"#D97706"}:{label:"High — hyperglycaemia risk",color:"#DC2626"};
+  const [girTarget,setGirTarget] = useState("");
+  const girTargetNum=parseFloat(girTarget)||0;
+  const girReqRate = girTargetNum>0&&girDexNum>0&&girWtNum>0 ? +((girTargetNum*girWtNum*60)/(girDexNum*10)).toFixed(1) : null;
 
   // ── BIG Score state ────────────────────────────────────────────────────────
   const [bigBD,setBigBD] = useState("");
@@ -507,43 +693,187 @@ export default function ToolDetailScreen() {
   const phxTotal=phxResp+phxCardio+phxCoag+phxNeuro;
   const phxShock=phxCardio>=1;
 
+  // ── Pain & Sedation state ─────────────────────────────────────────────────
+  const [psTab,setPsTab] = useState<"flacc"|"comfortb"|"sas"|"faces">("flacc");
+  const [flacc,setFlacc] = useState<number[]>([0,0,0,0,0]);
+  const flaccTotal = flacc.reduce((a,b)=>a+b,0);
+  const flaccResult = flaccTotal===0?{label:"Relaxed and comfortable",sub:"Routine reassessment",color:"#16A34A"}:flaccTotal<=3?{label:"Mild discomfort",sub:"Comfort measures, reassess",color:"#F59E0B"}:flaccTotal<=6?{label:"Moderate pain",sub:"Analgesic intervention per protocol, reassess",color:"#EA580C"}:{label:"Severe pain / discomfort",sub:"Prompt analgesia, notify prescriber, close reassessment",color:"#DC2626"};
+  const [comfortVent,setComfortVent] = useState(true);
+  const [comfort,setComfort] = useState<number[]>([1,1,1,1,1,1]);
+  const comfortItems = [COMFORTB_FIXED[0],COMFORTB_FIXED[1],{name:comfortVent?"Respiratory response":"Crying",options:comfortVent?COMFORTB_RESP:COMFORTB_CRYING},COMFORTB_REST[0],COMFORTB_REST[1],COMFORTB_REST[2]];
+  const comfortTotal = comfort.reduce((a,b)=>a+b,0);
+  const comfortResult = comfortTotal<=10?{label:"Possible over-sedation",sub:"Review sedation depth and infusion rates",color:"#D97706"}:comfortTotal<=22?{label:"Indeterminate (grey zone)",sub:"Interpret with clinical judgement (NISS) alongside the score",color:"#0284C7"}:{label:"Possible under-sedation",sub:"Assess pain / distress and review the sedation plan",color:"#DC2626"};
+  const [sasLevel,setSasLevel] = useState<number|null>(null);
+  const sasSelected = sasLevel!==null ? SAS_LEVELS.find(l=>l.score===sasLevel) : undefined;
+  const [facesScore,setFacesScore] = useState<number|null>(null);
+  const facesSelected = facesScore!==null ? WONGBAKER_FACES.find(f=>f.score===facesScore) : undefined;
+
+  // ── Braden Q & Humpty Dumpty state ────────────────────────────────────────
+  const [braden,setBraden] = useState<number[]>([4,4,4,4,4,4,4]);
+  const bradenTotal = braden.reduce((a,b)=>a+b,0);
+  const bradenAtRisk = bradenTotal<=16;
+  const hdfsDefaults = HDFS_PARAMS.map(p=>Math.min(...p.options.map(o=>o.points)));
+  const [hdfs,setHdfs] = useState<number[]>(hdfsDefaults);
+  const hdfsTotal = hdfs.reduce((a,b)=>a+b,0);
+  const hdfsHigh = hdfsTotal>=12;
+
+  // ── Fluid Balance (I/O chart) state ───────────────────────────────────────
+  const [ioWt,setIoWt] = useState(weight>0?weight.toString():"");
+  const [ioEntries,setIoEntries] = useState<IOEntry[]>([]);
+  const [ioHours,setIoHours] = useState("12");
+  const [ioKind,setIoKind] = useState<"in"|"out">("in");
+  const [ioType,setIoType] = useState<string>(IO_INTAKE_TYPES[0]);
+  const [ioVolume,setIoVolume] = useState("");
+  const [ioTime,setIoTime] = useState("");
+  const [ioLoaded,setIoLoaded] = useState(false);
+  useEffect(()=>{
+    let alive = true;
+    AsyncStorage.getItem("picu_io_chart_v1")
+      .then(val=>{
+        if(!alive) return;
+        if(val){
+          try{
+            const parsed = JSON.parse(val);
+            if(parsed&&Array.isArray(parsed.entries)) setIoEntries(parsed.entries);
+            if(parsed&&typeof parsed.hours==="string") setIoHours(parsed.hours);
+          }catch{}
+        }
+        setIoLoaded(true);
+      })
+      .catch(()=>{ if(alive) setIoLoaded(true); });
+    return ()=>{ alive=false; };
+  },[]);
+  useEffect(()=>{
+    if(!ioLoaded) return;
+    AsyncStorage.setItem("picu_io_chart_v1",JSON.stringify({entries:ioEntries,hours:ioHours})).catch(()=>{});
+  },[ioEntries,ioHours,ioLoaded]);
+  const ioWtNum = parseFloat(ioWt)||0;
+  const ioHoursNum = parseFloat(ioHours)||0;
+  const ioTotalIn = ioEntries.filter(e=>e.kind==="in").reduce((a,e)=>a+e.volume,0);
+  const ioTotalOut = ioEntries.filter(e=>e.kind==="out").reduce((a,e)=>a+e.volume,0);
+  const ioUrine = ioEntries.filter(e=>e.kind==="out"&&e.type==="Urine").reduce((a,e)=>a+e.volume,0);
+  const ioNet = ioTotalIn-ioTotalOut;
+  const ioUop = ioWtNum>0&&ioHoursNum>0 ? +(ioUrine/(ioWtNum*ioHoursNum)).toFixed(2) : null;
+  const switchIoKind = (k:"in"|"out") => { setIoKind(k); setIoType(k==="in"?IO_INTAKE_TYPES[0]:IO_OUTPUT_TYPES[0]); };
+  const addIoEntry = () => {
+    const v = parseFloat(ioVolume)||0;
+    if(v<=0) return;
+    setIoEntries(prev=>[...prev,{id:Date.now().toString(),kind:ioKind,type:ioType,volume:v,time:ioTime.trim()}]);
+    setIoVolume("");
+    setIoTime("");
+  };
+
   // ── Inline input styles ───────────────────────────────────────────────────
-  const inputStyle = {color:tp,backgroundColor:inputBg,borderColor:border,borderWidth:1,borderRadius:10,paddingHorizontal:12,paddingVertical:10,fontSize:16,fontWeight:"600" as const};
+  const inputStyle = {color:tp,backgroundColor:inputBg,borderColor:border,borderWidth:1,borderRadius:10,paddingHorizontal:12,paddingVertical:10,fontSize: Math.round(16 * activeTextScale),fontWeight:"600" as const};
 
   function renderContent() {
     switch (id) {
       // ── GROWTH CHARTS ─────────────────────────────────────────────────────
+      // ── DOSE DOUBLE-CHECK ─────────────────────────────────────────────
+      case "dose-check": {
+        const dcDrug = DRUGS.find(d=>d.id===dcDrugId) || null;
+        const dcMatches = dcQuery.trim() ? DRUGS.filter(d=>matchesDrugQuery([d.name, d.genericName ?? ""], dcQuery)).slice(0,8) : [];
+        const dcDose = dcDrug ? dcDrug.doses[Math.min(dcDoseIdx, dcDrug.doses.length-1)] : null;
+        const dcBaseUnit = dcDose ? dcDose.unit.split("/")[0].trim() : "";
+        const massToMg: Record<string, number> = { mg: 1, mcg: 0.001, g: 1000 };
+        let dcLo: number | null = null, dcHi: number | null = null, dcVerdict: string | null = null, dcColor = "#059669";
+        if (dcDose && weight > 0) {
+          const perKgDose = dcDose.perKg || dcDose.unit.includes("/kg");
+          const lo0 = dcDose.min ?? dcDose.value ?? 0;
+          const hi0 = dcDose.max ?? dcDose.value ?? lo0;
+          dcLo = perKgDose ? lo0 * weight : lo0;
+          dcHi = perKgDose ? hi0 * weight : hi0;
+          const caps = [dcDose.maxSingleDose_num, dcDose.adultMaxDose_num].filter((x): x is number => typeof x === "number");
+          if (caps.length) dcHi = Math.min(dcHi, Math.min(...caps));
+          const amt = parseFloat(dcAmount);
+          if (Number.isFinite(amt) && amt > 0) {
+            let amtBase: number | null = null;
+            if (massToMg[dcUnit] !== undefined && massToMg[dcBaseUnit] !== undefined) amtBase = (amt * massToMg[dcUnit]) / massToMg[dcBaseUnit];
+            else if (dcUnit === dcBaseUnit) amtBase = amt;
+            if (amtBase === null) { dcVerdict = "Unit match nahi hoti — dose " + dcBaseUnit + " me check karein."; dcColor = "#D97706"; }
+            else if (amtBase < dcLo * 0.995) { dcVerdict = "✗ KAM HE — sahi range se neeche"; dcColor = "#DC2626"; }
+            else if (amtBase > dcHi * 1.005) { dcVerdict = "✗ ZYADA HE — KHATRA, dobara hisaab karein"; dcColor = "#DC2626"; }
+            else { dcVerdict = "✓ SAHI RANGE ME HE"; dcColor = "#059669"; }
+          }
+        }
+        const fmtN = (n: number) => n >= 100 ? Math.round(n).toString() : n >= 10 ? (+n.toFixed(1)).toString() : (+n.toFixed(2)).toString();
+        return (
+          <View style={{gap:12}}>
+            <View style={c.card}><Text style={c.cardTitle}>Dose Double-Check — {weight} kg</Text>
+              <Text style={c.note}>Jo dose banayi gayi he, use yahan likho — app batayega ke is wazan par wo sahi range me he ya nahi. Pehle dawa chuno:</Text>
+              <TextInput style={inputStyle} value={dcQuery} onChangeText={(t)=>{setDcQuery(t);}} placeholder="Dawa ka naam likho…" placeholderTextColor={tm} />
+              {dcMatches.length>0 && (
+                <View style={{gap:6, marginTop:8}}>
+                  {dcMatches.map(d=>(
+                    <TouchableOpacity key={d.id} onPress={()=>{setDcDrugId(d.id); setDcDoseIdx(0); setDcQuery(d.name);}} style={{padding:10, borderRadius:10, borderWidth:1, borderColor: dcDrugId===d.id ? "#059669" : border, backgroundColor: dcDrugId===d.id ? "#05966918" : "transparent"}}>
+                      <Text style={{color:tp, fontWeight:"700", fontSize: Math.round(13.5 * activeTextScale)}}>{d.name}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+            </View>
+            {dcDrug && dcDose && (
+              <View style={c.card}><Text style={c.cardTitle}>{dcDrug.name} — istemal chuno</Text>
+                <View style={{flexDirection:"row", flexWrap:"wrap", gap:6}}>
+                  {dcDrug.doses.map((dd,i)=>(
+                    <TouchableOpacity key={i} onPress={()=>setDcDoseIdx(i)} style={{paddingHorizontal:10, paddingVertical:7, borderRadius:999, borderWidth:1, borderColor: dcDoseIdx===i ? "#059669" : border, backgroundColor: dcDoseIdx===i ? "#059669" : "transparent"}}>
+                      <Text style={{color: dcDoseIdx===i ? "#FFFFFF" : tp, fontWeight:"700", fontSize: Math.round(11.5 * activeTextScale)}}>{dd.label || dd.route || ("Dose " + (i+1))}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                <Text style={[c.note, {marginTop:8}]}>Sahi range is wazan par: <Text style={{fontWeight:"800", color:tp}}>{dcLo!==null && dcHi!==null ? fmtN(dcLo) + " – " + fmtN(dcHi) + " " + dcBaseUnit : "—"}</Text> ({dcDose.min ?? dcDose.value}–{dcDose.max ?? dcDose.value} {dcDose.unit})</Text>
+                <View style={{flexDirection:"row", gap:8, marginTop:6}}>
+                  <TextInput style={[inputStyle, {flex:1}]} value={dcAmount} onChangeText={setDcAmount} keyboardType="decimal-pad" placeholder="Banayi gayi dose" placeholderTextColor={tm} />
+                  <View style={{flexDirection:"row", gap:4}}>
+                    {["mg","mcg","g","units","mL"].map(u=>(
+                      <TouchableOpacity key={u} onPress={()=>setDcUnit(u)} style={{paddingHorizontal:9, paddingVertical:10, borderRadius:10, borderWidth:1, borderColor: dcUnit===u ? "#059669" : border, backgroundColor: dcUnit===u ? "#059669" : "transparent"}}>
+                        <Text style={{color: dcUnit===u ? "#FFFFFF" : tp, fontWeight:"700", fontSize:12}}>{u}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+                {dcVerdict && (
+                  <View style={{marginTop:10, borderRadius:10, padding:12, backgroundColor: dcColor + "1A", borderWidth:1, borderColor: dcColor}}>
+                    <Text style={{color: dcColor, fontWeight:"800", fontSize: Math.round(15 * activeTextScale)}}>{dcVerdict}</Text>
+                  </View>
+                )}
+                <Text style={c.ref}>Reference: PeadsCal dataset — Harriet Lane 24e. Ye sirf ek check he; final faisla hamesha clinical judgement aur dusre nurse ki tasdeeq se karein.</Text>
+              </View>
+            )}
+          </View>
+        );
+      }
       case "growth": return (
         <View style={{gap:12}}>
           <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
             <View>
-              <Text style={{fontSize:12,fontWeight:"700",color:"#0D9488"}}>WHO Child Growth Standards</Text>
-              <Text style={{fontSize:11,color:tm,marginTop:1}}>Nelson's Pediatrics 22e · Harriet Lane 23e</Text>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:"#0D9488"}}>WHO Child Growth Standards</Text>
+              <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,marginTop:1}}>Nelson's Pediatrics 22e · Harriet Lane 24e</Text>
             </View>
             <StarButton isFav={isFav("tool-growth")} onToggle={()=>toggleFav({id:"tool-growth",type:"tool",label:"Growth Charts",color:"#0D9488"})} size={18} color="#0D9488"/>
           </View>
-          <Text style={{fontSize:11,color:tm,fontStyle:"italic"}}>Weight-for-Age · Z-score (SD) · Nutritional Status Classification</Text>
+          <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,fontStyle:"italic"}}>Weight-for-Age · Z-score (SD) · Nutritional Status Classification</Text>
 
-          <Text style={{fontSize:12,fontWeight:"700",color:tm}}>Sex</Text>
+          <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm}}>Sex</Text>
           <View style={{flexDirection:"row",gap:8}}>
             {(["M","F"] as const).map(s=>(
               <TouchableOpacity key={s} onPress={()=>setGrowthSex(s)} style={{flex:1,paddingVertical:10,borderRadius:10,alignItems:"center",backgroundColor:growthSex===s?(s==="M"?"#0D9488":"#7C3AED"):isDark?"#1E293B":"#F1F5F9",borderWidth:2,borderColor:growthSex===s?(s==="M"?"#0D9488":"#7C3AED"):isDark?"#334155":"#CBD5E1"}}>
-                <Text style={{fontWeight:"700",fontSize:14,color:growthSex===s?"#FFFFFF":tm}}>{s==="M"?"♂ Male":"♀ Female"}</Text>
+                <Text style={{fontWeight:"700",fontSize: Math.round(14 * activeTextScale),color:growthSex===s?"#FFFFFF":tm}}>{s==="M"?"♂ Male":"♀ Female"}</Text>
               </TouchableOpacity>
             ))}
           </View>
 
-          <Text style={{fontSize:12,fontWeight:"700",color:tm}}>Age</Text>
+          <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm}}>Age</Text>
           <View style={{flexDirection:"row",gap:8}}>
             <TextInput style={[inputStyle,{flex:1}]} value={growthAge} onChangeText={setGrowthAge} keyboardType="decimal-pad" placeholder="e.g. 18" placeholderTextColor={tm}/>
             {(["months","years"] as const).map(u=>(
               <TouchableOpacity key={u} onPress={()=>setGrowthAgeUnit(u)} style={{paddingHorizontal:12,paddingVertical:10,borderRadius:10,justifyContent:"center",backgroundColor:growthAgeUnit===u?"#0D9488":isDark?"#1E293B":"#F1F5F9",borderWidth:2,borderColor:growthAgeUnit===u?"#0D9488":isDark?"#334155":"#CBD5E1"}}>
-                <Text style={{fontWeight:"700",fontSize:13,color:growthAgeUnit===u?"#FFFFFF":tm}}>{u==="months"?"Months":"Years"}</Text>
+                <Text style={{fontWeight:"700",fontSize: Math.round(13 * activeTextScale),color:growthAgeUnit===u?"#FFFFFF":tm}}>{u==="months"?"Months":"Years"}</Text>
               </TouchableOpacity>
             ))}
           </View>
 
-          <Text style={{fontSize:12,fontWeight:"700",color:tm}}>Weight (kg)</Text>
+          <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm}}>Weight (kg)</Text>
           <TextInput style={inputStyle} value={growthWeight} onChangeText={setGrowthWeight} keyboardType="decimal-pad" placeholder="e.g. 12.5" placeholderTextColor={tm}/>
 
           <TouchableOpacity onPress={()=>setGrowthEdema(!growthEdema)} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,backgroundColor:growthEdema?"#FEF3C7":isDark?"#1E293B":"#F8FAFC",borderWidth:1.5,borderColor:growthEdema?"#F59E0B":isDark?"#334155":"#E2E8F0"}}>
@@ -551,51 +881,51 @@ export default function ToolDetailScreen() {
               {growthEdema&&<Feather name="check" size={13} color="#FFFFFF"/>}
             </View>
             <View style={{flex:1}}>
-              <Text style={{fontSize:13,fontWeight:"700",color:growthEdema?"#92400E":tp}}>Edema Detected?</Text>
-              <Text style={{fontSize:10,color:tm,marginTop:1}}>Tick if pitting edema is present — affects weight interpretation</Text>
+              <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:growthEdema?"#92400E":tp}}>Edema Detected?</Text>
+              <Text style={{fontSize: Math.round(10 * activeTextScale),color:tm,marginTop:1}}>Tick if pitting edema is present — affects weight interpretation</Text>
             </View>
           </TouchableOpacity>
 
           {growthResult&&growthRefs&&(
             <View style={{gap:10}}>
-              {growthEdema&&<View style={{backgroundColor:"#FEF9C3",borderColor:"#FDE047",borderWidth:1.5,borderRadius:10,padding:10,flexDirection:"row",alignItems:"flex-start",gap:8}}><Feather name="droplet" size={16} color="#B45309"/><Text style={{flex:1,fontSize:12,color:"#92400E",fontWeight:"600"}}>Weight may be falsely elevated due to fluid overload. Z-score may underestimate severity.{"\n"}<Text style={{fontStyle:"italic",fontWeight:"400"}}>Ref: Nelson's Pediatric Nutrition</Text></Text></View>}
-              {fttAlert&&<View style={{backgroundColor:"#FEE2E2",borderColor:"#DC2626",borderWidth:2,borderRadius:10,padding:12,flexDirection:"row",alignItems:"center",gap:8}}><Feather name="trending-down" size={18} color="#DC2626"/><View style={{flex:1}}><Text style={{color:"#DC2626",fontWeight:"800",fontSize:13}}>Warning: Potential Growth Failure</Text><Text style={{color:"#B91C1C",fontSize:12,marginTop:2}}>Percentile has crossed a major centile line since last saved entry.</Text></View></View>}
-              {growthResult.samAlert&&<View style={{backgroundColor:"#FEE2E2",borderColor:"#DC2626",borderWidth:2,borderRadius:10,padding:12,flexDirection:"row",alignItems:"center",gap:8}}><Feather name="alert-triangle" size={20} color="#DC2626"/><View style={{flex:1}}><Text style={{color:"#DC2626",fontWeight:"800",fontSize:13}}>CRITICAL: Severe Acute Malnutrition</Text><Text style={{color:"#B91C1C",fontSize:12,marginTop:2}}>Refer to Dietitian — Initiate SAM Protocol</Text></View></View>}
+              {growthEdema&&<View style={{backgroundColor:"#FEF9C3",borderColor:"#FDE047",borderWidth:1.5,borderRadius:10,padding:10,flexDirection:"row",alignItems:"flex-start",gap:8}}><Feather name="droplet" size={16} color="#B45309"/><Text style={{flex:1,fontSize: Math.round(12 * activeTextScale),color:"#92400E",fontWeight:"600"}}>Weight may be falsely elevated due to fluid overload. Z-score may underestimate severity.{"\n"}<Text style={{fontStyle:"italic",fontWeight:"400"}}>Ref: Nelson's Pediatric Nutrition</Text></Text></View>}
+              {fttAlert&&<View style={{backgroundColor:"#FEE2E2",borderColor:"#DC2626",borderWidth:2,borderRadius:10,padding:12,flexDirection:"row",alignItems:"center",gap:8}}><Feather name="trending-down" size={18} color="#DC2626"/><View style={{flex:1}}><Text style={{color:"#DC2626",fontWeight:"800",fontSize: Math.round(13 * activeTextScale)}}>Warning: Potential Growth Failure</Text><Text style={{color:"#B91C1C",fontSize: Math.round(12 * activeTextScale),marginTop:2}}>Percentile has crossed a major centile line since last saved entry.</Text></View></View>}
+              {growthResult.samAlert&&<View style={{backgroundColor:"#FEE2E2",borderColor:"#DC2626",borderWidth:2,borderRadius:10,padding:12,flexDirection:"row",alignItems:"center",gap:8}}><Feather name="alert-triangle" size={20} color="#DC2626"/><View style={{flex:1}}><Text style={{color:"#DC2626",fontWeight:"800",fontSize: Math.round(13 * activeTextScale)}}>CRITICAL: Severe Acute Malnutrition</Text><Text style={{color:"#B91C1C",fontSize: Math.round(12 * activeTextScale),marginTop:2}}>Refer to Dietitian — Initiate SAM Protocol</Text></View></View>}
               <View style={{flexDirection:"row",gap:8}}>
                 <View style={{flex:1,backgroundColor:growthResult.color+"18",borderColor:growthResult.color+"50",borderWidth:1.5,borderRadius:10,padding:12,alignItems:"center"}}>
-                  <Text style={{fontSize:11,color:tm,fontWeight:"600",marginBottom:2}}>Z-SCORE (SD)</Text>
-                  <Text style={{fontSize:26,fontWeight:"800",color:growthResult.color}}>{growthResult.zscore>0?"+":""}{growthResult.zscore}</Text>
-                  {zTrend!==null&&<Text style={{fontSize:11,color:zTrend>=0?"#16A34A":"#DC2626",fontWeight:"700",marginTop:2}}>{zTrend>=0?"↑":"↓"} {zTrend>=0?"+":""}{Math.round(zTrend*10)/10} vs last</Text>}
+                  <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,fontWeight:"600",marginBottom:2}}>Z-SCORE (SD)</Text>
+                  <Text style={{fontSize: Math.round(26 * activeTextScale),fontWeight:"800",color:growthResult.color}}>{growthResult.zscore>0?"+":""}{growthResult.zscore}</Text>
+                  {zTrend!==null&&<Text style={{fontSize: Math.round(11 * activeTextScale),color:zTrend>=0?"#16A34A":"#DC2626",fontWeight:"700",marginTop:2}}>{zTrend>=0?"↑":"↓"} {zTrend>=0?"+":""}{Math.round(zTrend*10)/10} vs last</Text>}
                 </View>
                 <View style={{flex:1,backgroundColor:growthResult.color+"18",borderColor:growthResult.color+"50",borderWidth:1.5,borderRadius:10,padding:12,alignItems:"center"}}>
-                  <Text style={{fontSize:11,color:tm,fontWeight:"600",marginBottom:2}}>PERCENTILE</Text>
-                  <Text style={{fontSize:14,fontWeight:"800",color:growthResult.color,textAlign:"center"}}>{growthResult.label}</Text>
+                  <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,fontWeight:"600",marginBottom:2}}>PERCENTILE</Text>
+                  <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"800",color:growthResult.color,textAlign:"center"}}>{growthResult.label}</Text>
                 </View>
               </View>
               <View style={{backgroundColor:growthResult.nutritionColor+"15",borderColor:growthResult.nutritionColor+"60",borderWidth:1.5,borderRadius:10,padding:12}}>
-                <Text style={{fontSize:11,color:tm,fontWeight:"600",marginBottom:2}}>NUTRITIONAL STATUS</Text>
-                <Text style={{fontSize:15,fontWeight:"800",color:growthResult.nutritionColor}}>{growthResult.nutritionStatus}</Text>
-                <Text style={{fontSize:12,color:tm,marginTop:3}}>{growthResult.note}</Text>
+                <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,fontWeight:"600",marginBottom:2}}>NUTRITIONAL STATUS</Text>
+                <Text style={{fontSize: Math.round(15 * activeTextScale),fontWeight:"800",color:growthResult.nutritionColor}}>{growthResult.nutritionStatus}</Text>
+                <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,marginTop:3}}>{growthResult.note}</Text>
               </View>
               <TouchableOpacity onPress={saveGrowthEntry} style={{backgroundColor:"#0D9488",borderRadius:10,paddingVertical:12,alignItems:"center",flexDirection:"row",justifyContent:"center",gap:8}}>
                 <Feather name="save" size={15} color="#FFFFFF"/>
-                <Text style={{color:"#FFFFFF",fontWeight:"700",fontSize:14}}>Save This Entry</Text>
+                <Text style={{color:"#FFFFFF",fontWeight:"700",fontSize: Math.round(14 * activeTextScale)}}>Save This Entry</Text>
               </TouchableOpacity>
-              <Text style={{fontSize:11,color:tm,fontStyle:"italic"}}>Reference at {Math.round(growthAgeMonths)} mo ({growthSex==="M"?"Boys":"Girls"}): P3 = {growthRefs[0]} kg · P50 = {growthRefs[2]} kg · P97 = {growthRefs[4]} kg</Text>
+              <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,fontStyle:"italic"}}>Reference at {Math.round(growthAgeMonths)} mo ({growthSex==="M"?"Boys":"Girls"}): P3 = {growthRefs[0]} kg · P50 = {growthRefs[2]} kg · P97 = {growthRefs[4]} kg</Text>
             </View>
           )}
 
           {growthEntries.length>0&&(
             <View style={{backgroundColor:isDark?"#0F172A":"#F0FDF4",borderColor:isDark?"#1A3A2A":"#BBF7D0",borderWidth:1,borderRadius:10,padding:12}}>
               <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-                <Text style={{fontSize:12,fontWeight:"800",color:"#16A34A"}}>Z-Score Trend ({growthEntries.length} saved)</Text>
-                <TouchableOpacity onPress={clearGrowthEntries}><Text style={{fontSize:11,color:"#DC2626",fontWeight:"600"}}>Clear</Text></TouchableOpacity>
+                <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"800",color:"#16A34A"}}>Z-Score Trend ({growthEntries.length} saved)</Text>
+                <TouchableOpacity onPress={clearGrowthEntries}><Text style={{fontSize: Math.round(11 * activeTextScale),color:"#DC2626",fontWeight:"600"}}>Clear</Text></TouchableOpacity>
               </View>
               <View style={{flexDirection:"row",alignItems:"flex-end",gap:6,marginBottom:8}}>
                 {growthEntries.map((entry)=>{
                   const dc=entry.zscore<-3?"#DC2626":entry.zscore<-2?"#F59E0B":"#16A34A";
                   const bh=Math.max(8,Math.min(40,24+entry.zscore*6));
-                  return(<View key={entry.id} style={{flex:1,alignItems:"center",gap:3}}><Text style={{fontSize:9,color:dc,fontWeight:"700"}}>{entry.zscore>0?"+":""}{entry.zscore}</Text><View style={{width:"100%",height:bh,backgroundColor:dc+"CC",borderRadius:4}}/><Text style={{fontSize:8,color:tm,textAlign:"center"}}>{entry.ageMonths}mo</Text></View>);
+                  return(<View key={entry.id} style={{flex:1,alignItems:"center",gap:3}}><Text style={{fontSize: Math.round(9 * activeTextScale),color:dc,fontWeight:"700"}}>{entry.zscore>0?"+":""}{entry.zscore}</Text><View style={{width:"100%",height:bh,backgroundColor:dc+"CC",borderRadius:4}}/><Text style={{fontSize: Math.round(8 * activeTextScale),color:tm,textAlign:"center"}}>{entry.ageMonths}mo</Text></View>);
                 })}
               </View>
             </View>
@@ -609,19 +939,19 @@ export default function ToolDetailScreen() {
           <View style={{flexDirection:"row",justifyContent:"flex-end"}}>
             <StarButton isFav={isFav("tool-vis")} onToggle={()=>toggleFav({id:"tool-vis",type:"tool",label:"VIS / Cardiac",color:"#E53E3E"})} size={18} color="#E53E3E"/>
           </View>
-          <Text style={{fontSize:12,color:tm,fontStyle:"italic"}}>Vasoactive-Inotropic Score (Wernovsky et al. 1995){"\n"}VIS = Dopa + Dobu + 100×Epi + 10×Milrinone + 10000×Vaso + 100×Norepi</Text>
+          <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,fontStyle:"italic"}}>Vasoactive-Inotropic Score (Wernovsky et al. 1995){"\n"}VIS = Dopa + Dobu + 100×Epi + 10×Milrinone + 10000×Vaso + 100×Norepi</Text>
           {(["dopa","dobu","epi","mil","vaso","norepi"] as const).map(key=>{
             const labels:Record<string,string>={dopa:"Dopamine (mcg/kg/min)",dobu:"Dobutamine (mcg/kg/min)",epi:"Epinephrine (mcg/kg/min)",mil:"Milrinone (mcg/kg/min)",vaso:"Vasopressin (units/kg/min)",norepi:"Norepinephrine (mcg/kg/min)"};
             return(
               <View key={key}>
-                <Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>{labels[key]}</Text>
+                <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>{labels[key]}</Text>
                 <TextInput style={inputStyle} value={vis[key]} onChangeText={t=>setVis(p=>({...p,[key]:t}))} keyboardType="decimal-pad" placeholder="0" placeholderTextColor={tm}/>
               </View>
             );
           })}
           <View style={{backgroundColor:visResult.color+"15",borderColor:visResult.color+"40",borderWidth:1.5,borderRadius:12,padding:14,alignItems:"center"}}>
-            <Text style={{fontSize:24,fontWeight:"900",color:visResult.color}}>VIS = {visScore}</Text>
-            <Text style={{fontSize:13,color:tm,marginTop:4}}>{visResult.label}</Text>
+            <Text style={{fontSize: Math.round(24 * activeTextScale),fontWeight:"900",color:visResult.color}}>VIS = {visScore}</Text>
+            <Text style={{fontSize: Math.round(13 * activeTextScale),color:tm,marginTop:4}}>{visResult.label}</Text>
           </View>
 
           {/* BP & Growth Calculator */}
@@ -629,20 +959,21 @@ export default function ToolDetailScreen() {
 
           {/* Vitals Table */}
           <View style={{backgroundColor:isDark?"#0A192F":"#EFF6FF",borderColor:isDark?"#233554":"#BFDBFE",borderWidth:1,borderRadius:12,padding:12}}>
-            <Text style={{fontSize:13,fontWeight:"700",color:"#3B82F6",marginBottom:8}}>Normal Vitals by Age</Text>
+            <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:"#3B82F6",marginBottom:8}}>Normal Vitals by Age</Text>
             <View style={{flexDirection:"row",borderBottomWidth:1,borderBottomColor:border,paddingBottom:6,marginBottom:4}}>
-              {["Age Group","HR","SBP","RR","MAP"].map(h=><Text key={h} style={{flex:1,fontSize:11,fontWeight:"700",color:"#3B82F6",textAlign:"center"}}>{h}</Text>)}
+              {["Age Group","HR","SBP","RR","MAP"].map(h=><Text key={h} style={{flex:1,fontSize: Math.round(11 * activeTextScale),fontWeight:"700",color:"#3B82F6",textAlign:"center"}}>{h}</Text>)}
             </View>
             {VITALS_TABLE.map(row=>(
               <View key={row.age} style={{flexDirection:"row",paddingVertical:5,borderBottomWidth:1,borderBottomColor:isDark?"#1E293B":"#F1F5F9"}}>
-                <Text style={{flex:1,fontSize:11,color:tp}}>{row.age}</Text>
-                <Text style={{flex:1,fontSize:11,color:tm,textAlign:"center"}}>{row.hr}</Text>
-                <Text style={{flex:1,fontSize:11,color:tm,textAlign:"center"}}>{row.sbp}</Text>
-                <Text style={{flex:1,fontSize:11,color:tm,textAlign:"center"}}>{row.rr}</Text>
-                <Text style={{flex:1,fontSize:11,color:tm,textAlign:"center"}}>{row.map}</Text>
+                <Text style={{flex:1,fontSize: Math.round(11 * activeTextScale),color:tp}}>{row.age}</Text>
+                <Text style={{flex:1,fontSize: Math.round(11 * activeTextScale),color:tm,textAlign:"center"}}>{row.hr}</Text>
+                <Text style={{flex:1,fontSize: Math.round(11 * activeTextScale),color:tm,textAlign:"center"}}>{row.sbp}</Text>
+                <Text style={{flex:1,fontSize: Math.round(11 * activeTextScale),color:tm,textAlign:"center"}}>{row.rr}</Text>
+                <Text style={{flex:1,fontSize: Math.round(11 * activeTextScale),color:tm,textAlign:"center"}}>{row.map}</Text>
               </View>
             ))}
           </View>
+        <Text style={{fontSize: Math.round(10 * activeTextScale),color:tm,fontStyle:"italic",textAlign:"center",marginTop:10}}>Ref: VIS formula — Gaies et al., Crit Care Med 2010 · Normal vitals by age — PALS 2025 / Harriet Lane 24e</Text>
         </View>
       );
 
@@ -657,60 +988,61 @@ export default function ToolDetailScreen() {
           </View>
           {bundleTab==="fasthug"&&(
             <>
-              <Text style={{fontSize:14,fontWeight:"700",color:"#0891B2"}}>FASTHUG (Daily ICU Checklist)</Text>
+              <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"700",color:"#0891B2"}}>FASTHUG (Daily ICU Checklist)</Text>
               <View style={{height:6,borderRadius:3,backgroundColor:isDark?"#233554":"#E2E8F0"}}><View style={{height:6,borderRadius:3,width:`${fasthugPct}%` as any,backgroundColor:fasthugPct===100?"#16A34A":"#0891B2"}}/></View>
-              <Text style={{fontSize:11,color:tm}}>{fasthugChecked.filter(Boolean).length}/{FASTHUG_BUNDLE.length} complete</Text>
+              <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm}}>{fasthugChecked.filter(Boolean).length}/{FASTHUG_BUNDLE.length} complete</Text>
               {FASTHUG_BUNDLE.map((item,i)=>(
                 <TouchableOpacity key={i} onPress={()=>setFasthugChecked(p=>p.map((v,j)=>j===i?!v:v))} style={{flexDirection:"row",alignItems:"center",gap:10,paddingVertical:8}}>
                   <View style={{width:22,height:22,borderRadius:6,borderWidth:2,justifyContent:"center",alignItems:"center",backgroundColor:fasthugChecked[i]?"#16A34A":"transparent",borderColor:fasthugChecked[i]?"#16A34A":isDark?"#3D5470":"#CBD5E1"}}>{fasthugChecked[i]&&<Feather name="check" size={12} color="#FFF"/>}</View>
-                  <Text style={{flex:1,fontSize:13,color:fasthugChecked[i]?tm:tp,textDecorationLine:fasthugChecked[i]?"line-through":"none"}}>{item}</Text>
+                  <Text style={{flex:1,fontSize: Math.round(13 * activeTextScale),color:fasthugChecked[i]?tm:tp,textDecorationLine:fasthugChecked[i]?"line-through":"none"}}>{item}</Text>
                 </TouchableOpacity>
               ))}
-              <TouchableOpacity onPress={()=>setFasthugChecked(FASTHUG_BUNDLE.map(()=>false))} style={{flexDirection:"row",alignItems:"center",gap:6,paddingVertical:8}}><Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize:12,color:tm}}>Reset checklist</Text></TouchableOpacity>
+              <TouchableOpacity onPress={()=>setFasthugChecked(FASTHUG_BUNDLE.map(()=>false))} style={{flexDirection:"row",alignItems:"center",gap:6,paddingVertical:8}}><Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize: Math.round(12 * activeTextScale),color:tm}}>Reset checklist</Text></TouchableOpacity>
             </>
           )}
           {bundleTab==="vap"&&(
             <>
-              <Text style={{fontSize:14,fontWeight:"700",color:"#E53E3E"}}>Ventilator-Associated Pneumonia (VAP) Prevention</Text>
+              <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"700",color:"#E53E3E"}}>Ventilator-Associated Pneumonia (VAP) Prevention</Text>
               <View style={{height:6,borderRadius:3,backgroundColor:isDark?"#233554":"#E2E8F0"}}><View style={{height:6,borderRadius:3,width:`${vapPct}%` as any,backgroundColor:vapPct===100?"#16A34A":"#E53E3E"}}/></View>
               {VAP_BUNDLE_UPDATED.map((item,i)=>(
                 <TouchableOpacity key={i} onPress={()=>setVapChecked(p=>p.map((v,j)=>j===i?!v:v))} style={{flexDirection:"row",alignItems:"center",gap:10,paddingVertical:8}}>
                   <View style={{width:22,height:22,borderRadius:6,borderWidth:2,justifyContent:"center",alignItems:"center",backgroundColor:vapChecked[i]?"#16A34A":"transparent",borderColor:vapChecked[i]?"#16A34A":isDark?"#3D5470":"#CBD5E1"}}>{vapChecked[i]&&<Feather name="check" size={12} color="#FFF"/>}</View>
-                  <Text style={{flex:1,fontSize:13,color:vapChecked[i]?tm:tp,textDecorationLine:vapChecked[i]?"line-through":"none"}}>{item}</Text>
+                  <Text style={{flex:1,fontSize: Math.round(13 * activeTextScale),color:vapChecked[i]?tm:tp,textDecorationLine:vapChecked[i]?"line-through":"none"}}>{item}</Text>
                 </TouchableOpacity>
               ))}
-              <TouchableOpacity onPress={()=>setVapChecked(VAP_BUNDLE_UPDATED.map(()=>false))} style={{flexDirection:"row",alignItems:"center",gap:6,paddingVertical:8}}><Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize:12,color:tm}}>Reset checklist</Text></TouchableOpacity>
+              <TouchableOpacity onPress={()=>setVapChecked(VAP_BUNDLE_UPDATED.map(()=>false))} style={{flexDirection:"row",alignItems:"center",gap:6,paddingVertical:8}}><Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize: Math.round(12 * activeTextScale),color:tm}}>Reset checklist</Text></TouchableOpacity>
             </>
           )}
           {bundleTab==="clabsi"&&(
             <>
-              <Text style={{fontSize:14,fontWeight:"700",color:"#7C3AED"}}>CLABSI Prevention (Central Line Bundle)</Text>
+              <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"700",color:"#7C3AED"}}>CLABSI Prevention (Central Line Bundle)</Text>
               <View style={{height:6,borderRadius:3,backgroundColor:isDark?"#233554":"#E2E8F0"}}><View style={{height:6,borderRadius:3,width:`${clabsiPct}%` as any,backgroundColor:clabsiPct===100?"#16A34A":"#7C3AED"}}/></View>
               {CLABSI_BUNDLE_UPDATED.map((item,i)=>(
                 <TouchableOpacity key={i} onPress={()=>setClabsiChecked(p=>p.map((v,j)=>j===i?!v:v))} style={{flexDirection:"row",alignItems:"center",gap:10,paddingVertical:8}}>
                   <View style={{width:22,height:22,borderRadius:6,borderWidth:2,justifyContent:"center",alignItems:"center",backgroundColor:clabsiChecked[i]?"#16A34A":"transparent",borderColor:clabsiChecked[i]?"#16A34A":isDark?"#3D5470":"#CBD5E1"}}>{clabsiChecked[i]&&<Feather name="check" size={12} color="#FFF"/>}</View>
-                  <Text style={{flex:1,fontSize:13,color:clabsiChecked[i]?tm:tp,textDecorationLine:clabsiChecked[i]?"line-through":"none"}}>{item}</Text>
+                  <Text style={{flex:1,fontSize: Math.round(13 * activeTextScale),color:clabsiChecked[i]?tm:tp,textDecorationLine:clabsiChecked[i]?"line-through":"none"}}>{item}</Text>
                 </TouchableOpacity>
               ))}
-              <TouchableOpacity onPress={()=>setClabsiChecked(CLABSI_BUNDLE_UPDATED.map(()=>false))} style={{flexDirection:"row",alignItems:"center",gap:6,paddingVertical:8}}><Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize:12,color:tm}}>Reset checklist</Text></TouchableOpacity>
+              <TouchableOpacity onPress={()=>setClabsiChecked(CLABSI_BUNDLE_UPDATED.map(()=>false))} style={{flexDirection:"row",alignItems:"center",gap:6,paddingVertical:8}}><Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize: Math.round(12 * activeTextScale),color:tm}}>Reset checklist</Text></TouchableOpacity>
             </>
           )}
           {bundleTab==="cauti"&&(
             <>
-              <Text style={{fontSize:14,fontWeight:"700",color:"#F59E0B"}}>CAUTI Prevention (Urinary Catheter Bundle)</Text>
+              <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"700",color:"#F59E0B"}}>CAUTI Prevention (Urinary Catheter Bundle)</Text>
               <View style={{height:6,borderRadius:3,backgroundColor:isDark?"#233554":"#E2E8F0"}}><View style={{height:6,borderRadius:3,width:`${cautiPct}%` as any,backgroundColor:cautiPct===100?"#16A34A":"#F59E0B"}}/></View>
               {CAUTI_BUNDLE.map((item,i)=>(
                 <TouchableOpacity key={i} onPress={()=>setCautiChecked(p=>p.map((v,j)=>j===i?!v:v))} style={{flexDirection:"row",alignItems:"center",gap:10,paddingVertical:8}}>
                   <View style={{width:22,height:22,borderRadius:6,borderWidth:2,justifyContent:"center",alignItems:"center",backgroundColor:cautiChecked[i]?"#16A34A":"transparent",borderColor:cautiChecked[i]?"#16A34A":isDark?"#3D5470":"#CBD5E1"}}>{cautiChecked[i]&&<Feather name="check" size={12} color="#FFF"/>}</View>
-                  <Text style={{flex:1,fontSize:13,color:cautiChecked[i]?tm:tp,textDecorationLine:cautiChecked[i]?"line-through":"none"}}>{item}</Text>
+                  <Text style={{flex:1,fontSize: Math.round(13 * activeTextScale),color:cautiChecked[i]?tm:tp,textDecorationLine:cautiChecked[i]?"line-through":"none"}}>{item}</Text>
                 </TouchableOpacity>
               ))}
-              <TouchableOpacity onPress={()=>setCautiChecked(CAUTI_BUNDLE.map(()=>false))} style={{flexDirection:"row",alignItems:"center",gap:6,paddingVertical:8}}><Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize:12,color:tm}}>Reset checklist</Text></TouchableOpacity>
+              <TouchableOpacity onPress={()=>setCautiChecked(CAUTI_BUNDLE.map(()=>false))} style={{flexDirection:"row",alignItems:"center",gap:6,paddingVertical:8}}><Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize: Math.round(12 * activeTextScale),color:tm}}>Reset checklist</Text></TouchableOpacity>
             </>
           )}
           <TouchableOpacity onPress={()=>{setFasthugChecked(FASTHUG_BUNDLE.map(()=>false));setVapChecked(VAP_BUNDLE_UPDATED.map(()=>false));setClabsiChecked(CLABSI_BUNDLE_UPDATED.map(()=>false));setCautiChecked(CAUTI_BUNDLE.map(()=>false));}} style={{flexDirection:"row",alignItems:"center",justifyContent:"center",gap:6,paddingVertical:10,borderRadius:10,backgroundColor:isDark?"#1A0505":"#FEE2E2",marginTop:8}}>
-            <Feather name="rotate-ccw" size={14} color="#DC2626"/><Text style={{fontSize:13,fontWeight:"700",color:"#DC2626"}}>Reset All Bundles</Text>
+            <Feather name="rotate-ccw" size={14} color="#DC2626"/><Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:"#DC2626"}}>Reset All Bundles</Text>
           </TouchableOpacity>
+        <Text style={{fontSize: Math.round(10 * activeTextScale),color:tm,fontStyle:"italic",textAlign:"center",marginTop:10}}>Ref: FASTHUG — Vincent, Crit Care 2005 · VAP / CLABSI / CAUTI bundles — IHI & Solutions for Patient Safety (SPS)</Text>
         </View>
       );
 
@@ -720,16 +1052,16 @@ export default function ToolDetailScreen() {
           <View style={{flexDirection:"row",justifyContent:"flex-end"}}>
             <StarButton isFav={isFav("tool-fluids")} onToggle={()=>toggleFav({id:"tool-fluids",type:"tool",label:"IV Fluids",color:"#0EA5E9"})} size={18} color="#0EA5E9"/>
           </View>
-          <Text style={{fontSize:11,color:tm,fontStyle:"italic"}}>Holliday-Segar · Harriet Lane 23e · Nelson 22e</Text>
-          <Text style={{fontSize:12,fontWeight:"700",color:tm}}>Patient Weight (kg)</Text>
+          <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,fontStyle:"italic"}}>Holliday-Segar · Harriet Lane 24e · Nelson 22e</Text>
+          <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm}}>Patient Weight (kg)</Text>
           <TextInput style={inputStyle} value={fluidWt} onChangeText={setFluidWt} keyboardType="decimal-pad" placeholder="e.g. 15" placeholderTextColor={tm}/>
-          <Text style={{fontSize:12,fontWeight:"700",color:tm}}>Clinical Scenario</Text>
+          <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm}}>Clinical Scenario</Text>
           <View style={{flexDirection:"row",flexWrap:"wrap",gap:8}}>
             {[{key:"maintenance",label:"Maintenance"},{key:"neonatal",label:"Neonatal"},{key:"dehydration",label:"Dehydration"},{key:"resuscitation",label:"Resuscitation"},{key:"dka",label:"DKA / Metabolic"}].map(s=>(
               <Chip key={s.key} label={s.label} color={s.key==="resuscitation"||s.key==="dka"?"#DC2626":s.key==="neonatal"?"#7C3AED":"#0EA5E9"} selected={scenario===s.key as any} onPress={()=>setScenario(s.key as any)} isDark={isDark}/>
             ))}
           </View>
-          <Text style={{fontSize:12,fontWeight:"700",color:tm}}>Maintenance Target</Text>
+          <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm}}>Maintenance Target</Text>
           <View style={{flexDirection:"row",flexWrap:"wrap",gap:8}}>
             {([{key:100,label:"100% (Full)"},{key:75,label:"75% (3/4)"},{key:66,label:"66% (2/3)"},{key:50,label:"50% (1/2)"}]).map(m=>(
               <Chip key={m.key} label={m.label} color="#0891B2" selected={maintTarget===m.key as any} onPress={()=>setMaintTarget(m.key as any)} isDark={isDark}/>
@@ -738,27 +1070,27 @@ export default function ToolDetailScreen() {
           {maintenance&&(
             <>
               {fluidWtNum>60&&(
-                <Text style={{fontSize:11.5,color:"#D97706",fontWeight:"600"}}>⚠ Weight above 60 kg — Holliday-Segar is shown in full; many units cap total fluids in larger children. Confirm with your unit protocol.</Text>
+                <Text style={{fontSize: Math.round(11.5 * activeTextScale),color:"#D97706",fontWeight:"600"}}>⚠ Weight above 60 kg — Holliday-Segar is shown in full; many units cap total fluids in larger children. Confirm with your unit protocol.</Text>
               )}
               <View style={{backgroundColor:"#0EA5E915",borderColor:"#0EA5E940",borderWidth:1.5,borderRadius:12,padding:14}}>
-                <Text style={{fontSize:13,fontWeight:"700",color:"#0EA5E9",marginBottom:8}}>Maintenance Fluids {maintTarget<100?`(${maintTarget}% of Holliday-Segar)`:""}</Text>
+                <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:"#0EA5E9",marginBottom:8}}>Maintenance Fluids {maintTarget<100?`(${maintTarget}% of Holliday-Segar)`:""}</Text>
                 <Row label="24-hour total" value={`${maintenance.daily} mL/day`} isDark={isDark}/>
                 <Row label="Hourly rate (4-2-1)" value={`${maintenance.hourly} mL/hr`} isDark={isDark}/>
               </View>
               <View style={{backgroundColor:"#DC262615",borderColor:"#DC262640",borderWidth:1.5,borderRadius:12,padding:14}}>
-                <Text style={{fontSize:13,fontWeight:"700",color:"#DC2626",marginBottom:8}}>Resuscitation Bolus (crystalloid)</Text>
+                <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:"#DC2626",marginBottom:8}}>Resuscitation Bolus (crystalloid)</Text>
                 <Row label="10 mL/kg" value={`${Math.round(fluidWtNum*10)} mL`} isDark={isDark}/>
                 <Row label="20 mL/kg" value={`${Math.round(fluidWtNum*20)} mL`} isDark={isDark}/>
-                <Text style={{fontSize:11,color:tm,marginTop:6}}>Reassess after every bolus — perfusion, lungs, liver edge.</Text>
+                <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,marginTop:6}}>Reassess after every bolus — perfusion, lungs, liver edge.</Text>
               </View>
-              <Text style={{fontSize:12,fontWeight:"700",color:tm}}>Dehydration Severity</Text>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm}}>Dehydration Severity</Text>
               <View style={{flexDirection:"row",gap:8}}>
                 {([5,10,15] as const).map(pct=>(
                   <Chip key={pct} label={`${pct}% (${pct===5?"Mild":pct===10?"Moderate":"Severe"})`} color={pct===5?"#16A34A":pct===10?"#D97706":"#DC2626"} selected={dehydPct===pct} onPress={()=>setDehydPct(pct)} isDark={isDark}/>
                 ))}
               </View>
               <View style={{backgroundColor:"#D9770615",borderColor:"#D9770640",borderWidth:1.5,borderRadius:12,padding:14}}>
-                <Text style={{fontSize:13,fontWeight:"700",color:"#D97706",marginBottom:8}}>Fluid Deficit</Text>
+                <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:"#D97706",marginBottom:8}}>Fluid Deficit</Text>
                 <Row label="Deficit volume" value={`${deficit} mL`} isDark={isDark}/>
                 <Row label="Replace over 48h + maintenance" value={`${total48h} mL/day`} isDark={isDark}/>
                 <Row label="Total hourly rate" value={`${+(total48h/24).toFixed(1)} mL/hr`} isDark={isDark}/>
@@ -773,51 +1105,15 @@ export default function ToolDetailScreen() {
       case "electrolytes": return (
         <View style={{gap:12}}>
           <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
-            <View><Text style={{fontSize:12,fontWeight:"700",color:"#0891B2"}}>K⁺ Correction Calculator</Text><Text style={{fontSize:10,color:tm,marginTop:1}}>Deficit = (Target − Actual) × Weight × 0.4</Text></View>
+            <View><Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:"#0891B2"}}>Electrolyte Correction</Text><Text style={{fontSize: Math.round(10 * activeTextScale),color:tm,marginTop:1}}>K⁺ Potassium correction</Text></View>
             <StarButton isFav={isFav("tool-electrolytes")} onToggle={()=>toggleFav({id:"tool-electrolytes",type:"tool",label:"Electrolyte Correction",color:"#0891B2"})} size={18} color="#0891B2"/>
           </View>
-          <View style={{flexDirection:"row",gap:8}}>
-            <View style={{flex:1}}><Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>Actual K⁺ (mEq/L)</Text><TextInput style={inputStyle} value={elActualK} onChangeText={setElActualK} keyboardType="decimal-pad" placeholder="e.g. 2.8" placeholderTextColor={tm}/></View>
-            <View style={{flex:1}}><Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>Target K⁺ (mEq/L)</Text><TextInput style={inputStyle} value={elTargetK} onChangeText={setElTargetK} keyboardType="decimal-pad" placeholder="e.g. 4.0" placeholderTextColor={tm}/></View>
-          </View>
-          <Text style={{fontSize:12,fontWeight:"700",color:tm}}>Weight (kg)</Text>
-          <TextInput style={inputStyle} value={elWt} onChangeText={setElWt} keyboardType="decimal-pad" placeholder="e.g. 15" placeholderTextColor={tm}/>
-          <View style={{flexDirection:"row",gap:8}}>
-            <TouchableOpacity onPress={()=>setElCentral(!elCentral)} style={{flex:1,paddingVertical:10,borderRadius:10,alignItems:"center",backgroundColor:elCentral?"#0891B2":isDark?"#1E293B":"#F1F5F9",borderWidth:2,borderColor:elCentral?"#0891B2":isDark?"#334155":"#CBD5E1"}}>
-              <Text style={{fontWeight:"700",fontSize:12,color:elCentral?"#FFFFFF":tm}}>🏥 Central Line</Text>
-              <Text style={{fontSize:10,color:elCentral?"#E0F7FA":tm,marginTop:2}}>{elCentral?"80 mEq/L max":"Peripheral"}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={()=>setElRestrictFluids(!elRestrictFluids)} style={{flex:1,paddingVertical:10,borderRadius:10,alignItems:"center",backgroundColor:elRestrictFluids?"#7C3AED":isDark?"#1E293B":"#F1F5F9",borderWidth:2,borderColor:elRestrictFluids?"#7C3AED":isDark?"#334155":"#CBD5E1"}}>
-              <Text style={{fontWeight:"700",fontSize:12,color:elRestrictFluids?"#FFFFFF":tm}}>💧 Restrict Fluids</Text>
-              <Text style={{fontSize:10,color:elRestrictFluids?"#EDE9FE":tm,marginTop:2}}>{elRestrictFluids?"High-conc. recipe":"Standard volume"}</Text>
+          <View style={{backgroundColor:isDark?"#0A192F":"#EFF6FF",borderColor:isDark?"#1E3A5F":"#BFDBFE",borderWidth:1,borderRadius:12,padding:16,gap:12}}>
+            <Text style={{fontSize: Math.round(13 * activeTextScale),color:tp,lineHeight:20}}>Potassium correction ab Protocols (Calcs) tab me he — K+ aur Na+ dono wahan hein.</Text>
+            <TouchableOpacity onPress={()=>router.push("/(tabs)/calcs" as any)} style={{paddingVertical:12,borderRadius:10,alignItems:"center",backgroundColor:"#0891B2"}}>
+              <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:"#FFFFFF"}}>Protocols (Calcs) tab kholo</Text>
             </TouchableOpacity>
           </View>
-          <View style={{backgroundColor:isDark?"#0F172A":"#FEF9C3",borderColor:isDark?"#334155":"#FDE047",borderWidth:1.5,borderRadius:10,padding:12}}>
-            <Text style={{fontSize:12,fontWeight:"800",color:"#B45309",marginBottom:8}}>⚠ Safety Checklist — Required Before Infusion</Text>
-            {([{key:"renal",label:"Renal function (Cr / BUN) checked?"},{key:"ecg",label:"Baseline ECG performed?"},{key:"mg",label:"Magnesium levels normal (≥ 0.7 mmol/L)?"}] as {key: keyof typeof elChecklist;label:string}[]).map(item=>(
-              <TouchableOpacity key={item.key} onPress={()=>setElChecklist(p=>({...p,[item.key]:!p[item.key]}))} style={{flexDirection:"row",alignItems:"center",gap:10,paddingVertical:6}}>
-                <View style={{width:22,height:22,borderRadius:6,borderWidth:2,borderColor:elChecklist[item.key]?"#16A34A":"#D97706",backgroundColor:elChecklist[item.key]?"#16A34A":"transparent",justifyContent:"center",alignItems:"center"}}>{elChecklist[item.key]&&<Feather name="check" size={13} color="#FFFFFF"/>}</View>
-                <Text style={{flex:1,fontSize:13,color:elChecklist[item.key]?"#16A34A":isDark?"#FDE68A":"#92400E"}}>{item.label}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-          {elDeficit>0&&elChecklistDone&&(
-            <View style={{gap:8}}>
-              <View style={{flexDirection:"row",gap:8}}>
-                <View style={{flex:1,backgroundColor:"#0891B220",borderColor:"#0891B250",borderWidth:1.5,borderRadius:10,padding:12,alignItems:"center"}}><Text style={{fontSize:11,color:tm,fontWeight:"600",marginBottom:2}}>TOTAL DEFICIT</Text><Text style={{fontSize:26,fontWeight:"800",color:"#0891B2"}}>{elDeficit}</Text><Text style={{fontSize:12,color:tm}}>mEq</Text></View>
-                <View style={{flex:1,backgroundColor:"#0891B220",borderColor:"#0891B250",borderWidth:1.5,borderRadius:10,padding:12,alignItems:"center"}}><Text style={{fontSize:11,color:tm,fontWeight:"600",marginBottom:2}}>RATE</Text><Text style={{fontSize:26,fontWeight:"800",color:"#0891B2"}}>{elRateMLHr}</Text><Text style={{fontSize:12,color:tm}}>mL/hr</Text></View>
-              </View>
-              <View style={{backgroundColor:isDark?"#0A192F":"#EFF6FF",borderColor:isDark?"#1E3A5F":"#BFDBFE",borderWidth:1,borderRadius:10,padding:12}}>
-                <Text style={{fontSize:12,fontWeight:"800",color:"#2563EB",marginBottom:6}}>{(elCentral||elRestrictFluids)?"Central / Fluid-Restricted Recipe":"Peripheral Line Recipe"}</Text>
-                <Text style={{fontSize:13,color:tp,lineHeight:20}}>{"• KCl drawn: "}<Text style={{fontWeight:"700",color:"#0891B2"}}>{elKClML} mL</Text>{" from 2 mEq/mL ampoule\n• Add NS: "}<Text style={{fontWeight:"700",color:"#0891B2"}}>{elNSML} mL</Text>{"\n• Total syringe: "}<Text style={{fontWeight:"700",color:"#0891B2"}}>{elTotalVol} mL</Text>{"\n• Concentration: "}<Text style={{fontWeight:"700",color:"#0891B2"}}>{(elCentral||elRestrictFluids)?80:40} mEq/L</Text></Text>
-                <Text style={{fontSize:12,color:tm,marginTop:8}}>Infusion duration: ~<Text style={{fontWeight:"700",color:"#0891B2"}}>{elDurationHr} hr</Text>{"  ·  Rate: "}<Text style={{fontWeight:"700"}}>{elCentral?0.5:0.3} mEq/kg/hr</Text></Text>
-              </View>
-              <View style={{backgroundColor:"#FEF2F2",borderColor:"#FECACA",borderWidth:1,borderRadius:10,padding:10}}>
-                <Text style={{fontSize:11,color:"#DC2626",fontWeight:"700",marginBottom:4}}>⚠ Clinical Warnings</Text>
-                <Text style={{fontSize:11,color:"#991B1B",lineHeight:18}}>{"• Max peripheral KCl: 40 mEq/L — extravasation risk\n• Central line required if conc. > 40 mEq/L\n• Never give KCl bolus IV — fatal arrhythmia risk\n• Continuous ECG monitoring during infusion\n• Recheck K⁺ level 1–2 hr after infusion"}</Text>
-              </View>
-            </View>
-          )}
         </View>
       );
 
@@ -825,20 +1121,20 @@ export default function ToolDetailScreen() {
       case "gcs": return (
         <View style={{gap:10}}>
           <View style={{flexDirection:"row",justifyContent:"flex-end"}}><StarButton isFav={isFav("tool-gcs")} onToggle={()=>toggleFav({id:"tool-gcs",type:"tool",label:"Pediatric GCS",color:"#16A34A"})} size={18} color="#16A34A"/></View>
-          <Text style={{fontSize:12,color:tm,fontStyle:"italic"}}>Modified GCS for verbal children and infants (Reilly et al. 1988 / PALS 2025). Score range: 3–15.</Text>
-          <Text style={{fontSize:13,fontWeight:"700",color:tp}}>Eye Opening (E) — selected: {eye}</Text>
+          <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,fontStyle:"italic"}}>Modified GCS for verbal children and infants (Reilly et al. 1988 / PALS 2025). Score range: 3–15.</Text>
+          <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp}}>Eye Opening (E) — selected: {eye}</Text>
           <GCSOption options={EYE_OPTIONS} selected={eye} onSelect={setEye} isDark={isDark}/>
-          <Text style={{fontSize:13,fontWeight:"700",color:tp}}>Verbal Response (V) — selected: {verbal}</Text>
+          <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp}}>Verbal Response (V) — selected: {verbal}</Text>
           <GCSOption options={VERBAL_OPTIONS} selected={verbal} onSelect={setVerbal} isDark={isDark}/>
-          <Text style={{fontSize:13,fontWeight:"700",color:tp}}>Motor Response (M) — selected: {motor}</Text>
+          <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp}}>Motor Response (M) — selected: {motor}</Text>
           <GCSOption options={MOTOR_OPTIONS} selected={motor} onSelect={setMotor} isDark={isDark}/>
           <View style={{backgroundColor:gcsResult.color+"15",borderColor:gcsResult.color+"40",borderWidth:1.5,borderRadius:12,padding:16,alignItems:"center"}}>
-            <Text style={{fontSize:28,fontWeight:"900",color:gcsResult.color}}>pGCS = {gcsTotal} / 15</Text>
-            <Text style={{fontSize:13,color:tm,marginTop:4}}>E{eye} + V{verbal} + M{motor} = {gcsTotal}</Text>
-            <Text style={{fontSize:14,fontWeight:"700",color:gcsResult.color,marginTop:4}}>{gcsResult.label}</Text>
+            <Text style={{fontSize: Math.round(28 * activeTextScale),fontWeight:"900",color:gcsResult.color}}>pGCS = {gcsTotal} / 15</Text>
+            <Text style={{fontSize: Math.round(13 * activeTextScale),color:tm,marginTop:4}}>E{eye} + V{verbal} + M{motor} = {gcsTotal}</Text>
+            <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"700",color:gcsResult.color,marginTop:4}}>{gcsResult.label}</Text>
           </View>
           <TouchableOpacity onPress={()=>{setEye(4);setVerbal(5);setMotor(6);}} style={{flexDirection:"row",alignItems:"center",justifyContent:"center",gap:6,paddingVertical:10,borderRadius:10,backgroundColor:isDark?"#1E293B":"#F1F5F9"}}>
-            <Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize:12,color:tm}}>Reset GCS</Text>
+            <Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize: Math.round(12 * activeTextScale),color:tm}}>Reset GCS</Text>
           </TouchableOpacity>
         </View>
       );
@@ -853,92 +1149,92 @@ export default function ToolDetailScreen() {
           </View>
           {scoreTab==="four"&&(
             <>
-              <Text style={{fontSize:12,color:tm,fontStyle:"italic"}}>Full Outline of UnResponsiveness (Wijdicks et al. 2005). Range 0–16.</Text>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,fontStyle:"italic"}}>Full Outline of UnResponsiveness (Wijdicks et al. 2005). Range 0–16.</Text>
               {[{label:"Eye Response",options:FOUR_EYE,value:fourEye,setter:setFourEye},{label:"Motor Response",options:FOUR_MOTOR,value:fourMotor,setter:setFourMotor},{label:"Brainstem Reflexes",options:FOUR_BRAINSTEM,value:fourBrainstem,setter:setFourBrainstem},{label:"Respiration",options:FOUR_RESP,value:fourResp,setter:setFourResp}].map(section=>(
                 <View key={section.label}>
-                  <Text style={{fontSize:13,fontWeight:"700",color:tp,marginBottom:6}}>{section.label} — selected: {section.value}</Text>
+                  <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp,marginBottom:6}}>{section.label} — selected: {section.value}</Text>
                   <View style={{gap:6,marginBottom:8}}>
                     {section.options.map(opt=>(
                       <TouchableOpacity key={opt.value} onPress={()=>section.setter(opt.value)} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,borderWidth:1.5,backgroundColor:section.value===opt.value?"#0891B220":isDark?"#0F1F2E":"#F8FAFC",borderColor:section.value===opt.value?"#0891B2":border}}>
                         <View style={{width:18,height:18,borderRadius:9,borderWidth:2,justifyContent:"center",alignItems:"center",borderColor:section.value===opt.value?"#0891B2":tm}}>{section.value===opt.value&&<View style={{width:8,height:8,borderRadius:4,backgroundColor:"#0891B2"}}/>}</View>
-                        <Text style={{flex:1,fontSize:13,color:isDark?"#CBD5E1":"#334155"}}>{opt.label}</Text>
+                        <Text style={{flex:1,fontSize: Math.round(13 * activeTextScale),color:isDark?"#CBD5E1":"#334155"}}>{opt.label}</Text>
                       </TouchableOpacity>
                     ))}
                   </View>
                 </View>
               ))}
               <View style={{backgroundColor:fourInterpret.color+"15",borderColor:fourInterpret.color+"40",borderWidth:1.5,borderRadius:12,padding:14,alignItems:"center"}}>
-                <Text style={{fontSize:22,fontWeight:"900",color:fourInterpret.color}}>FOUR = {fourTotal} / 16</Text>
-                <Text style={{fontSize:13,fontWeight:"700",color:fourInterpret.color,marginTop:4}}>{fourInterpret.label}</Text>
+                <Text style={{fontSize: Math.round(22 * activeTextScale),fontWeight:"900",color:fourInterpret.color}}>FOUR = {fourTotal} / 16</Text>
+                <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:fourInterpret.color,marginTop:4}}>{fourInterpret.label}</Text>
               </View>
               <TouchableOpacity onPress={()=>{setFourEye(4);setFourMotor(4);setFourBrainstem(4);setFourResp(4);}} style={{flexDirection:"row",alignItems:"center",justifyContent:"center",gap:6,paddingVertical:10,borderRadius:10,backgroundColor:isDark?"#1E293B":"#F1F5F9"}}>
-                <Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize:12,color:tm}}>Reset FOUR Score</Text>
+                <Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize: Math.round(12 * activeTextScale),color:tm}}>Reset FOUR Score</Text>
               </TouchableOpacity>
             </>
           )}
           {scoreTab==="osi"&&(
             <>
-              <Text style={{fontSize:12,color:tm,fontStyle:"italic"}}>Oxygen Saturation Index (OSI) — Severe et al. 2014{"\n"}Formula: OSI = (MAP × FiO₂%) / SpO₂%</Text>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,fontStyle:"italic"}}>Oxygen Saturation Index (OSI) — PALICC / Khemani et al. 2015{"\n"}Formula: OSI = (MAP × FiO₂%) / SpO₂%</Text>
               <View style={{flexDirection:"row",gap:8}}>
-                <View style={{flex:1}}><Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>MAP (mmHg)</Text><TextInput style={inputStyle} value={osiMap} onChangeText={setOsiMap} keyboardType="decimal-pad" placeholder="e.g. 70" placeholderTextColor={tm}/></View>
-                <View style={{flex:1}}><Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>FiO₂ (%)</Text><TextInput style={inputStyle} value={osiFio2} onChangeText={setOsiFio2} keyboardType="decimal-pad" placeholder="e.g. 40" placeholderTextColor={tm}/></View>
-                <View style={{flex:1}}><Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>SpO₂ (%)</Text><TextInput style={inputStyle} value={osiSpo2} onChangeText={setOsiSpo2} keyboardType="decimal-pad" placeholder="e.g. 95" placeholderTextColor={tm}/></View>
+                <View style={{flex:1}}><Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>MAP (mmHg)</Text><TextInput style={inputStyle} value={osiMap} onChangeText={setOsiMap} keyboardType="decimal-pad" placeholder="e.g. 70" placeholderTextColor={tm}/></View>
+                <View style={{flex:1}}><Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>FiO₂ (%)</Text><TextInput style={inputStyle} value={osiFio2} onChangeText={setOsiFio2} keyboardType="decimal-pad" placeholder="e.g. 40" placeholderTextColor={tm}/></View>
+                <View style={{flex:1}}><Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>SpO₂ (%)</Text><TextInput style={inputStyle} value={osiSpo2} onChangeText={setOsiSpo2} keyboardType="decimal-pad" placeholder="e.g. 95" placeholderTextColor={tm}/></View>
               </View>
-              {osiVal!==null&&osiInterp&&<View style={{backgroundColor:osiInterp.color+"15",borderColor:osiInterp.color+"40",borderWidth:1.5,borderRadius:12,padding:14,alignItems:"center"}}><Text style={{fontSize:22,fontWeight:"900",color:osiInterp.color}}>OSI = {osiVal}</Text><Text style={{fontSize:13,fontWeight:"700",color:osiInterp.color,marginTop:4}}>{osiInterp.label}</Text></View>}
+              {osiVal!==null&&osiInterp&&<View style={{backgroundColor:osiInterp.color+"15",borderColor:osiInterp.color+"40",borderWidth:1.5,borderRadius:12,padding:14,alignItems:"center"}}><Text style={{fontSize: Math.round(22 * activeTextScale),fontWeight:"900",color:osiInterp.color}}>OSI = {osiVal}</Text><Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:osiInterp.color,marginTop:4}}>{osiInterp.label}</Text></View>}
             </>
           )}
           {scoreTab==="sipa"&&(
             <>
-              <Text style={{fontSize:12,color:tm,fontStyle:"italic"}}>Pediatric Age-Adjusted Shock Index (SIPA){"\n"}SI = HR / SBP · Compare to age-specific threshold</Text>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,fontStyle:"italic"}}>Pediatric Age-Adjusted Shock Index (SIPA) — Acker et al., J Pediatr Surg 2015{"\n"}SI = HR / SBP · Validated sirf 4–16 saal (blunt trauma)</Text>
               <View style={{flexDirection:"row",gap:8}}>
-                <View style={{flex:1}}><Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>Age</Text><TextInput style={inputStyle} value={sipaAge} onChangeText={setSipaAge} keyboardType="decimal-pad" placeholder="e.g. 5" placeholderTextColor={tm}/></View>
-                <View style={{flex:1}}><Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>HR (bpm)</Text><TextInput style={inputStyle} value={sipaHR} onChangeText={setSipaHR} keyboardType="decimal-pad" placeholder="e.g. 140" placeholderTextColor={tm}/></View>
-                <View style={{flex:1}}><Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>SBP (mmHg)</Text><TextInput style={inputStyle} value={sipaSBP} onChangeText={setSipaSBP} keyboardType="decimal-pad" placeholder="e.g. 80" placeholderTextColor={tm}/></View>
+                <View style={{flex:1}}><Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>Age</Text><TextInput style={inputStyle} value={sipaAge} onChangeText={setSipaAge} keyboardType="decimal-pad" placeholder="e.g. 5" placeholderTextColor={tm}/></View>
+                <View style={{flex:1}}><Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>HR (bpm)</Text><TextInput style={inputStyle} value={sipaHR} onChangeText={setSipaHR} keyboardType="decimal-pad" placeholder="e.g. 140" placeholderTextColor={tm}/></View>
+                <View style={{flex:1}}><Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>SBP (mmHg)</Text><TextInput style={inputStyle} value={sipaSBP} onChangeText={setSipaSBP} keyboardType="decimal-pad" placeholder="e.g. 80" placeholderTextColor={tm}/></View>
               </View>
               <View style={{flexDirection:"row",gap:8}}><Chip label="Years" color="#D97706" selected={sipaAgeUnit==="years"} onPress={()=>setSipaAgeUnit("years")} isDark={isDark}/><Chip label="Months" color="#D97706" selected={sipaAgeUnit==="months"} onPress={()=>setSipaAgeUnit("months")} isDark={isDark}/></View>
-              {sipaSi!==null&&<View style={{backgroundColor:sipaAlert?"#FEE2E2":"#DCFCE715",borderColor:sipaAlert?"#FCA5A5":"#86EFAC40",borderWidth:1.5,borderRadius:12,padding:14,alignItems:"center"}}><Text style={{fontSize:18,fontWeight:"900",color:sipaAlert?"#DC2626":"#16A34A"}}>SIPA = {sipaSi} (threshold: {sipaThresholdVal})</Text><Text style={{fontSize:13,fontWeight:"700",color:sipaAlert?"#DC2626":"#16A34A",marginTop:4}}>{sipaAlert?"SIPA ABOVE threshold — possible shock":"SIPA within normal limits"}</Text></View>}
+              {sipaSi!==null&&sipaAgeMonths>0&&(sipaThresholdVal===null?(<View style={{backgroundColor:"#F59E0B15",borderColor:"#F59E0B40",borderWidth:1.5,borderRadius:12,padding:14,alignItems:"center"}}><Text style={{fontSize: Math.round(17 * activeTextScale),fontWeight:"900",color:"#D97706"}}>SIPA = {sipaSi}</Text><Text style={{fontSize: Math.round(12.5 * activeTextScale),fontWeight:"700",color:"#D97706",marginTop:4,textAlign:"center"}}>SIPA sirf 4–16 saal ke liye validated he (Acker 2015) — is umar par threshold lagu nahi hota</Text></View>):(<View style={{backgroundColor:sipaAlert?"#FEE2E2":"#DCFCE715",borderColor:sipaAlert?"#FCA5A5":"#86EFAC40",borderWidth:1.5,borderRadius:12,padding:14,alignItems:"center"}}><Text style={{fontSize: Math.round(18 * activeTextScale),fontWeight:"900",color:sipaAlert?"#DC2626":"#16A34A"}}>SIPA = {sipaSi} (threshold: {sipaThresholdVal})</Text><Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:sipaAlert?"#DC2626":"#16A34A",marginTop:4}}>{sipaAlert?"SIPA ABOVE threshold — possible shock":"SIPA within normal limits"}</Text></View>))}
             </>
           )}
           {scoreTab==="wat1"&&(
             <>
-              <Text style={{fontSize:12,color:tm,fontStyle:"italic"}}>WAT-1 (Franck et al. 2012) · Range 0–12 · Score ≥3 = significant withdrawal</Text>
-              <Text style={{fontSize:13,fontWeight:"700",color:tp}}>Section 1: Past 12 Hours</Text>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,fontStyle:"italic"}}>WAT-1 (Franck et al. 2012) · Range 0–12 · Score ≥3 = significant withdrawal</Text>
+              <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp}}>Section 1: Past 12 Hours</Text>
               {WAT1_PAST12.map((item,i)=>(
                 <TouchableOpacity key={item.label} onPress={()=>setWat1Past12(p=>p.map((v,j)=>j===i?!v:v))} style={{flexDirection:"row",alignItems:"center",gap:10,paddingVertical:8}}>
                   <View style={{width:22,height:22,borderRadius:6,borderWidth:2,justifyContent:"center",alignItems:"center",backgroundColor:wat1Past12[i]?"#FF4C60":"transparent",borderColor:wat1Past12[i]?"#FF4C60":isDark?"#3D5470":"#CBD5E1"}}>{wat1Past12[i]&&<Feather name="check" size={12} color="#FFF"/>}</View>
-                  <Text style={{flex:1,fontSize:13,color:wat1Past12[i]?tm:tp}}>{item.label} <Text style={{color:tm,fontWeight:"700"}}>(+{item.points})</Text></Text>
+                  <Text style={{flex:1,fontSize: Math.round(13 * activeTextScale),color:wat1Past12[i]?tm:tp}}>{item.label} <Text style={{color:tm,fontWeight:"700"}}>(+{item.points})</Text></Text>
                 </TouchableOpacity>
               ))}
-              <Text style={{fontSize:13,fontWeight:"700",color:tp}}>Section 2: 2-Minute Observation</Text>
+              <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp}}>Section 2: 2-Minute Observation</Text>
               {WAT1_OBS2MIN.map((item,i)=>(
                 <TouchableOpacity key={item.label} onPress={()=>setWat1Obs2(p=>p.map((v,j)=>j===i?!v:v))} style={{flexDirection:"row",alignItems:"center",gap:10,paddingVertical:8}}>
                   <View style={{width:22,height:22,borderRadius:6,borderWidth:2,justifyContent:"center",alignItems:"center",backgroundColor:wat1Obs2[i]?"#FF4C60":"transparent",borderColor:wat1Obs2[i]?"#FF4C60":isDark?"#3D5470":"#CBD5E1"}}>{wat1Obs2[i]&&<Feather name="check" size={12} color="#FFF"/>}</View>
-                  <Text style={{flex:1,fontSize:13,color:wat1Obs2[i]?tm:tp}}>{item.label} <Text style={{color:tm,fontWeight:"700"}}>(+{item.points})</Text></Text>
+                  <Text style={{flex:1,fontSize: Math.round(13 * activeTextScale),color:wat1Obs2[i]?tm:tp}}>{item.label} <Text style={{color:tm,fontWeight:"700"}}>(+{item.points})</Text></Text>
                 </TouchableOpacity>
               ))}
-              <Text style={{fontSize:13,fontWeight:"700",color:tp}}>Section 3: Stimulus Observation</Text>
+              <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp}}>Section 3: Stimulus Observation</Text>
               {WAT1_STIMULUS.map((item,i)=>(
                 <TouchableOpacity key={item.label} onPress={()=>setWat1Stim(p=>p.map((v,j)=>j===i?!v:v))} style={{flexDirection:"row",alignItems:"center",gap:10,paddingVertical:8}}>
                   <View style={{width:22,height:22,borderRadius:6,borderWidth:2,justifyContent:"center",alignItems:"center",backgroundColor:wat1Stim[i]?"#FF4C60":"transparent",borderColor:wat1Stim[i]?"#FF4C60":isDark?"#3D5470":"#CBD5E1"}}>{wat1Stim[i]&&<Feather name="check" size={12} color="#FFF"/>}</View>
-                  <Text style={{flex:1,fontSize:13,color:wat1Stim[i]?tm:tp}}>{item.label} <Text style={{color:tm,fontWeight:"700"}}>(+{item.points})</Text></Text>
+                  <Text style={{flex:1,fontSize: Math.round(13 * activeTextScale),color:wat1Stim[i]?tm:tp}}>{item.label} <Text style={{color:tm,fontWeight:"700"}}>(+{item.points})</Text></Text>
                 </TouchableOpacity>
               ))}
-              <Text style={{fontSize:13,fontWeight:"700",color:tp}}>Time to gain calm state</Text>
+              <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp}}>Time to gain calm state</Text>
               <View style={{flexDirection:"row",gap:8}}>
                 {WAT1_CALM_TIME.map(opt=>(
                   <TouchableOpacity key={opt.label} onPress={()=>setWat1CalmTime(opt.points)} style={{flex:1,paddingVertical:10,borderRadius:10,alignItems:"center",borderWidth:1.5,backgroundColor:wat1CalmTime===opt.points?"#FF4C60":isDark?"#0A192F":"#F8FAFC",borderColor:wat1CalmTime===opt.points?"#FF4C60":border}}>
-                    <Text style={{fontSize:13,fontWeight:"600",color:wat1CalmTime===opt.points?"#FFFFFF":tm}}>{opt.label}</Text>
-                    <Text style={{fontSize:11,color:wat1CalmTime===opt.points?"rgba(255,255,255,0.8)":tm}}>{opt.points>0?`+${opt.points}`:opt.points}</Text>
+                    <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"600",color:wat1CalmTime===opt.points?"#FFFFFF":tm}}>{opt.label}</Text>
+                    <Text style={{fontSize: Math.round(11 * activeTextScale),color:wat1CalmTime===opt.points?"rgba(255,255,255,0.8)":tm}}>{opt.points>0?`+${opt.points}`:opt.points}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
               <View style={{backgroundColor:wat1Interpret.color+"15",borderColor:wat1Interpret.color+"40",borderWidth:1.5,borderRadius:12,padding:14,alignItems:"center"}}>
-                <Text style={{fontSize:22,fontWeight:"900",color:wat1Interpret.color}}>WAT-1 Score = {wat1Score} / 12</Text>
-                <Text style={{fontSize:13,fontWeight:"700",color:wat1Interpret.color,marginTop:4}}>{wat1Interpret.label}</Text>
-                <Text style={{fontSize:12,color:tm,marginTop:4}}>{wat1Score<=2?"Routine monitoring":"Consider weaning / sedation adjustment"}</Text>
+                <Text style={{fontSize: Math.round(22 * activeTextScale),fontWeight:"900",color:wat1Interpret.color}}>WAT-1 Score = {wat1Score} / 12</Text>
+                <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:wat1Interpret.color,marginTop:4}}>{wat1Interpret.label}</Text>
+                <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,marginTop:4}}>{wat1Score<=2?"Routine monitoring":"Consider weaning / sedation adjustment"}</Text>
               </View>
               <TouchableOpacity onPress={()=>{setWat1Past12(WAT1_PAST12.map(()=>false));setWat1Obs2(WAT1_OBS2MIN.map(()=>false));setWat1Stim(WAT1_STIMULUS.map(()=>false));setWat1CalmTime(0);}} style={{flexDirection:"row",alignItems:"center",justifyContent:"center",gap:6,paddingVertical:10,borderRadius:10,backgroundColor:isDark?"#1E293B":"#F1F5F9"}}>
-                <Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize:12,color:tm}}>Reset WAT-1</Text>
+                <Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize: Math.round(12 * activeTextScale),color:tm}}>Reset WAT-1</Text>
               </TouchableOpacity>
             </>
           )}
@@ -955,24 +1251,24 @@ export default function ToolDetailScreen() {
           {renalTab==="renal"&&(
             <>
               <View style={{backgroundColor:isDark?"#1C0A0A":"#FFF1F1",borderColor:isDark?"#4A1A1A":"#FCA5A5",borderWidth:1.5,borderRadius:12,padding:14}}>
-                <Text style={{fontSize:13,fontWeight:"700",color:"#DC2626",marginBottom:4}}>Schwartz eGFR (Paediatric)</Text>
-                <Text style={{fontSize:11,color:tm,marginBottom:10,fontStyle:"italic"}}>eGFR = 0.413 × Height(cm) / Serum Creatinine(mg/dL)</Text>
+                <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:"#DC2626",marginBottom:4}}>Schwartz eGFR (Paediatric)</Text>
+                <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,marginBottom:10,fontStyle:"italic"}}>eGFR = 0.413 × Height(cm) / Serum Creatinine(mg/dL)</Text>
                 <View style={{flexDirection:"row",gap:8}}>
-                  <View style={{flex:1}}><Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>Height (cm)</Text><TextInput style={inputStyle} value={crclHt} onChangeText={setCrclHt} keyboardType="decimal-pad" placeholder="e.g. 90" placeholderTextColor={tm}/></View>
-                  <View style={{flex:1}}><Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>Creatinine (mg/dL)</Text><TextInput style={inputStyle} value={crclCr} onChangeText={setCrclCr} keyboardType="decimal-pad" placeholder="e.g. 0.5" placeholderTextColor={tm}/></View>
+                  <View style={{flex:1}}><Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>Height (cm)</Text><TextInput style={inputStyle} value={crclHt} onChangeText={setCrclHt} keyboardType="decimal-pad" placeholder="e.g. 90" placeholderTextColor={tm}/></View>
+                  <View style={{flex:1}}><Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>Creatinine (mg/dL)</Text><TextInput style={inputStyle} value={crclCr} onChangeText={setCrclCr} keyboardType="decimal-pad" placeholder="e.g. 0.5" placeholderTextColor={tm}/></View>
                 </View>
-                {schwartz!==null&&<View style={{backgroundColor:crclSeverity(schwartz).color+"15",borderColor:crclSeverity(schwartz).color+"40",borderWidth:1.5,borderRadius:10,padding:12,alignItems:"center",marginTop:8}}><Text style={{fontSize:18,fontWeight:"900",color:crclSeverity(schwartz).color}}>eGFR = {schwartz} mL/min/1.73m²</Text><Text style={{fontSize:13,color:tm,marginTop:4}}>{crclSeverity(schwartz).label}</Text></View>}
+                {schwartz!==null&&<View style={{backgroundColor:crclSeverity(schwartz).color+"15",borderColor:crclSeverity(schwartz).color+"40",borderWidth:1.5,borderRadius:10,padding:12,alignItems:"center",marginTop:8}}><Text style={{fontSize: Math.round(18 * activeTextScale),fontWeight:"900",color:crclSeverity(schwartz).color}}>eGFR = {schwartz} mL/min/1.73m²</Text><Text style={{fontSize: Math.round(13 * activeTextScale),color:tm,marginTop:4}}>{crclSeverity(schwartz).label}</Text></View>}
               </View>
-              <Text style={{fontSize:14,fontWeight:"700",color:tp,marginTop:4}}>Drug Adjustments in Renal Failure</Text>
+              <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"700",color:tp,marginTop:4}}>Drug Adjustments in Renal Failure</Text>
               {RENAL_DRUGS.map(d=>(
                 <View key={d.drug} style={{borderLeftWidth:3,borderLeftColor:d.alert==="high"?"#DC2626":d.alert==="moderate"?"#D97706":"#16A34A",backgroundColor:isDark?"#0A192F":"#F8FAFC",borderRadius:8,padding:12,marginBottom:4}}>
                   <View style={{flexDirection:"row",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
-                    <Text style={{fontSize:13,fontWeight:"700",color:tp}}>{d.drug}</Text>
+                    <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp}}>{d.drug}</Text>
                     <View style={{backgroundColor:d.alert==="high"?"#DC262620":d.alert==="moderate"?"#D9770620":"#16A34A20",borderRadius:6,paddingHorizontal:8,paddingVertical:3}}>
-                      <Text style={{fontSize:10,fontWeight:"700",color:d.alert==="high"?"#DC2626":d.alert==="moderate"?"#D97706":"#16A34A"}}>{d.alert==="high"?"HIGH RISK":d.alert==="moderate"?"CAUTION":"LOW RISK"}</Text>
+                      <Text style={{fontSize: Math.round(10 * activeTextScale),fontWeight:"700",color:d.alert==="high"?"#DC2626":d.alert==="moderate"?"#D97706":"#16A34A"}}>{d.alert==="high"?"HIGH RISK":d.alert==="moderate"?"CAUTION":"LOW RISK"}</Text>
                     </View>
                   </View>
-                  <Text style={{fontSize:12,color:tm,lineHeight:18}}>{d.adj}</Text>
+                  <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,lineHeight:18}}>{d.adj}</Text>
                 </View>
               ))}
             </>
@@ -980,23 +1276,24 @@ export default function ToolDetailScreen() {
           {renalTab==="hepatic"&&(
             <>
               <View style={{backgroundColor:isDark?"#1A0D00":"#FFFBEB",borderColor:isDark?"#4A2800":"#FCD34D",borderWidth:1.5,borderRadius:12,padding:14}}>
-                <Text style={{fontSize:13,fontWeight:"700",color:"#D97706",marginBottom:6}}>Hepatic Failure — General Principles</Text>
-                <Text style={{fontSize:12,color:tm,lineHeight:20}}>{"• Most sedatives, opioids, and antimicrobials are hepatically metabolised\n• Child-Pugh score guides severity: A (5–6), B (7–9), C (10–15)\n• Avoid nephrotoxic drugs — hepatorenal syndrome risk\n• Monitor coagulation (PT/INR) and ammonia regularly\n• Anticipate prolonged drug effect — titrate slowly"}</Text>
+                <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:"#D97706",marginBottom:6}}>Hepatic Failure — General Principles</Text>
+                <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,lineHeight:20}}>{"• Most sedatives, opioids, and antimicrobials are hepatically metabolised\n• Child-Pugh score guides severity: A (5–6), B (7–9), C (10–15)\n• Avoid nephrotoxic drugs — hepatorenal syndrome risk\n• Monitor coagulation (PT/INR) and ammonia regularly\n• Anticipate prolonged drug effect — titrate slowly"}</Text>
               </View>
-              <Text style={{fontSize:14,fontWeight:"700",color:tp,marginTop:4}}>Drug Adjustments in Hepatic Failure</Text>
+              <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"700",color:tp,marginTop:4}}>Drug Adjustments in Hepatic Failure</Text>
               {HEPATIC_DRUGS.map(d=>(
                 <View key={d.drug} style={{borderLeftWidth:3,borderLeftColor:d.alert==="high"?"#DC2626":"#D97706",backgroundColor:isDark?"#0A192F":"#F8FAFC",borderRadius:8,padding:12,marginBottom:4}}>
                   <View style={{flexDirection:"row",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
-                    <Text style={{fontSize:13,fontWeight:"700",color:tp}}>{d.drug}</Text>
+                    <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp}}>{d.drug}</Text>
                     <View style={{backgroundColor:d.alert==="high"?"#DC262620":"#D9770620",borderRadius:6,paddingHorizontal:8,paddingVertical:3}}>
-                      <Text style={{fontSize:10,fontWeight:"700",color:d.alert==="high"?"#DC2626":"#D97706"}}>{d.alert==="high"?"HIGH RISK":"CAUTION"}</Text>
+                      <Text style={{fontSize: Math.round(10 * activeTextScale),fontWeight:"700",color:d.alert==="high"?"#DC2626":"#D97706"}}>{d.alert==="high"?"HIGH RISK":"CAUTION"}</Text>
                     </View>
                   </View>
-                  <Text style={{fontSize:12,color:tm,lineHeight:18}}>{d.adj}</Text>
+                  <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,lineHeight:18}}>{d.adj}</Text>
                 </View>
               ))}
             </>
           )}
+        <Text style={{fontSize: Math.round(10 * activeTextScale),color:tm,fontStyle:"italic",textAlign:"center",marginTop:10}}>Ref: eGFR — bedside Schwartz, JASN 2009 · Renal / hepatic drug adjustments — Harriet Lane 24e · Nelson 22e</Text>
         </View>
       );
 
@@ -1004,23 +1301,24 @@ export default function ToolDetailScreen() {
       case "pews": return (
         <View style={{gap:12}}>
           <View style={{flexDirection:"row",justifyContent:"flex-end"}}><StarButton isFav={isFav("tool-pews")} onToggle={()=>toggleFav({id:"tool-pews",type:"tool",label:"PEWS Score",color:"#FF4C60"})} size={18} color="#FF4C60"/></View>
-          <Text style={{fontSize:12,color:tm,fontStyle:"italic"}}>Pediatric Early Warning Score (PEWS) — 3 categories 0–3 each. Total 0–9.</Text>
+          <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,fontStyle:"italic"}}>Pediatric Early Warning Score (PEWS) — 3 categories 0–3 each. Total 0–9.</Text>
           {[{l:"Behavior",v:pewsB,s:setPewsB},{l:"Cardiovascular",v:pewsCv,s:setPewsCv},{l:"Respiratory",v:pewsR,s:setPewsR}].map(x=>(
             <View key={x.l}>
-              <Text style={{fontSize:13,fontWeight:"700",color:tp,marginBottom:8}}>{x.l} (0–3)</Text>
+              <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp,marginBottom:8}}>{x.l} (0–3)</Text>
               <View style={{flexDirection:"row",gap:8}}>
                 {[0,1,2,3].map(n=>(
                   <TouchableOpacity key={n} onPress={()=>x.s(n.toString())} style={{flex:1,paddingVertical:12,borderRadius:10,alignItems:"center",borderWidth:1.5,backgroundColor:x.v===n.toString()?"#FF4C60":isDark?"#0A192F":"#F8FAFC",borderColor:x.v===n.toString()?"#FF4C60":border}}>
-                    <Text style={{fontSize:16,fontWeight:"700",color:x.v===n.toString()?"#FFFFFF":tm}}>{n}</Text>
+                    <Text style={{fontSize: Math.round(16 * activeTextScale),fontWeight:"700",color:x.v===n.toString()?"#FFFFFF":tm}}>{n}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
             </View>
           ))}
           <View style={{backgroundColor:pewsAlert?"#FF4C6015":"#16A34A15",borderColor:pewsAlert?"#FF4C6040":"#16A34A40",borderWidth:1.5,borderRadius:12,padding:16,alignItems:"center"}}>
-            <Text style={{fontSize:28,fontWeight:"900",color:pewsAlert?"#FF4C60":"#16A34A"}}>PEWS = {pewsSum} / 9</Text>
-            <Text style={{fontSize:13,fontWeight:"700",color:pewsAlert?"#FF4C60":"#16A34A",marginTop:4}}>{pewsAlert?"⚠ Urgent: Activate Rapid Response":"Routine monitoring"}</Text>
+            <Text style={{fontSize: Math.round(28 * activeTextScale),fontWeight:"900",color:pewsAlert?"#FF4C60":"#16A34A"}}>PEWS = {pewsSum} / 9</Text>
+            <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:pewsAlert?"#FF4C60":"#16A34A",marginTop:4}}>{pewsAlert?"⚠ Urgent: Activate Rapid Response":"Routine monitoring"}</Text>
           </View>
+        <Text style={{fontSize: Math.round(10 * activeTextScale),color:tm,fontStyle:"italic",textAlign:"center",marginTop:10}}>Ref: Brighton PEWS — Monaghan, Arch Dis Child 2005</Text>
         </View>
       );
 
@@ -1028,28 +1326,29 @@ export default function ToolDetailScreen() {
       case "apgar": return (
         <View style={{gap:12}}>
           <View style={{flexDirection:"row",justifyContent:"flex-end"}}><StarButton isFav={isFav("tool-apgar")} onToggle={()=>toggleFav({id:"tool-apgar",type:"tool",label:"APGAR Score",color:"#EC4899"})} size={18} color="#EC4899"/></View>
-          <Text style={{fontSize:12,color:tm,fontStyle:"italic"}}>Neonatal assessment at 1 and 5 minutes. Score range: 0–10.</Text>
+          <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,fontStyle:"italic"}}>Neonatal assessment at 1 and 5 minutes. Score range: 0–10.</Text>
           {apgarItems.map(item=>(
             <View key={item.key}>
-              <Text style={{fontSize:13,fontWeight:"700",color:tp,marginBottom:8}}>{item.key} — <Text style={{color:tm,fontWeight:"400"}}>selected: {item.value??'—'}</Text></Text>
+              <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp,marginBottom:8}}>{item.key} — <Text style={{color:tm,fontWeight:"400"}}>selected: {item.value??'—'}</Text></Text>
               <View style={{flexDirection:"row",gap:6}}>
                 {item.options.map(opt=>(
                   <TouchableOpacity key={opt.score} onPress={()=>item.setter(opt.score)} style={{flex:1,paddingVertical:10,borderRadius:10,alignItems:"center",borderWidth:1.5,backgroundColor:item.value===opt.score?"#EC4899":isDark?"#0A192F":"#F8FAFC",borderColor:item.value===opt.score?"#EC4899":border}}>
-                    <Text style={{fontSize:16,fontWeight:"700",color:item.value===opt.score?"#FFFFFF":tm}}>{opt.score}</Text>
-                    <Text style={{fontSize:10,color:item.value===opt.score?"rgba(255,255,255,0.8)":tm,marginTop:2,textAlign:"center"}}>{opt.label}</Text>
+                    <Text style={{fontSize: Math.round(16 * activeTextScale),fontWeight:"700",color:item.value===opt.score?"#FFFFFF":tm}}>{opt.score}</Text>
+                    <Text style={{fontSize: Math.round(10 * activeTextScale),color:item.value===opt.score?"rgba(255,255,255,0.8)":tm,marginTop:2,textAlign:"center"}}>{opt.label}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
             </View>
           ))}
           <View style={{backgroundColor:apgarTotal>=7?"#16A34A15":apgarTotal>=4?"#F59E0B15":"#FEE2E2",borderColor:apgarTotal>=7?"#16A34A40":apgarTotal>=4?"#F59E0B40":"#FCA5A5",borderWidth:1.5,borderRadius:12,padding:16,alignItems:"center"}}>
-            <Text style={{fontSize:28,fontWeight:"900",color:apgarTotal>=7?"#16A34A":apgarTotal>=4?"#F59E0B":"#DC2626"}}>APGAR = {apgarTotal} / 10</Text>
-            <Text style={{fontSize:14,fontWeight:"700",color:apgarTotal>=7?"#16A34A":apgarTotal>=4?"#F59E0B":"#DC2626",marginTop:4}}>{apgarTotal>=7?"Normal":apgarTotal>=4?"Moderately depressed":"Severely depressed"}</Text>
-            {apgarTotal<7&&<Text style={{fontSize:12,color:tm,marginTop:4}}>If HR &lt; 100: PPV. If HR &lt; 60: CPR + Epi</Text>}
+            <Text style={{fontSize: Math.round(28 * activeTextScale),fontWeight:"900",color:apgarTotal>=7?"#16A34A":apgarTotal>=4?"#F59E0B":"#DC2626"}}>APGAR = {apgarTotal} / 10</Text>
+            <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"700",color:apgarTotal>=7?"#16A34A":apgarTotal>=4?"#F59E0B":"#DC2626",marginTop:4}}>{apgarTotal>=7?"Normal":apgarTotal>=4?"Moderately depressed":"Severely depressed"}</Text>
+            {apgarTotal<7&&<Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,marginTop:4}}>If HR &lt; 100: PPV. If HR &lt; 60: CPR + Epi</Text>}
           </View>
           <TouchableOpacity onPress={()=>{setApgarA(null);setApgarP(null);setApgarG(null);setApgarAc(null);setApgarR(null);}} style={{flexDirection:"row",alignItems:"center",justifyContent:"center",gap:6,paddingVertical:10,borderRadius:10,backgroundColor:isDark?"#1E293B":"#F1F5F9"}}>
-            <Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize:12,color:tm}}>Reset APGAR</Text>
+            <Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize: Math.round(12 * activeTextScale),color:tm}}>Reset APGAR</Text>
           </TouchableOpacity>
+        <Text style={{fontSize: Math.round(10 * activeTextScale),color:tm,fontStyle:"italic",textAlign:"center",marginTop:10}}>Ref: Apgar, 1953 · AAP / ACOG — score kabhi resuscitation ko nahi rokta; pehle NRP</Text>
         </View>
       );
 
@@ -1058,37 +1357,37 @@ export default function ToolDetailScreen() {
         <View style={{gap:14}}>
           <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
             <View style={{flex:1}}>
-              <Text style={{fontSize:12,color:"#0EA5E9",fontWeight:"700"}}>GIR = (Rate × Dextrose%) ÷ (Weight × 6)</Text>
-              <Text style={{fontSize:11,color:tm,marginTop:1}}>Result in mg/kg/min</Text>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),color:"#0EA5E9",fontWeight:"700"}}>GIR = (Rate × Dextrose%) ÷ (Weight × 6)</Text>
+              <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,marginTop:1}}>Result in mg/kg/min</Text>
             </View>
             <StarButton isFav={isFav("tool-gir")} onToggle={()=>toggleFav({id:"tool-gir",type:"tool",label:"GIR Calculator",color:"#0EA5E9"})} size={18} color="#0EA5E9"/>
           </View>
-          <Text style={{fontSize:11,color:tm,fontStyle:"italic"}}>Normal neonatal range: 4–8 mg/kg/min. Premature neonates may require 6–10 mg/kg/min.</Text>
+          <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,fontStyle:"italic"}}>Normal neonatal range: 4–8 mg/kg/min. Premature neonates may require 6–10 mg/kg/min.</Text>
 
           {/* Weight */}
           <View>
-            <Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>Patient Weight (kg)</Text>
+            <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>Patient Weight (kg)</Text>
             <View style={{flexDirection:"row",gap:8,alignItems:"center"}}>
               <TextInput style={[inputStyle,{flex:1}]} value={girWeight} onChangeText={setGirWeight} keyboardType="decimal-pad" placeholder="kg" placeholderTextColor={tm}/>
               {weight>0&&<TouchableOpacity onPress={()=>setGirWeight(weight.toString())} style={{paddingHorizontal:10,paddingVertical:8,borderRadius:8,backgroundColor:"#0EA5E915",borderWidth:1,borderColor:"#0EA5E940"}}>
-                <Text style={{fontSize:11,color:"#0EA5E9",fontWeight:"700"}}>Use {weight} kg</Text>
+                <Text style={{fontSize: Math.round(11 * activeTextScale),color:"#0EA5E9",fontWeight:"700"}}>Use {weight} kg</Text>
               </TouchableOpacity>}
             </View>
           </View>
 
           {/* IV Rate */}
           <View>
-            <Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>IV Rate (mL/hr)</Text>
+            <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>IV Rate (mL/hr)</Text>
             <TextInput style={inputStyle} value={girRate} onChangeText={setGirRate} keyboardType="decimal-pad" placeholder="e.g. 5" placeholderTextColor={tm}/>
           </View>
 
           {/* Dextrose concentration */}
           <View>
-            <Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>Dextrose Concentration (%)</Text>
+            <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>Dextrose Concentration (%)</Text>
             <View style={{flexDirection:"row",gap:6,flexWrap:"wrap",marginBottom:8}}>
               {["5","10","12.5","15","20","25"].map(d=>(
                 <TouchableOpacity key={d} onPress={()=>setGirDextrose(d)} style={{paddingHorizontal:14,paddingVertical:8,borderRadius:8,backgroundColor:girDextrose===d?"#0EA5E9":isDark?"#1E293B":"#F1F5F9",borderWidth:1.5,borderColor:girDextrose===d?"#0EA5E9":isDark?"#334155":"#CBD5E1"}}>
-                  <Text style={{fontWeight:"700",fontSize:13,color:girDextrose===d?"#FFFFFF":tm}}>D{d}</Text>
+                  <Text style={{fontWeight:"700",fontSize: Math.round(13 * activeTextScale),color:girDextrose===d?"#FFFFFF":tm}}>D{d}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -1098,18 +1397,38 @@ export default function ToolDetailScreen() {
           {/* Result */}
           {girResult!==null&&girInterpret&&(
             <View style={{backgroundColor:girInterpret.color+"15",borderColor:girInterpret.color+"50",borderWidth:2,borderRadius:14,padding:18,gap:6,alignItems:"center"}}>
-              <Text style={{fontSize:12,fontWeight:"700",color:tm}}>GLUCOSE INFUSION RATE</Text>
-              <Text style={{fontSize:44,fontWeight:"900",color:girInterpret.color}}>{girResult}</Text>
-              <Text style={{fontSize:15,fontWeight:"700",color:girInterpret.color}}>mg/kg/min</Text>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm}}>GLUCOSE INFUSION RATE</Text>
+              <Text style={{fontSize: Math.round(44 * activeTextScale),fontWeight:"900",color:girInterpret.color}}>{girResult}</Text>
+              <Text style={{fontSize: Math.round(15 * activeTextScale),fontWeight:"700",color:girInterpret.color}}>mg/kg/min</Text>
               <View style={{height:1,width:"100%",backgroundColor:girInterpret.color+"30"}}/>
-              <Text style={{fontSize:13,fontWeight:"700",color:girInterpret.color,textAlign:"center"}}>{girInterpret.label}</Text>
-              <Text style={{fontSize:11,color:tm,textAlign:"center"}}>({girRateNum} mL/hr × {girDexNum}%) ÷ ({girWtNum} kg × 6)</Text>
+              <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:girInterpret.color,textAlign:"center"}}>{girInterpret.label}</Text>
+              <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,textAlign:"center"}}>({girRateNum} mL/hr × {girDexNum}%) ÷ ({girWtNum} kg × 6)</Text>
             </View>
           )}
 
+          {/* Reverse: Target GIR → required rate (ported from Protocols/Calcs) */}
+          <View>
+            <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>Target GIR (mg/kg/min) → calculates required rate</Text>
+            <TextInput style={inputStyle} value={girTarget} onChangeText={setGirTarget} keyboardType="decimal-pad" placeholder="e.g. 5" placeholderTextColor={tm}/>
+          </View>
+          {girReqRate!==null&&(
+            <View style={{backgroundColor:"#0D948815",borderColor:"#0D948850",borderWidth:2,borderRadius:14,padding:18,gap:6,alignItems:"center"}}>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm}}>REQUIRED INFUSION RATE</Text>
+              <Text style={{fontSize: Math.round(44 * activeTextScale),fontWeight:"900",color:"#0D9488"}}>{girReqRate}</Text>
+              <Text style={{fontSize: Math.round(15 * activeTextScale),fontWeight:"700",color:"#0D9488"}}>mL/hr</Text>
+              <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,textAlign:"center"}}>({girTargetNum} × {girWtNum} kg × 60) ÷ ({girDexNum}% × 10)</Text>
+            </View>
+          )}
+
+          {/* TPN / GIR Reference (ported verbatim from Protocols/Calcs) */}
+          <View style={{backgroundColor:"#05966910",borderColor:"#05966930",borderWidth:1,borderRadius:10,padding:12}}>
+            <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"800",color:"#059669",marginBottom:6}}>TPN / GIR Reference</Text>
+            <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,lineHeight:20}}>{"• Neonates: start GIR 4–6, increase by 1–2 mg/kg/min/day\n• PICU: target GIR 3–5; avoid >8 mg/kg/min (risk of hepatic steatosis)\n• Amino acids: neonates 3–4 g/kg/day; PICU 1.5–2 g/kg/day\n• Lipids (20%): 1–3 g/kg/day; start low and increase\n• Monitor glucose q4–6h; target 5–8 mmol/L (90–145 mg/dL)"}</Text>
+          </View>
+
           {/* Reference ranges */}
           <View style={{backgroundColor:isDark?"#112240":"#F8FAFC",borderRadius:10,padding:12,gap:5}}>
-            <Text style={{fontSize:11,fontWeight:"700",color:tm,marginBottom:4}}>Reference Ranges</Text>
+            <Text style={{fontSize: Math.round(11 * activeTextScale),fontWeight:"700",color:tm,marginBottom:4}}>Reference Ranges</Text>
             {([
               {range:"< 4 mg/kg/min",label:"Low — supplementation needed",color:"#D97706"},
               {range:"4–8 mg/kg/min",label:"Normal (term neonates/infants)",color:"#16A34A"},
@@ -1119,12 +1438,12 @@ export default function ToolDetailScreen() {
             ] as const).map(r=>(
               <View key={r.range} style={{flexDirection:"row",gap:8,alignItems:"center"}}>
                 <View style={{width:7,height:7,borderRadius:4,backgroundColor:r.color}}/>
-                <Text style={{fontSize:11,color:r.color,fontWeight:"700",width:115}}>{r.range}</Text>
-                <Text style={{fontSize:11,color:tm,flex:1}}>{r.label}</Text>
+                <Text style={{fontSize: Math.round(11 * activeTextScale),color:r.color,fontWeight:"700",width:115}}>{r.range}</Text>
+                <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,flex:1}}>{r.label}</Text>
               </View>
             ))}
           </View>
-          <Text style={{fontSize:10,color:tm,fontStyle:"italic",textAlign:"center"}}>Ref: Harriet Lane 23e | Nelson's Pediatric Nutrition | Neonatal Formulary</Text>
+          <Text style={{fontSize: Math.round(10 * activeTextScale),color:tm,fontStyle:"italic",textAlign:"center"}}>Ref: Harriet Lane 24e | Nelson's Pediatric Nutrition | Neonatal Formulary</Text>
         </View>
       );
 
@@ -1133,33 +1452,33 @@ export default function ToolDetailScreen() {
         <View style={{gap:14}}>
           <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
             <View style={{flex:1}}>
-              <Text style={{fontSize:12,color:"#DC2626",fontWeight:"700"}}>BIG = Base Deficit + (2.5 × INR) + (15 − GCS)</Text>
-              <Text style={{fontSize:11,color:tm,marginTop:1}}>Borgman et al. (2009) J Trauma</Text>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),color:"#DC2626",fontWeight:"700"}}>BIG = Base Deficit + (2.5 × INR) + (15 − GCS)</Text>
+              <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,marginTop:1}}>Borgman et al. (2009) J Trauma</Text>
             </View>
             <StarButton isFav={isFav("tool-big-score")} onToggle={()=>toggleFav({id:"tool-big-score",type:"tool",label:"BIG Score",color:"#DC2626"})} size={18} color="#DC2626"/>
           </View>
-          <Text style={{fontSize:11,color:tm,fontStyle:"italic"}}>Validates in blunt paediatric trauma. Predicts in-hospital mortality from 3 readily available parameters.</Text>
+          <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,fontStyle:"italic"}}>Validates in blunt paediatric trauma. Predicts in-hospital mortality from 3 readily available parameters.</Text>
 
           {/* Base Deficit */}
           <View>
-            <Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:4}}>Base Deficit (mmol/L)</Text>
-            <Text style={{fontSize:11,color:tm,marginBottom:6}}>Enter as a positive number (e.g. if base excess = −8, enter 8)</Text>
+            <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm,marginBottom:4}}>Base Deficit (mmol/L)</Text>
+            <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,marginBottom:6}}>Enter as a positive number (e.g. if base excess = −8, enter 8)</Text>
             <TextInput style={inputStyle} value={bigBD} onChangeText={setBigBD} keyboardType="decimal-pad" placeholder="e.g. 8" placeholderTextColor={tm}/>
           </View>
 
           {/* INR */}
           <View>
-            <Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>INR</Text>
+            <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>INR</Text>
             <TextInput style={inputStyle} value={bigINR} onChangeText={setBigINR} keyboardType="decimal-pad" placeholder="e.g. 1.2" placeholderTextColor={tm}/>
           </View>
 
           {/* GCS */}
           <View>
-            <Text style={{fontSize:12,fontWeight:"700",color:tm,marginBottom:6}}>Glasgow Coma Scale (3–15)</Text>
+            <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>Glasgow Coma Scale (3–15)</Text>
             <View style={{flexDirection:"row",flexWrap:"wrap",gap:6}}>
               {[3,4,5,6,7,8,9,10,11,12,13,14,15].map(n=>(
                 <TouchableOpacity key={n} onPress={()=>setBigGCS(n.toString())} style={{width:46,paddingVertical:10,borderRadius:8,alignItems:"center",backgroundColor:bigGCS===n.toString()?"#DC2626":isDark?"#1E293B":"#F1F5F9",borderWidth:1.5,borderColor:bigGCS===n.toString()?"#DC2626":isDark?"#334155":"#CBD5E1"}}>
-                  <Text style={{fontWeight:"700",fontSize:14,color:bigGCS===n.toString()?"#FFFFFF":tm}}>{n}</Text>
+                  <Text style={{fontWeight:"700",fontSize: Math.round(14 * activeTextScale),color:bigGCS===n.toString()?"#FFFFFF":tm}}>{n}</Text>
                 </TouchableOpacity>
               ))}
             </View>
@@ -1168,17 +1487,17 @@ export default function ToolDetailScreen() {
           {/* Result */}
           {bigScore!==null&&bigInterpret&&(
             <View style={{backgroundColor:bigInterpret.color+"15",borderColor:bigInterpret.color+"50",borderWidth:2,borderRadius:14,padding:18,gap:6,alignItems:"center"}}>
-              <Text style={{fontSize:12,fontWeight:"700",color:tm}}>BIG SCORE</Text>
-              <Text style={{fontSize:48,fontWeight:"900",color:bigInterpret.color}}>{bigScore}</Text>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm}}>BIG SCORE</Text>
+              <Text style={{fontSize: Math.round(48 * activeTextScale),fontWeight:"900",color:bigInterpret.color}}>{bigScore}</Text>
               <View style={{height:1,width:"100%",backgroundColor:bigInterpret.color+"30"}}/>
-              <Text style={{fontSize:13,fontWeight:"700",color:bigInterpret.color,textAlign:"center"}}>{bigInterpret.label}</Text>
-              <Text style={{fontSize:11,color:tm,textAlign:"center"}}>{bigBDNum} + (2.5 × {bigINRNum}) + (15 − {bigGCSNum}) = {bigScore}</Text>
+              <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:bigInterpret.color,textAlign:"center"}}>{bigInterpret.label}</Text>
+              <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,textAlign:"center"}}>{bigBDNum} + (2.5 × {bigINRNum}) + (15 − {bigGCSNum}) = {bigScore}</Text>
             </View>
           )}
 
           {/* Mortality table */}
           <View style={{backgroundColor:isDark?"#112240":"#F8FAFC",borderRadius:10,padding:12,gap:6}}>
-            <Text style={{fontSize:11,fontWeight:"700",color:tm,marginBottom:4}}>Predicted Mortality (Borgman 2009)</Text>
+            <Text style={{fontSize: Math.round(11 * activeTextScale),fontWeight:"700",color:tm,marginBottom:4}}>Predicted Mortality (Borgman 2009)</Text>
             {([
               {range:"< 16",mortality:"< 1%",color:"#16A34A"},
               {range:"16–21",mortality:"~ 10%",color:"#D97706"},
@@ -1187,15 +1506,15 @@ export default function ToolDetailScreen() {
             ] as const).map(r=>(
               <View key={r.range} style={{flexDirection:"row",gap:8,alignItems:"center"}}>
                 <View style={{width:7,height:7,borderRadius:4,backgroundColor:r.color}}/>
-                <Text style={{fontSize:12,color:r.color,fontWeight:"700",width:64}}>BIG {r.range}</Text>
-                <Text style={{fontSize:12,color:tm,flex:1}}>Predicted mortality: {r.mortality}</Text>
+                <Text style={{fontSize: Math.round(12 * activeTextScale),color:r.color,fontWeight:"700",width:64}}>BIG {r.range}</Text>
+                <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,flex:1}}>Predicted mortality: {r.mortality}</Text>
               </View>
             ))}
           </View>
           <View style={{backgroundColor:"#FEF9C3",borderColor:"#FDE047",borderWidth:1,borderRadius:10,padding:10}}>
-            <Text style={{fontSize:11,color:"#92400E"}}>⚠ Clinical adjunct only. Integrate with full trauma team assessment. Not validated in penetrating trauma or burns.</Text>
+            <Text style={{fontSize: Math.round(11 * activeTextScale),color:"#92400E"}}>⚠ Clinical adjunct only. Integrate with full trauma team assessment. Not validated in penetrating trauma or burns.</Text>
           </View>
-          <Text style={{fontSize:10,color:tm,fontStyle:"italic",textAlign:"center"}}>Ref: Borgman et al. J Trauma 2009 | Harriet Lane 23e | Nelson's Pediatrics 22e</Text>
+          <Text style={{fontSize: Math.round(10 * activeTextScale),color:tm,fontStyle:"italic",textAlign:"center"}}>Ref: Borgman et al. J Trauma 2009 | Harriet Lane 24e | Nelson's Pediatrics 22e</Text>
         </View>
       );
 
@@ -1204,35 +1523,35 @@ export default function ToolDetailScreen() {
         <View style={{gap:12}}>
           <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
             <View style={{flex:1}}>
-              <Text style={{fontSize:12,color:"#7C3AED",fontWeight:"700"}}>Phoenix Pediatric Sepsis Score 2024</Text>
-              <Text style={{fontSize:11,color:tm,marginTop:1}}>Schlapbach et al. — JAMA 2024</Text>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),color:"#7C3AED",fontWeight:"700"}}>Phoenix Pediatric Sepsis Score 2024</Text>
+              <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,marginTop:1}}>Schlapbach et al. — JAMA 2024</Text>
             </View>
             <StarButton isFav={isFav("tool-phoenix-sepsis")} onToggle={()=>toggleFav({id:"tool-phoenix-sepsis",type:"tool",label:"Phoenix Sepsis Score",color:"#7C3AED"})} size={18} color="#7C3AED"/>
           </View>
-          <Text style={{fontSize:11,color:tm,fontStyle:"italic"}}>Sepsis = total score ≥ 2. Septic shock = cardiovascular domain ≥ 1. Replaces SIRS-based criteria.</Text>
+          <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,fontStyle:"italic"}}>Sepsis = total score ≥ 2. Septic shock = cardiovascular domain ≥ 1. Replaces SIRS-based criteria.</Text>
 
           {/* ─ RESPIRATORY ─ */}
           <View style={{backgroundColor:isDark?"#112240":"#FFFFFF",borderRadius:12,padding:14,gap:10,borderWidth:1,borderColor:isDark?"#233554":"#E2E8F0"}}>
             <View style={{flexDirection:"row",alignItems:"center",gap:8}}>
               <View style={{width:28,height:28,borderRadius:8,backgroundColor:"#0EA5E915",alignItems:"center",justifyContent:"center"}}><Feather name="wind" size={14} color="#0EA5E9"/></View>
-              <Text style={{fontSize:14,fontWeight:"800",color:tp}}>Respiratory</Text>
+              <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"800",color:tp}}>Respiratory</Text>
               <View style={{marginLeft:"auto",backgroundColor:"#0EA5E920",borderRadius:8,paddingHorizontal:10,paddingVertical:4}}>
-                <Text style={{fontSize:13,fontWeight:"900",color:"#0EA5E9"}}>{phxResp} / 3</Text>
+                <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"900",color:"#0EA5E9"}}>{phxResp} / 3</Text>
               </View>
             </View>
             <TouchableOpacity onPress={()=>setPhxIMV(!phxIMV)} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,backgroundColor:phxIMV?"#0EA5E915":isDark?"#0A192F":"#F8FAFC",borderWidth:1.5,borderColor:phxIMV?"#0EA5E9":isDark?"#334155":"#E2E8F0"}}>
               <View style={{width:20,height:20,borderRadius:5,borderWidth:2,borderColor:phxIMV?"#0EA5E9":isDark?"#475569":"#CBD5E1",backgroundColor:phxIMV?"#0EA5E9":"transparent",justifyContent:"center",alignItems:"center"}}>
                 {phxIMV&&<Feather name="check" size={12} color="#FFFFFF"/>}
               </View>
-              <Text style={{fontSize:13,fontWeight:"700",color:phxIMV?"#0EA5E9":tp,flex:1}}>Invasive Mechanical Ventilation (IMV)</Text>
-              <Text style={{fontSize:11,color:"#0EA5E9",fontWeight:"700"}}>+1</Text>
+              <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:phxIMV?"#0EA5E9":tp,flex:1}}>Invasive Mechanical Ventilation (IMV)</Text>
+              <Text style={{fontSize: Math.round(11 * activeTextScale),color:"#0EA5E9",fontWeight:"700"}}>+1</Text>
             </TouchableOpacity>
             {phxIMV&&(<View style={{gap:8}}>
-              <Text style={{fontSize:11,fontWeight:"700",color:tm}}>PaO₂/FiO₂ ratio (if blood gas available)</Text>
-              <TextInput style={[inputStyle,{fontSize:14}]} value={phxPFRatio} onChangeText={setPhxPFRatio} keyboardType="decimal-pad" placeholder="e.g. 150" placeholderTextColor={tm}/>
-              <Text style={{fontSize:11,fontWeight:"700",color:tm}}>SpO₂/FiO₂ ratio (if PaO₂ unavailable)</Text>
-              <TextInput style={[inputStyle,{fontSize:14}]} value={phxSFRatio} onChangeText={setPhxSFRatio} keyboardType="decimal-pad" placeholder="e.g. 200" placeholderTextColor={tm}/>
-              <Text style={{fontSize:10,color:tm,fontStyle:"italic"}}>PF &lt;100 or SF &lt;148 → +3 · PF 100–199 or SF 148–263 → +2 · IMV only → +1</Text>
+              <Text style={{fontSize: Math.round(11 * activeTextScale),fontWeight:"700",color:tm}}>PaO₂/FiO₂ ratio (if blood gas available)</Text>
+              <TextInput style={[inputStyle,{fontSize: Math.round(14 * activeTextScale)}]} value={phxPFRatio} onChangeText={setPhxPFRatio} keyboardType="decimal-pad" placeholder="e.g. 150" placeholderTextColor={tm}/>
+              <Text style={{fontSize: Math.round(11 * activeTextScale),fontWeight:"700",color:tm}}>SpO₂/FiO₂ ratio (if PaO₂ unavailable)</Text>
+              <TextInput style={[inputStyle,{fontSize: Math.round(14 * activeTextScale)}]} value={phxSFRatio} onChangeText={setPhxSFRatio} keyboardType="decimal-pad" placeholder="e.g. 200" placeholderTextColor={tm}/>
+              <Text style={{fontSize: Math.round(10 * activeTextScale),color:tm,fontStyle:"italic"}}>PF &lt;100 or SF &lt;148 → +3 · PF 100–199 or SF 148–263 → +2 · IMV only → +1</Text>
             </View>)}
           </View>
 
@@ -1240,26 +1559,26 @@ export default function ToolDetailScreen() {
           <View style={{backgroundColor:isDark?"#112240":"#FFFFFF",borderRadius:12,padding:14,gap:10,borderWidth:1,borderColor:isDark?"#233554":"#E2E8F0"}}>
             <View style={{flexDirection:"row",alignItems:"center",gap:8}}>
               <View style={{width:28,height:28,borderRadius:8,backgroundColor:"#DC262615",alignItems:"center",justifyContent:"center"}}><Feather name="heart" size={14} color="#DC2626"/></View>
-              <Text style={{fontSize:14,fontWeight:"800",color:tp}}>Cardiovascular</Text>
+              <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"800",color:tp}}>Cardiovascular</Text>
               <View style={{marginLeft:"auto",backgroundColor:"#DC262615",borderRadius:8,paddingHorizontal:10,paddingVertical:4}}>
-                <Text style={{fontSize:13,fontWeight:"900",color:"#DC2626"}}>{phxCardio} / 6</Text>
+                <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"900",color:"#DC2626"}}>{phxCardio} / 6</Text>
               </View>
             </View>
             <View>
-              <Text style={{fontSize:11,fontWeight:"700",color:tm,marginBottom:6}}>Vasoactive medications (1 point each, max 2)</Text>
+              <Text style={{fontSize: Math.round(11 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>Vasoactive medications (1 point each, max 2)</Text>
               <View style={{flexDirection:"row",gap:8}}>
                 {[0,1,2,3].map(n=>(
                   <TouchableOpacity key={n} onPress={()=>setPhxVasoCount(n)} style={{flex:1,paddingVertical:10,borderRadius:8,alignItems:"center",backgroundColor:phxVasoCount===n?"#DC2626":isDark?"#0A192F":"#F1F5F9",borderWidth:1.5,borderColor:phxVasoCount===n?"#DC2626":isDark?"#334155":"#CBD5E1"}}>
-                    <Text style={{fontWeight:"800",fontSize:16,color:phxVasoCount===n?"#FFFFFF":tm}}>{n}</Text>
-                    <Text style={{fontSize:9,color:phxVasoCount===n?"rgba(255,255,255,0.75)":tm}}>drug{n!==1?"s":""}</Text>
+                    <Text style={{fontWeight:"800",fontSize: Math.round(16 * activeTextScale),color:phxVasoCount===n?"#FFFFFF":tm}}>{n}</Text>
+                    <Text style={{fontSize: Math.round(9 * activeTextScale),color:phxVasoCount===n?"rgba(255,255,255,0.75)":tm}}>drug{n!==1?"s":""}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
             </View>
             <View>
-              <Text style={{fontSize:11,fontWeight:"700",color:tm,marginBottom:6}}>Serum Lactate (mmol/L)</Text>
-              <TextInput style={[inputStyle,{fontSize:14}]} value={phxLactate} onChangeText={setPhxLactate} keyboardType="decimal-pad" placeholder="e.g. 3.5" placeholderTextColor={tm}/>
-              <Text style={{fontSize:10,color:tm,marginTop:3}}>≥ 5: +1 · ≥ 11: +2</Text>
+              <Text style={{fontSize: Math.round(11 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>Serum Lactate (mmol/L)</Text>
+              <TextInput style={[inputStyle,{fontSize: Math.round(14 * activeTextScale)}]} value={phxLactate} onChangeText={setPhxLactate} keyboardType="decimal-pad" placeholder="e.g. 3.5" placeholderTextColor={tm}/>
+              <Text style={{fontSize: Math.round(10 * activeTextScale),color:tm,marginTop:3}}>≥ 5: +1 · ≥ 11: +2</Text>
             </View>
             {([
               {label:"MAP below age-specific threshold",key:"map",val:phxMAPLow,set:setPhxMAPLow},
@@ -1269,8 +1588,8 @@ export default function ToolDetailScreen() {
                 <View style={{width:20,height:20,borderRadius:5,borderWidth:2,borderColor:item.val?"#DC2626":isDark?"#475569":"#CBD5E1",backgroundColor:item.val?"#DC2626":"transparent",justifyContent:"center",alignItems:"center"}}>
                   {item.val&&<Feather name="check" size={12} color="#FFFFFF"/>}
                 </View>
-                <Text style={{fontSize:13,fontWeight:"600",color:item.val?"#DC2626":tp,flex:1}}>{item.label}</Text>
-                <Text style={{fontSize:11,color:"#DC2626",fontWeight:"700"}}>+1</Text>
+                <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"600",color:item.val?"#DC2626":tp,flex:1}}>{item.label}</Text>
+                <Text style={{fontSize: Math.round(11 * activeTextScale),color:"#DC2626",fontWeight:"700"}}>+1</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -1279,15 +1598,15 @@ export default function ToolDetailScreen() {
           <View style={{backgroundColor:isDark?"#112240":"#FFFFFF",borderRadius:12,padding:14,gap:10,borderWidth:1,borderColor:isDark?"#233554":"#E2E8F0"}}>
             <View style={{flexDirection:"row",alignItems:"center",gap:8}}>
               <View style={{width:28,height:28,borderRadius:8,backgroundColor:"#D9770615",alignItems:"center",justifyContent:"center"}}><Feather name="droplet" size={14} color="#D97706"/></View>
-              <Text style={{fontSize:14,fontWeight:"800",color:tp}}>Coagulation</Text>
+              <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"800",color:tp}}>Coagulation</Text>
               <View style={{marginLeft:"auto",backgroundColor:"#D9770615",borderRadius:8,paddingHorizontal:10,paddingVertical:4}}>
-                <Text style={{fontSize:13,fontWeight:"900",color:"#D97706"}}>{phxCoag} / 2</Text>
+                <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"900",color:"#D97706"}}>{phxCoag} / 2</Text>
               </View>
             </View>
             <View>
-              <Text style={{fontSize:11,fontWeight:"700",color:tm,marginBottom:6}}>Platelet count (×10⁹/L)</Text>
-              <TextInput style={[inputStyle,{fontSize:14}]} value={phxPlatelets} onChangeText={setPhxPlatelets} keyboardType="decimal-pad" placeholder="e.g. 80" placeholderTextColor={tm}/>
-              <Text style={{fontSize:10,color:tm,marginTop:3}}>&lt; 100: +1 · &lt; 50: additional +1</Text>
+              <Text style={{fontSize: Math.round(11 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>Platelet count (×10⁹/L)</Text>
+              <TextInput style={[inputStyle,{fontSize: Math.round(14 * activeTextScale)}]} value={phxPlatelets} onChangeText={setPhxPlatelets} keyboardType="decimal-pad" placeholder="e.g. 80" placeholderTextColor={tm}/>
+              <Text style={{fontSize: Math.round(10 * activeTextScale),color:tm,marginTop:3}}>&lt; 100: +1 · &lt; 50: additional +1</Text>
             </View>
             {([
               {label:"INR > 1.3",key:"inr",val:phxINRHigh,set:setPhxINRHigh},
@@ -1297,8 +1616,8 @@ export default function ToolDetailScreen() {
                 <View style={{width:20,height:20,borderRadius:5,borderWidth:2,borderColor:item.val?"#D97706":isDark?"#475569":"#CBD5E1",backgroundColor:item.val?"#D97706":"transparent",justifyContent:"center",alignItems:"center"}}>
                   {item.val&&<Feather name="check" size={12} color="#FFFFFF"/>}
                 </View>
-                <Text style={{fontSize:13,fontWeight:"600",color:item.val?"#D97706":tp,flex:1}}>{item.label}</Text>
-                <Text style={{fontSize:11,color:"#D97706",fontWeight:"700"}}>+1</Text>
+                <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"600",color:item.val?"#D97706":tp,flex:1}}>{item.label}</Text>
+                <Text style={{fontSize: Math.round(11 * activeTextScale),color:"#D97706",fontWeight:"700"}}>+1</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -1307,9 +1626,9 @@ export default function ToolDetailScreen() {
           <View style={{backgroundColor:isDark?"#112240":"#FFFFFF",borderRadius:12,padding:14,gap:10,borderWidth:1,borderColor:isDark?"#233554":"#E2E8F0"}}>
             <View style={{flexDirection:"row",alignItems:"center",gap:8}}>
               <View style={{width:28,height:28,borderRadius:8,backgroundColor:"#7C3AED15",alignItems:"center",justifyContent:"center"}}><Feather name="zap" size={14} color="#7C3AED"/></View>
-              <Text style={{fontSize:14,fontWeight:"800",color:tp}}>Neurological</Text>
+              <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"800",color:tp}}>Neurological</Text>
               <View style={{marginLeft:"auto",backgroundColor:"#7C3AED15",borderRadius:8,paddingHorizontal:10,paddingVertical:4}}>
-                <Text style={{fontSize:13,fontWeight:"900",color:"#7C3AED"}}>{phxNeuro} / 2</Text>
+                <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"900",color:"#7C3AED"}}>{phxNeuro} / 2</Text>
               </View>
             </View>
             {([
@@ -1320,16 +1639,16 @@ export default function ToolDetailScreen() {
                 <View style={{width:20,height:20,borderRadius:5,borderWidth:2,borderColor:item.val?"#7C3AED":isDark?"#475569":"#CBD5E1",backgroundColor:item.val?"#7C3AED":"transparent",justifyContent:"center",alignItems:"center"}}>
                   {item.val&&<Feather name="check" size={12} color="#FFFFFF"/>}
                 </View>
-                <Text style={{fontSize:13,fontWeight:"600",color:item.val?"#7C3AED":tp,flex:1}}>{item.label}</Text>
-                <Text style={{fontSize:11,color:"#7C3AED",fontWeight:"700"}}>+1</Text>
+                <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"600",color:item.val?"#7C3AED":tp,flex:1}}>{item.label}</Text>
+                <Text style={{fontSize: Math.round(11 * activeTextScale),color:"#7C3AED",fontWeight:"700"}}>+1</Text>
               </TouchableOpacity>
             ))}
           </View>
 
           {/* ─ TOTAL SCORE ─ */}
           <View style={{backgroundColor:phxTotal>=2?"#7C3AED15":"#16A34A15",borderColor:phxTotal>=2?"#7C3AED60":"#16A34A40",borderWidth:2,borderRadius:14,padding:18,gap:10}}>
-            <Text style={{fontSize:12,fontWeight:"700",color:tm,textAlign:"center"}}>PHOENIX SEPSIS SCORE</Text>
-            <Text style={{fontSize:52,fontWeight:"900",color:phxTotal>=2?"#7C3AED":"#16A34A",textAlign:"center"}}>{phxTotal}</Text>
+            <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm,textAlign:"center"}}>PHOENIX SEPSIS SCORE</Text>
+            <Text style={{fontSize: Math.round(52 * activeTextScale),fontWeight:"900",color:phxTotal>=2?"#7C3AED":"#16A34A",textAlign:"center"}}>{phxTotal}</Text>
             {/* Domain breakdown */}
             <View style={{flexDirection:"row",gap:6}}>
               {([
@@ -1339,24 +1658,24 @@ export default function ToolDetailScreen() {
                 {label:"Neuro",val:phxNeuro,max:2,color:"#7C3AED"},
               ] as const).map(d=>(
                 <View key={d.label} style={{flex:1,backgroundColor:d.color+"15",borderRadius:8,padding:8,alignItems:"center"}}>
-                  <Text style={{fontSize:10,color:d.color,fontWeight:"700"}}>{d.label}</Text>
-                  <Text style={{fontSize:20,fontWeight:"900",color:d.color}}>{d.val}</Text>
-                  <Text style={{fontSize:9,color:tm}}>/{d.max}</Text>
+                  <Text style={{fontSize: Math.round(10 * activeTextScale),color:d.color,fontWeight:"700"}}>{d.label}</Text>
+                  <Text style={{fontSize: Math.round(20 * activeTextScale),fontWeight:"900",color:d.color}}>{d.val}</Text>
+                  <Text style={{fontSize: Math.round(9 * activeTextScale),color:tm}}>/{d.max}</Text>
                 </View>
               ))}
             </View>
             <View style={{height:1,backgroundColor:phxTotal>=2?"#7C3AED30":"#16A34A30"}}/>
             {phxTotal>=2?(
               <View style={{gap:4}}>
-                <Text style={{fontSize:15,fontWeight:"800",color:"#7C3AED",textAlign:"center"}}>⚠ MEETS PHOENIX SEPSIS CRITERIA</Text>
-                {phxShock&&<Text style={{fontSize:13,fontWeight:"700",color:"#DC2626",textAlign:"center"}}>🔴 Cardiovascular dysfunction — consider SEPTIC SHOCK</Text>}
-                <Text style={{fontSize:11,color:tm,textAlign:"center",lineHeight:17}}>Initiate sepsis bundle: blood cultures, empiric antibiotics within 1 hour, IV access, fluid resuscitation assessment</Text>
+                <Text style={{fontSize: Math.round(15 * activeTextScale),fontWeight:"800",color:"#7C3AED",textAlign:"center"}}>⚠ MEETS PHOENIX SEPSIS CRITERIA</Text>
+                {phxShock&&<Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:"#DC2626",textAlign:"center"}}>🔴 Cardiovascular dysfunction — consider SEPTIC SHOCK</Text>}
+                <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,textAlign:"center",lineHeight:17}}>Initiate sepsis bundle: blood cultures, empiric antibiotics within 1 hour, IV access, fluid resuscitation assessment</Text>
               </View>
             ):(
-              <Text style={{fontSize:14,fontWeight:"700",color:"#16A34A",textAlign:"center"}}>Score &lt; 2 — Does not meet Phoenix Sepsis criteria</Text>
+              <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"700",color:"#16A34A",textAlign:"center"}}>Score &lt; 2 — Does not meet Phoenix Sepsis criteria</Text>
             )}
           </View>
-          <Text style={{fontSize:10,color:tm,fontStyle:"italic",textAlign:"center"}}>Ref: Schlapbach et al. JAMA 2024;331(8):665–674 | Phoenix Sepsis Score Consortium</Text>
+          <Text style={{fontSize: Math.round(10 * activeTextScale),color:tm,fontStyle:"italic",textAlign:"center"}}>Ref: Schlapbach et al. JAMA 2024;331(8):665–674 | Phoenix Sepsis Score Consortium</Text>
         </View>
       );
 
@@ -1367,30 +1686,30 @@ export default function ToolDetailScreen() {
             <View style={{flex:1}}>
               <View style={{flexDirection:"row",alignItems:"center",gap:6,marginBottom:2}}>
                 <View style={{backgroundColor:"#0D948820",borderRadius:6,paddingHorizontal:8,paddingVertical:2}}>
-                  <Text style={{fontSize:10,fontWeight:"800",color:"#0D9488"}}>ICU PROTOCOL</Text>
+                  <Text style={{fontSize: Math.round(10 * activeTextScale),fontWeight:"800",color:"#0D9488"}}>ICU PROTOCOL</Text>
                 </View>
               </View>
-              <Text style={{fontSize:11,color:tm}}>Intrapleural Fibrinolysis — Empyema Thoracis</Text>
+              <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm}}>Intrapleural Fibrinolysis — Empyema Thoracis</Text>
             </View>
             <StarButton isFav={isFav("tool-streptokinase-empyema")} onToggle={()=>toggleFav({id:"tool-streptokinase-empyema",type:"tool",label:"Streptokinase Empyema Protocol",color:"#0D9488"})} size={18} color="#0D9488"/>
           </View>
 
           {/* Drug overview */}
           <View style={{backgroundColor:"#0D948812",borderColor:"#0D948840",borderWidth:1.5,borderRadius:12,padding:14}}>
-            <Text style={{fontSize:15,fontWeight:"800",color:"#0D9488",marginBottom:4}}>Streptokinase (Intrapleural)</Text>
-            <Text style={{fontSize:12,color:tp,lineHeight:18}}>Thrombolytic agent — degrades fibrin septa within loculated empyema to improve ICD drainage and accelerate resolution.</Text>
+            <Text style={{fontSize: Math.round(15 * activeTextScale),fontWeight:"800",color:"#0D9488",marginBottom:4}}>Streptokinase (Intrapleural)</Text>
+            <Text style={{fontSize: Math.round(12 * activeTextScale),color:tp,lineHeight:18}}>Thrombolytic agent — degrades fibrin septa within loculated empyema to improve ICD drainage and accelerate resolution.</Text>
           </View>
 
           {/* Dosing */}
           <View style={{backgroundColor:isDark?"#112240":"#FFFFFF",borderRadius:12,padding:14,gap:12,borderWidth:1,borderColor:isDark?"#233554":"#E2E8F0"}}>
             <View style={{flexDirection:"row",alignItems:"center",gap:8,marginBottom:2}}>
               <View style={{width:28,height:28,borderRadius:8,backgroundColor:"#0D948815",alignItems:"center",justifyContent:"center"}}><Feather name="droplet" size={14} color="#0D9488"/></View>
-              <Text style={{fontSize:14,fontWeight:"800",color:tp}}>Weight-Based Dosing</Text>
+              <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"800",color:tp}}>Weight-Based Dosing</Text>
             </View>
 
             {/* < 1 year */}
             <View style={{backgroundColor:isDark?"#0A192F":"#F0FDFA",borderRadius:10,padding:12,borderLeftWidth:4,borderLeftColor:"#0D9488"}}>
-              <Text style={{fontSize:13,fontWeight:"800",color:"#0D9488",marginBottom:8}}>Age &lt; 1 Year</Text>
+              <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"800",color:"#0D9488",marginBottom:8}}>Age &lt; 1 Year</Text>
               {[
                 {lbl:"Dose",val:"10,000 units/kg"},
                 {lbl:"Diluent",val:"50 mL Normal Saline"},
@@ -1399,15 +1718,15 @@ export default function ToolDetailScreen() {
                 {lbl:"Duration",val:"3 consecutive days"},
               ].map(r=>(
                 <View key={r.lbl} style={{flexDirection:"row",gap:8,marginBottom:4}}>
-                  <Text style={{fontSize:12,color:tm,width:86}}>{r.lbl}:</Text>
-                  <Text style={{fontSize:12,fontWeight:"700",color:tp,flex:1}}>{r.val}</Text>
+                  <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,width:86}}>{r.lbl}:</Text>
+                  <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tp,flex:1}}>{r.val}</Text>
                 </View>
               ))}
             </View>
 
             {/* > 1 year */}
             <View style={{backgroundColor:isDark?"#0A192F":"#F0FDFA",borderRadius:10,padding:12,borderLeftWidth:4,borderLeftColor:"#0891B2"}}>
-              <Text style={{fontSize:13,fontWeight:"800",color:"#0891B2",marginBottom:8}}>Age &gt; 1 Year</Text>
+              <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"800",color:"#0891B2",marginBottom:8}}>Age &gt; 1 Year</Text>
               {[
                 {lbl:"Dose",val:"20,000 units/kg"},
                 {lbl:"Diluent",val:"50 mL Normal Saline"},
@@ -1416,8 +1735,8 @@ export default function ToolDetailScreen() {
                 {lbl:"Duration",val:"3 consecutive days"},
               ].map(r=>(
                 <View key={r.lbl} style={{flexDirection:"row",gap:8,marginBottom:4}}>
-                  <Text style={{fontSize:12,color:tm,width:86}}>{r.lbl}:</Text>
-                  <Text style={{fontSize:12,fontWeight:"700",color:tp,flex:1}}>{r.val}</Text>
+                  <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,width:86}}>{r.lbl}:</Text>
+                  <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tp,flex:1}}>{r.val}</Text>
                 </View>
               ))}
             </View>
@@ -1427,7 +1746,7 @@ export default function ToolDetailScreen() {
           <View style={{backgroundColor:isDark?"#112240":"#FFFFFF",borderRadius:12,padding:14,gap:10,borderWidth:1,borderColor:isDark?"#233554":"#E2E8F0"}}>
             <View style={{flexDirection:"row",alignItems:"center",gap:8,marginBottom:2}}>
               <View style={{width:28,height:28,borderRadius:8,backgroundColor:"#0EA5E915",alignItems:"center",justifyContent:"center"}}><Feather name="settings" size={14} color="#0EA5E9"/></View>
-              <Text style={{fontSize:14,fontWeight:"800",color:tp}}>Preparation & Administration</Text>
+              <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"800",color:tp}}>Preparation & Administration</Text>
             </View>
             {[
               "Reconstitute streptokinase with 5 mL Normal Saline (gentle swirling — do NOT shake)",
@@ -1440,9 +1759,9 @@ export default function ToolDetailScreen() {
             ].map((step,i)=>(
               <View key={i} style={{flexDirection:"row",gap:10,alignItems:"flex-start"}}>
                 <View style={{width:22,height:22,borderRadius:11,backgroundColor:"#0EA5E920",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1}}>
-                  <Text style={{fontSize:11,fontWeight:"800",color:"#0EA5E9"}}>{i+1}</Text>
+                  <Text style={{fontSize: Math.round(11 * activeTextScale),fontWeight:"800",color:"#0EA5E9"}}>{i+1}</Text>
                 </View>
-                <Text style={{fontSize:12,color:tp,flex:1,lineHeight:18}}>{step}</Text>
+                <Text style={{fontSize: Math.round(12 * activeTextScale),color:tp,flex:1,lineHeight:18}}>{step}</Text>
               </View>
             ))}
           </View>
@@ -1451,7 +1770,7 @@ export default function ToolDetailScreen() {
           <View style={{backgroundColor:"#DC262608",borderColor:"#DC262630",borderWidth:1.5,borderRadius:12,padding:14,gap:8}}>
             <View style={{flexDirection:"row",alignItems:"center",gap:8,marginBottom:4}}>
               <Feather name="x-circle" size={16} color="#DC2626"/>
-              <Text style={{fontSize:14,fontWeight:"800",color:"#DC2626"}}>Contraindications</Text>
+              <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"800",color:"#DC2626"}}>Contraindications</Text>
             </View>
             {[
               "Bronchopleural fistula (air leak — absolute contraindication)",
@@ -1461,8 +1780,8 @@ export default function ToolDetailScreen() {
               "Recent streptococcal infection (neutralising antibodies may reduce efficacy)",
             ].map((item,i)=>(
               <View key={i} style={{flexDirection:"row",gap:8,alignItems:"flex-start"}}>
-                <Text style={{fontSize:14,color:"#DC2626",marginTop:-2}}>•</Text>
-                <Text style={{fontSize:12,color:isDark?"#8892B0":"#475569",flex:1,lineHeight:17}}>{item}</Text>
+                <Text style={{fontSize: Math.round(14 * activeTextScale),color:"#DC2626",marginTop:-2}}>•</Text>
+                <Text style={{fontSize: Math.round(12 * activeTextScale),color:isDark?"#8892B0":"#475569",flex:1,lineHeight:17}}>{item}</Text>
               </View>
             ))}
           </View>
@@ -1471,7 +1790,7 @@ export default function ToolDetailScreen() {
           <View style={{backgroundColor:isDark?"#112240":"#FFFFFF",borderRadius:12,padding:14,gap:8,borderWidth:1,borderColor:isDark?"#233554":"#E2E8F0"}}>
             <View style={{flexDirection:"row",alignItems:"center",gap:8,marginBottom:4}}>
               <View style={{width:28,height:28,borderRadius:8,backgroundColor:"#D9770615",alignItems:"center",justifyContent:"center"}}><Feather name="activity" size={14} color="#D97706"/></View>
-              <Text style={{fontSize:14,fontWeight:"800",color:tp}}>Monitoring</Text>
+              <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"800",color:tp}}>Monitoring</Text>
             </View>
             {[
               "Vital signs every 30 min during infusion (fever, hypotension, anaphylaxis — stop infusion if occurs)",
@@ -1482,18 +1801,354 @@ export default function ToolDetailScreen() {
               "If no response after 3 doses — discuss VATS vs repeat course with surgical/respiratory team",
             ].map((item,i)=>(
               <View key={i} style={{flexDirection:"row",gap:8,alignItems:"flex-start"}}>
-                <Text style={{fontSize:14,color:"#D97706",marginTop:-2}}>•</Text>
-                <Text style={{fontSize:12,color:tp,flex:1,lineHeight:17}}>{item}</Text>
+                <Text style={{fontSize: Math.round(14 * activeTextScale),color:"#D97706",marginTop:-2}}>•</Text>
+                <Text style={{fontSize: Math.round(12 * activeTextScale),color:tp,flex:1,lineHeight:17}}>{item}</Text>
               </View>
             ))}
           </View>
 
           {/* Protocol disclaimer */}
           <View style={{backgroundColor:isDark?"#1E293B":"#F8FAFC",borderRadius:10,padding:12,borderWidth:1,borderColor:isDark?"#334155":"#E2E8F0"}}>
-            <Text style={{fontSize:11,color:tm,fontStyle:"italic",lineHeight:16}}>
+            <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,fontStyle:"italic",lineHeight:16}}>
               Adapted from IAP Standard Treatment Guidelines 2022 & Institutional Protocols. Cross-reference with Harriet Lane for systemic dosing.
             </Text>
           </View>
+        </View>
+      );
+
+      // ── PAIN & SEDATION SCORES ────────────────────────────────────────────
+      case "pain-sedation": return (
+        <View style={{gap:10}}>
+          <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
+            <Text style={{fontSize: Math.round(12 * activeTextScale),color:"#DB2777",fontWeight:"700"}}>Bedside nursing assessment scales</Text>
+            <StarButton isFav={isFav("tool-pain-sedation")} onToggle={()=>toggleFav({id:"tool-pain-sedation",type:"tool",label:"Pain & Sedation Scores",color:"#DB2777"})} size={18} color="#DB2777"/>
+          </View>
+          <View style={{flexDirection:"row",flexWrap:"wrap",gap:8}}>
+            {[{key:"flacc",label:"FLACC — Pain"},{key:"comfortb",label:"COMFORT-B — Sedation"},{key:"sas",label:"SAS (Riker)"},{key:"faces",label:"Faces — Self-report"}].map(s=>(
+              <Chip key={s.key} label={s.label} color="#DB2777" selected={psTab===s.key as any} onPress={()=>setPsTab(s.key as any)} isDark={isDark}/>
+            ))}
+          </View>
+
+          {psTab==="flacc"&&(
+            <>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,fontStyle:"italic"}}>Behavioural pain scale for children 2 months – 7 years who cannot self-report. Observe the child and score each category 0–2.</Text>
+              {FLACC_ITEMS.map((item,idx)=>(
+                <View key={item.name}>
+                  <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp,marginBottom:6}}>{item.name} — selected: {flacc[idx]}</Text>
+                  <View style={{gap:6,marginBottom:8}}>
+                    {item.options.map((opt,val)=>(
+                      <TouchableOpacity key={val} onPress={()=>setFlacc(prev=>prev.map((v,j)=>j===idx?val:v))} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,borderWidth:1.5,backgroundColor:flacc[idx]===val?"#DB277720":isDark?"#0F1F2E":"#F8FAFC",borderColor:flacc[idx]===val?"#DB2777":border}}>
+                        <View style={{width:24,height:24,borderRadius:8,justifyContent:"center",alignItems:"center",backgroundColor:flacc[idx]===val?"#DB2777":isDark?"#233554":"#E2E8F0"}}>
+                          <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"800",color:flacc[idx]===val?"#FFFFFF":tm}}>{val}</Text>
+                        </View>
+                        <Text style={{flex:1,fontSize: Math.round(13 * activeTextScale),color:isDark?"#CBD5E1":"#334155"}}>{opt}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              ))}
+              <View style={{backgroundColor:flaccResult.color+"15",borderColor:flaccResult.color+"40",borderWidth:1.5,borderRadius:12,padding:14,alignItems:"center"}}>
+                <Text style={{fontSize: Math.round(22 * activeTextScale),fontWeight:"900",color:flaccResult.color}}>FLACC = {flaccTotal} / 10</Text>
+                <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:flaccResult.color,marginTop:4}}>{flaccResult.label}</Text>
+                <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,marginTop:4,textAlign:"center"}}>{flaccResult.sub}</Text>
+              </View>
+              <TouchableOpacity onPress={()=>setFlacc([0,0,0,0,0])} style={{flexDirection:"row",alignItems:"center",justifyContent:"center",gap:6,paddingVertical:10,borderRadius:10,backgroundColor:isDark?"#1E293B":"#F1F5F9"}}>
+                <Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize: Math.round(12 * activeTextScale),color:tm}}>Reset FLACC</Text>
+              </TouchableOpacity>
+              <Text style={{fontSize: Math.round(10 * activeTextScale),color:tm,fontStyle:"italic",textAlign:"center"}}>Ref: Merkel et al., Pediatr Nurs 1997 · Harriet Lane · Nelson</Text>
+            </>
+          )}
+
+          {psTab==="comfortb"&&(
+            <>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,fontStyle:"italic"}}>Sedation / distress in PICU. Score each item 1–5 after a 2-minute observation. Only ONE breathing item is scored — Respiratory response if ventilated, Crying if not.</Text>
+              <View style={{flexDirection:"row",gap:8}}>
+                <Chip label="Ventilated" color="#DB2777" selected={comfortVent} onPress={()=>setComfortVent(true)} isDark={isDark}/>
+                <Chip label="Not ventilated" color="#DB2777" selected={!comfortVent} onPress={()=>setComfortVent(false)} isDark={isDark}/>
+              </View>
+              {comfortItems.map((item,idx)=>(
+                <View key={item.name}>
+                  <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp,marginBottom:6}}>{item.name} — selected: {comfort[idx]}</Text>
+                  <View style={{gap:6,marginBottom:8}}>
+                    {item.options.map((opt,i)=>{
+                      const val = i+1;
+                      return (
+                        <TouchableOpacity key={val} onPress={()=>setComfort(prev=>prev.map((v,j)=>j===idx?val:v))} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,borderWidth:1.5,backgroundColor:comfort[idx]===val?"#DB277720":isDark?"#0F1F2E":"#F8FAFC",borderColor:comfort[idx]===val?"#DB2777":border}}>
+                          <View style={{width:24,height:24,borderRadius:8,justifyContent:"center",alignItems:"center",backgroundColor:comfort[idx]===val?"#DB2777":isDark?"#233554":"#E2E8F0"}}>
+                            <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"800",color:comfort[idx]===val?"#FFFFFF":tm}}>{val}</Text>
+                          </View>
+                          <Text style={{flex:1,fontSize: Math.round(13 * activeTextScale),color:isDark?"#CBD5E1":"#334155"}}>{opt}</Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                </View>
+              ))}
+              <View style={{backgroundColor:comfortResult.color+"15",borderColor:comfortResult.color+"40",borderWidth:1.5,borderRadius:12,padding:14,alignItems:"center"}}>
+                <Text style={{fontSize: Math.round(22 * activeTextScale),fontWeight:"900",color:comfortResult.color}}>COMFORT-B = {comfortTotal} / 30</Text>
+                <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:comfortResult.color,marginTop:4}}>{comfortResult.label}</Text>
+                <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,marginTop:4,textAlign:"center"}}>{comfortResult.sub}</Text>
+              </View>
+              <TouchableOpacity onPress={()=>setComfort([1,1,1,1,1,1])} style={{flexDirection:"row",alignItems:"center",justifyContent:"center",gap:6,paddingVertical:10,borderRadius:10,backgroundColor:isDark?"#1E293B":"#F1F5F9"}}>
+                <Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize: Math.round(12 * activeTextScale),color:tm}}>Reset COMFORT-B</Text>
+              </TouchableOpacity>
+              <Text style={{fontSize: Math.round(10 * activeTextScale),color:tm,fontStyle:"italic",textAlign:"center"}}>Ref: Ista et al., Intensive Care Med 2005</Text>
+            </>
+          )}
+
+          {psTab==="sas"&&(
+            <>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,fontStyle:"italic"}}>Riker Sedation-Agitation Scale (SAS) — tap the level that best matches the patient. Plain 1–7 scoring.</Text>
+              <View style={{gap:6}}>
+                {SAS_LEVELS.map(l=>(
+                  <TouchableOpacity key={l.score} onPress={()=>setSasLevel(l.score)} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,borderWidth:1.5,backgroundColor:sasLevel===l.score?"#DB277720":isDark?"#0F1F2E":"#F8FAFC",borderColor:sasLevel===l.score?"#DB2777":border}}>
+                    <View style={{width:28,height:28,borderRadius:9,justifyContent:"center",alignItems:"center",backgroundColor:sasLevel===l.score?"#DB2777":isDark?"#233554":"#E2E8F0"}}>
+                      <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"800",color:sasLevel===l.score?"#FFFFFF":tm}}>{l.score}</Text>
+                    </View>
+                    <View style={{flex:1}}>
+                      <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp}}>{l.level}</Text>
+                      <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,marginTop:1}}>{l.desc}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              {sasSelected&&(
+                <View style={{backgroundColor:"#DB277715",borderColor:"#DB277740",borderWidth:1.5,borderRadius:12,padding:14,alignItems:"center"}}>
+                  <Text style={{fontSize: Math.round(22 * activeTextScale),fontWeight:"900",color:"#DB2777"}}>SAS = {sasSelected.score} — {sasSelected.level}</Text>
+                  <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,marginTop:4,textAlign:"center"}}>Usual ICU goal: 3–4{sasSelected.score>=5?" · This level is in the agitation range (≥5)":""}</Text>
+                </View>
+              )}
+              <TouchableOpacity onPress={()=>setSasLevel(null)} style={{flexDirection:"row",alignItems:"center",justifyContent:"center",gap:6,paddingVertical:10,borderRadius:10,backgroundColor:isDark?"#1E293B":"#F1F5F9"}}>
+                <Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize: Math.round(12 * activeTextScale),color:tm}}>Reset SAS</Text>
+              </TouchableOpacity>
+              <Text style={{fontSize: Math.round(10 * activeTextScale),color:tm,fontStyle:"italic",textAlign:"center"}}>Ref: Riker et al., Crit Care Med 1999</Text>
+            </>
+          )}
+
+          {psTab==="faces"&&(
+            <>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,fontStyle:"italic"}}>Wong-Baker FACES — the child points to the face that matches how much it hurts. Self-report scale.</Text>
+              <View style={{flexDirection:"row",flexWrap:"wrap",gap:8,justifyContent:"space-between"}}>
+                {WONGBAKER_FACES.map(f=>{
+                  const sel = facesScore===f.score;
+                  return (
+                    <TouchableOpacity key={f.score} onPress={()=>setFacesScore(f.score)} style={{width:"31%",alignItems:"center",paddingVertical:10,paddingHorizontal:4,borderRadius:12,borderWidth:1.5,backgroundColor:sel?f.color+"20":isDark?"#0F1F2E":"#F8FAFC",borderColor:sel?f.color:border}}>
+                      <WongBakerFace score={f.score} size={64}/>
+                      <Text style={{fontSize: Math.round(17 * activeTextScale),fontWeight:"900",color:f.color,marginTop:6}}>{f.score}</Text>
+                      <Text style={{fontSize: Math.round(10.5 * activeTextScale),color:tm,textAlign:"center",marginTop:1}}>{f.label}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+              {facesSelected&&(
+                <View style={{backgroundColor:facesSelected.color+"15",borderColor:facesSelected.color+"40",borderWidth:1.5,borderRadius:12,padding:14,alignItems:"center"}}>
+                  <Text style={{fontSize: Math.round(22 * activeTextScale),fontWeight:"900",color:facesSelected.color}}>Score {facesSelected.score}/10 — {facesSelected.label}</Text>
+                  <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:facesSelected.color,marginTop:4}}>{facesSelected.band}</Text>
+                  <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,marginTop:4,textAlign:"center"}}>{facesSelected.hint}</Text>
+                </View>
+              )}
+              <TouchableOpacity onPress={()=>setFacesScore(null)} style={{flexDirection:"row",alignItems:"center",justifyContent:"center",gap:6,paddingVertical:10,borderRadius:10,backgroundColor:isDark?"#1E293B":"#F1F5F9"}}>
+                <Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize: Math.round(12 * activeTextScale),color:tm}}>Reset Faces</Text>
+              </TouchableOpacity>
+              <Text style={{fontSize: Math.round(10 * activeTextScale),color:tm,fontStyle:"italic",textAlign:"center"}}>Ref: Wong &amp; Baker, 1988 · Self-report — usually age ≥ 3 years</Text>
+            </>
+          )}
+        </View>
+      );
+
+      // ── FLUID BALANCE — I/O CHART ─────────────────────────────────────────
+      case "fluid-balance": return (
+        <View style={{gap:12}}>
+          <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
+            <Text style={{fontSize: Math.round(12 * activeTextScale),color:"#0369A1",fontWeight:"700"}}>Shift intake &amp; output chart</Text>
+            <StarButton isFav={isFav("tool-fluid-balance")} onToggle={()=>toggleFav({id:"tool-fluid-balance",type:"tool",label:"Fluid Balance — I/O Chart",color:"#0369A1"})} size={18} color="#0369A1"/>
+          </View>
+
+          {/* Weight + hours */}
+          <View style={{flexDirection:"row",gap:8}}>
+            <View style={{flex:1}}>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>Patient Weight (kg)</Text>
+              <View style={{flexDirection:"row",gap:6,alignItems:"center"}}>
+                <TextInput style={[inputStyle,{flex:1}]} value={ioWt} onChangeText={setIoWt} keyboardType="decimal-pad" placeholder="kg" placeholderTextColor={tm}/>
+                {weight>0&&<TouchableOpacity onPress={()=>setIoWt(weight.toString())} style={{paddingHorizontal:8,paddingVertical:8,borderRadius:8,backgroundColor:"#0369A115",borderWidth:1,borderColor:"#0369A140"}}>
+                  <Text style={{fontSize: Math.round(11 * activeTextScale),color:"#0369A1",fontWeight:"700"}}>Use {weight}</Text>
+                </TouchableOpacity>}
+              </View>
+            </View>
+            <View style={{width:110}}>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>Hours covered</Text>
+              <TextInput style={inputStyle} value={ioHours} onChangeText={setIoHours} keyboardType="decimal-pad" placeholder="12" placeholderTextColor={tm}/>
+            </View>
+          </View>
+
+          {/* Entry form */}
+          <View style={{flexDirection:"row",gap:8}}>
+            <Chip label="Intake" color="#0369A1" selected={ioKind==="in"} onPress={()=>switchIoKind("in")} isDark={isDark}/>
+            <Chip label="Output" color="#D97706" selected={ioKind==="out"} onPress={()=>switchIoKind("out")} isDark={isDark}/>
+          </View>
+          <View style={{flexDirection:"row",flexWrap:"wrap",gap:6}}>
+            {(ioKind==="in"?IO_INTAKE_TYPES:IO_OUTPUT_TYPES).map(t=>(
+              <Chip key={t} label={t} color={ioKind==="in"?"#0369A1":"#D97706"} selected={ioType===t} onPress={()=>setIoType(t)} isDark={isDark}/>
+            ))}
+          </View>
+          <View style={{flexDirection:"row",gap:8}}>
+            <View style={{flex:1}}>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>Volume (mL)</Text>
+              <TextInput style={inputStyle} value={ioVolume} onChangeText={setIoVolume} keyboardType="decimal-pad" placeholder="e.g. 250" placeholderTextColor={tm}/>
+            </View>
+            <View style={{flex:1}}>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>Time (optional)</Text>
+              <TextInput style={inputStyle} value={ioTime} onChangeText={setIoTime} placeholder="e.g. 14:00" placeholderTextColor={tm}/>
+            </View>
+          </View>
+          <TouchableOpacity onPress={addIoEntry} style={{flexDirection:"row",alignItems:"center",justifyContent:"center",gap:6,paddingVertical:12,borderRadius:10,backgroundColor:"#0369A1"}}>
+            <Feather name="plus" size={15} color="#FFFFFF"/><Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:"#FFFFFF"}}>Add entry</Text>
+          </TouchableOpacity>
+
+          {/* Entries list */}
+          {ioEntries.length>0?(
+            <View style={{gap:6}}>
+              <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp}}>Entries ({ioEntries.length})</Text>
+              {ioEntries.map(e=>(
+                <View key={e.id} style={{flexDirection:"row",alignItems:"center",gap:10,paddingVertical:8,paddingHorizontal:10,borderRadius:10,borderWidth:1,borderColor:border,backgroundColor:isDark?"#0F1F2E":"#F8FAFC"}}>
+                  <View style={{width:8,height:8,borderRadius:4,backgroundColor:e.kind==="in"?"#0369A1":"#D97706"}}/>
+                  <View style={{flex:1}}>
+                    <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"600",color:tp}}>{e.type}</Text>
+                    {e.time?<Text style={{fontSize: Math.round(11 * activeTextScale),color:tm}}>{e.time}</Text>:null}
+                  </View>
+                  <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:e.kind==="in"?"#0369A1":"#D97706"}}>{e.kind==="in"?"+":"−"}{e.volume} mL</Text>
+                  <TouchableOpacity onPress={()=>setIoEntries(prev=>prev.filter(x=>x.id!==e.id))} style={{padding:4}}>
+                    <Feather name="trash-2" size={15} color="#DC2626"/>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          ):(
+            <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,fontStyle:"italic",textAlign:"center"}}>No entries yet — add the first intake or output above.</Text>
+          )}
+
+          {/* Totals */}
+          <View style={{backgroundColor:isDark?"#112240":"#F8FAFC",borderRadius:12,padding:14,borderWidth:1,borderColor:border}}>
+            <Text style={{fontSize: Math.round(11 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>TOTALS</Text>
+            <Row label="Total IN" value={`${ioTotalIn} mL`} isDark={isDark}/>
+            <Row label="Total OUT" value={`${ioTotalOut} mL`} isDark={isDark}/>
+            <Row label="Net balance" value={`${ioNet>0?"+":""}${ioNet} mL`} isDark={isDark}/>
+            {ioWtNum>0&&<Row label="Net balance (per kg)" value={`${+(ioNet/ioWtNum).toFixed(1)} mL/kg`} isDark={isDark}/>}
+            <Row label="Urine output" value={ioUop!==null?`${ioUop} mL/kg/hr`:"— (needs weight + hours)"} isDark={isDark}/>
+          </View>
+
+          <TouchableOpacity onPress={()=>{setIoEntries([]);}} style={{flexDirection:"row",alignItems:"center",justifyContent:"center",gap:6,paddingVertical:10,borderRadius:10,backgroundColor:isDark?"#1E293B":"#F1F5F9"}}>
+            <Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize: Math.round(12 * activeTextScale),color:tm}}>Clear chart</Text>
+          </TouchableOpacity>
+          <Text style={{fontSize: Math.round(10 * activeTextScale),color:tm,fontStyle:"italic",textAlign:"center"}}>Saved on this device only — not a medical record.</Text>
+        <Text style={{fontSize: Math.round(10 * activeTextScale),color:tm,fontStyle:"italic",textAlign:"center",marginTop:10}}>Ref: Standard PICU fluid-balance charting · Urine output &lt; 1 mL/kg/hr = oliguria (KDIGO)</Text>
+        </View>
+      );
+
+      // ── BRADEN Q — PRESSURE INJURY RISK ───────────────────────────────────
+      case "braden-q": return (
+        <View style={{gap:10}}>
+          <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
+            <Text style={{fontSize: Math.round(12 * activeTextScale),color:"#B45309",fontWeight:"700"}}>Pressure-injury risk assessment</Text>
+            <StarButton isFav={isFav("tool-braden-q")} onToggle={()=>toggleFav({id:"tool-braden-q",type:"tool",label:"Braden Q — Pressure Injury Risk",color:"#B45309"})} size={18} color="#B45309"/>
+          </View>
+          <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,fontStyle:"italic"}}>Score each of the 7 subscales 1–4 (1 = most impaired). Total 7–28 — the lower the score, the higher the risk. ≤16 = at risk.</Text>
+          {BRADENQ_SUBSCALES.map((item,idx)=>(
+            <View key={item.name}>
+              <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp,marginBottom:6}}>{item.name} — selected: {braden[idx]}</Text>
+              <View style={{gap:6,marginBottom:8}}>
+                {item.options.map((opt,i)=>{
+                  const val = i+1;
+                  return (
+                    <TouchableOpacity key={val} onPress={()=>setBraden(prev=>prev.map((v,j)=>j===idx?val:v))} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,borderWidth:1.5,backgroundColor:braden[idx]===val?"#B4530920":isDark?"#0F1F2E":"#F8FAFC",borderColor:braden[idx]===val?"#B45309":border}}>
+                      <View style={{width:24,height:24,borderRadius:8,justifyContent:"center",alignItems:"center",backgroundColor:braden[idx]===val?"#B45309":isDark?"#233554":"#E2E8F0"}}>
+                        <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"800",color:braden[idx]===val?"#FFFFFF":tm}}>{val}</Text>
+                      </View>
+                      <Text style={{flex:1,fontSize: Math.round(13 * activeTextScale),color:isDark?"#CBD5E1":"#334155"}}>{opt}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+          ))}
+          <View style={{backgroundColor:(bradenAtRisk?"#DC2626":"#16A34A")+"15",borderColor:(bradenAtRisk?"#DC2626":"#16A34A")+"40",borderWidth:1.5,borderRadius:12,padding:14,alignItems:"center"}}>
+            <Text style={{fontSize: Math.round(22 * activeTextScale),fontWeight:"900",color:bradenAtRisk?"#DC2626":"#16A34A"}}>Braden Q = {bradenTotal} / 28</Text>
+            <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:bradenAtRisk?"#DC2626":"#16A34A",marginTop:4}}>{bradenAtRisk?"⚠ AT RISK — score ≤16":"Above the at-risk cutoff (>16)"}</Text>
+            <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,marginTop:4,textAlign:"center"}}>{bradenAtRisk?"Start / continue pressure-injury prevention measures below":"Continue routine skin surveillance and reassess per unit protocol"}</Text>
+          </View>
+          {bradenAtRisk&&(
+            <View style={{backgroundColor:isDark?"#0F1F2E":"#FFFBEB",borderColor:"#B4530940",borderWidth:1.5,borderRadius:12,padding:12,gap:6}}>
+              <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"800",color:"#B45309"}}>Pressure-injury prevention</Text>
+              {BRADENQ_PREVENTION.map(item=>(
+                <View key={item} style={{flexDirection:"row",alignItems:"flex-start",gap:8}}>
+                  <Feather name="check" size={13} color="#B45309" style={{marginTop:2}}/>
+                  <Text style={{flex:1,fontSize: Math.round(12.5 * activeTextScale),color:isDark?"#CBD5E1":"#334155"}}>{item}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+          <TouchableOpacity onPress={()=>setBraden([4,4,4,4,4,4,4])} style={{flexDirection:"row",alignItems:"center",justifyContent:"center",gap:6,paddingVertical:10,borderRadius:10,backgroundColor:isDark?"#1E293B":"#F1F5F9"}}>
+            <Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize: Math.round(12 * activeTextScale),color:tm}}>Reset Braden Q</Text>
+          </TouchableOpacity>
+          <Text style={{fontSize: Math.round(10 * activeTextScale),color:tm,fontStyle:"italic",textAlign:"center"}}>Ref: Curley et al., Nurs Res 2003</Text>
+        </View>
+      );
+
+      // ── HUMPTY DUMPTY — FALLS RISK ────────────────────────────────────────
+      case "humpty-dumpty": return (
+        <View style={{gap:10}}>
+          <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
+            <Text style={{fontSize: Math.round(12 * activeTextScale),color:"#65A30D",fontWeight:"700"}}>Inpatient falls-risk assessment</Text>
+            <StarButton isFav={isFav("tool-humpty-dumpty")} onToggle={()=>toggleFav({id:"tool-humpty-dumpty",type:"tool",label:"Humpty Dumpty — Falls Risk",color:"#65A30D"})} size={18} color="#65A30D"/>
+          </View>
+          <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,fontStyle:"italic"}}>Pick ONE criterion per parameter. Total 7–23: 7–11 = low risk, ≥12 = high risk.</Text>
+          {HDFS_PARAMS.map((param,idx)=>(
+            <View key={param.name}>
+              <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp,marginBottom:6}}>{param.name} — selected: {hdfs[idx]}</Text>
+              <View style={{gap:6,marginBottom:8}}>
+                {param.options.map(o=>(
+                  <TouchableOpacity key={o.label} onPress={()=>setHdfs(prev=>prev.map((v,j)=>j===idx?o.points:v))} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,borderWidth:1.5,backgroundColor:hdfs[idx]===o.points?"#65A30D20":isDark?"#0F1F2E":"#F8FAFC",borderColor:hdfs[idx]===o.points?"#65A30D":border}}>
+                    <View style={{width:24,height:24,borderRadius:8,justifyContent:"center",alignItems:"center",backgroundColor:hdfs[idx]===o.points?"#65A30D":isDark?"#233554":"#E2E8F0"}}>
+                      <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"800",color:hdfs[idx]===o.points?"#FFFFFF":tm}}>{o.points}</Text>
+                    </View>
+                    <Text style={{flex:1,fontSize: Math.round(13 * activeTextScale),color:isDark?"#CBD5E1":"#334155"}}>{o.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          ))}
+          <View style={{backgroundColor:(hdfsHigh?"#DC2626":"#16A34A")+"15",borderColor:(hdfsHigh?"#DC2626":"#16A34A")+"40",borderWidth:1.5,borderRadius:12,padding:14,alignItems:"center"}}>
+            <Text style={{fontSize: Math.round(22 * activeTextScale),fontWeight:"900",color:hdfsHigh?"#DC2626":"#16A34A"}}>Humpty Dumpty = {hdfsTotal} / 23</Text>
+            <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:hdfsHigh?"#DC2626":"#16A34A",marginTop:4}}>{hdfsHigh?"⚠ HIGH RISK — score ≥12":"Low risk (7–11)"}</Text>
+            <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm,marginTop:4,textAlign:"center"}}>{hdfsHigh?"Follow the high-risk falls protocol below":"Follow the low-risk standard protocol below"}</Text>
+          </View>
+          {!hdfsHigh&&(
+            <View style={{backgroundColor:isDark?"#0F1F2E":"#F0FDF4",borderColor:"#65A30D40",borderWidth:1.5,borderRadius:12,padding:12,gap:6}}>
+              <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"800",color:"#65A30D"}}>Low-risk standard protocol</Text>
+              {HDFS_LOW_RISK.map(item=>(
+                <View key={item} style={{flexDirection:"row",alignItems:"flex-start",gap:8}}>
+                  <Feather name="check" size={13} color="#65A30D" style={{marginTop:2}}/>
+                  <Text style={{flex:1,fontSize: Math.round(12.5 * activeTextScale),color:isDark?"#CBD5E1":"#334155"}}>{item}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+          {hdfsHigh&&(
+            <View style={{backgroundColor:isDark?"#0F1F2E":"#FEF2F2",borderColor:"#DC262640",borderWidth:1.5,borderRadius:12,padding:12,gap:6}}>
+              <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"800",color:"#DC2626"}}>High-risk protocol — low-risk measures PLUS:</Text>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),color:tm}}>Low-risk summary: bed low with brakes on, side rails up, call light in reach and family taught, non-skid footwear, room clear with nightlight on, teaching documented.</Text>
+              {HDFS_HIGH_RISK.map(item=>(
+                <View key={item} style={{flexDirection:"row",alignItems:"flex-start",gap:8}}>
+                  <Feather name="check" size={13} color="#DC2626" style={{marginTop:2}}/>
+                  <Text style={{flex:1,fontSize: Math.round(12.5 * activeTextScale),color:isDark?"#CBD5E1":"#334155"}}>{item}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+          <TouchableOpacity onPress={()=>setHdfs(hdfsDefaults)} style={{flexDirection:"row",alignItems:"center",justifyContent:"center",gap:6,paddingVertical:10,borderRadius:10,backgroundColor:isDark?"#1E293B":"#F1F5F9"}}>
+            <Feather name="rotate-ccw" size={14} color={tm}/><Text style={{fontSize: Math.round(12 * activeTextScale),color:tm}}>Reset Humpty Dumpty</Text>
+          </TouchableOpacity>
+          <Text style={{fontSize: Math.round(10 * activeTextScale),color:tm,fontStyle:"italic",textAlign:"center"}}>Ref: Hill-Rodriguez et al., J Spec Pediatr Nurs 2009 · JCI IPSG Goal 6</Text>
         </View>
       );
 
@@ -1502,8 +2157,8 @@ export default function ToolDetailScreen() {
         <View style={{gap:12}}>
           <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
             <View>
-              <Text style={{fontSize:12,fontWeight:"700",color:"#0891B2"}}>PALICC 2023 · Harriet Lane 22e/23e</Text>
-              <Text style={{fontSize:11,color:tm,marginTop:1}}>Hamilton C3 · Lung-Protective Ventilation</Text>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:"#0891B2"}}>PALICC 2023 · Harriet Lane 24e</Text>
+              <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,marginTop:1}}>Hamilton C3 · Lung-Protective Ventilation</Text>
             </View>
             <StarButton isFav={isFav("tool-ventilator")} onToggle={()=>toggleFav({id:"tool-ventilator",type:"tool",label:"Ventilator & ABG",color:"#0891B2"})} size={18} color="#0891B2"/>
           </View>
@@ -1519,15 +2174,15 @@ export default function ToolDetailScreen() {
     <SafeAreaView style={{flex:1,backgroundColor:bg}} edges={["top","bottom"]}>
       {/* Header */}
       <View style={{flexDirection:"row",alignItems:"center",gap:12,paddingHorizontal:16,paddingVertical:14,backgroundColor:card,borderBottomWidth:1,borderBottomColor:border,...Platform.select({ios:{shadowColor:"#000",shadowOffset:{width:0,height:2},shadowOpacity:0.06,shadowRadius:8},android:{elevation:3}})}}>
-        <TouchableOpacity onPress={()=>router.back()} style={{width:38,height:38,borderRadius:19,alignItems:"center",justifyContent:"center",backgroundColor:isDark?"#233554":"#F0F4F8"}}>
+        <TouchableOpacity onPress={()=>goBack(router)} style={{width:38,height:38,borderRadius:19,alignItems:"center",justifyContent:"center",backgroundColor:isDark?"#233554":"#F0F4F8"}}>
           <Feather name="arrow-left" size={20} color={isDark?"#8892B0":C.tint}/>
         </TouchableOpacity>
         <View style={{width:36,height:36,borderRadius:10,backgroundColor:meta.color+"1A",alignItems:"center",justifyContent:"center"}}>
           <Feather name={meta.icon as any} size={18} color={meta.color}/>
         </View>
         <View style={{flex:1,minWidth:0}}>
-          <Text style={{fontSize:17,fontWeight:"800",color:tp,letterSpacing:-0.3}} numberOfLines={1}>{meta.title}</Text>
-          <Text style={{fontSize:11,color:tm,marginTop:1}} numberOfLines={1}>{meta.subtitle}</Text>
+          <Text style={{fontSize: Math.round(17 * activeTextScale),fontWeight:"800",color:tp,letterSpacing:-0.3}} numberOfLines={1}>{meta.title}</Text>
+          <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,marginTop:1}} numberOfLines={1}>{meta.subtitle}</Text>
         </View>
       </View>
 

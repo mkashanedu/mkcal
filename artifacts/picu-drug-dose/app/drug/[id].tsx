@@ -1,5 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
+import { goBack } from "@/lib/nav";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Platform,
@@ -15,12 +16,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Colors from "@/constants/colors";
 import { CATEGORIES, DRUGS, calculateDose } from "@/constants/allDrugs";
-import { INFUSION_DRUGS } from "@/constants/infusions";
+import { INFUSION_DRUGS, computeRecipe } from "@/constants/infusions";
 import { useTheme } from "@/context/ThemeContext";
 import { useWeight } from "@/context/WeightContext";
 import { useFavorites } from "@/context/FavoritesContext";
 import { useHistory } from "@/context/HistoryContext";
 import { usePreferences } from "@/context/PreferencesContext";
+import { lasaPartner } from "@/lib/lasa";
 import { StarButton } from "@/components/StarButton";
 import { highAlertInfo } from "@/lib/highAlert";
 import { renalCaution } from "@/lib/renal";
@@ -39,7 +41,10 @@ export default function DrugDetailScreen() {
       : undefined;
   const { isFav, toggleFav } = useFavorites();
   const { addEntry } = useHistory();
-  const { textScale } = usePreferences();
+  const { textScale, highAlertConfirm } = usePreferences();
+  const [doseRevealed, setDoseRevealed] = useState(false);
+  useEffect(() => { setDoseRevealed(false); }, [drug.id]);
+  const lasaOther = lasaPartner(drug.id);
   const weightValid = Number.isFinite(weight) && weight > 0;
 
   const drug = DRUGS.find((d) => d.id === id);
@@ -205,7 +210,7 @@ export default function DrugDetailScreen() {
         ]}
       >
         <View style={styles.headerRow}>
-          <Pressable onPress={() => router.back()} style={styles.backBtn}>
+          <Pressable onPress={() => goBack(router)} style={styles.backBtn}>
             <Feather name="arrow-left" size={22} color="#FFFFFF" />
           </Pressable>
           <View style={{ flex: 1 }} />
@@ -408,6 +413,32 @@ export default function DrugDetailScreen() {
           </View>
         )}
 
+        {lasaOther && (
+          <Pressable
+            onPress={() => router.push({ pathname: "/drug/[id]", params: { id: lasaOther.id } } as any)}
+            style={{ flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: isDark ? "#451A03" : "#FFFBEB", borderWidth: 1, borderColor: "#D97706", borderRadius: 10, padding: 10, marginBottom: 10 }}
+          >
+            <Feather name="alert-triangle" size={15} color="#D97706" />
+            <Text style={{ flex: 1, fontSize: 12.5, fontFamily: "Inter_600SemiBold", color: isDark ? "#FCD34D" : "#92400E", lineHeight: 17 }}>
+              Milta-julta naam (LASA): {lasaOther.name} — ghalti se wo na de dein. Us ki page dekhne ke liye tap karein.
+            </Text>
+          </Pressable>
+        )}
+        {ha.high && highAlertConfirm && !doseRevealed ? (
+          <View style={[styles.card, { backgroundColor: isDark ? "#112240" : "#FFFFFF", borderWidth: 1.5, borderColor: "#DC2626", alignItems: "center", padding: 18 }]}>
+            <Feather name="lock" size={22} color="#DC2626" />
+            <Text style={{ fontFamily: "Inter_700Bold", fontSize: 15, color: isDark ? "#FFFFFF" : "#0D1B2A", marginTop: 8, textAlign: "center" }}>
+              HIGH ALERT — dose chhupi hui he
+            </Text>
+            <Text style={{ fontFamily: "Inter_400Regular", fontSize: 13, color: isDark ? "#A8B8DC" : "#4A5568", marginTop: 6, textAlign: "center", lineHeight: 18 }}>
+              Pehle mareez aur wazan dobara confirm karein — abhi ka wazan: {weight} kg
+            </Text>
+            <Pressable onPress={() => setDoseRevealed(true)} style={{ backgroundColor: "#DC2626", borderRadius: 10, paddingHorizontal: 18, paddingVertical: 11, marginTop: 12 }}>
+              <Text style={{ color: "#FFFFFF", fontFamily: "Inter_700Bold", fontSize: 13.5 }}>Wazan confirm he — dose dikhao</Text>
+            </Pressable>
+          </View>
+        ) : (
+          <>
         {/* Doses */}
         <SectionHeader title="Dosing" icon="activity" color={accent} isDark={isDark} />
         <View style={[styles.card, { backgroundColor: isDark ? "#112240" : "#FFFFFF" }]}>
@@ -497,6 +528,9 @@ export default function DrugDetailScreen() {
           })}
         </View>
 
+          </>
+        )}
+
         {/* Copy / Share dose summary (extra batch) */}
         <Pressable
           onPress={handleShareDose}
@@ -537,6 +571,15 @@ export default function DrugDetailScreen() {
                 <Text style={{ fontSize: 12.5, color: isDark ? "#A8B8DC" : "#4A5568", fontFamily: "Inter_400Regular", marginTop: 2 }}>
                   {infusionMatch.minDose}–{infusionMatch.maxDose} {infusionMatch.primaryUnit} · {infusionMatch.standardConcentrations.length} standard concentrations
                 </Text>
+                {(() => {
+                  const r = computeRecipe(infusionMatch, 0, weight, 50);
+                  if (!r) return null;
+                  return (
+                    <Text style={{ fontSize: 12.5, color: isDark ? "#A8B8DC" : "#4A5568", fontFamily: "Inter_400Regular", marginTop: 4 }}>
+                      Standard recipe (50 mL): {r.totalAmountStr} — drug {r.drugML < 10 ? r.drugML.toFixed(2) : r.drugML.toFixed(1)} mL + fluid {r.diluentML.toFixed(1)} mL
+                    </Text>
+                  );
+                })()}
                 <Text style={{ fontSize: 12.5, color: colors.tint, fontFamily: "Inter_600SemiBold", marginTop: 4 }}>
                   Open full infusion setup →
                 </Text>
@@ -660,6 +703,12 @@ export default function DrugDetailScreen() {
         )}
 
         {/* Reference */}
+        <View style={styles.referenceRow}>
+          <Feather name="shield" size={12} color={isDark ? "#A8B8DC" : "#8A9BB0"} />
+          <Text style={[styles.referenceText, { color: isDark ? "#A8B8DC" : "#8A9BB0", fontFamily: "Inter_400Regular" }]}>
+            Dataset references: Harriet Lane 24e · Nelson — verified Oct–Nov 2026
+          </Text>
+        </View>
         {drug.reference && (
           <View style={styles.referenceRow}>
             <Feather name="book-open" size={12} color={isDark ? "#A8B8DC" : "#8A9BB0"} />

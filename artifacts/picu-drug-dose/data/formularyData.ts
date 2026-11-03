@@ -1,5 +1,5 @@
 // PICU Formulary — non-emergency medications (Tablets, Syrups, Nebulizers, IV Infusions)
-// Reference: Harriet Lane Handbook 22nd/23rd Ed · Nelson Textbook of Pediatrics 22nd Ed
+// Reference: Harriet Lane Handbook 24th Ed · Nelson Textbook of Pediatrics 22nd Ed
 //
 // HOW TO ADD A NEW DRUG:
 // 1. Pick the correct `category` below.
@@ -115,7 +115,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — primarily unchanged via glomerular filtration and tubular secretion (>60%); dose reduction required when GFR <25 mL/min",
     monitoring: ["Renal function (especially with high doses or pre-existing renal impairment)", "Hydration status", "Signs of neurotoxicity (tremor, confusion) with impaired renal function"],
     adverseReactions: ["Nausea, vomiting, diarrhea", "Headache", "Renal impairment (crystalluria if dehydrated)", "Neurotoxicity (tremor, confusion) with high doses/renal failure", "Rash (rare)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-albendazole-tab",
@@ -132,7 +132,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Biliary excretion of metabolites; <1% unchanged in urine",
     monitoring: ["Liver function tests (especially with prolonged use)", "CBC (risk of leukopenia/aplastic anaemia with extended therapy)", "Neurological status and corticosteroid cover for neurocysticercosis"],
     adverseReactions: ["Abdominal pain, nausea", "Elevated liver enzymes (usually transient)", "Leukopenia (prolonged use)", "Alopecia (prolonged use)", "Headache, dizziness", "Rare: aplastic anaemia"],
-    reference: "Harriet Lane 22e | Nelson's 22e | WHO Essential Medicines",
+    reference: "Harriet Lane 24e | Nelson's 22e | WHO Essential Medicines",
   },
   {
     id: "f-amlodipine-tab",
@@ -149,7 +149,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (~60% as metabolites, ~10% unchanged); t½ 30–50 hours",
     monitoring: ["Blood pressure (before and after each dose titration)", "Heart rate", "Peripheral oedema", "Liver function with prolonged use"],
     adverseReactions: ["Peripheral oedema (ankle/pedal)", "Flushing", "Headache", "Dizziness", "Palpitations", "Reflex tachycardia", "Gingival hyperplasia (rare, long-term)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-amoxicillin-tab",
@@ -166,7 +166,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — tubular secretion and glomerular filtration (~60–70% unchanged in urine); probenecid delays excretion",
     monitoring: ["Clinical response at 48–72 hours", "Signs of allergic reaction", "GI tolerance", "Renal function if prolonged use"],
     adverseReactions: ["Diarrhoea", "Nausea, vomiting", "Maculopapular rash (especially concurrent viral infection/EBV)", "Hypersensitivity/anaphylaxis", "C. difficile colitis (rare)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-amoxiclav-tab",
@@ -184,7 +184,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Predominantly renal; amoxicillin ~60% unchanged; clavulanate ~25–45% unchanged. Both excreted via glomerular filtration and tubular secretion",
     monitoring: ["Liver function (ALT/AST) with prolonged use", "Signs of GI intolerance", "Clinical response", "Renal function"],
     adverseReactions: ["Diarrhoea (more common than amoxicillin alone — clavulanate related)", "Nausea, vomiting", "Hepatitis/cholestatic jaundice (rare but clavulanate-related)", "Rash", "Hypersensitivity/anaphylaxis"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-atenolol-tab",
@@ -201,7 +201,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — primarily unchanged via glomerular filtration and tubular secretion; dose reduce if GFR <35 mL/min",
     monitoring: ["Heart rate (hold if HR <60 bpm)", "Blood pressure", "ECG (PR interval)", "Blood glucose (may mask hypoglycaemia)", "Respiratory status in asthmatics"],
     adverseReactions: ["Bradycardia", "Hypotension", "Fatigue, lethargy", "Cold extremities", "Bronchospasm (less than non-selective beta-blockers)", "Masking of hypoglycaemia", "Rebound hypertension on abrupt withdrawal"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-azithromycin-tab",
@@ -218,7 +218,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Biliary/fecal excretion (~50% unchanged); minimal renal excretion (<10%)",
     monitoring: ["QTc (ECG if risk factors)", "Liver function with prolonged use", "Clinical response", "Hearing with prolonged/high-dose use"],
     adverseReactions: ["Nausea, vomiting, abdominal cramps", "Diarrhoea", "QT prolongation (dose-related)", "Transient elevated liver enzymes", "Rare: cholestatic jaundice", "Sensorineural hearing loss (high dose/prolonged)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-bisacodyl-tab",
@@ -235,7 +235,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Primarily fecal; small fraction excreted renally as glucuronide conjugate",
     monitoring: ["Stool frequency and consistency", "Electrolytes with prolonged use (risk of hypokalaemia)", "Abdominal pain/cramping (discontinue if severe)"],
     adverseReactions: ["Abdominal cramps", "Nausea", "Diarrhoea", "Hypokalaemia with chronic use", "Rectal irritation (suppository form)", "Dependence with prolonged use", "Melanosis coli (cosmetic, reversible)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-carbamazepine-tab",
@@ -252,7 +252,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (~70% as metabolites); <3% unchanged; significant drug interactions via CYP induction",
     monitoring: ["Serum carbamazepine levels (trough target 4–12 mg/L)", "CBC with differential (neutropenia risk)", "LFTs", "Serum sodium (SIADH)", "ECG if cardiac history", "HLA-B*1502 testing in high-risk populations before initiation"],
     adverseReactions: ["Diplopia, ataxia, dizziness (dose-related, especially on initiation)", "Nausea/vomiting", "Hyponatraemia (SIADH)", "Leucopenia/aplastic anaemia (rare)", "Steven-Johnson syndrome / TEN (rare, esp. HLA-B*1502)", "Hepatotoxicity", "Rash"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-cetirizine-tab",
@@ -269,7 +269,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — predominantly unchanged (~60–70% in urine); dose reduction required if CrCl <31 mL/min",
     monitoring: ["Renal function if prolonged use", "Sedation level (less sedating than 1st-generation but may still cause drowsiness in some children)", "Urinary retention risk in predisposed patients"],
     adverseReactions: ["Somnolence (less than 1st generation)", "Headache", "Dry mouth", "Fatigue", "GI upset", "Rare: urinary retention, QT prolongation at very high doses"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-cephalexin-tab",
@@ -287,7 +287,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — tubular secretion and glomerular filtration; t½ ~1 hour; dose adjustment required in renal failure",
     monitoring: ["Renal function with prolonged use", "Signs of superinfection", "Clinical response at 48–72 hours"],
     adverseReactions: ["GI upset (nausea, diarrhoea)", "Rash", "Hypersensitivity reactions", "Positive direct Coombs test", "C. difficile colitis (less common than broad-spectrum antibiotics)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-chloroquine-tab",
@@ -304,7 +304,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — slow excretion (~50% unchanged); very long t½ (days to weeks) due to tissue accumulation",
     monitoring: ["Ophthalmological exam (baseline and annually with prolonged use — retinopathy)", "ECG (QT interval)", "CBC", "G6PD status before initiation in high-risk populations"],
     adverseReactions: ["GI upset (nausea, abdominal cramps)", "Headache, dizziness", "Pruritus (especially in African populations)", "QT prolongation", "Retinopathy (dose-dependent, with cumulative use)", "Haemolysis (G6PD deficiency)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | WHO Malaria Guidelines",
+    reference: "Harriet Lane 24e | Nelson's 22e | WHO Malaria Guidelines",
   },
   {
     id: "f-ciprofloxacin-tab",
@@ -321,7 +321,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (~40–50% unchanged in urine); biliary/fecal (~20–35%); dose adjust in severe renal impairment",
     monitoring: ["Tendon pain/swelling (risk of tendinopathy/rupture)", "Serum creatinine/GFR", "Blood glucose (hypo/hyperglycaemia)", "CNS symptoms (seizures, confusion)", "QTc if risk factors"],
     adverseReactions: ["Tendinopathy and tendon rupture (especially Achilles)", "Nausea, vomiting, diarrhoea", "CNS effects (headache, dizziness, insomnia, seizures — rare)", "QT prolongation", "Photosensitivity", "Dysglycaemia", "Arthralgias/cartilage effects in young patients"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-clarithromycin-tab",
@@ -338,7 +338,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (~20–30% unchanged) and biliary; active metabolite also renally excreted",
     monitoring: ["QTc interval (ECG if risk factors)", "Liver function tests", "Drug interactions (strong CYP3A4 inhibitor)", "GI tolerance"],
     adverseReactions: ["Nausea, vomiting, abdominal pain, diarrhoea", "Metallic/bitter taste (characteristic)", "QT prolongation", "Elevated liver enzymes / hepatitis (rare)", "Headache", "C. difficile colitis (rare)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-clindamycin-tab",
@@ -355,7 +355,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Biliary/fecal (~60%) and renal (~10% as metabolites); significant biliary concentration promotes intestinal colonisation",
     monitoring: ["Signs/symptoms of C. difficile-associated diarrhoea (CDAD)", "Liver function", "Clinical response", "Blood counts with prolonged use"],
     adverseReactions: ["Diarrhoea (most common)", "Pseudomembranous colitis / C. difficile (most serious)", "Nausea, vomiting", "Metallic/bitter taste", "Elevated transaminases", "Rash, urticaria"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-clonazepam-tab",
@@ -372,7 +372,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal as glucuronide conjugates (<1% unchanged); t½ 18–50 hours",
     monitoring: ["Seizure frequency", "CNS depression/sedation level", "Respiratory status", "LFTs", "Signs of dependence and tolerance with prolonged use", "Withdrawal symptoms if abruptly stopped"],
     adverseReactions: ["Sedation, drowsiness", "Ataxia, coordination problems", "Cognitive impairment/memory", "Behavioural changes (paradoxical aggression/hyperactivity in children)", "Hypersalivation", "Tolerance and physical dependence", "Respiratory depression (especially with concurrent CNS depressants)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-cotrimoxazole-tab",
@@ -390,7 +390,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — TMP ~50–60% unchanged; SMX primarily as acetyl conjugate; dose adjust if GFR < 30 mL/min",
     monitoring: ["CBC (folate antagonism — macrocytic anaemia, neutropenia)", "Serum creatinine/electrolytes (TMP blocks tubular secretion of creatinine — spurious rise)", "Liver function tests", "Potassium (TMP blocks Na⁺/K⁺ tubular exchange — hyperkalaemia)"],
     adverseReactions: ["Nausea, vomiting, anorexia", "Hypersensitivity rash (sulfonamide)", "Stevens-Johnson syndrome / TEN (rare)", "Megaloblastic anaemia, neutropenia, thrombocytopenia", "Hyperkalaemia", "Photosensitivity", "Nephrotoxicity (crystalluria — ensure hydration)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-desmopressin-tab",
@@ -408,7 +408,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — oral bioavailability low (~1%); primarily excreted unchanged",
     monitoring: ["Serum sodium and osmolality", "Urine output and osmolality", "Blood pressure", "Signs of water intoxication/hyponatraemia (headache, nausea, seizures)", "Fluid intake and restriction compliance"],
     adverseReactions: ["Hyponatraemia (most serious — risk of water intoxication/seizures)", "Headache", "Facial flushing", "Nausea", "Abdominal cramps", "Hypertension (with high doses)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-dexamethasone-tab",
@@ -425,7 +425,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal as metabolites and small amount unchanged",
     monitoring: ["Blood glucose", "Blood pressure", "Electrolytes (sodium, potassium)", "Adrenal function (with prolonged courses)", "Intraocular pressure (long-term)", "Growth with prolonged use"],
     adverseReactions: ["Hyperglycaemia", "Immunosuppression", "Adrenal suppression (prolonged use)", "Hypertension", "GI ulceration", "Insomnia, mood disturbance", "Avascular necrosis (prolonged use)", "Osteoporosis", "Growth suppression"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-diazepam-tab",
@@ -442,7 +442,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal as glucuronide conjugates of metabolites; minimal unchanged drug",
     monitoring: ["Level of sedation / respiratory rate", "Paradoxical excitation (especially in young children)", "Signs of physical dependence", "Liver function in prolonged use"],
     adverseReactions: ["Sedation, drowsiness, fatigue", "Ataxia, dizziness", "Anterograde amnesia", "Paradoxical disinhibition (children)", "Respiratory depression", "Physical dependence and withdrawal", "Confusion (elderly)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-digoxin-tab",
@@ -459,7 +459,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — ~65–80% unchanged via glomerular filtration and tubular secretion; t½ 36–48 hours; accumulates in renal failure",
     monitoring: ["Serum digoxin level (trough, 6–8h post-dose; therapeutic 0.5–2 ng/mL)", "ECG (PR prolongation, ST depression, arrhythmias)", "Serum potassium, magnesium, calcium (hypokalaemia potentiates toxicity)", "Renal function (adjust dose if GFR impaired)"],
     adverseReactions: ["Nausea, vomiting, anorexia (early toxicity signs)", "Visual disturbances (yellow-green haloes, blurred vision)", "Bradycardia, AV block", "Ventricular arrhythmias (severe toxicity)", "Gynaecomastia (long-term)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-domperidone-tab",
@@ -476,7 +476,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Primarily faecal (~66%) as metabolites; renal (~31%)",
     monitoring: ["QTc interval (ECG before and during therapy)", "Signs of extrapyramidal effects (rare — does not cross BBB readily)", "Prolactin levels (galactorrhoea/gynaecomastia)", "Clinical response"],
     adverseReactions: ["QT prolongation and risk of torsades de pointes (dose-related)", "Dry mouth", "Headache", "Galactorrhoea, gynaecomastia (hyperprolactinaemia)", "Rare extrapyramidal effects in neonates/very young infants"],
-    reference: "Harriet Lane 22e | Nelson's 22e | EMA guidelines",
+    reference: "Harriet Lane 24e | Nelson's 22e | EMA guidelines",
   },
   {
     id: "f-enalapril-tab",
@@ -493,7 +493,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — enalaprilat excreted mainly unchanged; dose reduction required if GFR < 30 mL/min",
     monitoring: ["Renal function (serum creatinine, BUN) within 1–2 weeks of initiation and after dose increases", "Serum potassium (hyperkalaemia risk)", "Blood pressure (first-dose hypotension)", "Urine protein", "Signs of angioedema (discontinue immediately if occurs)"],
     adverseReactions: ["Persistent dry cough (bradykinin-mediated, ~10%)", "First-dose hypotension", "Hyperkalaemia", "Deterioration of renal function (bilateral RAS, volume depletion)", "Angioedema (rare but serious)", "Rash", "Fetopathy/teratogenicity"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-erythromycin-tab",
@@ -510,7 +510,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Primarily biliary/fecal; ~5% renal unchanged; t½ 1.5–2 hours",
     monitoring: ["QTc (ECG if risk factors)", "Liver function tests (cholestatic hepatitis risk)", "GI tolerance", "Hearing with high doses"],
     adverseReactions: ["GI disturbance (most common — nausea, vomiting, cramps, diarrhoea)", "QT prolongation", "Cholestatic hepatitis (erythromycin estolate — avoid in pregnancy)", "Hypertrophic pyloric stenosis (neonates < 6 weeks — avoid oral erythromycin)", "Hearing loss (high dose, reversible)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-famotidine-tab",
@@ -527,7 +527,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — ~65–70% unchanged via glomerular filtration and tubular secretion; dose adjust in renal failure",
     monitoring: ["Symptom response", "Renal function if prolonged use", "Note: less effective than PPIs for erosive oesophagitis"],
     adverseReactions: ["Headache", "Dizziness", "Constipation or diarrhoea", "Elevated serum transaminases (rare)", "Thrombocytopenia (rare)", "QT prolongation with IV formulation (less of a concern orally)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-fexofenadine-tab",
@@ -544,7 +544,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Primarily faecal (~80%) unchanged; renal ~11% unchanged; t½ ~14 hours",
     monitoring: ["Renal function if prolonged use (reduce dose if GFR impaired)", "Drug interactions — avoid concurrent erythromycin/ketoconazole (increases fexofenadine levels)"],
     adverseReactions: ["Headache", "Nausea", "Dizziness", "Drowsiness (minimal — does not cross BBB significantly)", "Dysmenorrhoea"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-fluconazole-tab",
@@ -561,7 +561,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — ~80% unchanged in urine; t½ ~30 hours; dose adjust in renal impairment",
     monitoring: ["Liver function tests", "QTc interval (ECG if concurrent QT-prolonging medications)", "Drug interactions (significant CYP2C9/3A4 inhibitor — warfarin, phenytoin, cyclosporin interactions)", "Clinical response (resolution of signs/symptoms)"],
     adverseReactions: ["Nausea, vomiting, abdominal pain", "Elevated liver transaminases", "Rash", "QT prolongation", "Hepatotoxicity (rare, especially with prolonged use)", "Alopecia (prolonged use)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-folicacid-tab",
@@ -579,7 +579,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — excess folate excreted unchanged; small amounts in faeces",
     monitoring: ["CBC (reticulocyte response expected at 5–7 days; normalisation at 4–8 weeks)", "Serum folate levels", "Serum B12 (rule out concurrent B12 deficiency before high-dose folate)", "Haematological response"],
     adverseReactions: ["Generally very well tolerated at therapeutic doses", "Very rare: allergic reactions (bronchospasm, erythema)", "May mask B12 deficiency-related neurological deterioration", "May decrease serum phenobarbital levels (enzyme induction)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-furosemide-tab",
@@ -597,7 +597,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — ~65% unchanged via tubular secretion; some biliary excretion in hepatic disease; t½ 0.5–1 hour",
     monitoring: ["Serum electrolytes (Na, K, Mg, Ca) — especially potassium (hypokalaemia)", "Serum creatinine and BUN (pre-renal azotaemia)", "Urine output", "Blood pressure (hypotension)", "Weight (daily in acute setting)", "Hearing (ototoxicity with rapid IV, less so oral)"],
     adverseReactions: ["Hypokalaemia (most common — may require KCl supplementation)", "Hyponatraemia", "Hypomagnesaemia", "Hypochloraemic alkalosis", "Dehydration/hypotension", "Hyperuricaemia/gout", "Ototoxicity (mainly IV, rapid administration)", "Hypocalcaemia"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-gabapentin-tab",
@@ -614,7 +614,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — entirely unchanged; t½ 5–7 hours; dose reduce proportional to GFR",
     monitoring: ["Seizure frequency", "Pain scores", "Sedation/CNS effects", "Renal function and dose adjustment", "Signs of dependence (especially high doses)"],
     adverseReactions: ["Somnolence, dizziness, ataxia", "Fatigue", "Nystagmus", "Peripheral oedema", "Weight gain", "Behavioural changes (hyperactivity in children)", "Respiratory depression (high dose, concurrent CNS depressants)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-hydroxychloroquine-tab",
@@ -631,7 +631,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (~20–30% unchanged); remainder as metabolites; extensive tissue accumulation",
     monitoring: ["Annual ophthalmological exam with OCT (retinal toxicity — cumulative dose-dependent)", "CBC (haematological toxicity)", "Blood glucose (may cause hypoglycaemia)", "QTc interval", "Liver function"],
     adverseReactions: ["GI upset (nausea, anorexia, abdominal cramps — take with food)", "Retinopathy (dose-cumulative — risk increases after 5 years)", "Skin hyperpigmentation", "QT prolongation (rare)", "Cardiomyopathy (rare, prolonged use)", "Haemolysis (G6PD deficiency)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | ACR Guidelines",
+    reference: "Harriet Lane 24e | Nelson's 22e | ACR Guidelines",
   },
   {
     id: "f-hydroxyzine-tab",
@@ -648,7 +648,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — primarily as metabolites; t½ 3–7 hours (children); 20+ hours (elderly)",
     monitoring: ["Sedation level", "QTc interval (risk of torsades)", "Urinary retention", "Anticholinergic symptoms", "Blood pressure"],
     adverseReactions: ["Sedation (significant — first-generation)", "Dry mouth, constipation (anticholinergic)", "Urinary retention", "QT prolongation", "Paradoxical CNS excitation (children)", "Blurred vision", "Dizziness, ataxia"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-ibuprofen-tab",
@@ -665,7 +665,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (~90% as metabolites), remainder in bile/feces",
     monitoring: ["Renal function with prolonged use", "GI symptoms/occult bleeding", "Hydration status"],
     adverseReactions: ["GI upset, peptic ulceration", "Renal impairment (esp. if dehydrated)", "Bronchospasm in aspirin-sensitive asthma"],
-    reference: "Harriet Lane 22e",
+    reference: "Harriet Lane 24e",
   },
   {
     id: "f-ivermectin-tab",
@@ -682,7 +682,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Faecal/biliary (~98%); <1% renal; t½ 12–35 hours",
     monitoring: ["Mazzotti reaction (fever, rash, lymphadenopathy — killed microfilariae reaction) — mainly with onchocerciasis", "Neurological symptoms (dizziness, ataxia, seizures — rare)", "Loa loa microfilaria count before treatment (if endemic)", "Resolution of symptoms"],
     adverseReactions: ["Mazzotti reaction (fever, pruritus, rash, oedema, arthralgias — Jarisch-Herxheimer-like)", "Dizziness", "Headache", "Nausea, diarrhoea", "Hypotension (rare)", "Neurological effects (with very high doses or P-glycoprotein dysfunction)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | WHO Essential Medicines",
+    reference: "Harriet Lane 24e | Nelson's 22e | WHO Essential Medicines",
   },
   {
     id: "f-levocetirizine-tab",
@@ -699,7 +699,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — ~85% unchanged; t½ ~8 hours",
     monitoring: ["Renal function (dose adjustment required in renal impairment)", "Level of sedation", "Clinical response"],
     adverseReactions: ["Somnolence (less than 1st-generation antihistamines)", "Dry mouth", "Headache", "Fatigue", "Nasopharyngitis"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-levothyroxine-tab",
@@ -717,7 +717,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal and faecal; enterohepatic circulation; t½ ~7 days (euthyroid state)",
     monitoring: ["Serum TSH and Free T4 (4–8 weeks after initiation/dose change; then 6–12 monthly once stable)", "Growth and bone age (paediatrics)", "Heart rate, blood pressure", "Signs of over/under-replacement", "Timing with interacting medications (iron, calcium, antacids reduce absorption)"],
     adverseReactions: ["Signs of hyperthyroidism if over-replaced: tachycardia, heat intolerance, weight loss, tremor, insomnia", "Accelerated bone turnover/osteoporosis (long-term supra-physiological dosing)", "Craniosynostosis risk (inadequately treated congenital hypothyroidism)", "Cardiac arrhythmias (high doses in pre-existing heart disease)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | ATA/ESPE guidelines",
+    reference: "Harriet Lane 24e | Nelson's 22e | ATA/ESPE guidelines",
   },
   {
     id: "f-loratadine-tab",
@@ -734,7 +734,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal and faecal (approximately equal split) as metabolites; t½ loratadine ~8h, desloratadine ~27h",
     monitoring: ["Liver function (reduce dosing frequency if impaired)", "Clinical symptom response"],
     adverseReactions: ["Headache", "Somnolence (minimal — does not readily penetrate BBB)", "Dry mouth", "Fatigue", "Nausea", "Elevated liver enzymes (rare)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-losartan-tab",
@@ -751,7 +751,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Biliary (~60%) and renal (~35%) as metabolites",
     monitoring: ["Blood pressure", "Serum creatinine/GFR", "Serum potassium (hyperkalaemia risk)", "Urine protein", "Liver function if hepatic disease present"],
     adverseReactions: ["Hyperkalaemia", "Renal function deterioration (bilateral RAS)", "Dizziness/hypotension", "Hyperuricaemia (unique among ARBs — uricosuric metabolite)", "Rare: angioedema (less than ACE inhibitors)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-mebendazole-tab",
@@ -768,7 +768,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Primarily faecal (~75%); <5% renal; low systemic bioavailability",
     monitoring: ["Symptom resolution (perianal itching)", "Family members should be treated simultaneously", "Repeat treatment after 2–3 weeks to prevent reinfection"],
     adverseReactions: ["Generally very well tolerated (minimal systemic absorption)", "Transient abdominal pain, diarrhoea (heavy worm burden — dying worms)", "Allergic reactions (rare)", "Transient elevation of liver enzymes (high doses)", "Alopecia (prolonged high-dose therapy)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | WHO Essential Medicines",
+    reference: "Harriet Lane 24e | Nelson's 22e | WHO Essential Medicines",
   },
   {
     id: "f-metformin-tab",
@@ -785,7 +785,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — 100% unchanged via tubular secretion; t½ 4–9 hours; contraindicated in significant renal impairment",
     monitoring: ["HbA1c (3-monthly initially, then 6-monthly)", "Fasting blood glucose", "Renal function (eGFR) — at least annually, more frequently if impaired", "Vitamin B12 levels (annually — metformin reduces B12 absorption)", "Lactic acid if symptomatic"],
     adverseReactions: ["GI: nausea, vomiting, diarrhoea, abdominal pain (most common, especially initially)", "Metallic taste", "Vitamin B12 deficiency (long-term)", "Lactic acidosis (rare but serious — risk with renal/hepatic impairment)", "Hypoglycaemia (rare with metformin monotherapy)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | ADA Paediatric Guidelines",
+    reference: "Harriet Lane 24e | Nelson's 22e | ADA Paediatric Guidelines",
   },
   {
     id: "f-methylprednisolone-tab",
@@ -802,7 +802,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal as metabolites",
     monitoring: ["Blood glucose", "Blood pressure", "Electrolytes (potassium)", "Signs of infection", "Growth with prolonged use", "Bone density (prolonged courses)"],
     adverseReactions: ["Hyperglycaemia", "Hypertension", "Immunosuppression", "GI ulceration (give with food or add PPI)", "Mood/behavioural changes", "Adrenal suppression", "Avascular necrosis (prolonged use)", "Growth retardation"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-metoclopramide-tab",
@@ -819,7 +819,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (~20–40% unchanged), remainder as sulphate/glucuronide conjugates",
     monitoring: ["Extrapyramidal symptoms (EPS) — dystonia, akathisia, especially in young children", "Tardive dyskinesia (with prolonged use)", "Sedation level", "GI response", "Prolactin levels (galactorrhoea)"],
     adverseReactions: ["Extrapyramidal reactions (dystonia, oculogyric crisis — most common in young patients/high doses)", "Tardive dyskinesia (prolonged use)", "Sedation", "Hyperprolactinaemia (galactorrhoea, gynaecomastia)", "Diarrhoea", "Rare: neuroleptic malignant syndrome"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-metronidazole-tab",
@@ -836,7 +836,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (~60–80% as metabolites); <20% unchanged; biliary excretion",
     monitoring: ["Signs of neurological toxicity (peripheral neuropathy, seizures — with prolonged use)", "CBC with prolonged therapy", "Liver function (hepatotoxicity — rare)", "Avoid alcohol during therapy and for 48h after completion"],
     adverseReactions: ["Nausea, vomiting, metallic/bitter taste (very common)", "Headache", "Dizziness", "Peripheral neuropathy (prolonged use)", "Seizures (rare)", "Disulfiram-like reaction with alcohol", "Dark/reddish-brown urine (harmless metabolite)", "Pancreatitis (rare)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-montelukast-tab",
@@ -853,7 +853,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Predominantly biliary/faecal (~86%); <0.2% renal; t½ 2.7–5.5 hours",
     monitoring: ["Asthma symptom frequency/PEFR", "Neuropsychiatric symptoms (FDA Black Box Warning: mood changes, sleep disturbances, suicidal ideation — especially in children)", "Eosinophil count (Churg-Strauss vasculitis risk when steroid-sparing)"],
     adverseReactions: ["Headache", "Abdominal pain (children)", "Neuropsychiatric effects: agitation, aggression, nightmares, sleep disturbances, depression, suicidal ideation (Black Box Warning)", "Elevated liver transaminases (rare)", "Churg-Strauss syndrome (rare, with steroid reduction)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | FDA Black Box Warning 2020",
+    reference: "Harriet Lane 24e | Nelson's 22e | FDA Black Box Warning 2020",
   },
   {
     id: "f-nitrofurantoin-tab",
@@ -870,7 +870,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — active drug concentrated in urine; therapeutic only in urine, not systemic infections",
     monitoring: ["Urine culture and sensitivity (confirm susceptibility)", "Renal function (GFR — contraindicated if impaired)", "Pulmonary symptoms (cough, dyspnoea — pulmonary toxicity)", "Liver function (rare hepatotoxicity)", "CBC in prolonged prophylaxis (haematological toxicity)"],
     adverseReactions: ["GI: nausea, vomiting, anorexia (reduced with food and macrocrystalline form)", "Pulmonary hypersensitivity (acute: eosinophilia, fever; chronic: pulmonary fibrosis)", "Peripheral neuropathy (prolonged use, renal impairment)", "Haemolytic anaemia (G6PD deficiency)", "Hepatotoxicity (rare)", "Brown discolouration of urine (harmless)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-omeprazole-tab",
@@ -887,7 +887,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (~80% as metabolites); biliary (~20%); t½ 0.5–1 hour (irreversible enzyme inhibition means duration exceeds t½)",
     monitoring: ["Symptom response (4–8 weeks initial trial)", "H. pylori eradication confirmation (urea breath test 4+ weeks after treatment)", "Magnesium (hypomagnesaemia with prolonged use)", "Vitamin B12 (impaired absorption — long-term use)", "Bone density (prolonged high-dose use — osteoporosis risk)"],
     adverseReactions: ["Headache", "Diarrhoea or constipation", "Nausea, abdominal pain", "Hypomagnesaemia (prolonged use)", "C. difficile infection (prolonged use — altered gut flora)", "Vitamin B12 deficiency (long-term)", "Osteoporosis (long-term)", "Drug interactions (CYP2C19: clopidogrel, phenytoin, warfarin)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-oseltamivir-tab",
@@ -904,7 +904,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — active metabolite >99% excreted unchanged via glomerular filtration and tubular secretion; dose adjust GFR < 60 mL/min",
     monitoring: ["Symptom duration and severity", "Renal function (dose adjustment)", "Neuropsychiatric symptoms (hallucinations, self-injury — particularly in Japanese adolescents — FDA warning)", "Influenza test confirmation"],
     adverseReactions: ["Nausea, vomiting (most common — take with food)", "Headache", "Abdominal pain", "Rare: neuropsychiatric effects (hallucinations, self-harm — especially paediatric)", "Rare: Stevens-Johnson syndrome"],
-    reference: "Harriet Lane 22e | Nelson's 22e | CDC Influenza Antiviral Guidance",
+    reference: "Harriet Lane 24e | Nelson's 22e | CDC Influenza Antiviral Guidance",
   },
   {
     id: "f-paracetamol-tab",
@@ -922,7 +922,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal excretion of glucuronide/sulfate conjugates (>90%); <5% excreted unchanged",
     monitoring: ["Temperature response", "Liver function if prolonged/high-dose use", "Signs of overdose (nausea, hepatotoxicity)"],
     adverseReactions: ["Hepatotoxicity in overdose", "Rare rash/hypersensitivity", "Rare thrombocytopenia"],
-    reference: "Harriet Lane 22e",
+    reference: "Harriet Lane 24e",
   },
   {
     id: "f-phenobarbital-tab",
@@ -940,7 +940,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — ~25% unchanged; alkalinisation of urine significantly increases excretion",
     monitoring: ["Serum phenobarbital levels (trough, therapeutic range 15–40 mg/L)", "Cognitive/behaviour assessment (sedation, hyperactivity in children)", "LFTs", "CBC", "Drug interactions — potent CYP inducer"],
     adverseReactions: ["Sedation (most common, tolerance develops)", "Hyperactivity and behavioural problems (paradoxical — children)", "Cognitive impairment", "Physical dependence / withdrawal seizures", "Rash (SJS rare)", "Hepatotoxicity (rare)", "Rickets (CYP induction — vitamin D metabolism)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-phenytoin-tab",
@@ -958,7 +958,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal as glucuronide of HPPH (~70%); <5% unchanged",
     monitoring: ["Serum phenytoin levels (trough, target 10–20 mg/L total; free 1–2 mg/L)", "Free phenytoin if hypoalbuminaemia or renal failure", "CBC (haematological toxicity)", "LFTs", "Gum hypertrophy (dental hygiene)", "Neurological exam (nystagmus, ataxia — toxicity signs)"],
     adverseReactions: ["Nystagmus, ataxia, diplopia (dose-related toxicity)", "Gingival hyperplasia (cosmetic — dental hygiene important)", "Hirsutism, acne, coarsening of facial features (long-term)", "Megaloblastic anaemia (folate antagonism)", "Osteomalacia (CYP induction — vitamin D metabolism)", "SJS/TEN (HLA-B*1502 risk in Asian patients)", "Foetal hydantoin syndrome (teratogenic — avoid in pregnancy)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-prednisolone-tab",
@@ -975,7 +975,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal, primarily as metabolites",
     monitoring: ["Blood glucose", "Blood pressure", "Growth (long-term use)", "Adrenal suppression with prolonged courses"],
     adverseReactions: ["Hyperglycemia", "Mood/behavior changes", "GI upset", "Adrenal suppression with long-term use", "Growth suppression"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-propranolol-tab",
@@ -992,7 +992,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal as metabolites (<1% unchanged); t½ 3–6 hours (short-acting)",
     monitoring: ["Heart rate (hold if HR < 60 or age-appropriate lower limit)", "Blood pressure", "Blood glucose (may mask hypoglycaemia)", "Respiratory status (bronchospasm)", "ECG (PR interval)"],
     adverseReactions: ["Bradycardia (most common)", "Hypotension", "Bronchospasm (non-selective β-blockade)", "Fatigue, exercise intolerance", "Cold extremities", "Masking hypoglycaemic symptoms", "Sleep disturbance, nightmares", "Rebound hypertension on abrupt withdrawal"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-rifampicin-tab",
@@ -1010,7 +1010,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Biliary/faecal (~60–65%); renal (~30%); t½ 1.5–5 hours (initially); auto-induction shortens t½",
     monitoring: ["Liver function tests (ALT, AST, bilirubin) at baseline and monthly", "CBC", "Urine/body secretion discolouration (orange-red — warn patient)", "Drug interactions (comprehensive review required — OCPs, anticoagulants, antifungals, HIV drugs, cyclosporin)", "Sputum culture/smear (TB monitoring)"],
     adverseReactions: ["Orange-red discolouration of urine, tears, sweat, skin (harmless)", "GI upset (nausea, vomiting — take with food if necessary)", "Hepatotoxicity (transient transaminase elevation; rarely jaundice/hepatitis)", "Flu-like syndrome (intermittent therapy — fever, chills, myalgia)", "Thrombocytopenia (intermittent therapy)", "Drug interactions (extensive — potent CYP inducer)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | WHO TB Guidelines",
+    reference: "Harriet Lane 24e | Nelson's 22e | WHO TB Guidelines",
   },
   {
     id: "f-sertraline-tab",
@@ -1027,7 +1027,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (~44%) and faecal (~40%) as metabolites; <0.2% unchanged; t½ ~26 hours",
     monitoring: ["Mood and behaviour (especially first 4–8 weeks — FDA Black Box: suicidal ideation in <25 yr)", "Activation/agitation (serotonin-related)", "GI tolerance", "Serum sodium (SIADH risk)", "Drug interactions (SSRI + triptans, tramadol, linezolid — serotonin syndrome)"],
     adverseReactions: ["Nausea (most common, usually transient)", "Diarrhoea", "Insomnia or somnolence", "Activation/agitation/anxiety (early)", "Sexual dysfunction", "Suicidal ideation (FDA Black Box — young patients, especially early treatment)", "Serotonin syndrome (with interacting drugs)", "Hyponatraemia (SIADH)", "Weight changes"],
-    reference: "Harriet Lane 22e | Nelson's 22e | FDA SSRI Paediatric Guidelines",
+    reference: "Harriet Lane 24e | Nelson's 22e | FDA SSRI Paediatric Guidelines",
   },
   {
     id: "f-sildenafil-tab",
@@ -1044,7 +1044,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Faecal (~80%) and renal (~13%) as metabolites; t½ 3–5 hours",
     monitoring: ["Blood pressure (systemic hypotension)", "Oxygen saturation", "6-minute walk distance / exercise tolerance", "ECG", "Hepatic function", "Vision changes (NAION — non-arteritic anterior ischaemic optic neuropathy)"],
     adverseReactions: ["Headache", "Flushing", "Epistaxis", "Hypotension (systemic)", "Dyspepsia", "Visual disturbances (blue tinge, blurred vision)", "Priapism (prolonged erection)", "Hearing loss (rare)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | STARTS-2 Trial",
+    reference: "Harriet Lane 24e | Nelson's 22e | STARTS-2 Trial",
   },
   {
     id: "f-sodiumvalproate-tab",
@@ -1062,7 +1062,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — primarily as glucuronide conjugates; <5% unchanged; t½ 6–16 hours",
     monitoring: ["Serum valproate levels (trough, target 50–100 mg/L)", "LFTs and ammonia (especially in first 6 months, high hepatotoxicity risk in young children)", "CBC with platelets (thrombocytopenia)", "Coagulation (fibrinogen)", "Weight (weight gain)", "Ammonia if encephalopathy suspected"],
     adverseReactions: ["Hepatotoxicity (idiosyncratic — fatal in young children with metabolic disorders — highest risk <2 yr)", "Pancreatitis (rare but potentially fatal)", "Thrombocytopenia", "Weight gain, increased appetite", "Tremor", "Hair loss (alopecia — often temporary)", "Teratogenicity (spina bifida, neurodevelopmental delay — avoid in pregnancy)", "Encephalopathy/hyperammonaemia (without hepatotoxicity)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | MHRA Warnings",
+    reference: "Harriet Lane 24e | Nelson's 22e | MHRA Warnings",
   },
   {
     id: "f-spironolactone-tab",
@@ -1079,7 +1079,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (primarily) and biliary as metabolites; t½ of active metabolites 13–24 hours",
     monitoring: ["Serum potassium (hyperkalaemia — check at 1 week, 1 month, then quarterly)", "Serum creatinine/GFR", "Blood pressure", "Signs of anti-androgenic effects (gynaecomastia, menstrual irregularity)", "Electrolytes and fluid balance"],
     adverseReactions: ["Hyperkalaemia (most important — can be fatal)", "Gynaecomastia (males — anti-androgenic)", "Menstrual irregularities (females)", "Breast tenderness", "GI upset", "Hyponatraemia", "Dizziness/orthostatic hypotension"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-topiramate-tab",
@@ -1096,7 +1096,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — ~70% unchanged; dose reduce if GFR < 70 mL/min",
     monitoring: ["Cognition/language assessment (word-finding difficulties — most debilitating side effect)", "Weight (appetite suppression — weight loss)", "Serum bicarbonate (metabolic acidosis)", "Serum creatinine and urinalysis (nephrolithiasis risk)", "Temperature regulation (anhidrosis — hyperthermia in hot environments, esp. children)", "Intraocular pressure (acute angle-closure glaucoma — rare, early — discontinue immediately)"],
     adverseReactions: ["Cognitive slowing, word-finding difficulties ('Dopa-max')", "Psychomotor slowing", "Metabolic acidosis (carbonic anhydrase inhibition)", "Anorexia and weight loss", "Nephrolithiasis (increased risk)", "Anhidrosis / hyperthermia (children — dangerous in hot weather)", "Acute glaucoma (rare, stop immediately)", "Paraesthesia (carbonic anhydrase)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-trimethoprim-tab",
@@ -1113,7 +1113,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — ~60–80% unchanged via tubular secretion and glomerular filtration; alkaline urine increases excretion",
     monitoring: ["Serum creatinine (TMP blocks creatinine tubular secretion — apparent creatinine rise not true GFR decline)", "Serum potassium (blocks K⁺ secretion — hyperkalaemia risk, especially with ACE inhibitors/ARBs)", "CBC (folate antagonism — neutropenia)", "Urine culture at end of treatment"],
     adverseReactions: ["Nausea, vomiting (GI)", "Rash", "Megaloblastic anaemia/neutropenia (folate antagonism)", "Hyperkalaemia (blocks distal tubular K⁺ secretion)", "Hypersensitivity reactions"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-zincsulphate-tab",
@@ -1130,7 +1130,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Primarily faecal via pancreatic/intestinal secretions; small amount renal; regulated by metallothionein system",
     monitoring: ["Serum zinc levels if available", "Copper levels (high-dose zinc competitively inhibits copper absorption — risk of copper deficiency with prolonged high doses)", "Stool consistency, GI tolerance", "Alkaline phosphatase (zinc-dependent enzyme)"],
     adverseReactions: ["GI upset (nausea, vomiting, abdominal cramps) especially if taken on empty stomach", "Copper deficiency (prolonged high doses > 50 mg/day elemental zinc)", "Metallic taste", "Headache"],
-    reference: "Harriet Lane 22e | Nelson's 22e | WHO Diarrhoea Guidelines",
+    reference: "Harriet Lane 24e | Nelson's 22e | WHO Diarrhoea Guidelines",
   },
 
   // ════════════════════════════════════════════════════════════
@@ -1153,7 +1153,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal as inorganic sulphate and other metabolites",
     monitoring: ["Respiratory function (mucolytic use)", "Liver function and paracetamol levels (overdose management)", "Signs of anaphylactoid reaction (IV use more common)", "GI tolerance"],
     adverseReactions: ["Nausea, vomiting (most common — unpleasant taste)", "Rash", "Bronchospasm (inhaled route)", "Anaphylactoid reaction (mainly IV)", "Rhinorrhoea"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-albendazole-syrup",
@@ -1172,7 +1172,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Primarily faecal; <1% renal",
     monitoring: ["LFTs (prolonged use)", "CBC (prolonged use)", "Clinical response"],
     adverseReactions: ["Abdominal pain, nausea, diarrhoea", "Elevated liver enzymes", "Headache", "Rare: alopecia (prolonged), leukopenia"],
-    reference: "Harriet Lane 22e | WHO Essential Medicines",
+    reference: "Harriet Lane 24e | WHO Essential Medicines",
   },
   {
     id: "f-amoxicillin-syrup",
@@ -1190,7 +1190,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — tubular secretion and glomerular filtration (~60% unchanged in urine)",
     monitoring: ["Clinical response at 48–72 hr", "Signs of allergic reaction", "GI tolerance"],
     adverseReactions: ["Diarrhea", "Maculopapular rash (esp. with concurrent viral infection)", "Hypersensitivity/anaphylaxis", "C. difficile colitis (rare)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-amoxiclav-syrup",
@@ -1209,7 +1209,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — amoxicillin ~60% unchanged; clavulanate ~25–45%",
     monitoring: ["Liver function (cholestasis risk)", "GI tolerance (higher diarrhoea rate than amoxicillin alone)", "Clinical response"],
     adverseReactions: ["Diarrhoea (clavulanate-related)", "Nausea, vomiting", "Rash", "Cholestatic jaundice (rare)", "Hypersensitivity/anaphylaxis"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-azithromycin-syrup",
@@ -1228,7 +1228,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Biliary/faecal (~50% unchanged); minimal renal",
     monitoring: ["QTc if risk factors", "Liver function", "GI tolerance"],
     adverseReactions: ["Nausea, vomiting, diarrhoea, abdominal cramps", "QT prolongation", "Elevated liver enzymes", "Sensorineural hearing loss (high dose)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-carbamazepine-syrup",
@@ -1247,7 +1247,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (~70% as metabolites)",
     monitoring: ["Serum levels (4–12 mg/L)", "CBC (neutropenia)", "LFTs", "Sodium (SIADH)", "HLA-B*1502 screening"],
     adverseReactions: ["Diplopia, ataxia, dizziness", "Hyponatraemia (SIADH)", "Neutropenia/aplastic anaemia", "SJS/TEN (HLA-B*1502)", "Hepatotoxicity"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-cetirizine-syrup",
@@ -1266,7 +1266,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (~60–70% unchanged); dose reduce in renal impairment",
     monitoring: ["Renal function", "Sedation level", "Clinical symptom response"],
     adverseReactions: ["Mild somnolence", "Headache", "Dry mouth", "Fatigue", "GI upset"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-cephalexin-syrup",
@@ -1285,7 +1285,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (tubular secretion + GFR); t½ ~1 hour; dose adjust in renal failure",
     monitoring: ["Renal function", "Clinical response at 48–72 hours", "Signs of superinfection"],
     adverseReactions: ["GI upset (nausea, diarrhoea)", "Rash", "Hypersensitivity", "C. difficile colitis (less common)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-chlorphenamine-syrup",
@@ -1304,7 +1304,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal as metabolites; t½ 12–15 hours (children: shorter)",
     monitoring: ["Sedation level (especially in young children)", "Paradoxical CNS excitation", "Urinary retention", "Anticholinergic symptoms"],
     adverseReactions: ["Sedation, drowsiness (significant — 1st generation)", "Paradoxical excitation (children)", "Dry mouth, urinary retention (anticholinergic)", "GI upset", "Dizziness", "Blurred vision"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-ciprofloxacin-syrup",
@@ -1323,7 +1323,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (~40–50% unchanged); biliary (~20–35%)",
     monitoring: ["Tendon pain (tendinopathy risk)", "Renal function", "CNS symptoms", "Glucose", "QTc"],
     adverseReactions: ["Tendinopathy and tendon rupture", "Nausea, vomiting, diarrhoea", "CNS effects (headache, dizziness, seizures — rare)", "QT prolongation", "Arthralgias in young patients"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-clarithromycin-syrup",
@@ -1342,7 +1342,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (~20–30% unchanged) and biliary",
     monitoring: ["QTc interval", "Liver function", "Drug interactions (CYP3A4 inhibitor)", "Metallic taste (characteristic)"],
     adverseReactions: ["GI upset (nausea, diarrhoea, abdominal pain)", "Metallic/bitter taste", "QT prolongation", "Elevated liver enzymes", "C. difficile colitis (rare)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-clindamycin-syrup",
@@ -1361,7 +1361,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Biliary/faecal (~60%); renal (~10% as metabolites)",
     monitoring: ["C. difficile-associated diarrhoea (CDAD)", "Liver function", "Clinical response"],
     adverseReactions: ["Diarrhoea (most common)", "C. difficile colitis (most serious)", "Nausea, vomiting", "Elevated transaminases", "Rash"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-clonazepam-syrup",
@@ -1380,7 +1380,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal as glucuronide conjugates (<1% unchanged)",
     monitoring: ["Seizure frequency", "CNS sedation/respiratory rate", "Behavioural changes", "Signs of dependence", "LFTs"],
     adverseReactions: ["Sedation, drowsiness", "Ataxia", "Hypersalivation", "Paradoxical hyperactivity/aggression (children)", "Physical dependence", "Respiratory depression (with CNS depressants)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-cotrimoxazole-syrup",
@@ -1399,7 +1399,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — TMP ~50–60% unchanged; SMX as acetyl conjugate",
     monitoring: ["CBC (neutropenia, macrocytic anaemia)", "Serum creatinine/K⁺ (spurious rise in creatinine; hyperkalaemia)", "LFTs", "Signs of hypersensitivity"],
     adverseReactions: ["Nausea, anorexia", "Sulfonamide rash/SJS (rare)", "Megaloblastic anaemia, neutropenia", "Hyperkalaemia", "Nephrotoxicity"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-dexamethasone-syrup",
@@ -1418,7 +1418,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal as metabolites",
     monitoring: ["Blood glucose", "Blood pressure", "Electrolytes", "Signs of infection", "Adrenal suppression with repeated courses"],
     adverseReactions: ["Hyperglycaemia", "Hypertension", "Mood changes", "GI irritation", "Immunosuppression", "Adrenal suppression with prolonged use"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-digoxin-syrup",
@@ -1437,7 +1437,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (~65–80% unchanged); t½ 36–48 hours; accumulates in renal failure",
     monitoring: ["Serum digoxin levels (0.5–2 ng/mL; take trough 6–8h post-dose)", "ECG (PR interval, arrhythmias)", "Serum K⁺, Mg²⁺, Ca²⁺", "Renal function (reduce dose if GFR impaired)"],
     adverseReactions: ["Nausea, vomiting, anorexia (early toxicity)", "Visual disturbances (yellow-green haloes)", "Bradycardia, AV block", "Ventricular arrhythmias (severe toxicity)", "Gynaecomastia (long-term)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-domperidone-syrup",
@@ -1456,7 +1456,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Faecal (~66%) and renal (~31%) as metabolites",
     monitoring: ["QTc interval (ECG before/during)", "Prolactin levels (galactorrhoea)", "Extrapyramidal symptoms (rare)", "Clinical response"],
     adverseReactions: ["QT prolongation and torsades de pointes (dose-related)", "Galactorrhoea, gynaecomastia", "Dry mouth", "Headache", "Rare extrapyramidal effects (neonates)"],
-    reference: "Harriet Lane 22e | EMA guidelines",
+    reference: "Harriet Lane 24e | EMA guidelines",
   },
   {
     id: "f-enalapril-syrup",
@@ -1475,7 +1475,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — enalaprilat excreted mainly unchanged; dose reduce in GFR < 30 mL/min",
     monitoring: ["Renal function and K⁺ within 1–2 weeks of initiation/dose changes", "Blood pressure (first-dose hypotension)", "Urine protein", "Angioedema signs"],
     adverseReactions: ["Persistent dry cough (~10%)", "First-dose hypotension", "Hyperkalaemia", "Renal function deterioration", "Angioedema (rare)", "Rash"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-erythromycin-syrup",
@@ -1494,7 +1494,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Primarily biliary/faecal; minimal renal unchanged",
     monitoring: ["QTc", "LFTs (cholestatic hepatitis risk)", "GI tolerance", "Hearing (high-dose, prolonged)", "Hypertrophic pyloric stenosis signs (infants)"],
     adverseReactions: ["GI upset (most common — nausea, vomiting, diarrhoea, cramps)", "QT prolongation", "Cholestatic hepatitis", "IHPS (infantile hypertrophic pyloric stenosis — avoid in neonates < 6 weeks)", "Sensorineural hearing loss (high dose)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-famotidine-syrup",
@@ -1513,7 +1513,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — ~65–70% unchanged; dose adjust if GFR < 50 mL/min",
     monitoring: ["Symptom response", "Renal function (prolonged use)", "Note less effective than PPIs for erosive oesophagitis"],
     adverseReactions: ["Headache", "Dizziness", "Constipation or diarrhoea", "Elevated transaminases (rare)", "Thrombocytopenia (rare)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-ferrousulphate-syrup",
@@ -1531,7 +1531,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Small amount via skin (desquamation), GI epithelium shedding, bile; no significant renal excretion of iron",
     monitoring: ["Haemoglobin and MCV at 4 weeks (reticulocyte response within 7–10 days)", "Serum ferritin (repletion target > 30 mcg/L)", "Stool colour (black — expected)", "GI tolerance"],
     adverseReactions: ["GI upset (nausea, constipation, diarrhoea, abdominal cramps — most common)", "Black discolouration of stools and teeth (syrup — use straw)", "Constipation (switch to ferrous gluconate if intolerable)", "Dental staining (syrup — rinse mouth after)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | WHO Anaemia Guidelines",
+    reference: "Harriet Lane 24e | Nelson's 22e | WHO Anaemia Guidelines",
   },
   {
     id: "f-flucloxacillin-syrup",
@@ -1550,7 +1550,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — ~50–60% unchanged via glomerular filtration and tubular secretion; biliary 10–30%",
     monitoring: ["Clinical response at 48–72 hours", "LFTs (cholestatic hepatitis — rare, more with IV form)", "Signs of allergic reaction"],
     adverseReactions: ["GI upset (nausea, diarrhoea)", "Rash", "Cholestatic hepatitis (rare)", "Hypersensitivity/anaphylaxis", "C. difficile colitis"],
-    reference: "Harriet Lane 22e | BNF for Children",
+    reference: "Harriet Lane 24e | BNF for Children",
   },
   {
     id: "f-furosemide-syrup",
@@ -1569,7 +1569,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (~65% unchanged via tubular secretion); some biliary in hepatic disease",
     monitoring: ["Serum K⁺, Na⁺, Mg²⁺, Ca²⁺", "Renal function (BUN/creatinine)", "Urine output", "Weight", "Blood pressure"],
     adverseReactions: ["Hypokalaemia", "Hyponatraemia", "Dehydration/hypotension", "Hyperuricaemia", "Ototoxicity (rapid IV; less with oral)", "Hypomagnesaemia"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-gabapentin-syrup",
@@ -1588,7 +1588,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal 100% unchanged; t½ 5–7 hours; dose reduce in renal impairment",
     monitoring: ["Seizure frequency", "Pain scores", "Sedation/CNS effects", "Renal function", "Behavioural changes (hyperactivity in children)"],
     adverseReactions: ["Somnolence, dizziness, ataxia", "Fatigue", "Behavioural changes (hyperactivity — children)", "Peripheral oedema", "Weight gain", "Respiratory depression (high dose + CNS depressants)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-hydroxyzine-syrup",
@@ -1607,7 +1607,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal as metabolites; t½ 3–7 hours",
     monitoring: ["Sedation level", "QTc interval", "Anticholinergic symptoms", "Urinary retention", "Blood pressure"],
     adverseReactions: ["Sedation (significant)", "Dry mouth, constipation", "Urinary retention", "QT prolongation", "Paradoxical excitation (children)", "Dizziness"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-ibuprofen-syrup",
@@ -1626,7 +1626,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (~90% as metabolites); t½ 1.8–2.5 hours",
     monitoring: ["Renal function (dehydrated patients)", "GI symptoms/occult bleeding", "Hydration status", "Blood pressure (prolonged use)"],
     adverseReactions: ["GI upset, peptic ulceration", "Renal impairment (if dehydrated)", "Bronchospasm (aspirin-sensitive asthma)", "Platelet dysfunction (reversible)", "Rash"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-lactulose-syrup",
@@ -1644,7 +1644,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Primarily eliminated in faeces as metabolites/unchanged",
     monitoring: ["Stool frequency and consistency (target 2–3 soft stools/day)", "Abdominal distension/discomfort", "Electrolytes (diarrhoea with high doses)", "Blood glucose (diabetic patients)", "Ammonia levels (hepatic encephalopathy)"],
     adverseReactions: ["Bloating and flatulence (most common — colonic fermentation)", "Abdominal cramps", "Diarrhoea (high doses)", "Nausea (sweet taste)", "Electrolyte disturbances (excessive diarrhoea)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-levocetirizine-syrup",
@@ -1663,7 +1663,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal ~85% unchanged; t½ ~8 hours",
     monitoring: ["Renal function (dose adjustment in impairment)", "Sedation level", "Symptom response"],
     adverseReactions: ["Somnolence", "Dry mouth", "Headache", "Fatigue", "Nasopharyngitis"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-loratadine-syrup",
@@ -1682,7 +1682,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal and faecal (~equal split) as metabolites; t½ loratadine ~8h, desloratadine ~27h",
     monitoring: ["Liver function (frequency reduction if impaired)", "Symptom response", "Minimal sedation monitoring required"],
     adverseReactions: ["Headache", "Somnolence (minimal)", "Dry mouth", "Fatigue", "Nausea"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-losartan-syrup",
@@ -1701,7 +1701,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Biliary (~60%) and renal (~35%) as metabolites",
     monitoring: ["Blood pressure", "Serum creatinine/GFR", "Serum potassium", "Urine protein"],
     adverseReactions: ["Hyperkalaemia", "Renal function deterioration (bilateral RAS)", "Dizziness/hypotension", "Hyperuricaemia", "Angioedema (rare)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-metronidazole-syrup",
@@ -1720,7 +1720,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (~60–80% as metabolites); biliary excretion",
     monitoring: ["GI tolerance", "Signs of peripheral neuropathy (prolonged use)", "CBC (prolonged therapy)", "Alcohol avoidance counselling"],
     adverseReactions: ["Nausea, vomiting, metallic taste (most common)", "Headache, dizziness", "Peripheral neuropathy (prolonged)", "Disulfiram-like reaction with alcohol", "Dark/reddish-brown urine (harmless)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-montelukast-syrup",
@@ -1739,7 +1739,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Biliary/faecal (~86%); <0.2% renal",
     monitoring: ["Asthma symptom control", "Neuropsychiatric symptoms (Black Box Warning: mood, sleep, suicidal ideation)", "Eosinophil count"],
     adverseReactions: ["Headache", "Abdominal pain (children)", "Neuropsychiatric effects (Black Box Warning)", "Elevated liver enzymes (rare)", "Churg-Strauss syndrome (rare, with steroid tapering)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | FDA Black Box Warning 2020",
+    reference: "Harriet Lane 24e | Nelson's 22e | FDA Black Box Warning 2020",
   },
   {
     id: "f-nitrofurantoin-syrup",
@@ -1758,7 +1758,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (therapeutic only in urine) — contraindicated in renal impairment",
     monitoring: ["Urine C&S", "Renal function (GFR — contraindicated if impaired)", "Pulmonary symptoms", "LFTs", "CBC (prophylaxis — haematological toxicity)"],
     adverseReactions: ["GI upset (nausea, anorexia — reduced with food)", "Pulmonary toxicity (acute eosinophilic, chronic fibrosis)", "Peripheral neuropathy (renal failure, prolonged use)", "Haemolytic anaemia (G6PD)", "Brown discolouration of urine (harmless)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-nystatin-syrup",
@@ -1777,7 +1777,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Faecal — unchanged (not absorbed)",
     monitoring: ["Resolution of oral lesions (white plaques)", "Treatment of any fungal sources on nipples/dummies/breast (infants)", "Persistence despite treatment (consider fluconazole)"],
     adverseReactions: ["Nausea, vomiting, diarrhoea (GI — large doses)", "Rare hypersensitivity reactions", "Bitter/unpleasant taste"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-omeprazole-syrup",
@@ -1796,7 +1796,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (~80% as metabolites); biliary (~20%); t½ 0.5–1 hour",
     monitoring: ["Symptom response (4–8 weeks)", "H. pylori eradication confirmation", "Magnesium (prolonged use)", "B12 (long-term)", "Bone density (prolonged high-dose)"],
     adverseReactions: ["Headache", "Diarrhoea or constipation", "Hypomagnesaemia (prolonged)", "C. difficile (prolonged)", "B12 deficiency (long-term)", "Osteoporosis (long-term high dose)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-ondansetron-syrup",
@@ -1814,7 +1814,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (~5% unchanged), remainder as metabolites in urine/feces",
     monitoring: ["ECG/QTc if risk factors present", "Resolution of nausea/vomiting", "Electrolytes if prolonged vomiting"],
     adverseReactions: ["Headache", "Constipation/diarrhea", "QT prolongation (dose-dependent)", "Transient transaminase elevation"],
-    reference: "Harriet Lane 22e",
+    reference: "Harriet Lane 24e",
   },
   {
     id: "f-oseltamivir-syrup",
@@ -1833,7 +1833,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — active metabolite >99% unchanged via GFR and tubular secretion",
     monitoring: ["Symptom duration and severity", "Renal function (dose adjustment)", "Neuropsychiatric symptoms (rare — hallucinations, self-injury)", "Influenza diagnosis confirmation"],
     adverseReactions: ["Nausea, vomiting (take with food)", "Headache", "Abdominal pain", "Rare neuropsychiatric effects (children/adolescents)", "Rare SJS"],
-    reference: "Harriet Lane 22e | CDC Antiviral Guidance",
+    reference: "Harriet Lane 24e | CDC Antiviral Guidance",
   },
   {
     id: "f-phenobarbital-syrup",
@@ -1852,7 +1852,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — ~25% unchanged; alkalinised urine increases excretion",
     monitoring: ["Serum levels (target 15–40 mg/L)", "Sedation/behavioural assessment", "LFTs", "CBC", "Drug interactions (CYP inducer)"],
     adverseReactions: ["Sedation (tolerance develops)", "Hyperactivity (paradoxical — children)", "Cognitive impairment", "Physical dependence", "Rash (SJS rare)", "Hepatotoxicity", "Rickets (CYP induction)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-phenytoin-syrup",
@@ -1871,7 +1871,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal as glucuronide of HPPH (~70%); <5% unchanged",
     monitoring: ["Serum phenytoin levels (trough — target 10–20 mg/L; free 1–2 mg/L)", "Shake bottle well before dosing (critical)", "LFTs", "CBC", "Gum hypertrophy"],
     adverseReactions: ["Nystagmus, ataxia, diplopia (toxicity)", "Gingival hyperplasia", "Hirsutism, coarsening features", "Megaloblastic anaemia", "SJS/TEN (HLA-B*1502)", "Foetal hydantoin syndrome"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-prednisolone-syrup",
@@ -1890,7 +1890,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal as metabolites",
     monitoring: ["Blood glucose", "Blood pressure", "Electrolytes (K⁺)", "Growth (prolonged use)", "Adrenal suppression markers"],
     adverseReactions: ["Hyperglycaemia", "Mood/behavioural changes", "GI upset", "Adrenal suppression (prolonged courses)", "Growth retardation", "Cushingoid features"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-promethazine-syrup",
@@ -1909,7 +1909,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal and biliary as metabolites; t½ 12–15 hours",
     monitoring: ["Respiratory rate and sedation depth (especially < 6 yr)", "Extrapyramidal symptoms (dystonia, akathisia)", "QTc interval", "Anticholinergic effects (urinary retention, constipation)"],
     adverseReactions: ["Fatal respiratory depression (children < 2 yr — Black Box Warning)", "Excessive sedation", "Extrapyramidal reactions (dystonia, oculogyric crisis)", "QT prolongation", "Anticholinergic effects (dry mouth, urinary retention)", "Neuroleptic malignant syndrome (rare)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | FDA Black Box Warning",
+    reference: "Harriet Lane 24e | Nelson's 22e | FDA Black Box Warning",
   },
   {
     id: "f-propranolol-syrup",
@@ -1928,7 +1928,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal as metabolites (<1% unchanged); t½ 3–6 hours",
     monitoring: ["Heart rate (hold if HR below age-appropriate minimum)", "Blood pressure (especially post first dose)", "Blood glucose (masks hypoglycaemia)", "Respiratory status", "ECG (PR interval)"],
     adverseReactions: ["Bradycardia", "Hypotension (especially first dose)", "Bronchospasm", "Fatigue", "Masking hypoglycaemia", "Cold extremities", "Sleep disturbance"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-rifampicin-syrup",
@@ -1947,7 +1947,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Biliary/faecal (~60–65%); renal (~30%)",
     monitoring: ["LFTs monthly (hepatotoxicity)", "CBC", "Drug interactions (comprehensive review required)", "Adherence and orange discolouration counselling", "TB: sputum culture/smear"],
     adverseReactions: ["Orange-red secretions/urine/tears (harmless — warn family)", "GI upset", "Hepatotoxicity", "Flu-like syndrome (intermittent therapy)", "Thrombocytopenia", "Drug interactions (extensive CYP inducer)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | WHO TB Guidelines",
+    reference: "Harriet Lane 24e | Nelson's 22e | WHO TB Guidelines",
   },
   {
     id: "f-salbutamol-syrup",
@@ -1966,7 +1966,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal, mostly as sulfate conjugate",
     monitoring: ["Heart rate", "Tremor", "Response to therapy (oral route less effective than inhaled)"],
     adverseReactions: ["Tachycardia", "Tremor", "Hypokalemia (high dose)", "Nervousness/agitation"],
-    reference: "Harriet Lane 22e",
+    reference: "Harriet Lane 24e",
   },
   {
     id: "f-senna-syrup",
@@ -1985,7 +1985,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Primarily faecal; small amounts of metabolites renally excreted",
     monitoring: ["Stool frequency and consistency", "Electrolytes with prolonged use (risk of hypokalaemia)", "Signs of laxative dependence (chronic use)", "Dehydration"],
     adverseReactions: ["Abdominal cramps (most common)", "Diarrhoea", "Hypokalaemia (chronic use)", "Melanosis coli (reversible discolouration — prolonged use)", "Laxative dependency with prolonged use", "Nausea"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-sertraline-syrup",
@@ -2004,7 +2004,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal and faecal as metabolites; t½ ~26 hours",
     monitoring: ["Mood and behaviour — suicidal ideation (Black Box Warning < 25 yr)", "Activation/agitation (early)", "GI tolerance", "Serum sodium (SIADH)", "Serotonin syndrome signs"],
     adverseReactions: ["Nausea (most common, usually transient)", "Diarrhoea", "Insomnia/somnolence", "Activation/agitation", "Suicidal ideation (Black Box Warning — young patients)", "Sexual dysfunction", "Hyponatraemia (SIADH)", "Serotonin syndrome"],
-    reference: "Harriet Lane 22e | Nelson's 22e | FDA SSRI Paediatric Guidelines",
+    reference: "Harriet Lane 24e | Nelson's 22e | FDA SSRI Paediatric Guidelines",
   },
   {
     id: "f-sildenafil-syrup",
@@ -2023,7 +2023,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Faecal (~80%) and renal (~13%) as metabolites; t½ 3–5 hours",
     monitoring: ["Blood pressure (systemic hypotension — especially concurrent antihypertensives)", "Oxygen saturation and pulmonary haemodynamics", "Hepatic function", "Vision changes"],
     adverseReactions: ["Headache", "Flushing", "Epistaxis", "Systemic hypotension", "Dyspepsia", "Visual disturbances", "Priapism (prolonged erection)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | STARTS-2 Trial",
+    reference: "Harriet Lane 24e | Nelson's 22e | STARTS-2 Trial",
   },
   {
     id: "f-sodiumvalproate-syrup",
@@ -2042,7 +2042,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal as glucuronide conjugates; <5% unchanged; t½ 6–16 hours",
     monitoring: ["Serum valproate levels (target 50–100 mg/L)", "LFTs and ammonia (especially first 6 months)", "CBC + platelets (thrombocytopenia)", "Coagulation (fibrinogen)", "Weight", "Ammonia if encephalopathy suspected"],
     adverseReactions: ["Hepatotoxicity (idiosyncratic — fatal risk in young children < 2 yr with metabolic disease)", "Pancreatitis (rare but serious)", "Thrombocytopenia", "Weight gain", "Tremor", "Alopecia", "Teratogenicity", "Hyperammonaemia"],
-    reference: "Harriet Lane 22e | Nelson's 22e | MHRA Warnings",
+    reference: "Harriet Lane 24e | Nelson's 22e | MHRA Warnings",
   },
   {
     id: "f-spironolactone-syrup",
@@ -2061,7 +2061,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal and biliary as metabolites",
     monitoring: ["Serum potassium (hyperkalaemia — check at 1 week, 1 month)", "Serum creatinine/GFR", "Blood pressure", "Electrolytes and fluid balance", "Signs of anti-androgenic effects"],
     adverseReactions: ["Hyperkalaemia (most important)", "Gynaecomastia", "Menstrual irregularities", "GI upset", "Hyponatraemia", "Dizziness"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-topiramate-syrup",
@@ -2080,7 +2080,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal ~70% unchanged; dose reduce if GFR < 70 mL/min",
     monitoring: ["Cognition/language assessment (word-finding difficulties)", "Weight (anorexia — weight loss)", "Serum bicarbonate (metabolic acidosis)", "Urinalysis/creatinine (nephrolithiasis)", "Temperature regulation (anhidrosis in children)", "Intraocular pressure"],
     adverseReactions: ["Cognitive slowing, word-finding difficulties ('Dopamax')", "Metabolic acidosis", "Anorexia/weight loss", "Nephrolithiasis", "Anhidrosis/hyperthermia (children)", "Acute angle-closure glaucoma (discontinue immediately)", "Paraesthesia"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-trimethoprim-syrup",
@@ -2099,7 +2099,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal ~60–80% unchanged via tubular secretion",
     monitoring: ["Serum creatinine (spurious rise — TMP blocks tubular creatinine secretion)", "Serum K⁺ (hyperkalaemia)", "CBC (folate antagonism)", "Urine culture (end-of-treatment)"],
     adverseReactions: ["Nausea, vomiting", "Rash", "Megaloblastic anaemia/neutropenia (folate antagonism)", "Hyperkalaemia (blocks distal tubular K⁺ secretion)", "Hypersensitivity"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-ursodeoxycholic-syrup",
@@ -2118,7 +2118,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Faecal (predominantly); small amounts renally excreted",
     monitoring: ["Liver function tests (ALT, AST, GGT, bilirubin) every 3–6 months", "Alkaline phosphatase", "Cholestatic symptom improvement (pruritus, jaundice)", "Gallstone assessment (if indicated) by imaging"],
     adverseReactions: ["Diarrhoea (dose-related)", "GI discomfort", "Nausea, abdominal pain (rare at therapeutic doses)", "Elevated liver enzymes paradoxically (very rare)", "Pruritus exacerbation (rarely, in PBC — UDCA may worsen early)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | ESPGHAN Guidelines",
+    reference: "Harriet Lane 24e | Nelson's 22e | ESPGHAN Guidelines",
   },
   {
     id: "f-zincsulphate-syrup",
@@ -2137,7 +2137,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Primarily faecal via pancreatic/intestinal secretions; minor renal",
     monitoring: ["Serum zinc levels", "Copper levels (high-dose zinc — competes with copper absorption)", "Stool consistency, GI tolerance", "Alkaline phosphatase"],
     adverseReactions: ["GI upset (nausea, vomiting, abdominal cramps — especially on empty stomach)", "Copper deficiency (prolonged high doses)", "Metallic taste", "Headache"],
-    reference: "Harriet Lane 22e | Nelson's 22e | WHO Diarrhoea Management",
+    reference: "Harriet Lane 24e | Nelson's 22e | WHO Diarrhoea Management",
   },
 
   // ════════════════════════════════════════════════════════════
@@ -2158,7 +2158,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Fecal (primary) and renal as metabolites; extensive first-pass effect minimises systemic exposure",
     monitoring: ["Growth (long-term use)", "Adrenal suppression signs (high prolonged doses)", "Oral candidiasis", "Spirometry/symptom control"],
     adverseReactions: ["Oral candidiasis (rinse mouth post-dose)", "Dysphonia/hoarseness", "Cough", "Growth suppression (high doses)", "HPA suppression (rare at standard doses)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | GINA Paediatric Guidelines",
+    reference: "Harriet Lane 24e | Nelson's 22e | GINA Paediatric Guidelines",
   },
   {
     id: "f-budesonide-neb",
@@ -2175,7 +2175,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal and fecal, entirely as metabolites; <1% excreted unchanged",
     monitoring: ["Stridor and work of breathing (croup — reassess after 2 hr)", "Growth with long-term use", "Oral candidiasis", "SpO₂"],
     adverseReactions: ["Oral candidiasis", "Hoarseness/dysphonia", "Cough", "Growth suppression (prolonged high-dose)", "HPA axis suppression (rare)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-colistimethate-neb",
@@ -2211,7 +2211,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Not applicable — acts locally in airways; minimal systemic absorption",
     monitoring: ["Spirometry (FEV₁/FVC) at baseline then 3-monthly", "Sputum volume/consistency", "Respiratory symptoms (dyspnoea, cough)", "Voice changes (dysphonia)"],
     adverseReactions: ["Voice alteration/pharyngitis", "Laryngitis", "Rash", "Conjunctivitis (exposure)", "Chest pain (rare)", "Dyspepsia"],
-    reference: "Harriet Lane 22e | Nelson's 22e | CF Foundation Evidence-Based Guidelines",
+    reference: "Harriet Lane 24e | Nelson's 22e | CF Foundation Evidence-Based Guidelines",
   },
   {
     id: "f-epinephrine-neb",
@@ -2229,7 +2229,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — <5% excreted unchanged; metabolites in urine",
     monitoring: ["Heart rate (tachycardia expected)", "Blood pressure", "Oxygen saturation", "Stridor reassessment at 30 min and 2–4 hr post-dose (rebound)", "Clinical severity score (Westley Croup Score)"],
     adverseReactions: ["Tachycardia", "Hypertension", "Pallor", "Tremor", "Rebound stridor (2–3 hr post-dose)", "Vomiting", "Arrhythmias (rare)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | PALS 2025",
+    reference: "Harriet Lane 24e | Nelson's 22e | PALS 2025",
   },
   {
     id: "f-fluticasone-neb",
@@ -2246,7 +2246,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Fecal (primary, as metabolites); renal minor fraction",
     monitoring: ["Growth (6-monthly in children — high potency ICS)", "HPA axis function (high doses)", "Bone density (prolonged high-dose use)", "Oral candidiasis", "Lung function (FEV₁)"],
     adverseReactions: ["Oral candidiasis", "Dysphonia", "Adrenal suppression (high prolonged doses — more than budesonide equivalent)", "Growth suppression", "Cataract (very long-term)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | GINA 2024",
+    reference: "Harriet Lane 24e | Nelson's 22e | GINA 2024",
   },
   {
     id: "f-formoterol-neb",
@@ -2263,7 +2263,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (~65% as metabolites + unchanged drug) and fecal (~35%)",
     monitoring: ["Heart rate (tachycardia)", "Blood pressure", "Serum potassium (hypokalemia risk — especially with systemic steroids/diuretics)", "Tremor", "Asthma control score (ensure concomitant ICS use)"],
     adverseReactions: ["Tachycardia", "Tremor", "Palpitations", "Hypokalemia", "Headache", "Paradoxical bronchospasm (rare)", "Tolerance with prolonged use (partial)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-hypertonic-saline-neb",
@@ -2280,7 +2280,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Mucociliary clearance; absorbed sodium excreted renally",
     monitoring: ["SpO₂ (monitor during and for 15 min post-nebulisation)", "Work of breathing and respiratory rate", "Bronchospasm (wheeze — stop if severe)", "FEV₁/FVC in CF (response assessment)"],
     adverseReactions: ["Cough (common — transient)", "Bronchoconstriction/wheeze (pre-treat with SABA)", "Throat irritation", "Taste disturbance", "Haemoptysis (rare in CF with structural lung disease)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | Cochrane Review Bronchiolitis",
+    reference: "Harriet Lane 24e | Nelson's 22e | Cochrane Review Bronchiolitis",
   },
   {
     id: "f-ipratropium-neb",
@@ -2297,7 +2297,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Primarily biliary/fecal for swallowed fraction; small renal fraction unchanged",
     monitoring: ["Respiratory rate, SpO₂, work of breathing (response to bronchodilator)", "Heart rate", "Urinary retention (rare, particularly in males)", "Dry mouth and thirst"],
     adverseReactions: ["Dry mouth (most common)", "Cough, paradoxical bronchospasm (rare)", "Blurred vision if nebuliser mist contacts eyes (use mouthpiece not mask)", "Urinary retention (rare)", "Tachycardia (minimal compared with SABA)"],
-    reference: "Harriet Lane 22e | PALS 2025",
+    reference: "Harriet Lane 24e | PALS 2025",
   },
   {
     id: "f-levalbuterol-neb",
@@ -2315,7 +2315,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — 80–100% as conjugates and unchanged drug within 24 hr",
     monitoring: ["Heart rate (less tachycardia than racemic — monitor nonetheless)", "SpO₂", "Serum potassium (hypokalemia with frequent dosing)", "Work of breathing"],
     adverseReactions: ["Tachycardia (less than racemic salbutamol)", "Tremor", "Palpitations", "Hypokalemia", "Headache", "Paradoxical bronchospasm (rare)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-magnesium-sulfate-neb",
@@ -2332,7 +2332,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (systemically absorbed fraction)",
     monitoring: ["SpO₂", "Respiratory rate/work of breathing", "Blood pressure (hypotension with systemic absorption)", "Serum magnesium if repeated doses", "Deep tendon reflexes"],
     adverseReactions: ["Tingling/warmth (systemic absorption)", "Flushing", "Hypotension (significant systemic absorption)", "Bradycardia (rare)", "Loss of deep tendon reflexes (toxicity — very high systemic levels)"],
-    reference: "Nelson's 22e | Harriet Lane 22e | GINA Severe Asthma",
+    reference: "Nelson's 22e | Harriet Lane 24e | GINA Severe Asthma",
   },
   {
     id: "f-nac-neb",
@@ -2350,7 +2350,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal as cysteine and other metabolites",
     monitoring: ["Bronchospasm (vital — always give SABA first)", "SpO₂ during nebulisation", "Sputum consistency/volume (therapeutic response)", "Nausea/vomiting (systemic absorption)", "Stomatitis with prolonged use"],
     adverseReactions: ["Bronchoconstriction/bronchospasm (most important — ALWAYS pre-treat with SABA)", "Nausea and vomiting", "Stomatitis", "Runny nose (rhinorrhoea)", "Unpleasant sulphurous odour", "Haemoptysis (rare)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-racemic-epinephrine-neb",
@@ -2367,7 +2367,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal as metanephrine, VMA, and normetanephrine metabolites",
     monitoring: ["Heart rate and rhythm", "Blood pressure", "SpO₂", "Stridor score at 2 and 4 hr post-dose (rebound stridor)", "Westley Croup Score"],
     adverseReactions: ["Rebound stridor (2–3 hr post-dose — observe before discharge)", "Tachycardia", "Hypertension", "Pallor", "Tremor", "Vomiting"],
-    reference: "Harriet Lane 22e | Nelson's 22e | PALS 2025",
+    reference: "Harriet Lane 24e | Nelson's 22e | PALS 2025",
   },
   {
     id: "f-salbutamol-neb",
@@ -2385,7 +2385,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — as sulfate conjugate and unchanged drug",
     monitoring: ["Respiratory rate and work of breathing", "SpO₂", "Heart rate (tachycardia expected)", "Serum potassium (hypokalemia with frequent/continuous dosing)", "Blood glucose (hyperglycemia)"],
     adverseReactions: ["Tachycardia", "Tremor", "Hypokalemia (monitor with frequent dosing)", "Hyperglycemia", "Paradoxical bronchospasm (rare)", "Lactic acidosis (rare — continuous high-dose)"],
-    reference: "PALS 2025 | Harriet Lane 22e | Nelson's 22e",
+    reference: "PALS 2025 | Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-sodium-cromoglycate-neb",
@@ -2403,7 +2403,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Approximately equal renal and biliary; inhaled fraction absorbed from lungs excreted renally",
     monitoring: ["Asthma symptom control diary", "FEV₁/PEF (spirometry at 4–6 weeks for response)", "Exercise tolerance (exercise-induced bronchoconstriction)"],
     adverseReactions: ["Throat irritation", "Cough (transient)", "Unpleasant taste", "Bronchoconstriction (rare, mild — usually self-limiting)", "Eosinophilic pneumonia (very rare with prolonged use)"],
-    reference: "Nelson's 22e | Harriet Lane 22e",
+    reference: "Nelson's 22e | Harriet Lane 24e",
   },
   {
     id: "f-terbutaline-neb",
@@ -2420,7 +2420,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — primarily as sulfate conjugates; ~60% of dose within 24 hr",
     monitoring: ["Heart rate (tachycardia common)", "SpO₂", "Respiratory rate/work of breathing", "Serum potassium (hypokalemia)", "Blood pressure"],
     adverseReactions: ["Tachycardia", "Tremor", "Palpitations", "Hypokalemia", "Headache", "Muscle cramps"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-tobramycin-neb",
@@ -2438,7 +2438,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — unchanged, when systemically absorbed (<10% of inhaled dose reaches systemic circulation)",
     monitoring: ["Spirometry (FEV₁) at baseline and 3-monthly — improvement expected within 2 weeks of first cycle", "Sputum culture and Pseudomonas MIC", "Audiometry (annual — cochlear ototoxicity risk)", "Serum trough levels NOT routinely needed for inhaled route", "Renal function (if concerns about systemic absorption)"],
     adverseReactions: ["Cough (very common)", "Dysphonia/voice alteration", "Pharyngitis", "Tinnitus (rare — ototoxicity from systemic absorption)", "Haemoptysis (rare)", "Bronchoconstriction (pre-treat with SABA)", "Wheezing"],
-    reference: "Harriet Lane 22e | Nelson's 22e | CF Foundation Guidelines 2023",
+    reference: "Harriet Lane 24e | Nelson's 22e | CF Foundation Guidelines 2023",
   },
 
   // ════════════════════════════════════════════════════════════
@@ -2460,7 +2460,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — 60–90% excreted unchanged via glomerular filtration and tubular secretion; dose reduction required when GFR <50 mL/min/1.73m²",
     monitoring: ["Renal function (BUN, creatinine) at baseline and every 48–72 hr", "Hydration status/urine output (crystalluria prevention — ensure UO ≥1 mL/kg/hr)", "Neurological status (encephalopathy, tremor — neurotoxicity in renal impairment)", "LFTs (mild elevation common)", "CBC"],
     adverseReactions: ["Nephrotoxicity / crystalluria (rapid infusion, dehydration)", "Neurotoxicity (tremor, confusion, seizures — with renal failure)", "Phlebitis at infusion site", "Nausea/vomiting", "Elevated LFTs", "Rash (rare anaphylaxis)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-albumin-iv",
@@ -2479,7 +2479,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Not renally excreted; catabolised to amino acids",
     monitoring: ["Fluid balance (daily weight, urine output)", "Blood pressure, HR, central venous pressure", "Serum albumin levels", "Electrolytes (sodium — albumin 4%/5% is iso-oncotic)", "Signs of pulmonary oedema (SpO₂, respiratory rate)"],
     adverseReactions: ["Fluid overload / pulmonary oedema (rapid infusion or excess)", "Anaphylaxis / anaphylactoid reaction (rare — 1:50,000)", "Hypernatremia (with 4%/5% solutions)", "Fever, chills (infusion reaction)", "Electrolyte disturbance"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-amikacin-iv",
@@ -2497,7 +2497,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — glomerular filtration; 94–98% unchanged within 24 hr; prolonged elimination in renal impairment",
     monitoring: ["Peak and trough serum levels (AUC/MIC-guided TDM: target AUC₂₄ 70–100 mg·h/L for gram-negatives)", "Renal function (BUN, creatinine, urine output) — at baseline and every 48–72 hr", "Audiometry (cochlear ototoxicity — especially prolonged courses >5–7 days)", "Vestibular function (dizziness, ataxia)", "Neuromuscular function (weakness)"],
     adverseReactions: ["Nephrotoxicity (acute tubular necrosis — dose/duration-dependent)", "Ototoxicity — cochlear (high-frequency hearing loss) and vestibular (dizziness, ataxia)", "Neuromuscular blockade (rare — with anaesthesia/succinylcholine)", "Rash/urticaria (rare)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-aminophylline-iv",
@@ -2515,7 +2515,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — adults: 10% unchanged; children/neonates: higher proportion unchanged (reduced CYP1A2 activity)",
     monitoring: ["Serum theophylline levels (check at 30 min post-load, then 6-hourly; target 10–20 mg/L)", "Heart rate (tachycardia — risk of arrhythmias >20 mg/L)", "ECG (QTc, arrhythmias)", "Seizures (toxicity >40 mg/L)", "Blood pressure", "Nausea/vomiting (early toxicity sign)"],
     adverseReactions: ["Tachycardia/arrhythmias (common — narrow therapeutic index)", "Seizures (theophylline toxicity >40 mg/L)", "Nausea, vomiting, headache (early toxicity)", "Hypotension (rapid infusion)", "Insomnia", "Gastro-oesophageal reflux"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-ampicillin-iv",
@@ -2533,7 +2533,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — 70–80% unchanged via glomerular filtration and tubular secretion within 8 hr; dose adjustment in renal impairment",
     monitoring: ["Clinical response (fever, CRP, blood cultures)", "Renal function (dose adjustment in impairment)", "Signs of hypersensitivity (rash — distinguish penicillin rash from EBV rash)", "CBC (neutropenia with prolonged use)"],
     adverseReactions: ["Maculopapular rash (especially with EBV infection — non-allergic)", "Anaphylaxis (IgE-mediated — true penicillin allergy)", "Diarrhoea / C. difficile (less common than broad-spectrum antibiotics)", "Interstitial nephritis (rare)", "Neutropenia (prolonged courses)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-benzylpenicillin-iv",
@@ -2551,7 +2551,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — 60–90% unchanged via tubular secretion within 6 hr; dose adjustment in renal failure",
     monitoring: ["Serum electrolytes (hypernatraemia/hyperkalaemia — high doses contain significant Na⁺/K⁺ depending on salt)", "Renal function", "CNS — seizures (rare, high doses in renal impairment)", "Hypersensitivity signs (rash, urticaria, anaphylaxis)"],
     adverseReactions: ["Anaphylaxis (0.04–0.2% — most serious)", "Electrolyte imbalance (high-dose: hypernatraemia or hyperkalaemia per formulation)", "Seizures (CNS penetration at very high doses + renal impairment)", "Interstitial nephritis (rare)", "Haemolytic anaemia (prolonged high doses)", "Jarisch-Herxheimer reaction (syphilis treatment)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-ceftriaxone-iv",
@@ -2569,7 +2569,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (~60%) and biliary/faecal (~40%) — unique dual excretion among cephalosporins",
     monitoring: ["Renal function", "Biliary sludging symptoms (prolonged use — gallbladder pseudolithiasis on USS)", "Clinical response (CRP trend, fever, cultures)", "LFTs (mild elevation)", "Avoid concurrent IV calcium solutions"],
     adverseReactions: ["Biliary pseudolithiasis (sludge — reversible, usually asymptomatic)", "Diarrhoea / C. difficile (less common)", "Injection site reaction", "Hypersensitivity / anaphylaxis", "Kernicterus risk in neonates (bilirubin displacement)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-ciprofloxacin-iv",
@@ -2587,7 +2587,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — 40–70% unchanged via glomerular filtration and tubular secretion; biliary ~15%",
     monitoring: ["Renal function and LFTs", "Tendon pain (Achilles — stop if pain/swelling)", "CNS effects (confusion, seizures — especially with NSAIDs or CNS disease)", "QTc interval (ECG at baseline if risk factors)", "Photosensitivity precautions", "Glucose (dysglycaemia)"],
     adverseReactions: ["Tendinopathy / tendon rupture (rare in children — Achilles most common)", "CNS effects (dizziness, headache, seizures)", "QTc prolongation", "GI upset (nausea, diarrhoea)", "Photosensitivity", "C. difficile colitis", "Hypoglycaemia or hyperglycaemia"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-clindamycin-iv",
@@ -2605,7 +2605,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Biliary (primary — 10% unchanged in faeces); renal minor (10% as metabolites)",
     monitoring: ["C. difficile-associated diarrhoea (CDAD) — stool for C. difficile toxin if diarrhoea", "LFTs (mild elevation common, hepatotoxicity rare)", "Clinical response (bone/joint imaging at 4–6 weeks)", "Neuromuscular function (rare blockade with aminoglycosides)", "Rash"],
     adverseReactions: ["C. difficile-associated diarrhoea/colitis (most significant — occurs up to 4 weeks after course)", "Diarrhoea (common, non-C. difficile)", "Hepatotoxicity (elevated LFTs — rarely clinical)", "Thrombophlebitis (infusion site)", "Rash, urticaria", "Metallic taste"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-dexamethasone-iv",
@@ -2623,7 +2623,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — as metabolites and unchanged drug",
     monitoring: ["Blood glucose (hyperglycaemia — especially in diabetic patients or high doses)", "Blood pressure (hypertension)", "Electrolytes (hypokalaemia, fluid retention)", "GI symptoms (bleeding — especially with concurrent NSAIDs)", "Infection signs (immunosuppression)", "Adrenal suppression (courses >3–5 days)"],
     adverseReactions: ["Hyperglycaemia", "Hypertension / fluid retention", "GI bleeding (with NSAIDs)", "Immunosuppression", "Psychiatric effects (insomnia, mood disturbance)", "Adrenal suppression (short courses rarely clinically significant)", "HPA axis suppression (repeated/prolonged courses)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-dexmedetomidine-iv",
@@ -2641,7 +2641,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — 95% as metabolites; <1% unchanged",
     monitoring: ["Heart rate (bradycardia — very common; may require atropine or dose reduction)", "Blood pressure (biphasic: initial hypertension with loading, then hypotension)", "RASS/sedation score (goal-directed sedation)", "Respiratory rate (advantage: minimal respiratory depression)", "ECG (sinus bradycardia, junctional rhythm)"],
     adverseReactions: ["Bradycardia (very common — dose-dependent, may be severe)", "Hypotension (common)", "Hypertension (loading phase — especially pre-existing hypertension)", "Dry mouth (anticholinergic-like)", "Agitation on discontinuation", "Nausea"],
-    reference: "Nelson's 22e | Harriet Lane 22e | SCCM PADIS Guidelines",
+    reference: "Nelson's 22e | Harriet Lane 24e | SCCM PADIS Guidelines",
   },
   {
     id: "f-famotidine-iv",
@@ -2659,7 +2659,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — 65–70% excreted unchanged; dose reduction required in severe renal impairment (GFR <30 mL/min)",
     monitoring: ["Gastric pH (target >4 for stress ulcer prophylaxis)", "Renal function (dose adjustment in impairment)", "QTc interval (ECG if concurrent QTc-prolonging drugs)", "LFTs (rare elevation)", "CBC (thrombocytopenia — rare)"],
     adverseReactions: ["Headache (common)", "Dizziness", "QTc prolongation (dose-dependent — less than other H₂ blockers)", "Thrombocytopenia (rare)", "Elevated LFTs (rare)", "Constipation / diarrhoea"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-fentanyl-iv",
@@ -2677,7 +2677,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — 10% unchanged; remainder as norfentanyl and other metabolites",
     monitoring: ["Respiratory rate and SpO₂ (respiratory depression)", "Pain score (NRS, FLACC, COMFORT-B)", "Sedation score (RASS)", "Blood pressure and HR (hypotension)", "Bowel function (ileus)", "Pupil size (miosis — toxicity)", "Tolerance/withdrawal (prolonged infusions — taper on discontinuation)"],
     adverseReactions: ["Respiratory depression (dose-dependent)", "Chest wall rigidity (rapid IV bolus — high dose)", "Hypotension", "Bradycardia", "Nausea/vomiting", "Constipation/ileus", "Urinary retention", "Tolerance and withdrawal (prolonged use)", "Pruritus (less than morphine — minimal histamine release)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | SCCM PADIS 2018",
+    reference: "Harriet Lane 24e | Nelson's 22e | SCCM PADIS 2018",
   },
   {
     id: "f-fluconazole-iv",
@@ -2695,7 +2695,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — 80% unchanged; 11% as glucuronide metabolite; dose adjustment in renal impairment (GFR <50 mL/min — reduce dose by 50%)",
     monitoring: ["LFTs (ALT/AST, ALP, bilirubin) at baseline and weekly", "QTc interval (ECG at baseline and with concurrent QTc-prolonging drugs)", "Clinical response (blood cultures — repeat until negative)", "Drug interactions (CYP2C9/2C19/3A4 inhibitor — warfarin, phenytoin, tacrolimus, ciclosporin levels)", "Renal function"],
     adverseReactions: ["Elevated LFTs / hepatotoxicity (rare — fulminant hepatitis very rare)", "QTc prolongation (dose-dependent)", "Nausea, abdominal pain, headache", "Rash / Stevens-Johnson syndrome (rare — stop immediately)", "Drug interactions (extensive — check all concurrent medications)", "Alopecia (prolonged use — rare)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | IDSA Candidiasis Guidelines",
+    reference: "Harriet Lane 24e | Nelson's 22e | IDSA Candidiasis Guidelines",
   },
   {
     id: "f-furosemide-iv",
@@ -2713,7 +2713,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — 60–70% unchanged via tubular secretion; 30–40% as glucuronide",
     monitoring: ["Urine output (target ≥1 mL/kg/hr — response assessment)", "Serum electrolytes (K⁺, Na⁺, Mg²⁺, Ca²⁺) — hypokalaemia most common; every 6–12 hr in acute phase", "Creatinine/BUN (renal function — pre-renal AKI risk)", "Daily weight (fluid balance)", "Blood pressure (hypotension with aggressive diuresis)", "Audiometry (ototoxicity — rapid high-dose infusion)"],
     adverseReactions: ["Hypokalaemia (most common)", "Hyponatraemia", "Hypomagnesaemia", "Ototoxicity (rapid high-dose infusion — cochlear)", "Dehydration / pre-renal AKI", "Hyperuricaemia", "Alkalosis (contraction alkalosis)", "Photosensitivity", "Rash (sulphonamide cross-reactivity — rare)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-gentamicin-iv",
@@ -2731,7 +2731,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — 100% via glomerular filtration; accumulates in renal cortex and inner ear — dose adjustment in renal impairment",
     monitoring: ["Peak/trough levels or AUC-guided TDM (extended-interval: AUC₂₄ 70–100 for gram-negatives)", "Renal function (BUN, creatinine, UO) at baseline and every 48 hr", "Audiometry (high-frequency hearing loss — especially courses >5–7 days)", "Vestibular function (dizziness, ataxia, nystagmus)", "Urine (cast formation — nephrotoxicity)"],
     adverseReactions: ["Nephrotoxicity (acute tubular necrosis — trough-dependent)", "Ototoxicity — cochlear (irreversible high-frequency hearing loss)", "Ototoxicity — vestibular (dizziness, loss of balance)", "Neuromuscular blockade (rare — with succinylcholine/anaesthesia)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-heparin-iv",
@@ -2749,7 +2749,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — partially; dose-independent hepatic inactivation predominates at therapeutic doses",
     monitoring: ["aPTT every 4–6 hr (target 60–85 sec = 2–2.5× control); or anti-Xa heparin level (0.35–0.70 units/mL for therapeutic)", "Platelet count (CBC) every 2–3 days for HIT surveillance (HIT seroconversion 4–14 days)", "Haemoglobin/haematocrit (bleeding)", "Signs of bleeding (haematuria, haematemesis, neurological changes)", "Potassium (hyperkalaemia — heparin reduces aldosterone)"],
     adverseReactions: ["Bleeding (most common and most significant)", "Heparin-Induced Thrombocytopenia (HIT — type II: paradoxical thrombosis, severe, occurs 4–14 days post-initiation)", "Hyperkalaemia (aldosterone suppression)", "Osteoporosis (prolonged use)", "Transaminase elevation", "Hypersensitivity reactions"],
-    reference: "Harriet Lane 22e | Nelson's 22e | ACCP Antithrombotic Guidelines",
+    reference: "Harriet Lane 24e | Nelson's 22e | ACCP Antithrombotic Guidelines",
   },
   {
     id: "f-hydrocortisone-iv",
@@ -2767,7 +2767,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — as glucuronides and sulphates of metabolites",
     monitoring: ["Blood glucose (hyperglycaemia — monitor every 4–6 hr in ICU)", "Blood pressure and heart rate (haemodynamic response in shock)", "Serum electrolytes (Na⁺, K⁺ — mineralocorticoid effect)", "Infection signs (immunosuppression)", "GI bleeding (H₂ blocker prophylaxis)", "Adrenal function tests (ACTH stimulation test if ongoing use)"],
     adverseReactions: ["Hyperglycaemia", "Hypertension / fluid and sodium retention", "Hypokalaemia (mineralocorticoid effect)", "GI ulceration/bleeding", "Immunosuppression", "Psychosis/mood disturbance", "Growth suppression (prolonged use in children)", "Cushingoid features (prolonged course)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-ketamine-iv",
@@ -2785,7 +2785,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — <5% unchanged; predominantly as hydroxynorketamine metabolites",
     monitoring: ["Blood pressure and HR (sympathomimetic — expect ↑ BP and ↑ HR; pre-existing hypertension)", "Airway patency and laryngeal reflexes (maintained but not guaranteed)", "Secretions (hypersalivation — pre-treat with atropine if needed)", "Emergence phenomena (recover in quiet environment; benzodiazepine co-administration recommended)", "SpO₂ and respiratory rate (respiratory drive maintained but monitor)", "Recovery agitation score"],
     adverseReactions: ["Emergence dysphoria/hallucinations (10–30% of paediatric patients — reduce with midazolam co-administration)", "Hypersalivation (pre-treat with atropine)", "Hypertension and tachycardia (catecholamine release)", "Laryngospasm (rare — ~0.3% risk)", "Vomiting (post-procedural)", "Nystagmus and diplopia", "Raised ICP (mild — significance debated)", "Transient apnoea (rapid high-dose bolus)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | PALS 2025",
+    reference: "Harriet Lane 24e | Nelson's 22e | PALS 2025",
   },
   {
     id: "f-levetiracetam-iv",
@@ -2803,7 +2803,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — 66% unchanged; 27% as ucb L057 metabolite; dose adjustment when eGFR <80 mL/min/1.73m²",
     monitoring: ["Seizure frequency and duration (clinical response — 24–48 hr assessment)", "Behavioural changes (irritability, aggression, mood — 'keppra rage' — 10–15% of children)", "Renal function (dose adjustment in impairment)", "CBC (thrombocytopenia rare)", "EEG (if available — 48 hr assessment for SE resolution)"],
     adverseReactions: ["Behavioural effects — irritability, aggression, mood lability (most common and clinically significant in children)", "Somnolence/fatigue", "Headache", "Nasopharyngitis", "Rare: serious psychiatric disturbance (psychosis, suicidal ideation)", "Thrombocytopenia (rare)", "Stevens-Johnson syndrome (very rare)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | Paediatric Status Epilepticus Guidelines",
+    reference: "Harriet Lane 24e | Nelson's 22e | Paediatric Status Epilepticus Guidelines",
   },
   {
     id: "f-magnesium-sulfate-iv",
@@ -2821,7 +2821,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — 100% via glomerular filtration; renal tubular reabsorption varies with serum levels",
     monitoring: ["Serum magnesium (target: asthma 1.5–2.5 mmol/L; therapeutic 1.5–2 mmol/L normally)", "Deep tendon reflexes (DTRs — loss = early toxicity sign at ~3.5–5 mmol/L; do not give if DTRs absent)", "Respiratory rate (respiratory depression >5 mmol/L)", "Blood pressure (hypotension common with rapid infusion)", "Cardiac monitoring (QRS widening, bradycardia)", "Urine output (magnesium excreted renally — ensure ≥1 mL/kg/hr)"],
     adverseReactions: ["Hypotension (rapid infusion)", "Flushing and warmth (vasodilation)", "Respiratory depression (high levels — >5 mmol/L)", "Loss of deep tendon reflexes (>3.5 mmol/L)", "Bradycardia and cardiac arrest (extreme toxicity >7.5 mmol/L)", "Nausea/vomiting", "Muscle weakness"],
-    reference: "Harriet Lane 22e | Nelson's 22e | PALS 2025",
+    reference: "Harriet Lane 24e | Nelson's 22e | PALS 2025",
   },
   {
     id: "f-maintenance-fluid-iv",
@@ -2841,7 +2841,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (water and electrolytes)",
     monitoring: ["Daily weight (fluid balance)", "Urine output (target ≥1 mL/kg/hr)", "Serum electrolytes every 12–24 hr (Na⁺, K⁺, glucose)", "Fluid balance chart (input/output)", "Clinical signs of over- or under-hydration", "Blood glucose (dextrose-containing fluids in neonates)"],
     adverseReactions: ["Fluid overload / pulmonary oedema (excessive rate)", "Hyponatraemia (hypotonic fluids — especially illness-related ADH secretion)", "Hypernatraemia (insufficient free water)", "Hyperglycaemia (excessive dextrose)", "Electrolyte derangement"],
-    reference: "Harriet Lane 22e — Holliday-Segar method | Nelson's 22e",
+    reference: "Harriet Lane 24e — Holliday-Segar method | Nelson's 22e",
   },
   {
     id: "f-mannitol-iv",
@@ -2859,7 +2859,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — 80–90% unchanged via glomerular filtration within 3 hr; dose reduction in severe renal impairment",
     monitoring: ["Serum osmolality (target <320 mOsm/kg — check every 4–6 hr during treatment; hold if >320)", "Serum Na⁺ (mannitol causes transient hyponatraemia then hypernatraemia with diuresis)", "Urine output and fluid balance (osmotic diuresis expected — replace losses)", "ICP monitoring (neurological observation — GCS, pupils, vital signs)", "Renal function (creatinine) — mannitol nephrotoxicity with high doses/pre-existing renal disease"],
     adverseReactions: ["Dehydration and hypovolaemia (osmotic diuresis)", "Hypernatraemia (late — as free water diuresis)", "Rebound ICP elevation (discontinuation or serum osmolality >320 mOsm/kg)", "Acute tubular necrosis (high doses/osmolality >320 mOsm/kg)", "Pulmonary oedema (initial fluid shift into intravascular space)", "Electrolyte disturbance (hypokalaemia, hypomagnesaemia)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-meropenem-iv",
@@ -2877,7 +2877,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — 70% unchanged + 28% ring-opened metabolite via glomerular filtration and tubular secretion; dose adjustment required (eGFR <51 mL/min)",
     monitoring: ["Renal function (dose adjustment in impairment)", "Seizures (especially pre-existing CNS disease — lower seizure threshold at high doses)", "LFTs (mild transient elevation common)", "C. difficile risk (broad-spectrum)", "Valproate levels (if concurrent — expect marked reduction; switch anticonvulsant if possible)", "CBC (eosinophilia, thrombocytopenia — rare)"],
     adverseReactions: ["Seizures (especially with CNS disease or high doses)", "C. difficile-associated diarrhoea", "Hepatotoxicity (LFT elevation)", "Thrombocytopenia (rare)", "Rash / hypersensitivity", "Valproate interaction (critical — reduces valproate levels 60–80%)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-metronidazole-iv",
@@ -2895,7 +2895,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — 60–80% as metabolites; 20% unchanged; biliary 6–15%",
     monitoring: ["Peripheral neuropathy symptoms (tingling, paraesthesia — prolonged use >10 days)", "Seizures (high doses in patients with CNS pathology)", "LFTs (hepatotoxicity — rare but hepatic dosing adjustment needed)", "C. difficile response (repeat toxin assay after 5–7 days if used for CDI)", "INR if concurrent warfarin (significant interaction)", "Nausea/metallic taste (very common)"],
     adverseReactions: ["Metallic taste (very common — reassure patient/family)", "Nausea, vomiting, anorexia", "Peripheral neuropathy (prolonged courses >10 days)", "Seizures / encephalopathy (high doses, CNS disease)", "Disulfiram-like reaction with alcohol (flushing, nausea, tachycardia)", "Hepatotoxicity (rare)", "Carcinogenic potential (long-term animal data — avoid unnecessary prolonged courses)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-midazolam-iv",
@@ -2913,7 +2913,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — as glucuronide conjugates of hydroxymidazolam; accumulates with renal impairment",
     monitoring: ["Respiratory rate and SpO₂ (respiratory depression)", "RASS/sedation score (daily awakening trials)", "Blood pressure (hypotension)", "Withdrawal signs on dose reduction (agitation, tachycardia, seizures — taper slowly)", "Drug accumulation in renal failure (active metabolite accumulation)", "Paradoxical agitation (disinhibition — more common in children)"],
     adverseReactions: ["Respiratory depression (most significant — especially with opioids)", "Hypotension", "Paradoxical agitation/disinhibition (children — 5–10%)", "Tolerance and physical dependence (infusion >5 days)", "Withdrawal syndrome on abrupt discontinuation (tachycardia, agitation, seizures)", "Anterograde amnesia (useful for procedural purposes)", "Prolonged sedation with renal failure (1-hydroxymidazolam glucuronide accumulation)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | SCCM PADIS 2018",
+    reference: "Harriet Lane 24e | Nelson's 22e | SCCM PADIS 2018",
   },
   {
     id: "f-morphine-iv",
@@ -2931,7 +2931,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — 90% as M6G and M3G; dose reduction required in renal impairment (M6G accumulation causes prolonged sedation and respiratory depression)",
     monitoring: ["Respiratory rate and SpO₂ (respiratory depression — have naloxone available)", "Pain score (NRS, FLACC, COMFORT-B — every 2–4 hr)", "Sedation score (RASS)", "Bowel function (constipation/ileus — prophylactic laxatives)", "Urine output (urinary retention)", "Signs of opioid withdrawal on dose reduction (tachycardia, agitation, diarrhoea)", "Renal function (M6G accumulation risk)"],
     adverseReactions: ["Respiratory depression (dose-dependent — most dangerous)", "Histamine release (flushing, pruritus, bronchospasm — especially IV rapid bolus)", "Nausea/vomiting", "Constipation/ileus (near-universal)", "Urinary retention", "Pruritus (histamine + central)", "Hypotension", "Myoclonus (high doses or M3G accumulation)", "Tolerance and withdrawal (prolonged use)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | SCCM PADIS 2018",
+    reference: "Harriet Lane 24e | Nelson's 22e | SCCM PADIS 2018",
   },
   {
     id: "f-nac-iv",
@@ -2950,7 +2950,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — as cysteine and other thiol-containing metabolites",
     monitoring: ["LFTs (ALT, AST, ALP, bilirubin) at baseline and 4-hourly in acute OD", "PT/INR (coagulopathy — marker of hepatic synthetic function)", "Serum paracetamol levels (at 4 hr post-ingestion — plot on Rumack-Matthew nomogram)", "Renal function (creatinine, UO)", "Clinical signs of hepatic encephalopathy", "Anaphylactoid reaction signs (flushing, urticaria, bronchospasm, hypotension — monitor closely in first 30 min)"],
     adverseReactions: ["Anaphylactoid reaction (up to 14–18% — not IgE-mediated; rate-related; commonest with first bag; manage with antihistamine + slowing rate)", "Nausea and vomiting (common)", "Flushing and erythema", "Bronchospasm (especially in asthma)", "Hypotension (rare, with anaphylactoid reaction)", "Fluid overload risk (large dextrose volumes — calculate carefully in neonates/small children)"],
-    reference: "Harriet Lane 22e | Toxicology Guidelines | RCEM / AACT Practice Guidelines",
+    reference: "Harriet Lane 24e | Toxicology Guidelines | RCEM / AACT Practice Guidelines",
   },
   {
     id: "f-omeprazole-iv",
@@ -2968,7 +2968,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — 77% as metabolites; biliary ~18%; <0.1% unchanged",
     monitoring: ["Gastric pH (target >4 for stress ulcer prophylaxis)", "Serum magnesium (hypomagnesaemia with prolonged use >3 months)", "LFTs (rare hepatotoxicity)", "Drug interactions (CYP2C19 — warfarin, clopidogrel, phenytoin, methotrexate)", "C. difficile risk (acid suppression increases susceptibility)", "Fundal gland polyps (long-term endoscopic follow-up)"],
     adverseReactions: ["Headache, dizziness (common)", "Hypomagnesaemia (prolonged use — may be severe: arrhythmias, seizures)", "Clostridium difficile-associated diarrhoea (acid suppression)", "Drug interactions (CYP2C19 — reduce clopidogrel efficacy)", "Interstitial nephritis (rare)", "Elevated LFTs (rare hepatotoxicity)", "Fundal gland polyps (long-term)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-paracetamol-iv",
@@ -2987,7 +2987,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — as conjugate metabolites; <5% unchanged",
     monitoring: ["Hepatic function (LFTs — ALT) for prolonged courses or liver disease patients", "Cumulative daily dose (risk of inadvertent overdose if concurrent oral paracetamol/combination products)", "Blood glucose (neonates — particularly prematures)", "Clinical pain score response (NRS, FLACC)"],
     adverseReactions: ["Hepatotoxicity (overdose — >150 mg/kg acute ingestion or prolonged therapeutic overdose)", "Hypotension (rapid infusion — infuse over minimum 15 min)", "Rash (rare)", "Thrombocytopenia (rare)", "Nausea (rare)", "Elevated LFTs (therapeutic doses in liver disease)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-phenobarbital-iv",
@@ -3006,7 +3006,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — 25–50% unchanged (pH-dependent); remaining as glucuronide metabolites; t½ 50–120 hr in children (longer in neonates: 100–500 hr)",
     monitoring: ["Respiratory rate and SpO₂ (respiratory depression — critical — have bag-valve-mask ready)", "Blood pressure (hypotension with rapid infusion)", "Serum phenobarbital levels (therapeutic 15–40 mcg/mL for epilepsy; check 1–2 hr post-load)", "Sedation level (prolonged sedation due to long t½)", "Liver function (enzyme induction, hepatotoxicity rare)", "Drug interactions (enzyme induction — check all concurrent medications)"],
     adverseReactions: ["Respiratory depression (most dangerous — especially with benzodiazepines; additive)", "Hypotension (rapid infusion)", "Sedation (prolonged — long t½)", "Paradoxical hyperactivity in children (disinhibition)", "Hepatotoxicity (rare)", "Drug interactions (extensive CYP induction — reduces levels of many drugs)", "Rash (rarely Stevens-Johnson)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | ILAE Status Epilepticus Guidelines",
+    reference: "Harriet Lane 24e | Nelson's 22e | ILAE Status Epilepticus Guidelines",
   },
   {
     id: "f-phenytoin-iv",
@@ -3025,7 +3025,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — <5% unchanged; majority as glucuronide of HPPH",
     monitoring: ["Continuous ECG monitoring during IV loading (QTc prolongation, bradycardia, arrhythmias)", "Blood pressure (hypotension — especially with propylene glycol in phenytoin formulation)", "Serum phenytoin levels (free and total — check 1–2 hr post-load; trough before next dose for maintenance)", "Neurological status (nystagmus at 20 mcg/mL, ataxia at >30, lethargy >40 — toxicity)", "Injection site (purple glove syndrome — phenytoin extravasation)", "Drug interactions (extensive — many CYP interactions)"],
     adverseReactions: ["Cardiac arrhythmias (QTc prolongation, bradycardia, AV block — rate-dependent during IV loading)", "Hypotension (propylene glycol vehicle in phenytoin IV)", "Purple glove syndrome (phenytoin extravasation — severe tissue necrosis → prefer fosphenytoin)", "Nystagmus, ataxia, sedation (toxicity)", "Gingival hyperplasia, hirsutism (chronic use)", "Stevens-Johnson syndrome (rare — HLA-B*1502 in Asian populations)", "Drug interactions (enzyme inducer — reduces many drug levels)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | ILAE Status Epilepticus Guidelines",
+    reference: "Harriet Lane 24e | Nelson's 22e | ILAE Status Epilepticus Guidelines",
   },
   {
     id: "f-pip-taz-iv",
@@ -3044,7 +3044,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — piperacillin 68% unchanged; tazobactam 80% unchanged; dose adjustment in renal impairment",
     monitoring: ["Renal function (BUN, creatinine — dose adjustment for eGFR <40 mL/min)", "LFTs (cholestatic hepatitis — more common than with other penicillins; check if jaundice or RUQ pain)", "Serum electrolytes (high sodium load — 9.6 mEq Na per 4.5 g vial)", "Hypokalaemia (kaliuretic effect)", "Seizures (high doses with renal failure)", "C. difficile risk", "CBC (thrombocytopenia, neutropenia)"],
     adverseReactions: ["Cholestatic hepatitis / jaundice (important — more frequent than ampicillin; stop if develops)", "Diarrhoea / C. difficile", "Hypokalaemia (kaliuresis)", "Thrombocytopenia (rare)", "Seizures (high doses + renal failure)", "Anaphylaxis (penicillin)", "Electrolyte imbalance (high Na⁺ load)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-potassium-chloride-iv",
@@ -3063,7 +3063,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — primary excretion; 90% of daily K⁺ intake excreted renally",
     monitoring: ["Serum K⁺ (1–2 hr after each replacement dose, then regularly)", "Continuous ECG monitoring (for K⁺ <2.5 mmol/L or rapid infusion — peaked T-waves = hyperkalaemia; flat T-waves, U-waves = hypokalaemia)", "Serum Mg²⁺ (co-replace if low — refractory hypokalaemia often due to hypomagnesaemia)", "Renal function (dose reduction/hold in AKI)", "Infusion site (pain, phlebitis — especially peripheral high concentration)"],
     adverseReactions: ["Cardiac arrhythmias (hyperkalaemia — peaked T-waves, wide QRS, asystole if rapid infusion or overdose)", "Phlebitis / chemical burn (peripheral extravasation or high concentration)", "Pain at infusion site (common with peripheral KCl)", "Hyperkalaemia (overdose)", "GI irritation (oral — less relevant for IV route)", "DEATH if administered undiluted by IV push (strict protocols mandatory)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-sodium-bicarbonate-iv",
@@ -3082,7 +3082,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal (HCO₃⁻ excretion in urine) and pulmonary (CO₂)",
     monitoring: ["Arterial/venous blood gas (pH, pCO₂, HCO₃⁻) — 30–60 min after each dose", "Serum Na⁺ (hypernatraemia — 8.4% = 1 mmol Na per mmol NaHCO₃)", "Serum K⁺ (hypokalaemia — NaHCO₃ drives K⁺ intracellularly)", "Ionised calcium (iCa²⁺ falls with alkalosis)", "Serum osmolality", "Signs of fluid overload (high Na⁺ content)"],
     adverseReactions: ["Hypernatraemia (high sodium load — 8.4% solution)", "Metabolic alkalosis (overcorrection)", "Hypokalaemia (K⁺ shift intracellular)", "Hypocalcaemia (ionised Ca²⁺ reduced by alkalosis)", "Intracellular acidosis (paradoxical — CO₂ crosses membranes more readily than HCO₃⁻)", "Fluid overload (hypervolaemia)", "Extravasation injury (alkaline — tissue necrosis)"],
-    reference: "Harriet Lane 22e | Nelson's 22e",
+    reference: "Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-sodium-valproate-iv",
@@ -3101,7 +3101,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — >95% as conjugate metabolites; <3% unchanged",
     monitoring: ["Serum valproate levels (therapeutic: 50–100 mcg/mL for epilepsy)", "LFTs (ALT, AST, bilirubin — baseline and weekly for first 6 months, especially children <2 yr)", "Serum ammonia (hyperammonaemia — even without hepatotoxicity; may present as encephalopathy)", "CBC (thrombocytopenia — dose-related; check platelets weekly first month)", "Lipase/amylase (pancreatitis — any abdominal pain)", "Drug interactions (enzyme inhibitor — raises lamotrigine, phenobarbital, rufinamide levels)"],
     adverseReactions: ["Hepatotoxicity (fatal — especially children <2 yr; incidence 1:800 in high-risk <2 yr; Reye-like syndrome)", "Hyperammonaemia/encephalopathy (without elevated LFTs — can occur in patients with underlying urea cycle disorder)", "Thrombocytopenia (dose-related)", "Pancreatitis (rare but serious)", "Teratogenicity (avoid in females of childbearing potential if alternatives exist)", "Hair loss (telogen effluvium — reversible, dose-related)", "Weight gain (chronic use)", "Drug interactions (inhibits metabolism of lamotrigine, phenobarbital)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | ILAE Status Epilepticus Guidelines",
+    reference: "Harriet Lane 24e | Nelson's 22e | ILAE Status Epilepticus Guidelines",
   },
   {
     id: "f-vancomycin-iv",
@@ -3119,7 +3119,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — glomerular filtration (80–90% unchanged); dose adjustment required in renal impairment",
     monitoring: ["AUC-guided TDM (preferred; check peak and trough, or Bayesian approach)", "Renal function (BUN/creatinine/UO) at baseline and every 48 hr (nephrotoxicity)", "Infusion site (phlebitis — prefer central line)", "Hearing (ototoxicity — prolonged/high-level exposure)", "CBC (neutropenia — prolonged use)", "Infusion rate (red man syndrome prevention — ≤10 mg/min)"],
     adverseReactions: ["Red man syndrome (rate-related — flushing, pruritus, hypotension during infusion; slow rate, antihistamine)", "Nephrotoxicity (trough-dependent — especially with aminoglycosides)", "Ototoxicity (cochlear/vestibular — prolonged high levels)", "Phlebitis at peripheral IV site (dilute, use central access)", "Neutropenia (prolonged courses)", "Thrombocytopenia (rare)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | ASHP/IDSA/SIDP Vancomycin Monitoring Guidelines 2020",
+    reference: "Harriet Lane 24e | Nelson's 22e | ASHP/IDSA/SIDP Vancomycin Monitoring Guidelines 2020",
   },
 
   // ════════════════════════════════════════════════════════════
@@ -3144,7 +3144,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — as inactive metanephrine, normetanephrine, VMA; <10% unchanged",
     monitoring: ["Continuous arterial blood pressure (arterial line mandatory for high doses)", "Continuous ECG (tachyarrhythmias — sinus tachycardia expected; VT/VF — stop and treat)", "HR, SpO₂, urine output", "Serum lactate (clinical response marker — target falling lactate)", "Blood glucose (hyperglycaemia — insulin sliding scale)", "Serum potassium (hypokalaemia — beta-2 mediated)", "Peripheral perfusion (pallor, mottling, capillary refill — limb ischaemia at high doses)", "Infusion site (extravasation — severe necrosis, especially peripheral)"],
     adverseReactions: ["Tachycardia/tachyarrhythmias (VT, SVT)", "Hypertension (dose-dependent)", "Limb/digital ischaemia (high doses — alpha-mediated vasoconstriction)", "Hyperglycaemia (glycogenolysis)", "Hypokalaemia", "Lactic acidosis (high doses — beta-2 mediated glycolysis)", "Extravasation necrosis (peripheral line — treat with phentolamine)", "Pulmonary oedema (afterload increase in compromised myocardium)"],
-    reference: "PALS 2025 | Harriet Lane 22e | Nelson's 22e | Surviving Sepsis Campaign Paediatric",
+    reference: "PALS 2025 | Harriet Lane 24e | Nelson's 22e | Surviving Sepsis Campaign Paediatric",
   },
   {
     id: "f-dobutamine-inotrope",
@@ -3162,7 +3162,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — as glucuronide and sulphate conjugates of metabolites",
     monitoring: ["Continuous ECG (tachyarrhythmia — SVT, VT; most common adverse effect)", "Arterial blood pressure (arterial line for accurate monitoring)", "SpO₂", "Cardiac output / echocardiography assessment (haemodynamic response)", "Serum lactate (clinical endpoint — target reduction)", "Urine output (renal perfusion — target ≥1 mL/kg/hr)", "Development of tolerance (efficacy reduction after 72–96 hr)"],
     adverseReactions: ["Tachycardia (very common — dose-dependent; most limiting)", "Tachyarrhythmias (SVT, AF, VT — especially at high doses)", "Hypotension (vasodilatory at higher doses — beta-2 mediated)", "Headache, tremor", "Hypokalemia", "Eosinophilia (prolonged use — rare)", "Tolerance (tachyphylaxis within 3–4 days of continuous infusion)"],
-    reference: "Harriet Lane 22e | Nelson's 22e | PALS 2025",
+    reference: "Harriet Lane 24e | Nelson's 22e | PALS 2025",
   },
   {
     id: "f-dopamine-inotrope",
@@ -3180,7 +3180,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — 80% as metabolites (HVA, 3-methoxytyramine) within 24 hr",
     monitoring: ["Continuous ECG (tachyarrhythmia — SVT, VT — especially at high doses)", "Arterial blood pressure (arterial line for accurate haemodynamic management)", "SpO₂", "Serum lactate (haemodynamic response)", "Urine output (target ≥1 mL/kg/hr)", "Peripheral perfusion (distal limb ischaemia at high doses)", "Infusion site (extravasation necrosis — central line strongly preferred)"],
     adverseReactions: ["Tachycardia/tachyarrhythmias (dose-dependent)", "Hypertension (high doses — alpha effect)", "Peripheral vasoconstriction/ischaemia (high doses — gangrene, digital ischaemia)", "Extravasation necrosis (tissue death — treat immediately with phentolamine 0.1 mg/kg SC local injection)", "Nausea/vomiting", "Angina (coronary vasoconstriction at high doses)"],
-    reference: "PALS 2025 | Harriet Lane 22e | Nelson's 22e",
+    reference: "PALS 2025 | Harriet Lane 24e | Nelson's 22e",
   },
   {
     id: "f-milrinone-inotrope",
@@ -3198,7 +3198,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — 80–85% excreted unchanged via glomerular filtration and tubular secretion; dose reduction in renal impairment (t½ 3–6 hr in normal renal function; prolonged in failure)",
     monitoring: ["Continuous arterial blood pressure (arterial line — hypotension common, especially loading dose)", "Continuous ECG (ventricular arrhythmias — VT, VF)", "HR, SpO₂, urine output", "Serum lactate (cardiac output adequacy)", "Echocardiography (functional response — contractility, CO, LVEF)", "Serum electrolytes (potassium — hypokalaemia increases arrhythmia risk)", "Renal function (dose adjustment in impairment)", "Platelet count (thrombocytopenia — rare but documented)"],
     adverseReactions: ["Hypotension (very common — especially with loading dose; vasodilatory mechanism)", "Ventricular arrhythmias (VT, VF — most serious; manage with amiodarone if occurs)", "Supraventricular arrhythmias (SVT, AF)", "Headache", "Thrombocytopenia (rare — dose-dependent)", "Hypokalemia (exacerbates arrhythmia risk)", "Tremor"],
-    reference: "Harriet Lane 22e | Nelson's 22e | PALS 2025 | Prophylactic Milrinone (PRIMACORP Trial)",
+    reference: "Harriet Lane 24e | Nelson's 22e | PALS 2025 | Prophylactic Milrinone (PRIMACORP Trial)",
   },
   {
     id: "f-noradrenaline-inotrope",
@@ -3217,7 +3217,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — as normetanephrine, VMA, DHMA; <5% unchanged",
     monitoring: ["Continuous arterial blood pressure monitoring (arterial line essential)", "Continuous ECG (bradycardia — reflex from hypertension; ectopy)", "MAP (target per institutional protocol — typically 55–65 mmHg sepsis)", "Serum lactate (tissue perfusion adequacy — target <2 mmol/L or clearance ≥10%/2 hr)", "Urine output (renal perfusion — target ≥1 mL/kg/hr)", "Peripheral perfusion assessment (mottling, capillary refill, limb colour — distal ischaemia risk)", "Central line site (extravasation — necrosis risk — check every 2 hr)"],
     adverseReactions: ["Peripheral vasoconstriction → limb/digit ischaemia (dose-dependent and most limiting)", "Extravasation necrosis (severe — mandates central line; treat immediately with phentolamine 0.1 mg/kg SC local)", "Reflex bradycardia (hypertension → baroreceptor activation)", "Hypertension (overdose)", "Reduced renal/mesenteric blood flow (high doses)", "Arrhythmias (ectopy)", "Anxiety, restlessness (if awake)"],
-    reference: "PALS 2025 | Harriet Lane 22e | Nelson's 22e | Surviving Sepsis Campaign Paediatric Guidelines",
+    reference: "PALS 2025 | Harriet Lane 24e | Nelson's 22e | Surviving Sepsis Campaign Paediatric Guidelines",
   },
   {
     id: "f-vasopressin-inotrope",
@@ -3236,7 +3236,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
     excretion: "Renal — 10–20% excreted as inactive fragments; rest metabolised by peptidases",
     monitoring: ["Continuous arterial blood pressure (arterial line)", "Continuous ECG (arrhythmias — bradycardia; rare ischaemia-triggered VT)", "Serum sodium (hyponatraemia — V2 receptor-mediated free water retention; check every 6 hr)", "Serum osmolality and urine osmolality", "Urine output and fluid balance (antidiuretic effect — reduces urine output)", "Peripheral perfusion (skin mottling, digital ischaemia — vasoconstriction)", "Mesenteric ischaemia signs (abdominal distension, raised lactate, bloody stools)", "Coagulation (vWF release — may precipitate VTE in predisposed patients)"],
     adverseReactions: ["Hyponatraemia (antidiuretic V2 receptor effect — free water retention; common with prolonged use)", "Peripheral vasoconstriction → skin/digital ischaemia (alpha-like V1a effect)", "Mesenteric/hepatic ischaemia (gut vasoconstriction — raised lactate, ileus)", "Coronary vasoconstriction (angina/ischaemia at high doses)", "Bradycardia (reflex)", "Hypovolaemia/oliguria paradox (antidiuresis)", "Thrombocytopenia (rare)", "Infusion site reaction (non-central use)"],
-    reference: "PALS 2025 | Harriet Lane 22e | Nelson's 22e | Surviving Sepsis Campaign Paediatric 2020",
+    reference: "PALS 2025 | Harriet Lane 24e | Nelson's 22e | Surviving Sepsis Campaign Paediatric 2020",
   },
   {
     id: "f-terlipressin-inotrope",
@@ -3306,7 +3306,7 @@ export const FORMULARY_DRUGS: FormularyDrug[] = [
       "Nausea and vomiting",
       "Mesenteric ischaemia (rare but serious at high doses)",
     ],
-    reference: "Harriet Lane 22e | Nelson's Pediatrics 22e | EASL Clinical Practice Guidelines (Variceal Bleeding 2022) | International Club of Ascites (ICA) — HRS Consensus 2015",
+    reference: "Harriet Lane 24e | Nelson's Pediatrics 22e | EASL Clinical Practice Guidelines (Variceal Bleeding 2022) | International Club of Ascites (ICA) — HRS Consensus 2015",
   },
 ];
 

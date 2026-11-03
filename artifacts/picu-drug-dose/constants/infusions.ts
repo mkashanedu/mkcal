@@ -1,11 +1,12 @@
 // Infusion Calculator Drug Data — PICU Standard Infusions
-// Doses: Harriet Lane Handbook 23e | PALS 2025 | SSC Pediatric 2024
+// Doses: Harriet Lane Handbook 24e | PALS 2025 | SSC Pediatric 2024
 
 export type InfusionUnit =
   | "mcg/kg/min"
   | "mcg/kg/hr"
   | "mg/kg/hr"
   | "units/kg/hr"
+  | "units/kg/min"
   | "mcg/min"
   | "mcg/hr"
   | "mg/hr"
@@ -88,7 +89,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
       "PALS 2025: Norepinephrine preferred for septic shock",
       "Tissue necrosis with extravasation — use phentolamine if extravasated",
     ],
-    reference: "PALS 2025 | Harriet Lane 23e",
+    reference: "PALS 2025 | Harriet Lane 24e",
   },
 
   {
@@ -122,7 +123,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
     ],
     notes: "Recipe: 5 mL Dobutamine (1 vial, 40 mg/mL) + 45 mL NS/D5W = 50 mL @ 4000 mcg/mL  |  3 mL + 27 mL = 30 mL @ 4000 mcg/mL  |  5 mL + 95 mL = 100 mL @ 2000 mcg/mL",
     warnings: ["Vasodilatory — may worsen hypotension; add vasopressor if MAP low"],
-    reference: "PALS 2025 | Harriet Lane 23e",
+    reference: "PALS 2025 | Harriet Lane 24e",
   },
 
   {
@@ -236,14 +237,14 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
     ],
     notes: "Loading dose (optional): 50 mcg/kg IV over 30–60 min. OMIT if hypotensive.",
     warnings: ["Vasodilatory — withhold loading dose if MAP borderline"],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
 
   {
     id: "vasopressin",
     name: "Vasopressin",
     category: "Vasopressor",
-    primaryUnit: "units/kg/hr",
+    primaryUnit: "units/kg/min",
     alternateUnits: ["units/hr"],
     minDose: 0.0003,
     maxDose: 0.002,
@@ -306,7 +307,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
       "Hyponatraemia — antidiuretic V2 effect; monitor serum Na every 6–8 hr",
       "Hypertension — titrate carefully; reduce dose if MAP excessive",
     ],
-    reference: "Harriet Lane 22e | Nelson's 22e | EASL Variceal Bleeding Guidelines 2022",
+    reference: "Harriet Lane 24e | Nelson's 22e | EASL Variceal Bleeding Guidelines 2022",
   },
 
   {
@@ -372,7 +373,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
       },
     ],
     notes: "Weight-based: 10 mcg/kg in 50 mL NS → rate (mL/hr) = dose (mcg/kg/hr) × 5",
-    reference: "Harriet Lane 23e | SCCM PADIS 2024",
+    reference: "Harriet Lane 24e | SCCM PADIS 2024",
   },
 
   {
@@ -404,7 +405,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
       "Avoid in renal failure — M6G metabolite accumulates → use fentanyl instead",
       "Respiratory depression — have naloxone at bedside",
     ],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
 
   {
@@ -438,7 +439,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
     ],
     notes: "1 mg = 1000 mcg. For SE: start 0.05–0.2 mg/kg/hr (50–200 mcg/kg/hr); titrate up.",
     warnings: ["Tolerance develops with prolonged use", "Propylene glycol toxicity at high doses > 72 hr"],
-    reference: "Harriet Lane 23e | SCCM PADIS 2024",
+    reference: "Harriet Lane 24e | SCCM PADIS 2024",
   },
 
   {
@@ -467,7 +468,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
       },
     ],
     warnings: ["Bradycardia and hypotension with loading dose — load cautiously"],
-    reference: "Harriet Lane 23e | SCCM PADIS 2024",
+    reference: "Harriet Lane 24e | SCCM PADIS 2024",
   },
 
   {
@@ -496,7 +497,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
       "AVOID in children < 16 yr for ICU sedation > 48 hr per FDA warning",
       "Contains soy/egg — allergy check",
     ],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
 
   {
@@ -525,7 +526,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
       },
     ],
     notes: "Co-administer with midazolam or propofol to prevent emergence dysphoria.",
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
 
   {
@@ -560,7 +561,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
       "Observe for hypotension — especially in hypovolemic patients",
       "Avoid in known hypersensitivity to nalbuphine",
     ],
-    reference: "Harriet Lane 23e | Nelson's Pediatrics 22e",
+    reference: "Harriet Lane 24e | Nelson's Pediatrics 22e",
   },
 
   {
@@ -590,7 +591,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
     ],
     notes: "Useful for opioid weaning, night-time sedation in PICU. Do not stop abruptly.",
     warnings: ["Bradycardia, hypotension", "Rebound hypertension if stopped abruptly"],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
 
   {
@@ -620,7 +621,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
     ],
     notes: "For refractory SE. Midazolam infusion preferred. Propylene glycol accumulation risk at high doses.",
     warnings: ["Propylene glycol toxicity with prolonged high-dose infusion", "Respiratory depression — ensure intubation ready"],
-    reference: "Harriet Lane 23e | Neurocritical Care Society 2024",
+    reference: "Harriet Lane 24e | Neurocritical Care Society 2024",
   },
 
   // ══════════════════════════════════════════════════════════════
@@ -652,7 +653,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
       },
     ],
     warnings: ["Hypokalemia — check K+ every 4 hr", "Lactic acidosis and tachycardia at high doses"],
-    reference: "BTS 2023 | Harriet Lane 23e",
+    reference: "BTS 2023 | Harriet Lane 24e",
   },
 
   {
@@ -684,7 +685,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
       "Narrow therapeutic index — target 10–20 mcg/mL (asthma), 5–10 mcg/mL (apnea)",
       "Drug interactions: macrolides, ciprofloxacin, carbamazepine",
     ],
-    reference: "BTS 2023 | Harriet Lane 23e",
+    reference: "BTS 2023 | Harriet Lane 24e",
   },
 
   {
@@ -713,7 +714,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
       },
     ],
     warnings: ["Tachycardia, hypokalemia", "ECG monitoring mandatory during infusion"],
-    reference: "BTS 2023 | Harriet Lane 23e",
+    reference: "BTS 2023 | Harriet Lane 24e",
   },
 
   // ══════════════════════════════════════════════════════════════
@@ -749,7 +750,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
       "MUST use light-protected tubing — cover entirely with foil",
       "Avoid in hepatic/renal impairment if possible",
     ],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
 
   {
@@ -778,7 +779,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
       },
     ],
     warnings: ["Avoid in asthma and severe bradycardia", "Bradycardia, hypotension"],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
 
   {
@@ -787,10 +788,10 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
     category: "Antiarrhythmic",
     primaryUnit: "mg/kg/hr",
     alternateUnits: ["mg/hr"],
-    minDose: 5,
-    maxDose: 15,
-    typicalDose: 10,
-    doseStep: 1,
+    minDose: 0.2,
+    maxDose: 0.6,
+    typicalDose: 0.4,
+    doseStep: 0.05,
     color: "#6E4000",
     indication: "Post-cardiac arrest arrhythmia, VT/VF suppression, SVT (rate control)",
     vialConc_per_mL: 50,
@@ -806,13 +807,13 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
         totalDrug_mg: 500, totalVolume_mL: 250, concentration_per_mL: 2, unit: "mg",
       },
     ],
-    notes: "Loading: 5 mg/kg IV over 20–60 min; Maintenance: 5–15 mg/kg/day infusion.",
+    notes: "Loading: 5 mg/kg IV over 20–60 min; Maintenance: 5–15 mg/kg/day infusion (= 0.2–0.6 mg/kg/hr — is calculator ki rate isi me he).",
     warnings: [
       "MUST use D5W only — precipitates in NS",
       "QTc prolongation — continuous ECG monitoring",
       "Phlebitis with peripheral admin — CVC preferred > 2 mg/mL",
     ],
-    reference: "PALS 2025 | Harriet Lane 23e",
+    reference: "PALS 2025 | Harriet Lane 24e",
   },
 
   {
@@ -841,7 +842,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
       },
     ],
     warnings: ["Use non-PVC tubing — GTN adsorbs to PVC", "Headache, hypotension, tachycardia"],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
 
   {
@@ -871,7 +872,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
     ],
     notes: "Loading bolus: 1 mg/kg IV over 2 min before starting infusion. Then 20–50 mcg/kg/min.",
     warnings: ["CNS toxicity (seizures, tinnitus) at high levels", "Cardiac toxicity — ECG monitoring"],
-    reference: "PALS 2025 | Harriet Lane 23e",
+    reference: "PALS 2025 | Harriet Lane 24e",
   },
 
   // ══════════════════════════════════════════════════════════════
@@ -903,7 +904,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
       },
     ],
     warnings: ["Hypokalemia — replace K+", "Ototoxicity — avoid rapid bolus infusion"],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
 
   {
@@ -937,7 +938,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
       "⚠️ 50% vial VERY CONCENTRATED — always dilute before infusion",
       "Calcium gluconate antidote — keep at bedside",
     ],
-    reference: "GINA 2024 | Harriet Lane 23e",
+    reference: "GINA 2024 | Harriet Lane 24e",
   },
 
   // ══════════════════════════════════════════════════════════════
@@ -978,7 +979,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
       "No analgesic effect — ensure adequate analgesia",
       "Histamine release — inject boluses slowly",
     ],
-    reference: "Harriet Lane 23e | Miller's Anesthesia",
+    reference: "Harriet Lane 24e | Miller's Anesthesia",
   },
 
   {
@@ -1042,7 +1043,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
     ],
     notes: "Key advantage: fully reversible with sugammadex 4 mg/kg (routine) or 16 mg/kg (emergency CICO).",
     warnings: ["Have sugammadex at bedside", "Deep sedation mandatory before paralysis"],
-    reference: "PALS 2025 | Harriet Lane 23e",
+    reference: "PALS 2025 | Harriet Lane 24e",
   },
 
   {
@@ -1076,7 +1077,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
     ],
     notes: "Onset 2–3 min. TOF monitoring mandatory. Active metabolite accumulates in renal failure — use atracurium/cisatracurium instead.",
     warnings: ["Active 3-OH metabolite accumulates in renal failure → prolonged block", "Deep sedation mandatory"],
-    reference: "Harriet Lane 23e | Miller's Anesthesia",
+    reference: "Harriet Lane 24e | Miller's Anesthesia",
   },
 
   // ══════════════════════════════════════════════════════════════
@@ -1112,7 +1113,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
       "APTT target 60–85 sec (prophylaxis) or 1.5–2.5× ULN (treatment)",
       "HIT — check platelets every 2–3 days",
     ],
-    reference: "Harriet Lane 23e",
+    reference: "Harriet Lane 24e",
   },
 
   // ══════════════════════════════════════════════════════════════
@@ -1148,7 +1149,7 @@ export const INFUSION_DRUGS: InfusionDrug[] = [
       "Hypoglycemia — check glucose hourly",
       "DKA: withhold if K⁺ < 3.5 mEq/L until repleted",
     ],
-    reference: "ISPAD 2022 | Harriet Lane 23e",
+    reference: "ISPAD 2022 | Harriet Lane 24e",
   },
 
   // ══════════════════════════════════════════════════════════════
@@ -1411,6 +1412,10 @@ export function calculateInfusionRate(
       return (desiredDose * weight_kg) / concentration_per_mL;
     case "units/kg/hr":
       return (desiredDose * weight_kg) / concentration_per_mL;
+    case "units/kg/min":
+      return (desiredDose * weight_kg * 60) / concentration_per_mL;
+    case "units/min":
+      return (desiredDose * 60) / concentration_per_mL;
     case "mcg/min":
       return (desiredDose * 60) / (1000 * concentration_per_mL);
     case "mg/hr":
@@ -1453,6 +1458,9 @@ export function convertDoseUnit(
     case "mg/hr":      mgPerHr = dose; break;
     case "mcg/min":    mgPerHr = (dose * 60) / 1000; break;
     case "units/kg/hr":mgPerHr = dose * weight_kg; break;
+    case "units/kg/min":mgPerHr = dose * weight_kg * 60; break;
+    case "units/min":   mgPerHr = dose * 60; break;
+    case "units/hr":    mgPerHr = dose; break;
     default: return dose;
   }
   switch (to) {
@@ -1461,6 +1469,10 @@ export function convertDoseUnit(
     case "mg/kg/hr":   return mgPerHr / weight_kg;
     case "mg/hr":      return mgPerHr;
     case "mcg/min":    return (mgPerHr * 1000) / 60;
+    case "units/kg/hr":return mgPerHr / weight_kg;
+    case "units/kg/min":return mgPerHr / (weight_kg * 60);
+    case "units/min":   return mgPerHr / 60;
+    case "units/hr":    return mgPerHr;
     default: return dose;
   }
 }

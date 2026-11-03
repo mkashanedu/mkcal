@@ -1,5 +1,6 @@
 import { Feather } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
+import { goBack } from "@/lib/nav";
 import React, { useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -248,7 +249,7 @@ export default function FormularyDrugDetail() {
       <View style={[styles.header, { paddingTop: topPadding + 12, backgroundColor: accent }]}>
         <View style={styles.headerRow}>
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={() => goBack(router)}
             style={styles.backBtn}
             activeOpacity={0.7}
           >

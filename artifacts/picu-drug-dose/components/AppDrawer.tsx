@@ -16,6 +16,7 @@ import {
   StyleSheet,
   Switch,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -27,6 +28,7 @@ import { useWeight } from "@/context/WeightContext";
 import { usePreferences, TextSize, STARTUP_SCREEN_OPTIONS } from "@/context/PreferencesContext";
 import { useFavorites } from "@/context/FavoritesContext";
 import Colors from "@/constants/colors";
+import { APP_DATA_LINE } from "@/lib/appInfo";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const DRAWER_WIDTH = Math.min(SCREEN_WIDTH * 0.80, 340);
@@ -111,8 +113,9 @@ function SettingsRow({
 export function AppDrawer() {
   const { isOpen, closeDrawer } = useDrawer();
   const { isDark, toggleDark }  = useTheme();
-  const { weightUnit, setWeightUnit } = useWeight();
-  const { textSize, setTextSize, textScale, biometricEnabled, setBiometricEnabled, startupScreen, setStartupScreen } = usePreferences();
+  const { weightUnit, setWeightUnit, weight, age, profiles, activeProfileId, saveCurrentAsProfile, switchProfile, deleteProfile } = useWeight();
+  const [profileName, setProfileName] = useState("");
+  const { textSize, setTextSize, textScale, biometricEnabled, setBiometricEnabled, startupScreen, setStartupScreen, highAlertConfirm, setHighAlertConfirm } = usePreferences();
   const { syncNow, syncStatus, syncMessage } = useFavorites();
   const insets = useSafeAreaInsets();
 
@@ -153,7 +156,7 @@ export function AppDrawer() {
 
   function navigate(route: string) {
     closeDrawer();
-    setTimeout(() => { router.replace(route as any); }, 180);
+    setTimeout(() => { router.push(route as any); }, 180);
   }
 
   function goPrivacyPolicy() {
@@ -369,6 +372,72 @@ export function AppDrawer() {
 
               <SettingsDivider color={border} />
 
+              {/* ── Patient profiles (Point 1) ── */}
+              <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
+                <Text style={{ fontSize: 13, fontFamily: "Inter_600SemiBold", color: isDark ? "#FFFFFF" : "#0D1B2A" }}>Mareez (Patients)</Text>
+                <Text style={{ fontSize: 11.5, color: textMuted, fontFamily: "Inter_400Regular", marginTop: 2 }}>
+                  Har bed ka wazan save karein — ek tap par mareez badal jata he. Abhi: {weight} kg
+                </Text>
+                {profiles.map((p) => (
+                  <View key={p.id} style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 8 }}>
+                    <TouchableOpacity onPress={() => switchProfile(p.id)} activeOpacity={0.8} style={{ flex: 1, paddingHorizontal: 12, paddingVertical: 9, borderRadius: 10, borderWidth: 1, borderColor: activeProfileId === p.id ? "#0EA5E9" : border, backgroundColor: activeProfileId === p.id ? "#0EA5E922" : "transparent" }}>
+                      <Text style={{ fontSize: 13, fontFamily: "Inter_600SemiBold", color: isDark ? "#CCD6F6" : "#0D1B2A" }}>{p.name} · {p.weightKg} kg · {p.ageYears} yrs</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => deleteProfile(p.id)} activeOpacity={0.7} style={{ padding: 8 }}>
+                      <Feather name="trash-2" size={15} color="#DC2626" />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+                <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
+                  <TextInput
+                    value={profileName}
+                    onChangeText={setProfileName}
+                    placeholder="Bed / naam likho (Bed 4)"
+                    placeholderTextColor={textMuted}
+                    style={{ flex: 1, borderWidth: 1, borderColor: border, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 9, fontSize: 13, color: isDark ? "#FFFFFF" : "#0D1B2A", fontFamily: "Inter_400Regular" }}
+                  />
+                  <TouchableOpacity
+                    onPress={() => { saveCurrentAsProfile(profileName); setProfileName(""); }}
+                    activeOpacity={0.8}
+                    style={{ backgroundColor: "#0EA5E9", borderRadius: 10, paddingHorizontal: 14, justifyContent: "center" }}
+                  >
+                    <Text style={{ color: "#FFFFFF", fontFamily: "Inter_700Bold", fontSize: 12.5 }}>Save</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              <SettingsDivider color={border} />
+
+              {/* ── High-Alert dose confirm (Point 6) ── */}
+              <SettingsRow
+                icon="alert-octagon"
+                label="High-Alert Confirm"
+                sublabel="HIGH ALERT dawaiyon ki dose wazan confirm karne par dikhe"
+                color="#DC2626"
+                right={
+                  <View style={{ flexDirection: "row", gap: 6 }}>
+                    {[{ k: true, l: "ON" }, { k: false, l: "OFF" }].map((o) => (
+                      <TouchableOpacity
+                        key={o.l}
+                        onPress={() => setHighAlertConfirm(o.k)}
+                        style={[styles.segmentBtn, { borderColor: border, backgroundColor: highAlertConfirm === o.k ? "#DC2626" : "transparent" }]}
+                      >
+                        <Text style={{ fontSize: 10, fontFamily: "Inter_700Bold", color: highAlertConfirm === o.k ? "#FFFFFF" : textMuted }}>{o.l}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                }
+              />
+
+              <SettingsDivider color={border} />
+
+              {/* ── Version footer (Point 9) ── */}
+              <View style={{ paddingHorizontal: 16, paddingVertical: 10 }}>
+                <Text style={{ fontSize: 11, color: textMuted, fontFamily: "Inter_400Regular", textAlign: "center" }}>{APP_DATA_LINE}</Text>
+              </View>
+
+              <SettingsDivider color={border} />
+
               {/* ── Biometrics (native only) ── */}
               {Platform.OS !== "web" ? (
                 <>
@@ -482,10 +551,10 @@ export function AppDrawer() {
           {/* ── Footer ── */}
           <View style={styles.drawerFooter}>
             <Text style={[styles.footerText, { color: textMuted }]}>
-              Prepared By: M. Kashan, RN
+              Developed by M. Kashan, RN
             </Text>
             <Text style={[styles.footerSub, { color: isDark ? "#2D4A6A" : "#CBD5E0" }]}>
-              Pediatric Clinical Suite · v1.0.0
+              PeadsCal · Pediatric Clinical Reference
             </Text>
           </View>
         </Animated.View>

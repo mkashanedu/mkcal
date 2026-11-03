@@ -18,6 +18,7 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
+import { goBack } from "@/lib/nav";
 
 import { useWeight } from "@/context/WeightContext";
 import { useTheme } from "@/context/ThemeContext";
@@ -45,6 +46,7 @@ const DOSE_UNITS: InfusionUnit[] = [
   "mcg/kg/hr",
   "mg/kg/hr",
   "units/kg/hr",
+  "units/kg/min",
   "mcg/min",
   "mg/hr",
 ];
@@ -217,7 +219,7 @@ export default function InfusionDetailScreen() {
       <SafeAreaView style={{ flex: 1, backgroundColor: BG, justifyContent: "center", alignItems: "center" }} edges={["top", "bottom"]}>
         <Feather name="alert-circle" size={36} color={MUTED} />
         <Text style={{ color: MUTED, marginTop: 12, fontSize: 16 }}>Drug not found</Text>
-        <TouchableOpacity onPress={() => router.back()} style={{ marginTop: 16, padding: 12 }}>
+        <TouchableOpacity onPress={() => goBack(router)} style={{ marginTop: 16, padding: 12 }}>
           <Text style={{ color: C.tint, fontWeight: "700" }}>Go back</Text>
         </TouchableOpacity>
       </SafeAreaView>
@@ -233,7 +235,7 @@ export default function InfusionDetailScreen() {
       >
         {/* ── HEADER ── */}
         <View style={[styles.header, { backgroundColor: CARD, borderBottomColor: BORDER }]}>
-          <TouchableOpacity onPress={() => router.back()} style={[styles.backBtn, { backgroundColor: isDark ? "#233554" : "#F0F4F8" }]}>
+          <TouchableOpacity onPress={() => goBack(router)} style={[styles.backBtn, { backgroundColor: isDark ? "#233554" : "#F0F4F8" }]}>
             <Feather name="arrow-left" size={20} color={isDark ? "#8892B0" : C.tint} />
           </TouchableOpacity>
           <View style={[styles.drugColorDot, { backgroundColor: selectedDrug.color }]} />

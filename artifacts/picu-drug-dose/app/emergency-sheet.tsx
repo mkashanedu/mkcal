@@ -10,6 +10,7 @@
  */
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { goBack } from "@/lib/nav";
 import React from "react";
 import {
   Platform,
@@ -24,6 +25,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { DRUGS, calculateDose } from "@/constants/allDrugs";
 import { useWeight } from "@/context/WeightContext";
+import { usePreferences } from "@/context/PreferencesContext";
 
 // ── Same formulas as app/(tabs)/emergency.tsx (PALS 2025) ─────────────────
 function calcETTube(ageYears: number) {
@@ -63,6 +65,8 @@ function calcLMA(ageYears: number) {
 export default function EmergencySheetScreen() {
   const insets = useSafeAreaInsets();
   const { weight, age, ageUnit, ageConfirmed } = useWeight();
+  const { textScale } = usePreferences();
+  const styles = makeStyles(textScale);
   const weightValid = Number.isFinite(weight) && weight > 0;
   const ageYears = ageConfirmed && Number.isFinite(age) && age > 0
     ? ageUnit === "years" ? age : age / 12
@@ -131,25 +135,25 @@ export default function EmergencySheetScreen() {
   return (
     <View style={[styles.container, { backgroundColor: "#F4F6F8" }]}>
       <View style={[styles.header, { paddingTop: topOffset + 8 }]}>
-        <Pressable onPress={() => router.back()} style={styles.backBtn}>
+        <Pressable onPress={() => goBack(router)} style={styles.backBtn}>
           <Feather name="arrow-left" size={18} color="#0D1B2A" />
         </Pressable>
         <View style={{ flex: 1 }}>
           <Text style={[styles.title, { fontFamily: "Inter_700Bold" }]}>Emergency Sheet</Text>
-          <Text style={{ color: "#4A5568", fontFamily: "Inter_400Regular", fontSize: 12 }}>
+          <Text style={{ color: "#4A5568", fontFamily: "Inter_400Regular", fontSize: Math.round(12 * textScale) }}>
             One page · print or save as PDF
           </Text>
         </View>
         <Pressable onPress={handlePrint} style={styles.printBtn}>
           <Feather name="printer" size={15} color="#FFFFFF" />
-          <Text style={{ color: "#FFFFFF", fontFamily: "Inter_700Bold", fontSize: 13 }}>Print</Text>
+          <Text style={{ color: "#FFFFFF", fontFamily: "Inter_700Bold", fontSize: Math.round(13 * textScale) }}>Print</Text>
         </Pressable>
       </View>
 
       <ScrollView contentContainerStyle={{ padding: 14, paddingBottom: insets.bottom + 24 }}>
         {!weightValid ? (
           <View style={styles.sheet}>
-            <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 14, color: "#B91C1C" }}>
+            <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: Math.round(14 * textScale), color: "#B91C1C" }}>
               Set a valid weight first (on any drug page or the Calculator) — the sheet is built for that weight.
             </Text>
           </View>
@@ -178,11 +182,20 @@ export default function EmergencySheetScreen() {
                 </View>
               </>
             ) : (
-              <Text style={{ fontFamily: "Inter_400Regular", fontSize: 12.5, color: "#92400E", lineHeight: 17 }}>
+              <Text style={{ fontFamily: "Inter_400Regular", fontSize: Math.round(12.5 * textScale), color: "#92400E", lineHeight: 17 }}>
                 Age is not set — enter the age on any drug page to add airway sizes, then reopen this sheet.
               </Text>
             )}
 
+            <Text style={[styles.footer, { fontFamily: "Inter_600SemiBold", color: "#0D1B2A" }]}>
+              CPR: 100–120/min · depth ≥ ⅓ chest · 15:2 / 30:2 · Epi ASAP in non-shockable arrest, after 2nd shock in VF/pVT · Amiodarone max 3 doses
+            </Text>
+            <Text style={[styles.footer, { fontFamily: "Inter_600SemiBold", color: "#0D1B2A" }]}>
+              Bradycardia: HR &lt; 60 + poor perfusion → CPR → Epinephrine first (atropine only for vagal / AV block, max single 0.5 mg)
+            </Text>
+            <Text style={[styles.footer, { fontFamily: "Inter_600SemiBold", color: "#0D1B2A" }]}>
+              After ROSC: SpO2 94–98% · BP above age floor · temp ≤ 37.5°C · PaCO2 35–45 · check glucose
+            </Text>
             <Text style={[styles.footer, { fontFamily: "Inter_400Regular" }]}>
               Doses calculated by PeadsCal from its verified dataset (PALS 2025). Verify every dose before administration.
             </Text>
@@ -193,17 +206,17 @@ export default function EmergencySheetScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (ts: number) => StyleSheet.create({
   container: { flex: 1 },
   header: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingBottom: 10 },
   backBtn: { width: 36, height: 36, borderRadius: 10, alignItems: "center", justifyContent: "center", backgroundColor: "#E8F1F8" },
-  title: { fontSize: 19, color: "#0D1B2A" },
+  title: { fontSize: Math.round(19 * ts), color: "#0D1B2A" },
   printBtn: { flexDirection: "row", alignItems: "center", gap: 7, backgroundColor: "#B91C1C", paddingHorizontal: 14, paddingVertical: 9, borderRadius: 10 },
   sheet: { backgroundColor: "#FFFFFF", borderRadius: 12, padding: 16, borderWidth: 1, borderColor: "#E2E8F0" },
-  sheetTitle: { fontSize: 17, color: "#B91C1C", marginBottom: 8, letterSpacing: 0.3 },
-  sectionTitle: { fontSize: 13, color: "#0D1B2A", marginTop: 14, marginBottom: 4, letterSpacing: 0.6 },
+  sheetTitle: { fontSize: Math.round(17 * ts), color: "#B91C1C", marginBottom: 8, letterSpacing: 0.3 },
+  sectionTitle: { fontSize: Math.round(13 * ts), color: "#0D1B2A", marginTop: 14, marginBottom: 4, letterSpacing: 0.6 },
   row: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: 12, paddingVertical: 7, borderBottomWidth: 1, borderBottomColor: "#EEF2F7" },
-  rowLabel: { fontSize: 13, color: "#334155", flex: 1 },
-  rowValue: { fontSize: 13.5, color: "#0D1B2A", textAlign: "right", flex: 1 },
-  footer: { fontSize: 11, color: "#64748B", marginTop: 12, lineHeight: 15 },
+  rowLabel: { fontSize: Math.round(13 * ts), color: "#334155", flex: 1 },
+  rowValue: { fontSize: Math.round(13.5 * ts), color: "#0D1B2A", textAlign: "right", flex: 1 },
+  footer: { fontSize: Math.round(11 * ts), color: "#64748B", marginTop: 12, lineHeight: 15 },
 });

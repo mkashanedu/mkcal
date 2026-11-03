@@ -36,6 +36,10 @@ function RootLayoutNav() {
   return (
     <Stack screenOptions={{ headerBackTitle: "Back" }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="history" options={{ headerShown: false }} />
+      <Stack.Screen name="ysite" options={{ headerShown: false }} />
+      <Stack.Screen name="emergency-sheet" options={{ headerShown: false }} />
+      <Stack.Screen name="drug-chart" options={{ headerShown: false }} />
       <Stack.Screen
         name="drug/[id]"
         options={{

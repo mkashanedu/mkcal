@@ -66,7 +66,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Clinical response"
   ],
   "notes": "Formulary class: Benzimidazole Anthelmintic. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e | WHO Essential Medicines"
+  "reference": "Harriet Lane 24e | Nelson's 22e | WHO Essential Medicines"
  },
  {
   "id": "fx-amlodipine",
@@ -116,7 +116,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Liver function with prolonged use"
   ],
   "notes": "Formulary class: Calcium Channel Blocker (Dihydropyridine). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-amoxicillin",
@@ -176,7 +176,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Clinical response at 48–72 hr"
   ],
   "notes": "Formulary class: Beta-lactam Antibiotic (Aminopenicillin). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-amoxicillin-clavulanate",
@@ -240,7 +240,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "GI tolerance (higher diarrhoea rate than amoxicillin alone)"
   ],
   "notes": "Formulary class: Beta-lactam + Beta-lactamase Inhibitor. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-atenolol",
@@ -285,7 +285,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Respiratory status in asthmatics"
   ],
   "notes": "Formulary class: Selective Beta-1 Adrenergic Blocker (Cardioselective). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-azithromycin",
@@ -345,7 +345,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "GI tolerance"
   ],
   "notes": "Formulary class: Macrolide Antibiotic (Azalide). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-bisacodyl",
@@ -383,7 +383,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Abdominal pain/cramping (discontinue if severe)"
   ],
   "notes": "Formulary class: Stimulant Laxative (Diphenylmethane derivative). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-carbamazepine",
@@ -442,7 +442,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "HLA-B*1502 screening"
   ],
   "notes": "Formulary class: Anticonvulsant / Sodium Channel Blocker (Dibenzazepine). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-cetirizine",
@@ -490,7 +490,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Clinical symptom response"
   ],
   "notes": "Formulary class: Second-Generation Antihistamine (H1 Receptor Antagonist). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-cephalexin",
@@ -549,7 +549,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Renal function"
   ],
   "notes": "Formulary class: First-Generation Cephalosporin. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-chloroquine",
@@ -590,7 +590,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "G6PD status before initiation in high-risk populations"
   ],
   "notes": "Formulary class: 4-Aminoquinoline Antimalarial. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e | WHO Malaria Guidelines"
+  "reference": "Harriet Lane 24e | Nelson's 22e | WHO Malaria Guidelines"
  },
  {
   "id": "fx-ciprofloxacin",
@@ -659,7 +659,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "QTc"
   ],
   "notes": "Formulary class: Fluoroquinolone Antibiotic (2nd Generation). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-clarithromycin",
@@ -723,7 +723,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Metallic taste (characteristic)"
   ],
   "notes": "Formulary class: Macrolide Antibiotic (14-membered ring). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-clindamycin",
@@ -770,7 +770,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "C. difficile-associated diarrhoea (CDAD)"
   ],
   "notes": "Formulary class: Lincosamide Antibiotic. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-clonazepam",
@@ -825,7 +825,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Signs of dependence"
   ],
   "notes": "Formulary class: Benzodiazepine (Long-acting) — Anticonvulsant. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-co-trimoxazole",
@@ -891,7 +891,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Signs of hypersensitivity"
   ],
   "notes": "Formulary class: Antifolate / Sulfonamide Combination Antibiotic. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-desmopressin",
@@ -962,7 +962,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Fluid intake and restriction compliance"
   ],
   "notes": "Formulary class: Synthetic Vasopressin Analogue (V2-receptor agonist). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-diazepam",
@@ -1009,7 +1009,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Liver function in prolonged use"
   ],
   "notes": "Formulary class: Benzodiazepine (Long-acting) — Anxiolytic / Muscle Relaxant. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-domperidone",
@@ -1071,7 +1071,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Extrapyramidal symptoms (rare)"
   ],
   "notes": "Formulary class: Dopamine (D2) Receptor Antagonist — Prokinetic / Antiemetic. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e | EMA guidelines"
+  "reference": "Harriet Lane 24e | Nelson's 22e | EMA guidelines"
  },
  {
   "id": "fx-enalapril",
@@ -1124,7 +1124,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Angioedema signs"
   ],
   "notes": "Formulary class: ACE Inhibitor (Angiotensin-Converting Enzyme Inhibitor). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-erythromycin",
@@ -1177,7 +1177,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Hypertrophic pyloric stenosis signs (infants)"
   ],
   "notes": "Formulary class: Macrolide Antibiotic (14-membered ring). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-famotidine",
@@ -1233,7 +1233,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Note less effective than PPIs for erosive oesophagitis"
   ],
   "notes": "Formulary class: H2-Receptor Antagonist (Histamine H2 Blocker). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-fexofenadine",
@@ -1269,7 +1269,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Drug interactions — avoid concurrent erythromycin/ketoconazole (increases fexofenadine levels)"
   ],
   "notes": "Formulary class: Second-Generation Antihistamine (Non-sedating H1 Antagonist). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-folic-acid",
@@ -1311,7 +1311,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Haematological response"
   ],
   "notes": "Formulary class: Water-Soluble B Vitamin (Vitamin B9) / Haematinic. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-gabapentin",
@@ -1371,7 +1371,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Behavioural changes (hyperactivity in children)"
   ],
   "notes": "Formulary class: Anticonvulsant / Neuropathic Pain Agent (Alpha-2-delta voltage-gated calcium channel modulator). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-hydroxychloroquine",
@@ -1421,7 +1421,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Liver function"
   ],
   "notes": "Formulary class: 4-Aminoquinoline — DMARD / Antimalarial. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e | ACR Guidelines"
+  "reference": "Harriet Lane 24e | Nelson's 22e | ACR Guidelines"
  },
  {
   "id": "fx-hydroxyzine",
@@ -1472,7 +1472,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "QTc interval"
   ],
   "notes": "Formulary class: First-Generation Antihistamine (Piperazine H1 Antagonist) — Anxiolytic. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-ivermectin",
@@ -1516,7 +1516,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Resolution of symptoms"
   ],
   "notes": "Formulary class: Macrocyclic Lactone Antiparasitic. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e | WHO Essential Medicines"
+  "reference": "Harriet Lane 24e | Nelson's 22e | WHO Essential Medicines"
  },
  {
   "id": "fx-levocetirizine",
@@ -1567,7 +1567,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Symptom response"
   ],
   "notes": "Formulary class: Second-Generation Antihistamine (R-enantiomer of Cetirizine). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-levothyroxine",
@@ -1622,7 +1622,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Timing with interacting medications (iron, calcium, antacids reduce absorption)"
   ],
   "notes": "Formulary class: Thyroid Hormone Replacement. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e | ATA/ESPE guidelines"
+  "reference": "Harriet Lane 24e | Nelson's 22e | ATA/ESPE guidelines"
  },
  {
   "id": "fx-loratadine",
@@ -1672,7 +1672,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Minimal sedation monitoring required"
   ],
   "notes": "Formulary class: Second-Generation Antihistamine (Non-sedating H1 Antagonist). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-losartan",
@@ -1734,7 +1734,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Serum potassium"
   ],
   "notes": "Formulary class: Angiotensin II Receptor Blocker (ARB, AT1-receptor antagonist). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-mebendazole",
@@ -1773,7 +1773,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Repeat treatment after 2–3 weeks to prevent reinfection"
   ],
   "notes": "Formulary class: Benzimidazole Anthelmintic. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e | WHO Essential Medicines"
+  "reference": "Harriet Lane 24e | Nelson's 22e | WHO Essential Medicines"
  },
  {
   "id": "fx-metformin",
@@ -1819,7 +1819,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Lactic acid if symptomatic"
   ],
   "notes": "Formulary class: Biguanide — Oral Antidiabetic. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e | ADA Paediatric Guidelines"
+  "reference": "Harriet Lane 24e | Nelson's 22e | ADA Paediatric Guidelines"
  },
  {
   "id": "fx-metoclopramide",
@@ -1864,7 +1864,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Prolactin levels (galactorrhoea)"
   ],
   "notes": "Formulary class: Dopamine D2 Antagonist / Prokinetic — Antiemetic. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-metronidazole",
@@ -1932,7 +1932,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Alcohol avoidance counselling"
   ],
   "notes": "Formulary class: Nitroimidazole Antibiotic / Antiprotozoal. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-montelukast",
@@ -1988,7 +1988,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Eosinophil count"
   ],
   "notes": "Formulary class: Leukotriene Receptor Antagonist (LTRA, CysLT1 antagonist). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e | FDA Black Box Warning 2020"
+  "reference": "Harriet Lane 24e | Nelson's 22e | FDA Black Box Warning 2020"
  },
  {
   "id": "fx-nitrofurantoin",
@@ -2052,7 +2052,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "CBC (prophylaxis — haematological toxicity)"
   ],
   "notes": "Formulary class: Nitrofuran Antibiotic (Urinary antiseptic). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-omeprazole",
@@ -2127,7 +2127,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Bone density (prolonged high-dose)"
   ],
   "notes": "Formulary class: Proton Pump Inhibitor (PPI) — Irreversible H⁺/K⁺-ATPase Inhibitor. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-oseltamivir",
@@ -2180,7 +2180,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Influenza diagnosis confirmation"
   ],
   "notes": "Formulary class: Neuraminidase Inhibitor — Antiviral (Influenza). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e | CDC Influenza Antiviral Guidance"
+  "reference": "Harriet Lane 24e | Nelson's 22e | CDC Influenza Antiviral Guidance"
  },
  {
   "id": "fx-phenytoin",
@@ -2235,7 +2235,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Gum hypertrophy"
   ],
   "notes": "Formulary class: Anticonvulsant (Sodium Channel Blocker — Hydantoin). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-rifampicin",
@@ -2300,7 +2300,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "TB: sputum culture/smear"
   ],
   "notes": "Formulary class: Rifamycin Antibiotic (RNA polymerase inhibitor). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e | WHO TB Guidelines"
+  "reference": "Harriet Lane 24e | Nelson's 22e | WHO TB Guidelines"
  },
  {
   "id": "fx-sertraline",
@@ -2351,7 +2351,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Serotonin syndrome signs"
   ],
   "notes": "Formulary class: Selective Serotonin Reuptake Inhibitor (SSRI). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e | FDA SSRI Paediatric Guidelines"
+  "reference": "Harriet Lane 24e | Nelson's 22e | FDA SSRI Paediatric Guidelines"
  },
  {
   "id": "fx-sildenafil",
@@ -2404,7 +2404,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Vision changes"
   ],
   "notes": "Formulary class: Phosphodiesterase-5 (PDE5) Inhibitor — Pulmonary Vasodilator. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e | STARTS-2 Trial"
+  "reference": "Harriet Lane 24e | Nelson's 22e | STARTS-2 Trial"
  },
  {
   "id": "fx-sodium-valproate",
@@ -2466,7 +2466,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Weight"
   ],
   "notes": "Formulary class: Anticonvulsant — Broad Spectrum (Multiple mechanisms: Na⁺ channel, GABA potentiation, T-type Ca²⁺ channel). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e | MHRA Warnings"
+  "reference": "Harriet Lane 24e | Nelson's 22e | MHRA Warnings"
  },
  {
   "id": "fx-spironolactone",
@@ -2529,7 +2529,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Signs of anti-androgenic effects"
   ],
   "notes": "Formulary class: Potassium-Sparing Diuretic (Aldosterone Antagonist). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-topiramate",
@@ -2620,7 +2620,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Intraocular pressure"
   ],
   "notes": "Formulary class: Anticonvulsant — Multiple Mechanisms (Na⁺ channel, AMPA/kainate, GABA-A potentiation, carbonic anhydrase inhibition). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-trimethoprim",
@@ -2682,7 +2682,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Urine culture (end-of-treatment)"
   ],
   "notes": "Formulary class: Dihydrofolate Reductase Inhibitor — Antibiotic. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-acetylcysteine",
@@ -2721,7 +2721,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "GI tolerance"
   ],
   "notes": "Formulary class: Mucolytic / Antidote (Paracetamol overdose) / Antioxidant. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-chlorphenamine",
@@ -2763,7 +2763,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Anticholinergic symptoms"
   ],
   "notes": "Formulary class: First-Generation Antihistamine (H1 Receptor Antagonist). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-ferrous-sulfate",
@@ -2805,7 +2805,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "GI tolerance"
   ],
   "notes": "Formulary class: Iron Salt / Haematinic. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e | WHO Anaemia Guidelines"
+  "reference": "Harriet Lane 24e | Nelson's 22e | WHO Anaemia Guidelines"
  },
  {
   "id": "fx-flucloxacillin",
@@ -2844,7 +2844,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Signs of allergic reaction"
   ],
   "notes": "Formulary class: Beta-lactam Antibiotic — Antistaphylococcal Penicillin (Isoxazolyl penicillin). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | BNF for Children"
+  "reference": "Harriet Lane 24e | BNF for Children"
  },
  {
   "id": "fx-lactulose",
@@ -2895,7 +2895,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Ammonia levels (hepatic encephalopathy)"
   ],
   "notes": "Formulary class: Osmotic Laxative / Disaccharide Laxative. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-nystatin",
@@ -2932,7 +2932,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Persistence despite treatment (consider fluconazole)"
   ],
   "notes": "Formulary class: Polyene Antifungal. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-promethazine",
@@ -2974,7 +2974,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Anticholinergic effects (urinary retention, constipation)"
   ],
   "notes": "Formulary class: First-Generation Antihistamine (Phenothiazine H1 Antagonist) — Antiemetic / Sedative. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e | FDA Black Box Warning"
+  "reference": "Harriet Lane 24e | Nelson's 22e | FDA Black Box Warning"
  },
  {
   "id": "fx-senna",
@@ -3015,7 +3015,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Dehydration"
   ],
   "notes": "Formulary class: Stimulant Laxative (Anthraquinone glycoside). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-ursodeoxycholic-acid",
@@ -3069,7 +3069,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Gallstone assessment (if indicated) by imaging"
   ],
   "notes": "Formulary class: Hydrophilic Bile Acid — Hepatoprotective / Choleretic. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e | ESPGHAN Guidelines"
+  "reference": "Harriet Lane 24e | Nelson's 22e | ESPGHAN Guidelines"
  },
  {
   "id": "fx-beclomethasone-dipropionate",
@@ -3104,7 +3104,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Spirometry/symptom control"
   ],
   "notes": "Formulary class: Inhaled Corticosteroid (ICS). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e | GINA Paediatric Guidelines"
+  "reference": "Harriet Lane 24e | Nelson's 22e | GINA Paediatric Guidelines"
  },
  {
   "id": "fx-colistimethate-sodium",
@@ -3180,7 +3180,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Voice changes (dysphonia)"
   ],
   "notes": "Formulary class: Mucolytic Enzyme. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e | CF Foundation Evidence-Based Guidelines"
+  "reference": "Harriet Lane 24e | Nelson's 22e | CF Foundation Evidence-Based Guidelines"
  },
  {
   "id": "fx-epinephrine-1-1000",
@@ -3221,7 +3221,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Clinical severity score (Westley Croup Score)"
   ],
   "notes": "Formulary class: Sympathomimetic (Alpha + Beta Adrenergic Agonist). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e | PALS 2025"
+  "reference": "Harriet Lane 24e | Nelson's 22e | PALS 2025"
  },
  {
   "id": "fx-fluticasone-propionate",
@@ -3258,7 +3258,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Lung function (FEV₁)"
   ],
   "notes": "Formulary class: Inhaled Corticosteroid (ICS). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e | GINA 2024"
+  "reference": "Harriet Lane 24e | Nelson's 22e | GINA 2024"
  },
  {
   "id": "fx-formoterol-fumarate",
@@ -3295,7 +3295,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Asthma control score (ensure concomitant ICS use)"
   ],
   "notes": "Formulary class: Long-Acting Beta-2 Agonist (LABA). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-levalbuterol",
@@ -3333,7 +3333,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Work of breathing"
   ],
   "notes": "Formulary class: Short-Acting Beta-2 Agonist — Levorotatory Isomer (SABA). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-n-acetylcysteine",
@@ -3375,7 +3375,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Stomatitis with prolonged use"
   ],
   "notes": "Formulary class: Mucolytic Agent. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-racemic-epinephrine-2-25",
@@ -3414,7 +3414,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Westley Croup Score"
   ],
   "notes": "Formulary class: Racemic Sympathomimetic (Alpha + Beta Agonist). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e | PALS 2025"
+  "reference": "Harriet Lane 24e | Nelson's 22e | PALS 2025"
  },
  {
   "id": "fx-sodium-cromoglycate",
@@ -3449,7 +3449,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Exercise tolerance (exercise-induced bronchoconstriction)"
   ],
   "notes": "Formulary class: Mast Cell Stabiliser. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Nelson's 22e | Harriet Lane 22e"
+  "reference": "Nelson's 22e | Harriet Lane 24e"
  },
  {
   "id": "fx-terbutaline-sulfate",
@@ -3490,7 +3490,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Blood pressure"
   ],
   "notes": "Formulary class: Short-Acting Beta-2 Agonist (SABA). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-tobramycin",
@@ -3529,7 +3529,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Renal function (if concerns about systemic absorption)"
   ],
   "notes": "Formulary class: Aminoglycoside Antibiotic (Inhaled). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e | CF Foundation Guidelines 2023"
+  "reference": "Harriet Lane 24e | Nelson's 22e | CF Foundation Guidelines 2023"
  },
  {
   "id": "fx-aciclovir-iv",
@@ -3571,7 +3571,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "CBC"
   ],
   "notes": "Formulary class: Antiviral — Nucleoside Analogue. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-amikacin-iv",
@@ -3613,7 +3613,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Neuromuscular function (weakness)"
   ],
   "notes": "Formulary class: Aminoglycoside Antibiotic. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-benzylpenicillin-iv",
@@ -3655,7 +3655,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Hypersensitivity signs (rash, urticaria, anaphylaxis)"
   ],
   "notes": "Formulary class: Natural Penicillin — Beta-Lactam Antibiotic. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-ciprofloxacin-iv",
@@ -3699,7 +3699,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Glucose (dysglycaemia)"
   ],
   "notes": "Formulary class: Fluoroquinolone Antibiotic. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-clindamycin-iv",
@@ -3740,7 +3740,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Rash"
   ],
   "notes": "Formulary class: Lincosamide Antibiotic. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-famotidine-iv",
@@ -3782,7 +3782,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "CBC (thrombocytopenia — rare)"
   ],
   "notes": "Formulary class: H₂-Receptor Antagonist (H₂RA). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-maintenance-iv-fluids",
@@ -3836,7 +3836,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Blood glucose (dextrose-containing fluids in neonates)"
   ],
   "notes": "Formulary class: Crystalloid Fluid / Electrolyte Replacement. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e — Holliday-Segar method | Nelson's 22e"
+  "reference": "Harriet Lane 24e — Holliday-Segar method | Nelson's 22e"
  },
  {
   "id": "fx-mannitol-iv",
@@ -3881,7 +3881,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Renal function (creatinine) — mannitol nephrotoxicity with high doses/pre-existing renal disease"
   ],
   "notes": "Formulary class: Osmotic Diuretic. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-metronidazole-iv",
@@ -3924,7 +3924,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Nausea/metallic taste (very common)"
   ],
   "notes": "Formulary class: Nitroimidazole Antibiotic / Antiprotozoal. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-n-acetylcysteine-iv",
@@ -3965,7 +3965,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Anaphylactoid reaction signs (flushing, urticaria, bronchospasm, hypotension — monitor closely in first 30 min)"
   ],
   "notes": "Formulary class: Antidote — Glutathione Precursor / Hepatoprotective. Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Toxicology Guidelines | RCEM / AACT Practice Guidelines"
+  "reference": "Harriet Lane 24e | Toxicology Guidelines | RCEM / AACT Practice Guidelines"
  },
  {
   "id": "fx-omeprazole-iv",
@@ -4007,7 +4007,7 @@ export const CONVERTED_DRUGS: Drug[] = [
    "Fundal gland polyps (long-term endoscopic follow-up)"
   ],
   "notes": "Formulary class: Proton Pump Inhibitor (PPI). Full monograph (metabolism, excretion, adverse reactions) is in the Formulary section.",
-  "reference": "Harriet Lane 22e | Nelson's 22e"
+  "reference": "Harriet Lane 24e | Nelson's 22e"
  },
  {
   "id": "fx-acetazolamide",

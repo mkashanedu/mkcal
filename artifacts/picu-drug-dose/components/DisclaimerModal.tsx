@@ -97,7 +97,7 @@ export function DisclaimerModal() {
               based on information provided by this application.
               {"\n\n"}
               <Text style={[styles.italic, { color: isDark ? "#8892B0" : "#94A3B8" }]}>
-                Doses based on Harriet Lane Handbook 23rd Edition, PALS 2025 and WHO Guidelines.
+                Doses based on Harriet Lane Handbook 24th Edition, PALS 2025 and WHO Guidelines.
               </Text>
             </Text>
           </ScrollView>
@@ -106,7 +106,7 @@ export function DisclaimerModal() {
           <View style={[styles.attribution, { borderTopColor: BORDER }]}>
             <Text style={[styles.attributionBy, { color: MUTED }]}>Prepared by</Text>
             <Text style={[styles.attributionName, { color: "#0EA5E9" }]}>
-              Staff Kashan Peads ICU
+              M. Kashan, RN
             </Text>
           </View>
 
