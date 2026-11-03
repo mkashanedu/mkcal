@@ -28,7 +28,7 @@ import Colors from "@/constants/colors";
 const C = Colors.light;
 
 const INFUSION_CATS = [
-  { key: "all",       label: "All",         color: "#0EA5E9", match: [] as string[] },
+  { key: "all",       label: "All",         color: "#14B8A6", match: [] as string[] },
   { key: "inotrope",  label: "Inotropes",   color: "#7C3AED", match: ["Inotrope", "Vasopressor", "Inodilator"] },
   { key: "sedation",  label: "Sedation",    color: "#805AD5", match: ["Sedative", "Opioid", "Analgosedative", "Analgesic"] },
   { key: "resp",      label: "Respiratory", color: "#38A169", match: ["Bronchodilator", "Respiratory"] },
@@ -47,11 +47,11 @@ export default function InfusionScreen() {
   const [search, setSearch]     = useState("");
   const [catFilter, setCatFilter] = useState<InfusionCatKey>("all");
 
-  const BG    = isDark ? "#0B132B" : C.background;
-  const CARD  = isDark ? "#112240" : C.card;
-  const BORDER = isDark ? "#233554" : C.border;
+  const BG    = isDark ? "#06231D" : C.background;
+  const CARD  = isDark ? "#0B352B" : C.card;
+  const BORDER = isDark ? "#1D5243" : C.border;
   const TEXT  = isDark ? "#FFFFFF" : C.text;
-  const MUTED = isDark ? "#8892B0" : C.textMuted;
+  const MUTED = isDark ? "#83ACA1" : C.textMuted;
 
   const filteredDrugs = useMemo(() => {
     const catDef = INFUSION_CATS.find((c) => c.key === catFilter);
@@ -79,14 +79,14 @@ export default function InfusionScreen() {
         <View style={[styles.header, { backgroundColor: CARD, borderBottomColor: BORDER }]}>
           <TouchableOpacity
             onPress={openDrawer}
-            style={[styles.hamburgerBtn, { backgroundColor: isDark ? "#0A192F" : "#E8F4F9" }]}
+            style={[styles.hamburgerBtn, { backgroundColor: isDark ? "#041B16" : "#E8F4F9" }]}
             activeOpacity={0.7}
           >
-            <Feather name="menu" size={20} color={isDark ? "#8892B0" : C.tint} />
+            <Feather name="menu" size={20} color={isDark ? "#83ACA1" : C.tint} />
           </TouchableOpacity>
           <View style={styles.headerLeft}>
             <Text style={[styles.headerTitle, { color: TEXT, fontSize: Math.round(20 * textScale) }]} numberOfLines={1}>
-              MKashanEdu
+              PeadsCal
             </Text>
             <Text style={[styles.headerSubtitle, { color: MUTED }]} numberOfLines={1}>
               Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 480 drugs
@@ -94,7 +94,7 @@ export default function InfusionScreen() {
           </View>
           <View style={styles.headerRight}>
             <TouchableOpacity
-              style={[styles.nightBtn, { backgroundColor: isDark ? "#0A192F" : "#E8F4F9" }]}
+              style={[styles.nightBtn, { backgroundColor: isDark ? "#041B16" : "#E8F4F9" }]}
               onPress={toggleDark}
               activeOpacity={0.8}
             >
@@ -149,7 +149,7 @@ export default function InfusionScreen() {
                     style={[
                       styles.catChip,
                       {
-                        backgroundColor: isActive ? cat.color : isDark ? "#233554" : "#F1F5F9",
+                        backgroundColor: isActive ? cat.color : isDark ? "#1D5243" : "#F1F5F9",
                         borderColor: isActive ? cat.color : "transparent",
                       },
                     ]}
@@ -164,7 +164,7 @@ export default function InfusionScreen() {
             </ScrollView>
 
             {/* Search bar */}
-            <View style={[styles.drugSearchBar, { backgroundColor: isDark ? "#0A192F" : "#EBF5FB" }]}>
+            <View style={[styles.drugSearchBar, { backgroundColor: isDark ? "#041B16" : "#EBF5FB" }]}>
               <Feather name="search" size={15} color={isDark ? "#4D6E88" : C.tint} />
               <TextInput
                 style={[styles.drugSearchInput, { color: TEXT }]}
@@ -204,7 +204,7 @@ export default function InfusionScreen() {
                   >
                     <View style={[styles.drugPillDot, { backgroundColor: drug.color }]} />
                     <Text
-                      style={[styles.drugPillText, { color: isDark ? "#CCD6F6" : "#1E293B", fontSize: Math.round(13 * textScale), lineHeight: Math.round(17 * textScale) }]}
+                      style={[styles.drugPillText, { color: isDark ? "#C9E8DF" : "#1E293B", fontSize: Math.round(13 * textScale), lineHeight: Math.round(17 * textScale) }]}
                       numberOfLines={2}
                     >
                       {drug.name}

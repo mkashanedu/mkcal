@@ -42,12 +42,12 @@ export default function FormularyCategoryScreen() {
     [category, search]
   );
 
-  const bg = isDark ? "#0B132B" : "#F0F9FF";
-  const cardBg = isDark ? "#112240" : "#FFFFFF";
+  const bg = isDark ? "#06231D" : "#F0F9FF";
+  const cardBg = isDark ? "#0B352B" : "#FFFFFF";
   const textPrimary = isDark ? "#FFFFFF" : "#0D1B2A";
-  const textMuted = isDark ? "#8892B0" : "#64748B";
-  const borderColor = isDark ? "#233554" : "#E4EDF4";
-  const inputBg = isDark ? "#0A192F" : "#F0F4F8";
+  const textMuted = isDark ? "#83ACA1" : "#64748B";
+  const borderColor = isDark ? "#1D5243" : "#E4EDF4";
+  const inputBg = isDark ? "#041B16" : "#F0F4F8";
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
 
   if (!cat) {
@@ -63,14 +63,14 @@ export default function FormularyCategoryScreen() {
   return (
     <View style={[styles.container, { backgroundColor: bg }]}>
       {/* Header */}
-      <View style={[styles.header, { paddingTop: topPadding + 12, backgroundColor: isDark ? "#0A192F" : "#FFFFFF", borderBottomColor: borderColor }]}>
+      <View style={[styles.header, { paddingTop: topPadding + 12, backgroundColor: isDark ? "#041B16" : "#FFFFFF", borderBottomColor: borderColor }]}>
         <View style={styles.headerRow}>
           <TouchableOpacity
             onPress={() => goBack(router)}
-            style={[styles.backBtn, { backgroundColor: isDark ? "#233554" : "#F0F4F8" }]}
+            style={[styles.backBtn, { backgroundColor: isDark ? "#1D5243" : "#F0F4F8" }]}
             activeOpacity={0.7}
           >
-            <Feather name="arrow-left" size={20} color={isDark ? "#8892B0" : cat.color} />
+            <Feather name="arrow-left" size={20} color={isDark ? "#83ACA1" : cat.color} />
           </TouchableOpacity>
           <View style={[styles.catIconWrap, { backgroundColor: cat.color + "20" }]}>
             <Feather name={cat.icon as any} size={18} color={cat.color} />
@@ -174,7 +174,7 @@ export default function FormularyCategoryScreen() {
                   </View>
                 ))}
                 {item.indications.length > 3 && (
-                  <View style={[styles.tag, { backgroundColor: isDark ? "#1C2541" : "#F1F5F9", borderColor }]}>
+                  <View style={[styles.tag, { backgroundColor: isDark ? "#123C31" : "#F1F5F9", borderColor }]}>
                     <Text style={[styles.tagText, { color: textMuted, fontFamily: "Inter_500Medium" }]}>
                       +{item.indications.length - 3} more
                     </Text>

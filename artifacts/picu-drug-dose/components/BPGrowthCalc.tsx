@@ -272,12 +272,12 @@ function PctBar({ pct, color, isDark }: { pct:number; color:string; isDark:boole
 interface Props { isDark: boolean }
 
 export function BPGrowthCalc({ isDark }: Props) {
-  const bg    = isDark ? "#0B132B" : "#F0F4F8";
+  const bg    = isDark ? "#06231D" : "#F0F4F8";
   const card  = isDark ? "#0F1F2E" : "#FFFFFF";
-  const card2 = isDark ? "#112240" : "#F8FAFC";
+  const card2 = isDark ? "#0B352B" : "#F8FAFC";
   const border = isDark ? "#1E3A5F" : "#E2E8F0";
-  const tp    = isDark ? "#CCD6F6" : "#0D1B2A";
-  const tm    = isDark ? "#8892B0" : "#64748B";
+  const tp    = isDark ? "#C9E8DF" : "#0D1B2A";
+  const tm    = isDark ? "#83ACA1" : "#64748B";
 
   const [sex,   setSex]   = useState<"M"|"F">("M");
   const [yrStr, setYrStr] = useState("");
@@ -322,7 +322,7 @@ export function BPGrowthCalc({ isDark }: Props) {
   },[wtKg,totalMonths,sex]);
 
   const inp = {
-    backgroundColor: isDark ? "#0A192F" : "#F1F5F9",
+    backgroundColor: isDark ? "#041B16" : "#F1F5F9",
     borderWidth:1.5, borderRadius:10, borderColor:border,
     color:tp, fontSize:16, fontWeight:"700" as const,
     paddingHorizontal:12, paddingVertical:9,
@@ -330,17 +330,17 @@ export function BPGrowthCalc({ isDark }: Props) {
 
   const ROWS = thresholds ? [
     { pctLabel:"50th", sbp:thresholds.sbp50, dbp:thresholds.dbp50, color:"#16A34A" },
-    { pctLabel:"75th", sbp:thresholds.sbp75, dbp:thresholds.dbp75, color:"#0891B2" },
+    { pctLabel:"75th", sbp:thresholds.sbp75, dbp:thresholds.dbp75, color:"#0D9488" },
     { pctLabel:"90th", sbp:thresholds.sbp90, dbp:thresholds.dbp90, color:"#D97706" },
     { pctLabel:"95th", sbp:thresholds.sbp95, dbp:thresholds.dbp95, color:"#EA580C" },
     { pctLabel:"99th", sbp:thresholds.sbp99, dbp:thresholds.dbp99, color:"#DC2626" },
   ] : [];
 
   return (
-    <View style={{ backgroundColor:card, borderRadius:16, borderWidth:1.5, borderColor:"#0891B230", overflow:"hidden" }}>
+    <View style={{ backgroundColor:card, borderRadius:16, borderWidth:1.5, borderColor:"#0D948830", overflow:"hidden" }}>
 
       {/* ── Header ── */}
-      <View style={{ backgroundColor:"#0891B2", paddingHorizontal:16, paddingVertical:12, flexDirection:"row", alignItems:"center", gap:10 }}>
+      <View style={{ backgroundColor:"#0D9488", paddingHorizontal:16, paddingVertical:12, flexDirection:"row", alignItems:"center", gap:10 }}>
         <View style={{ width:32,height:32,borderRadius:10,backgroundColor:"#FFFFFF20",alignItems:"center",justifyContent:"center" }}>
           <Feather name="activity" size={18} color="#FFFFFF"/>
         </View>
@@ -357,8 +357,8 @@ export function BPGrowthCalc({ isDark }: Props) {
           {(["M","F"] as const).map(s=>(
             <TouchableOpacity key={s} onPress={()=>setSex(s)}
               style={{ flex:1,paddingVertical:10,borderRadius:10,alignItems:"center",
-                backgroundColor: sex===s ? (s==="M"?"#0891B2":"#A855F7") : isDark?"#0A192F":"#F1F5F9",
-                borderWidth:1.5, borderColor: sex===s ? (s==="M"?"#0891B2":"#A855F7") : border }}>
+                backgroundColor: sex===s ? (s==="M"?"#0D9488":"#A855F7") : isDark?"#041B16":"#F1F5F9",
+                borderWidth:1.5, borderColor: sex===s ? (s==="M"?"#0D9488":"#A855F7") : border }}>
               <Text style={{ fontWeight:"700",fontSize:14,color:sex===s?"#FFFFFF":tm }}>
                 {s==="M"?"♂ Male":"♀ Female"}
               </Text>
@@ -397,7 +397,7 @@ export function BPGrowthCalc({ isDark }: Props) {
             <View style={{ flexDirection:"row",borderRadius:10,overflow:"hidden",borderWidth:1.5,borderColor:border }}>
               {(["kg","lbs"] as const).map(u=>(
                 <TouchableOpacity key={u} onPress={()=>setWtUnit(u)}
-                  style={{ paddingHorizontal:14,paddingVertical:9,backgroundColor:wtUnit===u?"#0891B2":isDark?"#0A192F":"#F1F5F9" }}>
+                  style={{ paddingHorizontal:14,paddingVertical:9,backgroundColor:wtUnit===u?"#0D9488":isDark?"#041B16":"#F1F5F9" }}>
                   <Text style={{ fontWeight:"700",fontSize:13,color:wtUnit===u?"#FFFFFF":tm }}>{u}</Text>
                 </TouchableOpacity>
               ))}
@@ -430,7 +430,7 @@ export function BPGrowthCalc({ isDark }: Props) {
             GROWTH CENTILE CARD
         ═══════════════════════════════════════════════════════ */}
         {(htInfo||wtInfo)&&(
-          <View style={{ backgroundColor:isDark?"#0A192F":"#F0FDF4", borderRadius:12, borderWidth:1.5, borderColor:isDark?"#1A3A2A":"#86EFAC", padding:12, gap:8 }}>
+          <View style={{ backgroundColor:isDark?"#041B16":"#F0FDF4", borderRadius:12, borderWidth:1.5, borderColor:isDark?"#1A3A2A":"#86EFAC", padding:12, gap:8 }}>
             <Text style={{ fontSize:12,fontWeight:"800",color:"#16A34A",marginBottom:2 }}>Growth Centiles</Text>
 
             {htInfo&&(
@@ -479,10 +479,10 @@ export function BPGrowthCalc({ isDark }: Props) {
         {thresholds&&(
           <View style={{ backgroundColor:card2, borderRadius:12, borderWidth:1.5, borderColor:border, overflow:"hidden" }}>
             {/* Table header */}
-            <View style={{ flexDirection:"row", backgroundColor:"#0891B210", paddingVertical:8, paddingHorizontal:12, borderBottomWidth:1, borderBottomColor:border }}>
-              <Text style={{ flex:1.2,fontSize:11,fontWeight:"800",color:"#0891B2" }}>PERCENTILE</Text>
-              <Text style={{ flex:1,fontSize:11,fontWeight:"800",color:"#0891B2",textAlign:"center" }}>SBP (mmHg)</Text>
-              <Text style={{ flex:1,fontSize:11,fontWeight:"800",color:"#0891B2",textAlign:"center" }}>DBP (mmHg)</Text>
+            <View style={{ flexDirection:"row", backgroundColor:"#0D948810", paddingVertical:8, paddingHorizontal:12, borderBottomWidth:1, borderBottomColor:border }}>
+              <Text style={{ flex:1.2,fontSize:11,fontWeight:"800",color:"#0D9488" }}>PERCENTILE</Text>
+              <Text style={{ flex:1,fontSize:11,fontWeight:"800",color:"#0D9488",textAlign:"center" }}>SBP (mmHg)</Text>
+              <Text style={{ flex:1,fontSize:11,fontWeight:"800",color:"#0D9488",textAlign:"center" }}>DBP (mmHg)</Text>
             </View>
 
             {ROWS.map((row,i)=>{
@@ -509,7 +509,7 @@ export function BPGrowthCalc({ isDark }: Props) {
               );
             })}
 
-            <View style={{ padding:10, borderTopWidth:1, borderTopColor:border, backgroundColor:"#0891B208" }}>
+            <View style={{ padding:10, borderTopWidth:1, borderTopColor:border, backgroundColor:"#0D948808" }}>
               <Text style={{ fontSize:10,color:tm }}>
                 Height column used: <Text style={{ fontWeight:"700" }}>{thresholds.htColLabel}</Text> percentile
                 {" "}(actual ht = <Text style={{ fontWeight:"700" }}>{htCm} cm</Text>,
@@ -533,7 +533,7 @@ export function BPGrowthCalc({ isDark }: Props) {
                   {fmtPct(sbpExactPct)} pct
                 </Text>
               </View>
-              <PctBar pct={sbpExactPct} color={classification?.sbp.color||"#0891B2"} isDark={isDark}/>
+              <PctBar pct={sbpExactPct} color={classification?.sbp.color||"#0D9488"} isDark={isDark}/>
             </View>
             {/* DBP */}
             {dbp>0&&dbpExactPct!==null&&(
@@ -544,11 +544,11 @@ export function BPGrowthCalc({ isDark }: Props) {
                     {fmtPct(dbpExactPct)} pct
                   </Text>
                 </View>
-                <PctBar pct={dbpExactPct} color={classification?.dbp.color||"#0891B2"} isDark={isDark}/>
+                <PctBar pct={dbpExactPct} color={classification?.dbp.color||"#0D9488"} isDark={isDark}/>
               </View>
             )}
             <View style={{ flexDirection:"row",alignItems:"center",gap:8 }}>
-              {[{l:"50th",c:"#16A34A"},{l:"75th",c:"#0891B2"},{l:"90th",c:"#D97706"},{l:"95th",c:"#EA580C"}].map(m=>(
+              {[{l:"50th",c:"#16A34A"},{l:"75th",c:"#0D9488"},{l:"90th",c:"#D97706"},{l:"95th",c:"#EA580C"}].map(m=>(
                 <View key={m.l} style={{ flexDirection:"row",alignItems:"center",gap:3 }}>
                   <View style={{ width:6,height:6,backgroundColor:m.c,borderRadius:3 }}/>
                   <Text style={{ fontSize:9,color:tm }}>{m.l}</Text>

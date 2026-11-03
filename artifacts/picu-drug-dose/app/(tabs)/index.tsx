@@ -28,20 +28,37 @@ import { CONDITION_GROUPS, conditionForQuery } from "@/lib/indications";
 
 // ── Search index for Tools ────────────────────────────────────────────────────
 const SEARCH_TOOLS = [
-  { key: "gir",                   title: "GIR Calculator",                  subtitle: "Glucose Infusion Rate · mg/kg/min · Neonates",          icon: "droplet",    color: "#0EA5E9" },
-  { key: "big-score",             title: "BIG Score — Pediatric Trauma",    subtitle: "Base Deficit · INR · GCS · Mortality prediction",       icon: "trending-up",color: "#DC2626" },
-  { key: "phoenix-sepsis",        title: "Phoenix Sepsis Score 2024",       subtitle: "Respiratory · Cardiovascular · Coagulation · Neuro",    icon: "activity",   color: "#7C3AED" },
-  { key: "streptokinase-empyema", title: "Streptokinase — Empyema Protocol",subtitle: "Intrapleural fibrinolysis · ICU Protocol · 3-day",      icon: "shield",     color: "#0D9488" },
-  { key: "growth",                title: "Growth Charts — WHO Standards",   subtitle: "Weight-for-age · Z-score · Nutritional status",         icon: "bar-chart-2",color: "#0D9488" },
-  { key: "vis",                   title: "VIS / Cardiac & Haemodynamic",    subtitle: "Vasoactive-Inotropic Score · BP Percentile",            icon: "heart",      color: "#E53E3E" },
-  { key: "bundles",               title: "PICU Care Bundles",               subtitle: "FASTHUG · VAP · CLABSI · CAUTI daily checklists",       icon: "check-square",color: "#7C3AED" },
-  { key: "fluids",                title: "IV Fluids & Dehydration",         subtitle: "Holliday-Segar · Maintenance · Deficit · DKA",          icon: "droplet",    color: "#0EA5E9" },
-  { key: "electrolytes",          title: "Electrolyte Correction — K⁺",     subtitle: "K⁺ & Na⁺ correction — Protocols tab me",     icon: "zap",        color: "#0891B2" },
-  { key: "gcs",                   title: "Pediatric GCS (pGCS)",            subtitle: "Modified GCS for children & infants",                   icon: "activity",   color: "#16A34A" },
-  { key: "scores",                title: "Advanced ICU Scores",             subtitle: "FOUR Score · OSI · SIPA · WAT-1 withdrawal scale",      icon: "activity",   color: "#FF4C60" },
-  { key: "renal",                 title: "Renal & Hepatic Adjustments",     subtitle: "Schwartz eGFR · Drug dose adjustments by organ fn",     icon: "shield",     color: "#DC2626" },
-  { key: "pews",                  title: "PEWS Score",                      subtitle: "Pediatric Early Warning Score · Rapid Response trigger", icon: "activity",  color: "#FF4C60" },
-  { key: "apgar",                 title: "APGAR Score (1 & 5 min)",         subtitle: "Neonatal — Appearance · Pulse · Grimace · Activity",    icon: "heart",      color: "#EC4899" },
+  { key: "ventilator",            title: "Ventilator & ABG Management",     subtitle: "Vt · PEEP · Pplat · Driving Pressure · PARDS & Asthma",   icon: "wind",       color: "#14B8A6", kw: "vent ventilator respiratory abg blood gas hfov peep airway machine settings" },
+  { key: "gir",                   title: "GIR Calculator",                  subtitle: "Glucose Infusion Rate · mg/kg/min · Neonates",          icon: "droplet",    color: "#14B8A6", kw: "glucose infusion rate dextrose tpn sugar neonatal gir" },
+  { key: "fluids",                title: "IV Fluids & Dehydration",         subtitle: "Holliday-Segar · Maintenance · Deficit · DKA",          icon: "droplet",    color: "#14B8A6", kw: "maintenance holliday segar dehydration bolus dka fluid fluids" },
+  { key: "electrolytes",          title: "Electrolyte Correction — K⁺",     subtitle: "K⁺ & Na⁺ correction — Protocols tab me",     icon: "zap",        color: "#0D9488", kw: "potassium sodium correction electrolyte k+ na+" },
+  { key: "growth",                title: "Growth Charts — WHO Standards",   subtitle: "Weight-for-age · Z-score · Nutritional status",         icon: "bar-chart-2",color: "#0D9488", kw: "who zscore z-score weight age nutrition ftt growth chart" },
+  { key: "dose-check",            title: "Dose Double-Check",               subtitle: "Banayi gayi dose verify karo · sahi range check",       icon: "check-circle",color: "#059669", kw: "double check verify dose check galti cross check confirm" },
+  { key: "phoenix-sepsis",        title: "Phoenix Sepsis Score 2024",       subtitle: "Respiratory · Cardiovascular · Coagulation · Neuro",    icon: "activity",   color: "#7C3AED", kw: "sepsis septic shock phoenix sofa infection score" },
+  { key: "big-score",             title: "BIG Score — Pediatric Trauma",    subtitle: "Base Deficit · INR · GCS · Mortality prediction",       icon: "trending-up",color: "#DC2626", kw: "trauma big mortality base deficit inr score" },
+  { key: "streptokinase-empyema", title: "Streptokinase — Empyema Protocol",subtitle: "Intrapleural fibrinolysis · ICU Protocol · 3-day",      icon: "shield",     color: "#0D9488", kw: "empyema fibrinolysis chest drain pleural streptokinase" },
+  { key: "bundles",               title: "PICU Care Bundles",               subtitle: "FASTHUG · VAP · CLABSI · CAUTI daily checklists",       icon: "check-square",color: "#7C3AED", kw: "fasthug vap clabsi cauti bundle checklist care bundles" },
+  { key: "pews",                  title: "PEWS Score",                      subtitle: "Pediatric Early Warning Score · Rapid Response trigger", icon: "activity",  color: "#FF4C60", kw: "early warning pews rapid response deterioration score" },
+  { key: "gcs",                   title: "Pediatric GCS (pGCS)",            subtitle: "Modified GCS for children & infants",                   icon: "activity",   color: "#16A34A", kw: "glasgow coma gcs neuro consciousness score" },
+  { key: "scores",                title: "Advanced ICU Scores",             subtitle: "FOUR Score · OSI · SIPA · WAT-1 withdrawal scale",      icon: "activity",   color: "#FF4C60", kw: "four osi sipa wat withdrawal scores shock index oxygenation" },
+  { key: "apgar",                 title: "APGAR Score (1 & 5 min)",         subtitle: "Neonatal — Appearance · Pulse · Grimace · Activity",    icon: "heart",      color: "#EC4899", kw: "apgar newborn neonatal delivery baby score" },
+  { key: "pain-sedation",         title: "Pain & Sedation Scores",          subtitle: "FLACC · COMFORT-B · SAS (Riker) — bedside nursing scores", icon: "smile",   color: "#D97706", kw: "sas riker flacc comfort pain sedation dard agitation wong baker faces nursing" },
+  { key: "vis",                   title: "VIS / Cardiac & Haemodynamic",    subtitle: "Vasoactive-Inotropic Score · BP Percentile",            icon: "heart",      color: "#E53E3E", kw: "vasoactive inotropic vis bp blood pressure vitals haemodynamic" },
+  { key: "renal",                 title: "Renal & Hepatic Adjustments",     subtitle: "Schwartz eGFR · Drug dose adjustments by organ fn",     icon: "shield",     color: "#DC2626", kw: "renal hepatic kidney liver egfr schwartz gfr dose adjustment" },
+  { key: "braden-q",              title: "Braden Q — Pressure Injury Risk", subtitle: "7 subscales · Total 7–28 · ≤16 at risk",                 icon: "layers",     color: "#7C3AED", kw: "braden pressure sore ulcer bedsore skin injury risk q" },
+  { key: "humpty-dumpty",         title: "Humpty Dumpty — Falls Risk",      subtitle: "Score 7–23 · ≥12 high risk · JCI IPSG Goal 6",          icon: "alert-triangle", color: "#D97706", kw: "humpty dumpty fall falls girna risk safety" },
+  { key: "fluid-balance",         title: "Fluid Balance — I/O Chart",       subtitle: "Intake & output chart · Urine mL/kg/hr · Saved on device", icon: "clipboard", color: "#0D9488", kw: "fluid balance intake output io chart urine charting" },
+];
+
+const SEARCH_PROTOCOLS = [
+  { key: "abg",            title: "ABG Analyzer",                 subtitle: "Calcs · Acid-base · Winter's · Anion gap",            icon: "activity",   color: "#B45309", kw: "abg arterial blood gas acid base winter anion gap ph paco2" },
+  { key: "osmo",           title: "Osmotherapy — Raised ICP",     subtitle: "Calcs · Mannitol · 3% Hypertonic Saline",             icon: "zap",        color: "#B45309", kw: "mannitol hypertonic saline osmotherapy icp raised intracranial 3%" },
+  { key: "airway",         title: "Airway & Lines Sizes",         subtitle: "Calcs · ETT · CVL · UVC/UAC sizes by weight/age",     icon: "wind",       color: "#B45309", kw: "ett tube line cvl uvc uac airway sizes" },
+  { key: "transfusion",    title: "Pediatric Transfusion",        subtitle: "Calcs · PRBC · Platelets · FFP · Cryoprecipitate",    icon: "droplet",    color: "#B45309", kw: "transfusion blood prbc platelet ffp cryoprecipitate crossmatch" },
+  { key: "status-epi",     title: "Status Epilepticus Protocol",  subtitle: "Calcs · Step-wise anti-seizure protocol",             icon: "zap",        color: "#B45309", kw: "status epilepticus seizure convulsion epilepsy fits daura protocol" },
+  { key: "tet-pge1",       title: "Tet Spells & PGE1",            subtitle: "Calcs · Hypercyanotic spells · Prostaglandin",        icon: "heart",      color: "#B45309", kw: "tet spell tof cyanotic prostaglandin pge1 alprostadil hypercyanotic" },
+  { key: "burns",          title: "Burns — Parkland Formula",     subtitle: "Calcs · 4 mL × kg × %TBSA · fluid resuscitation",     icon: "thermometer",color: "#B45309", kw: "burn parkland tbsa jalna fluids resuscitation" },
+  { key: "bloods",         title: "Bloods & Lytes Reference",     subtitle: "Calcs · Normal values · electrolytes reference",      icon: "clipboard",  color: "#B45309", kw: "blood values reference normal ranges labs electrolytes" },
 ];
 
 const EMERGENCY_TERMS = ["emergency", "resus", "cpr", "code", "cardiac", "arrest", "pals", "acls", "defib", "adrenaline", "epinephrine"];
@@ -109,12 +126,12 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const inputRef = useRef<TextInput>(null);
 
-  const bg         = isDark ? "#0B132B" : "#F0F9FF";
+  const bg         = isDark ? "#06231D" : "#F0F9FF";
   const card       = isDark ? "#0E2A45" : "#FFFFFF";
   const border     = isDark ? "#1E3A5F" : "#E2EFF6";
   const tp         = isDark ? "#FFFFFF" : "#0D1B2A";
-  const tm         = isDark ? "#8892B0" : "#64748B";
-  const searchBg   = isDark ? "#0D2137" : "#EFF6FF";
+  const tm         = isDark ? "#83ACA1" : "#64748B";
+  const searchBg   = isDark ? "#08362B" : "#EFF6FF";
   const searchBdr  = isDark ? "#1E3A5F" : "#BAE6FD";
 
   const q = searchQuery.trim().toLowerCase();
@@ -171,7 +188,7 @@ export default function HomeScreen() {
         color: cat.color,
         icon: cat.icon,
         module: "Calculator",
-        moduleColor: "#0891B2",
+        moduleColor: "#0D9488",
         routePath: "/drug/[id]",
         routeParams: { id: d.id },
       });
@@ -201,9 +218,9 @@ export default function HomeScreen() {
 
     // Tools
     SEARCH_TOOLS.filter(
-      (t) => t.title.toLowerCase().includes(q) || t.subtitle.toLowerCase().includes(q)
+      (t) => t.title.toLowerCase().includes(q) || t.subtitle.toLowerCase().includes(q) || (t.kw ?? "").includes(q)
     )
-      .slice(0, 5)
+      .slice(0, 6)
       .forEach((t) => {
         out.push({
           id: "tool-" + t.key,
@@ -215,6 +232,24 @@ export default function HomeScreen() {
           moduleColor: "#16A34A",
           routePath: "/tool/[id]",
           routeParams: { id: t.key },
+        });
+      });
+
+    // Protocols (Calcs tab ke sections) — keyword/title match
+    SEARCH_PROTOCOLS.filter(
+      (t) => t.title.toLowerCase().includes(q) || t.subtitle.toLowerCase().includes(q) || (t.kw ?? "").includes(q)
+    )
+      .slice(0, 4)
+      .forEach((t) => {
+        out.push({
+          id: "proto-" + t.key,
+          label: t.title,
+          sublabel: t.subtitle,
+          color: t.color,
+          icon: t.icon,
+          module: "Protocols",
+          moduleColor: "#D97706",
+          routePath: "/(tabs)/calcs",
         });
       });
 
@@ -248,7 +283,7 @@ export default function HomeScreen() {
           styles.header,
           {
             paddingTop: insets.top + 10,
-            backgroundColor: isDark ? "#0A192F" : "#FFFFFF",
+            backgroundColor: isDark ? "#041B16" : "#FFFFFF",
             borderBottomColor: border,
           },
         ]}
@@ -256,15 +291,18 @@ export default function HomeScreen() {
         <View style={styles.headerTop}>
           <TouchableOpacity
             onPress={openDrawer}
-            style={[styles.iconBtn, { backgroundColor: isDark ? "#0D2137" : "#EFF6FF" }]}
+            style={[styles.iconBtn, { backgroundColor: isDark ? "#08362B" : "#EFF6FF" }]}
             activeOpacity={0.7}
           >
-            <Feather name="menu" size={20} color={isDark ? "#8892B0" : colors.tint} />
+            <Feather name="menu" size={20} color={isDark ? "#83ACA1" : colors.tint} />
           </TouchableOpacity>
 
+          <View style={{ width: 42, height: 42, borderRadius: 13, backgroundColor: "#0D9488", alignItems: "center", justifyContent: "center", marginRight: 10 }}>
+            <Feather name="activity" size={23} color="#FFFFFF" />
+          </View>
           <View style={{ flex: 1, minWidth: 0 }}>
             <Text style={[styles.headerTitle, { color: tp, fontSize: Math.round(22 * textScale) }]} numberOfLines={1}>
-              MKashanEdu
+              PeadsCal
             </Text>
             <Text style={[styles.headerSub, { color: tm }]}>
               Pediatric Clinical Suite
@@ -273,7 +311,7 @@ export default function HomeScreen() {
 
           <TouchableOpacity
             onPress={toggleDark}
-            style={[styles.iconBtn, { backgroundColor: isDark ? "#0D2137" : "#EFF6FF" }]}
+            style={[styles.iconBtn, { backgroundColor: isDark ? "#08362B" : "#EFF6FF" }]}
             activeOpacity={0.7}
           >
             <Feather
@@ -333,7 +371,7 @@ export default function HomeScreen() {
               style={[
                 styles.resultsPanel,
                 {
-                  backgroundColor: isDark ? "#0A192F" : "#FFFFFF",
+                  backgroundColor: isDark ? "#041B16" : "#FFFFFF",
                   borderColor: border,
                   ...Platform.select({
                     ios: { shadowColor: "#000", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.16, shadowRadius: 20 },
@@ -401,7 +439,7 @@ export default function HomeScreen() {
                       activeOpacity={0.7}
                       style={[
                         styles.resultItem,
-                        { borderBottomColor: isDark ? "#112240" : "#F1F5F9" },
+                        { borderBottomColor: isDark ? "#0B352B" : "#F1F5F9" },
                       ]}
                     >
                       {/* Coloured left accent */}
@@ -471,11 +509,11 @@ export default function HomeScreen() {
                     onPress={() => switchProfile(p.id)}
                     style={{
                       paddingHorizontal: 13, paddingVertical: 9, borderRadius: 999,
-                      backgroundColor: activeProfileId === p.id ? "#0EA5E9" : isDark ? "#112240" : "#FFFFFF",
-                      borderWidth: 1, borderColor: activeProfileId === p.id ? "#0EA5E9" : isDark ? "#1E3A5F" : "#D6EAF8",
+                      backgroundColor: activeProfileId === p.id ? "#14B8A6" : isDark ? "#0B352B" : "#FFFFFF",
+                      borderWidth: 1, borderColor: activeProfileId === p.id ? "#14B8A6" : isDark ? "#1E3A5F" : "#D6EAF8",
                     }}
                   >
-                    <Text style={{ fontSize: 13.5, fontFamily: "Inter_600SemiBold", color: activeProfileId === p.id ? "#FFFFFF" : isDark ? "#CCD6F6" : "#0D1B2A" }}>
+                    <Text style={{ fontSize: 13.5, fontFamily: "Inter_600SemiBold", color: activeProfileId === p.id ? "#FFFFFF" : isDark ? "#C9E8DF" : "#0D1B2A" }}>
                       {p.name} · {p.weightKg} kg
                     </Text>
                   </TouchableOpacity>
@@ -591,7 +629,7 @@ export default function HomeScreen() {
                     paddingHorizontal: 13,
                     paddingVertical: 9,
                     borderRadius: 999,
-                    backgroundColor: isDark ? "#112240" : "#FFFFFF",
+                    backgroundColor: isDark ? "#0B352B" : "#FFFFFF",
                     borderWidth: 1,
                     borderColor: isDark ? "#1E3A5F" : "#D6EAF8",
                   }}
@@ -601,7 +639,7 @@ export default function HomeScreen() {
                     style={{
                       fontSize: 13.5,
                       fontFamily: "Inter_600SemiBold",
-                      color: isDark ? "#CCD6F6" : "#0D1B2A",
+                      color: isDark ? "#C9E8DF" : "#0D1B2A",
                     }}
                   >
                     {d.name.split(" (")[0]}
@@ -645,7 +683,7 @@ export default function HomeScreen() {
                         paddingHorizontal: 13,
                         paddingVertical: 9,
                         borderRadius: 999,
-                        backgroundColor: isDark ? "#112240" : "#FFFFFF",
+                        backgroundColor: isDark ? "#0B352B" : "#FFFFFF",
                         borderWidth: 1,
                         borderColor: isDark ? "#1E3A5F" : "#D6EAF8",
                       }}
@@ -655,7 +693,7 @@ export default function HomeScreen() {
                         style={{
                           fontSize: 13.5,
                           fontFamily: "Inter_600SemiBold",
-                          color: isDark ? "#CCD6F6" : "#0D1B2A",
+                          color: isDark ? "#C9E8DF" : "#0D1B2A",
                         }}
                       >
                         {d.name.split(" (")[0]}
@@ -689,7 +727,7 @@ export default function HomeScreen() {
             <View style={styles.mainButtonText}>
               <Text style={[styles.mainButtonTitle, { color: tp, fontSize: Math.round(20 * textScale) }]}>Dose Calculator</Text>
               <Text style={[styles.mainButtonDesc, { color: tm, fontSize: Math.round(13 * textScale), lineHeight: Math.round(18 * textScale) }]}>
-                Weight-based drug doses · 480 medications
+                Weight-based drug doses · 544 medications
               </Text>
             </View>
             <Feather name="chevron-right" size={22} color={colors.tint} />

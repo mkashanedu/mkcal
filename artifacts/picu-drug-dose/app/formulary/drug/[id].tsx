@@ -125,7 +125,7 @@ function DoseCard({
       style={[
         dStyles.card,
         {
-          backgroundColor: isDark ? "#0A192F" : "#F8FFFE",
+          backgroundColor: isDark ? "#041B16" : "#F8FFFE",
           borderColor: accent + "30",
           borderLeftColor: accent,
         },
@@ -190,7 +190,7 @@ function DoseCard({
               style={[
                 dStyles.concInput,
                 {
-                  backgroundColor: isDark ? "#112240" : "#F0F4F8",
+                  backgroundColor: isDark ? "#0B352B" : "#F0F4F8",
                   borderColor: accent + "40",
                   color: textPrimary,
                   fontFamily: "Inter_400Regular",
@@ -222,11 +222,11 @@ export default function FormularyDrugDetail() {
   const drug = FORMULARY_DRUGS.find((d) => d.id === id);
   const topPadding = Platform.OS === "web" ? 67 : insets.top;
 
-  const bg = isDark ? "#0B132B" : "#F0F9FF";
-  const cardBg = isDark ? "#112240" : "#FFFFFF";
+  const bg = isDark ? "#06231D" : "#F0F9FF";
+  const cardBg = isDark ? "#0B352B" : "#FFFFFF";
   const textPrimary = isDark ? "#FFFFFF" : "#0D1B2A";
-  const textMuted = isDark ? "#8892B0" : "#64748B";
-  const borderColor = isDark ? "#233554" : "#E4EDF4";
+  const textMuted = isDark ? "#83ACA1" : "#64748B";
+  const borderColor = isDark ? "#1D5243" : "#E4EDF4";
 
   if (!drug) {
     return (

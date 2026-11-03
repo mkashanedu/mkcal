@@ -65,7 +65,7 @@ function RolePicker({
         activeOpacity={0.8}
         style={[
           styles.fieldWrap,
-          { backgroundColor: isDark ? "#0D2137" : "#F8FAFF", borderColor: open ? teal : border },
+          { backgroundColor: isDark ? "#08362B" : "#F8FAFF", borderColor: open ? teal : border },
         ]}
       >
         <Feather name="briefcase" size={15} color={tm} style={{ marginRight: 8 }} />
@@ -143,7 +143,7 @@ function SocialButton({
         {
           backgroundColor: isApple
             ? isDark ? "#FFFFFF" : "#000000"
-            : isDark ? "#1A2F4A" : "#FFFFFF",
+            : isDark ? "#173F31" : "#FFFFFF",
           borderColor: isApple ? "transparent" : border,
         },
       ]}
@@ -202,13 +202,13 @@ export default function LoginScreen() {
   // Social scaffold state
   const [socialLoading, setSocialLoading] = useState<"google" | "apple" | null>(null);
 
-  const teal    = "#0891B2";
-  const bg      = isDark ? "#0B132B" : "#F0F9FF";
-  const card    = isDark ? "#0A192F" : "#FFFFFF";
+  const teal    = "#0D9488";
+  const bg      = isDark ? "#06231D" : "#F0F9FF";
+  const card    = isDark ? "#041B16" : "#FFFFFF";
   const border  = isDark ? "#1E3A5F" : "#E2EFF6";
-  const inputBg = isDark ? "#0D2137" : "#F8FAFF";
+  const inputBg = isDark ? "#08362B" : "#F8FAFF";
   const tp      = isDark ? "#FFFFFF" : "#0D1B2A";
-  const tm      = isDark ? "#8892B0" : "#64748B";
+  const tm      = isDark ? "#83ACA1" : "#64748B";
 
   const inputStyle = {
     flex: 1,
@@ -438,7 +438,7 @@ export default function LoginScreen() {
           </View>
 
           {/* Tab switcher */}
-          <View style={[styles.tabs, { backgroundColor: isDark ? "#0D2137" : "#EFF6FF", borderColor: border }]}>
+          <View style={[styles.tabs, { backgroundColor: isDark ? "#08362B" : "#EFF6FF", borderColor: border }]}>
             {(["login", "register"] as Tab[]).map((t) => (
               <TouchableOpacity
                 key={t}

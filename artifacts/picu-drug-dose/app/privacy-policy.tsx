@@ -21,11 +21,11 @@ export default function PrivacyPolicyScreen() {
   const { isDark } = useTheme();
   const insets = useSafeAreaInsets();
 
-  const bg = isDark ? "#0B132B" : "#F0F9FF";
-  const card = isDark ? "#112240" : "#FFFFFF";
+  const bg = isDark ? "#06231D" : "#F0F9FF";
+  const card = isDark ? "#0B352B" : "#FFFFFF";
   const textPrimary = isDark ? "#E2E8F0" : "#0D1B2A";
-  const textMuted = isDark ? "#8892B0" : "#64748B";
-  const border = isDark ? "#233554" : "#E2EFF6";
+  const textMuted = isDark ? "#83ACA1" : "#64748B";
+  const border = isDark ? "#1D5243" : "#E2EFF6";
 
   const sections = [
     {
@@ -68,7 +68,7 @@ export default function PrivacyPolicyScreen() {
           styles.header,
           {
             paddingTop: Platform.OS === "web" ? 20 : insets.top + 12,
-            backgroundColor: isDark ? "#0A192F" : "#FFFFFF",
+            backgroundColor: isDark ? "#041B16" : "#FFFFFF",
             borderBottomColor: border,
           },
         ]}
@@ -76,7 +76,7 @@ export default function PrivacyPolicyScreen() {
         <View style={styles.headerRow}>
           <TouchableOpacity
             onPress={() => goBack(router)}
-            style={[styles.backBtn, { backgroundColor: isDark ? "#1A2F4A" : "#F0F4F8" }]}
+            style={[styles.backBtn, { backgroundColor: isDark ? "#173F31" : "#F0F4F8" }]}
             activeOpacity={0.7}
           >
             <Feather name="arrow-left" size={18} color={teal} />
@@ -86,7 +86,7 @@ export default function PrivacyPolicyScreen() {
               Privacy Policy
             </Text>
             <Text style={[styles.headerSub, { color: textMuted }]}>
-              MKashanEdu Clinical Suite
+              PeadsCal Clinical Suite
             </Text>
           </View>
         </View>
@@ -103,7 +103,7 @@ export default function PrivacyPolicyScreen() {
         <View style={[styles.introCard, { backgroundColor: teal + "14", borderColor: teal + "40" }]}>
           <Feather name="info" size={18} color={teal} />
           <Text style={[styles.introText, { color: teal }]}>
-            MKashanEdu Privacy Policy — Last updated: June 2026
+            PeadsCal Privacy Policy — Last updated: June 2026
           </Text>
         </View>
 
@@ -127,12 +127,15 @@ export default function PrivacyPolicyScreen() {
         ))}
 
         {/* Footer */}
-        <View style={[styles.footerCard, { backgroundColor: isDark ? "#112240" : "#F8FAFD", borderColor: border }]}>
+        <View style={[styles.footerCard, { backgroundColor: isDark ? "#0B352B" : "#F8FAFD", borderColor: border }]}>
           <Text style={[styles.footerText, { color: textMuted }]}>
             Developed by M. Kashan, RN
           </Text>
           <Text style={[styles.footerSub, { color: isDark ? "#2D4A6A" : "#CBD5E0" }]}>
             PeadsCal · Educational Use Only
+          </Text>
+          <Text style={[styles.footerSub, { color: textMuted, marginTop: 6 }]}>
+            Contact: mkstudio.support@gmail.com
           </Text>
         </View>
       </ScrollView>

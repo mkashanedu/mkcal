@@ -26,7 +26,7 @@ type VentTab = "calculator" | "modes" | "protocols" | "waveforms";
 // ─── CONSTANTS ────────────────────────────────────────────────────────────────
 // PALICC 2023 / Harriet Lane Vt targets (mL/kg IBW)
 const VT_TARGETS: Record<Pathology, { min: number; max: number; label: string; color: string; description: string }> = {
-  "normal":         { min: 6,  max: 8,  label: "Normal Lungs", color: "#0891B2", description: "Physiological tidal volume · Standard I:E 1:2 · PEEP 5 cmH₂O" },
+  "normal":         { min: 6,  max: 8,  label: "Normal Lungs", color: "#0D9488", description: "Physiological tidal volume · Standard I:E 1:2 · PEEP 5 cmH₂O" },
   "asthma":         { min: 8,  max: 10, label: "Asthma", color: "#7C3AED", description: "Prolonged expiratory time · Low RR · Avoid dynamic hyperinflation" },
   "mild-moderate":  { min: 6,  max: 8,  label: "Mild / Moderate PARDS", color: "#D97706", description: "Lung-protective ventilation · PALICC 2023 · Pplat < 28 cmH₂O" },
   "severe":         { min: 4,  max: 6,  label: "Severe PARDS",          color: "#DC2626", description: "Ultra-protective LPV · Permissive hypercapnia · SpO₂ 88–92% acceptable" },
@@ -65,7 +65,7 @@ const HAMILTON_MODES = [
     name: "APVcmv",
     full: "Adaptive Pressure Ventilation — Controlled Mandatory Ventilation",
     icon: "cpu" as const,
-    color: "#0891B2",
+    color: "#0D9488",
     description: "Volume-targeted, pressure-controlled mandatory breaths. Automatically adjusts inspiratory pressure breath-by-breath to deliver the set tidal volume at the lowest possible pressure. Ideal for lung-protective ventilation in PARDS.",
     indication: "PARDS · Post-op · Full ventilatory support needed",
     key_settings: ["Set Vt (mL/kg)", "RR (mandatory)", "PEEP", "FiO₂"],
@@ -139,7 +139,7 @@ const HAMILTON_MODES = [
     name: "NIV / NIV-ST",
     full: "Non-Invasive Ventilation (Spontaneous / Timed)",
     icon: "shield" as const,
-    color: "#0EA5E9",
+    color: "#14B8A6",
     description: "Delivers IPAP (inspiratory positive airway pressure) and EPAP (expiratory = PEEP) via mask. NIV mode is spontaneous-only; NIV-ST adds a timed backup rate. Includes IntelliTrig for automatic leak compensation — essential for paediatric mask interfaces.",
     indication: "Respiratory failure without intubation · Post-extubation support · Bronchiolitis · Asthma",
     key_settings: ["IPAP", "EPAP", "Backup RR (ST only)", "Ti", "FiO₂", "Leak compensation"],
@@ -253,12 +253,12 @@ export function VentilatorTool() {
   const { weight: ctxWeight } = useWeight();
 
   // Theme colours
-  const bg    = isDark ? "#0B132B" : "#F0F4F8";
-  const card  = isDark ? "#112240" : "#FFFFFF";
-  const border = isDark ? "#233554" : "#E2E8F0";
-  const tp    = isDark ? "#CCD6F6" : "#0D1B2A";
-  const tm    = isDark ? "#8892B0" : "#8A9BB0";
-  const inputBg = isDark ? "#0A192F" : "#F8FAFC";
+  const bg    = isDark ? "#06231D" : "#F0F4F8";
+  const card  = isDark ? "#0B352B" : "#FFFFFF";
+  const border = isDark ? "#1D5243" : "#E2E8F0";
+  const tp    = isDark ? "#C9E8DF" : "#0D1B2A";
+  const tm    = isDark ? "#83ACA1" : "#8A9BB0";
+  const inputBg = isDark ? "#041B16" : "#F8FAFC";
 
   // Tab navigation
   const [activeTab, setActiveTab] = useState<VentTab>("calculator");
@@ -451,11 +451,11 @@ export function VentilatorTool() {
                   key={p} onPress={() => { setPathology(p); setIeRatio(p === "asthma" ? "1:3" : "1:2"); }}
                   style={[s.pathBtn, {
                     borderColor: sel ? t.color : border,
-                    backgroundColor: sel ? t.color + "14" : isDark ? "#0A192F" : "#F8FAFC",
+                    backgroundColor: sel ? t.color + "14" : isDark ? "#041B16" : "#F8FAFC",
                   }]}
                   activeOpacity={0.75}
                 >
-                  <View style={[s.pathDot, { backgroundColor: sel ? t.color : (isDark ? "#233554" : "#CBD5E1") }]} />
+                  <View style={[s.pathDot, { backgroundColor: sel ? t.color : (isDark ? "#1D5243" : "#CBD5E1") }]} />
                   <View style={{ flex: 1 }}>
                     <Text style={{ fontSize: 13, fontWeight: "700", color: sel ? t.color : tp }}>{t.label}</Text>
                     <Text style={{ fontSize: 11, color: tm, marginTop: 2 }}>Vt {t.min}–{t.max} mL/kg · {t.description.split(" · ")[0]}</Text>
@@ -470,8 +470,8 @@ export function VentilatorTool() {
         {/* Patient Weight */}
         <View style={[s.card, { backgroundColor: card, borderColor: border }]}>
           <View style={s.cardHeader}>
-            <View style={[s.iconBadge, { backgroundColor: "#0891B215" }]}>
-              <Feather name="user" size={16} color="#0891B2" />
+            <View style={[s.iconBadge, { backgroundColor: "#0D948815" }]}>
+              <Feather name="user" size={16} color="#0D9488" />
             </View>
             <Text style={[s.cardTitle, { color: tp }]}>Patient Weight</Text>
           </View>
@@ -480,15 +480,15 @@ export function VentilatorTool() {
             {ctxWeight > 0 && (
               <TouchableOpacity onPress={() => setWeight(ctxWeight.toString())}
                 style={{ marginTop: 6, flexDirection: "row", alignItems: "center", gap: 6 }}>
-                <Feather name="link" size={12} color="#0891B2" />
-                <Text style={{ fontSize: 12, color: "#0891B2", fontWeight: "600" }}>
+                <Feather name="link" size={12} color="#0D9488" />
+                <Text style={{ fontSize: 12, color: "#0D9488", fontWeight: "600" }}>
                   Use global weight: {ctxWeight} kg
                 </Text>
               </TouchableOpacity>
             )}
-            <View style={[s.infoBanner, { backgroundColor: "#0891B210", borderColor: "#0891B230", marginTop: 10 }]}>
-              <Feather name="info" size={13} color="#0891B2" />
-              <Text style={{ fontSize: 11, color: isDark ? "#8892B0" : "#475569", flex: 1, lineHeight: 16 }}>
+            <View style={[s.infoBanner, { backgroundColor: "#0D948810", borderColor: "#0D948830", marginTop: 10 }]}>
+              <Feather name="info" size={13} color="#0D9488" />
+              <Text style={{ fontSize: 11, color: isDark ? "#83ACA1" : "#475569", flex: 1, lineHeight: 16 }}>
                 Use Ideal Body Weight (IBW) for tidal volume calculation, especially in obese patients.
                 IBW estimation: Boys: 50 + 2.3 × (height in cm − 152.4) / 2.54 · Girls: 45.5 + 2.3 × (height in cm − 152.4) / 2.54
               </Text>
@@ -543,12 +543,12 @@ export function VentilatorTool() {
               {/* Minute Ventilation */}
               {rrNum > 0 && mv !== null && (
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 10, padding: 10,
-                  borderRadius: 10, backgroundColor: isDark ? "#0A192F" : "#F0F9FF",
-                  borderWidth: 1, borderColor: "#0891B230" }}>
-                  <Feather name="activity" size={16} color="#0891B2" />
+                  borderRadius: 10, backgroundColor: isDark ? "#041B16" : "#F0F9FF",
+                  borderWidth: 1, borderColor: "#0D948830" }}>
+                  <Feather name="activity" size={16} color="#0D9488" />
                   <View>
                     <Text style={{ fontSize: 11, color: tm }}>{vtMeasNum > 0 ? "Minute Ventilation (measured Vt)" : "Estimated Minute Ventilation (using midpoint Vt)"}</Text>
-                    <Text style={{ fontSize: 18, fontWeight: "800", color: "#0891B2" }}>
+                    <Text style={{ fontSize: 18, fontWeight: "800", color: "#0D9488" }}>
                       {mv} L/min
                     </Text>
                     <Text style={{ fontSize: 11, color: tm }}>{rrNum} breaths/min × {mvVt} mL</Text>
@@ -589,7 +589,7 @@ export function VentilatorTool() {
             {ti !== null && te !== null && (
               <View style={[s.infoBanner, { backgroundColor: "#16A34A10", borderColor: "#16A34A30" }]}>
                 <Feather name="clock" size={13} color="#16A34A" />
-                <Text style={{ fontSize: 12, color: isDark ? "#8892B0" : "#475569", flex: 1, fontWeight: "600" }}>
+                <Text style={{ fontSize: 12, color: isDark ? "#83ACA1" : "#475569", flex: 1, fontWeight: "600" }}>
                   Ti {ti} s · Te {te} s — full cycle {cycleT?.toFixed(2)} s at RR {rrNum}/min (I:E {ieRatio})
                 </Text>
               </View>
@@ -598,24 +598,24 @@ export function VentilatorTool() {
             {/* Age-based RR guidance */}
             <View style={[s.infoBanner, { backgroundColor: "#16A34A10", borderColor: "#16A34A30" }]}>
               <Feather name="info" size={13} color="#16A34A" />
-              <Text style={{ fontSize: 11, color: isDark ? "#8892B0" : "#475569", flex: 1, lineHeight: 16 }}>
+              <Text style={{ fontSize: 11, color: isDark ? "#83ACA1" : "#475569", flex: 1, lineHeight: 16 }}>
                 Age-based RR guide: Neonate 40–60 · Infant 30–40 · 1–5 yr 20–30 · 6–11 yr 18–24 · ≥12 yr 12–20
               </Text>
             </View>
 
             {/* I:E guidance */}
             <View style={[s.infoBanner, {
-              backgroundColor: pathology === "asthma" ? "#7C3AED10" : "#0891B210",
-              borderColor: pathology === "asthma" ? "#7C3AED30" : "#0891B230",
+              backgroundColor: pathology === "asthma" ? "#7C3AED10" : "#0D948810",
+              borderColor: pathology === "asthma" ? "#7C3AED30" : "#0D948830",
             }]}>
-              <Feather name="sliders" size={13} color={pathology === "asthma" ? "#7C3AED" : "#0891B2"} />
+              <Feather name="sliders" size={13} color={pathology === "asthma" ? "#7C3AED" : "#0D9488"} />
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 12, fontWeight: "700", color: pathology === "asthma" ? "#7C3AED" : "#0891B2", marginBottom: 2 }}>
+                <Text style={{ fontSize: 12, fontWeight: "700", color: pathology === "asthma" ? "#7C3AED" : "#0D9488", marginBottom: 2 }}>
                   {pathology === "asthma" ? "Asthma I:E Target: 1:3 to 1:4 (prolonged expiration)"
                     : pathology === "normal" ? "Normal Lungs I:E: 1:2 (standard)"
                     : "Standard I:E: 1:2"}
                 </Text>
-                <Text style={{ fontSize: 11, color: isDark ? "#8892B0" : "#475569", lineHeight: 16 }}>
+                <Text style={{ fontSize: 11, color: isDark ? "#83ACA1" : "#475569", lineHeight: 16 }}>
                   {pathology === "asthma"
                     ? "Critical in asthma: prolonged expiratory time prevents auto-PEEP and dynamic hyperinflation. Keep RR low (10–14/min) to allow full exhalation. Low PEEP (3–5 cmH₂O) or even 0."
                     : pathology === "normal"
@@ -678,7 +678,7 @@ export function VentilatorTool() {
                   const highlighted = peepSuggestion === row;
                   return (
                     <View key={i} style={[s.tableRow, {
-                      backgroundColor: highlighted ? tc + "15" : (i % 2 === 0 ? (isDark ? "#0A192F" : "#F8FAFC") : "transparent"),
+                      backgroundColor: highlighted ? tc + "15" : (i % 2 === 0 ? (isDark ? "#041B16" : "#F8FAFC") : "transparent"),
                       borderColor: highlighted ? tc : "transparent",
                       borderWidth: highlighted ? 1.5 : 0,
                       borderRadius: highlighted ? 8 : 0,
@@ -766,7 +766,7 @@ export function VentilatorTool() {
                     <Text style={{ fontSize: 13, fontWeight: "800", color: critical ? "#DC2626" : "#D97706", marginBottom: 4 }}>
                       {critical ? "CRITICAL: Pressure limit exceeded" : "WARNING: Pressure threshold exceeded"}
                     </Text>
-                    <Text style={{ fontSize: 12, color: isDark ? "#8892B0" : "#475569", lineHeight: 17 }}>
+                    <Text style={{ fontSize: 12, color: isDark ? "#83ACA1" : "#475569", lineHeight: 17 }}>
                       {critical
                         ? "Immediate action required: Reduce Vt or PC · Increase PEEP · Consider NMB · Reassess lung mechanics"
                         : "Consider reducing tidal volume or pressure control · Check compliance · Reassess pathology"}
@@ -866,10 +866,10 @@ export function VentilatorTool() {
 
         {/* Summary Box */}
         {wt > 0 && (
-          <View style={[s.card, { backgroundColor: isDark ? "#0F1F2E" : "#F0F9FF", borderColor: "#0891B240", borderWidth: 1.5 }]}>
+          <View style={[s.card, { backgroundColor: isDark ? "#0F1F2E" : "#F0F9FF", borderColor: "#0D948840", borderWidth: 1.5 }]}>
             <View style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10 }}>
-              <Feather name="clipboard" size={16} color="#0891B2" />
-              <Text style={[s.cardTitle, { color: "#0891B2" }]}>Initial Settings Summary</Text>
+              <Feather name="clipboard" size={16} color="#0D9488" />
+              <Text style={[s.cardTitle, { color: "#0D9488" }]}>Initial Settings Summary</Text>
             </View>
             {[
               { label: "Mode", value: pathology === "asthma" ? "APVcmv (Volume control)" : "APVcmv or PCV+" },
@@ -883,7 +883,7 @@ export function VentilatorTool() {
               { label: "SpO₂ target", value: pathology === "severe" ? "88–92% (permissive hypoxaemia)" : pathology === "normal" ? "94–98%" : pathology === "asthma" ? "≥ 92%" : "92–98%" },
               { label: "pH target", value: "≥ 7.20 (permissive hypercapnia)" },
             ].map((row) => (
-              <View key={row.label} style={{ flexDirection: "row", paddingVertical: 5, borderBottomWidth: 1, borderBottomColor: isDark ? "#1A2A4A" : "#E2F4FB" }}>
+              <View key={row.label} style={{ flexDirection: "row", paddingVertical: 5, borderBottomWidth: 1, borderBottomColor: isDark ? "#14362C" : "#E2F4FB" }}>
                 <Text style={{ fontSize: 12, color: tm, flex: 1 }}>{row.label}</Text>
                 <Text style={{ fontSize: 12, fontWeight: "700", color: tp, flex: 1.5, textAlign: "right" }}>{row.value}</Text>
               </View>
@@ -909,11 +909,11 @@ export function VentilatorTool() {
     return (
       <View style={{ gap: 10 }}>
         {/* Header */}
-        <View style={[s.card, { backgroundColor: "#0891B215", borderColor: "#0891B240" }]}>
+        <View style={[s.card, { backgroundColor: "#0D948815", borderColor: "#0D948840" }]}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-            <Feather name="cpu" size={20} color="#0891B2" />
+            <Feather name="cpu" size={20} color="#0D9488" />
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 15, fontWeight: "800", color: "#0891B2" }}>Hamilton C3 — Mode Dictionary</Text>
+              <Text style={{ fontSize: 15, fontWeight: "800", color: "#0D9488" }}>Hamilton C3 — Mode Dictionary</Text>
               <Text style={{ fontSize: 11, color: tm, marginTop: 2 }}>
                 Hamilton Medical · {HAMILTON_MODES.length} ventilation modes · Tap to expand
               </Text>
@@ -967,7 +967,7 @@ export function VentilatorTool() {
                   {/* Indication */}
                   <View style={[s.infoBanner, { backgroundColor: mode.color + "10", borderColor: mode.color + "30" }]}>
                     <Feather name="check" size={13} color={mode.color} />
-                    <Text style={{ fontSize: 12, color: isDark ? "#8892B0" : "#475569", flex: 1 }}>
+                    <Text style={{ fontSize: 12, color: isDark ? "#83ACA1" : "#475569", flex: 1 }}>
                       <Text style={{ fontWeight: "700", color: mode.color }}>Indication: </Text>
                       {mode.indication}
                     </Text>
@@ -990,7 +990,7 @@ export function VentilatorTool() {
                   {mode.warning && (
                     <View style={[s.alertBanner, { backgroundColor: "#DC262612", borderColor: "#DC262640" }]}>
                       <Feather name="alert-triangle" size={14} color="#DC2626" />
-                      <Text style={{ fontSize: 12, color: isDark ? "#8892B0" : "#475569", flex: 1, lineHeight: 17 }}>
+                      <Text style={{ fontSize: 12, color: isDark ? "#83ACA1" : "#475569", flex: 1, lineHeight: 17 }}>
                         <Text style={{ fontWeight: "700", color: "#DC2626" }}>Warning: </Text>
                         {mode.warning}
                       </Text>
@@ -1020,11 +1020,11 @@ export function VentilatorTool() {
     const key = title;
     const open = expandedSection === key;
     return (
-      <View style={{ borderRadius: 10, overflow: "hidden", borderWidth: 1, borderColor: isDark ? "#233554" : "#E2E8F0" }}>
+      <View style={{ borderRadius: 10, overflow: "hidden", borderWidth: 1, borderColor: isDark ? "#1D5243" : "#E2E8F0" }}>
         <TouchableOpacity
           onPress={() => setExpandedSection(open ? null : key)}
           style={{ flexDirection: "row", alignItems: "center", gap: 10, padding: 12,
-            backgroundColor: open ? color + "10" : (isDark ? "#0A192F" : "#F8FAFC") }}
+            backgroundColor: open ? color + "10" : (isDark ? "#041B16" : "#F8FAFC") }}
           activeOpacity={0.8}
         >
           <Feather name={open ? "chevron-up" : "chevron-down"} size={16} color={color} />
@@ -1155,7 +1155,7 @@ export function VentilatorTool() {
                     onPress={() => setExtub((prev) => prev.map((v, idx) => (idx === i ? !v : v)))}
                     style={{ flexDirection: "row", alignItems: "center", gap: 10, padding: 10, borderRadius: 8,
                       borderWidth: 1, borderColor: on ? "#16A34A50" : border,
-                      backgroundColor: on ? "#16A34A10" : (isDark ? "#0A192F" : "#F8FAFC") }}>
+                      backgroundColor: on ? "#16A34A10" : (isDark ? "#041B16" : "#F8FAFC") }}>
                     <Feather name={on ? "check-square" : "square"} size={17} color={on ? "#16A34A" : tm} />
                     <Text style={{ fontSize: 12, color: tp, flex: 1, lineHeight: 17 }}>{item}</Text>
                   </TouchableOpacity>
@@ -1238,7 +1238,7 @@ export function VentilatorTool() {
 
             <View style={[s.infoBanner, { backgroundColor: "#0D948810", borderColor: "#0D948830", marginBottom: 10 }]}>
               <Feather name="info" size={13} color="#0D9488" />
-              <Text style={{ fontSize: 11, color: isDark ? "#8892B0" : "#475569", flex: 1, lineHeight: 16 }}>
+              <Text style={{ fontSize: 11, color: isDark ? "#83ACA1" : "#475569", flex: 1, lineHeight: 16 }}>
                 PALICC 2023: HFOV is a rescue / salvage option in severe PARDS when conventional lung-protective ventilation fails — not first line.
               </Text>
             </View>
@@ -1254,7 +1254,7 @@ export function VentilatorTool() {
                   { label: "MAP (direct start)", value: hfovMapStart ?? "—" },
                   { label: "Bias flow (by age)", value: "Neonate 15–20 · <1 yr 15–25 · 1–8 yr 15–30 · ≥8 yr 25–40 L/min" },
                 ].map((row) => (
-                  <View key={row.label} style={{ flexDirection: "row", paddingVertical: 5, borderBottomWidth: 1, borderBottomColor: isDark ? "#1A2A4A" : "#E2E8F0" }}>
+                  <View key={row.label} style={{ flexDirection: "row", paddingVertical: 5, borderBottomWidth: 1, borderBottomColor: isDark ? "#14362C" : "#E2E8F0" }}>
                     <Text style={{ fontSize: 12, color: tm, flex: 1 }}>{row.label}</Text>
                     <Text style={{ fontSize: 12, fontWeight: "700", color: tp, flex: 1.6, textAlign: "right" }}>{row.value}</Text>
                   </View>
@@ -1312,7 +1312,7 @@ export function VentilatorTool() {
   // ROOT RENDER
   // ─────────────────────────────────────────────────────────────────────────
   const TABS: { key: VentTab; label: string; icon: string; color: string }[] = [
-    { key: "calculator", label: "Calculator",  icon: "sliders",   color: "#0891B2" },
+    { key: "calculator", label: "Calculator",  icon: "sliders",   color: "#0D9488" },
     { key: "modes",      label: "C3 Modes",    icon: "cpu",       color: "#7C3AED" },
     { key: "protocols",  label: "Protocols",   icon: "file-text", color: "#DC2626" },
     { key: "waveforms",  label: "Waveforms",   icon: "activity",  color: "#0D9488" },

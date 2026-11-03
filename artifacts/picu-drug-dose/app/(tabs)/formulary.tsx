@@ -36,13 +36,13 @@ export default function FormularyScreen() {
   const [weightInputError, setWeightInputError] = useState("");
   const [weightRangeWarning, setWeightRangeWarning] = useState(false);
 
-  const bg = isDark ? "#0B132B" : "#F0F9FF";
-  const cardBg = isDark ? "#112240" : "#FFFFFF";
+  const bg = isDark ? "#06231D" : "#F0F9FF";
+  const cardBg = isDark ? "#0B352B" : "#FFFFFF";
   const textPrimary = isDark ? "#FFFFFF" : "#0D1B2A";
-  const textMuted = isDark ? "#8892B0" : "#64748B";
-  const borderColor = isDark ? "#233554" : "#E4EDF4";
-  const inputBg = isDark ? "#0A192F" : "#F0F4F8";
-  const accent = "#0891B2";
+  const textMuted = isDark ? "#83ACA1" : "#64748B";
+  const borderColor = isDark ? "#1D5243" : "#E4EDF4";
+  const inputBg = isDark ? "#041B16" : "#F0F4F8";
+  const accent = "#0D9488";
 
   const categories = Object.entries(FORMULARY_CATEGORIES) as [
     FormularyCategory,
@@ -110,16 +110,16 @@ export default function FormularyScreen() {
       <View
         style={[
           styles.header,
-          { paddingTop: topPadding + 12, backgroundColor: isDark ? "#0A192F" : "#FFFFFF" },
+          { paddingTop: topPadding + 12, backgroundColor: isDark ? "#041B16" : "#FFFFFF" },
         ]}
       >
         <View style={styles.headerRow}>
           <TouchableOpacity
             onPress={openDrawer}
-            style={[styles.hamburgerBtn, { backgroundColor: isDark ? "#233554" : "#F0F4F8" }]}
+            style={[styles.hamburgerBtn, { backgroundColor: isDark ? "#1D5243" : "#F0F4F8" }]}
             activeOpacity={0.7}
           >
-            <Feather name="menu" size={20} color={isDark ? "#8892B0" : colors.tint} />
+            <Feather name="menu" size={20} color={isDark ? "#83ACA1" : colors.tint} />
           </TouchableOpacity>
           <View style={{ flex: 1, minWidth: 0 }}>
             <Text
@@ -137,7 +137,7 @@ export default function FormularyScreen() {
           </View>
           <TouchableOpacity
             onPress={toggleDark}
-            style={[styles.nightToggle, { backgroundColor: isDark ? "#233554" : "#F0F4F8" }]}
+            style={[styles.nightToggle, { backgroundColor: isDark ? "#1D5243" : "#F0F4F8" }]}
             activeOpacity={0.7}
           >
             <Feather name={isDark ? "sun" : "moon"} size={16} color={isDark ? "#FFD700" : colors.tint} />

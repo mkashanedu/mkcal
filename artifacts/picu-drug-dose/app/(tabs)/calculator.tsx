@@ -156,24 +156,24 @@ export default function CalculatorScreen() {
   const categories = Object.entries(CATEGORIES) as [DrugCategory, typeof CATEGORIES[DrugCategory]][];
 
   return (
-    <View style={[styles.container, { backgroundColor: isDark ? "#0B132B" : "#F0F4F8" }]}>
+    <View style={[styles.container, { backgroundColor: isDark ? "#06231D" : "#F0F4F8" }]}>
       {/* Header */}
       <View
         style={[
           styles.header,
           {
             paddingTop: topPadding + 12,
-            backgroundColor: isDark ? "#0A192F" : "#FFFFFF",
+            backgroundColor: isDark ? "#041B16" : "#FFFFFF",
           },
         ]}
       >
         <View style={styles.headerRow}>
           <TouchableOpacity
             onPress={openDrawer}
-            style={[styles.hamburgerBtn, { backgroundColor: isDark ? "#233554" : "#F0F4F8" }]}
+            style={[styles.hamburgerBtn, { backgroundColor: isDark ? "#1D5243" : "#F0F4F8" }]}
             activeOpacity={0.7}
           >
-            <Feather name="menu" size={20} color={isDark ? "#8892B0" : Colors.light.tint} />
+            <Feather name="menu" size={20} color={isDark ? "#83ACA1" : Colors.light.tint} />
           </TouchableOpacity>
           <View style={{ flex: 1, minWidth: 0 }}>
             <Text
@@ -183,12 +183,12 @@ export default function CalculatorScreen() {
               ]}
               numberOfLines={1}
             >
-              MKashanEdu
+              PeadsCal
             </Text>
             <Text
               style={[
                 styles.headerSubtitle,
-                { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" },
+                { color: isDark ? "#83ACA1" : "#8A9BB0", fontFamily: "Inter_400Regular" },
               ]}
             >
               Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 480 drugs
@@ -198,7 +198,7 @@ export default function CalculatorScreen() {
             onPress={toggleDark}
             style={[
               styles.nightToggle,
-              { backgroundColor: isDark ? "#233554" : "#F0F4F8" },
+              { backgroundColor: isDark ? "#1D5243" : "#F0F4F8" },
             ]}
             activeOpacity={0.7}
           >
@@ -219,11 +219,11 @@ export default function CalculatorScreen() {
         </View>
 
         {/* Compact 2-row input grid: Weight + Age */}
-        <View style={[styles.inputGrid, { backgroundColor: isDark ? "#233554" : "#F8FAFC" }]}>
+        <View style={[styles.inputGrid, { backgroundColor: isDark ? "#1D5243" : "#F8FAFC" }]}>
           {/* Row 1 — Weight */}
           <View style={styles.inputRow}>
             <Feather name="user" size={13} color={colors.tint} />
-            <Text style={[styles.inputRowLabel, { color: isDark ? "#CCD6F6" : "#4A5568", fontFamily: "Inter_500Medium" }]}>
+            <Text style={[styles.inputRowLabel, { color: isDark ? "#C9E8DF" : "#4A5568", fontFamily: "Inter_500Medium" }]}>
               Weight
             </Text>
             <TextInput
@@ -231,7 +231,7 @@ export default function CalculatorScreen() {
                 styles.compactInput,
                 {
                   color: visibleWeightError || weightWarning ? "#E53E3E" : isDark ? "#FFFFFF" : "#0D1B2A",
-                  backgroundColor: isDark ? "#0A192F" : "#FFFFFF",
+                  backgroundColor: isDark ? "#041B16" : "#FFFFFF",
                   fontFamily: "Inter_700Bold",
                   borderColor: visibleWeightError || weightWarning ? "#E53E3E" : "transparent",
                   borderWidth: visibleWeightError || weightWarning ? 1.5 : 0,
@@ -245,14 +245,14 @@ export default function CalculatorScreen() {
               placeholder="–"
               placeholderTextColor={isDark ? "#4D6E88" : "#CBD5E0"}
             />
-            <View style={[styles.pillGroup, { backgroundColor: isDark ? "#0A192F" : "#E8EDF2" }]}>
+            <View style={[styles.pillGroup, { backgroundColor: isDark ? "#041B16" : "#E8EDF2" }]}>
               {(["kg", "lbs"] as const).map((u) => (
                 <TouchableOpacity
                   key={u}
                   onPress={() => handleUnitToggle(u)}
                   style={[styles.pill, weightUnit === u && { backgroundColor: colors.tint }]}
                 >
-                  <Text style={[styles.pillText, { color: weightUnit === u ? "#fff" : isDark ? "#8892B0" : "#4A5568", fontFamily: "Inter_600SemiBold" }]}>
+                  <Text style={[styles.pillText, { color: weightUnit === u ? "#fff" : isDark ? "#83ACA1" : "#4A5568", fontFamily: "Inter_600SemiBold" }]}>
                     {u}
                   </Text>
                 </TouchableOpacity>
@@ -265,7 +265,7 @@ export default function CalculatorScreen() {
             )}
             <View style={styles.resetMiniSpacer} />
             <TouchableOpacity onPress={handleReset} style={styles.resetMini} activeOpacity={0.7}>
-              <Feather name="rotate-ccw" size={12} color={isDark ? "#8892B0" : "#4A5568"} />
+              <Feather name="rotate-ccw" size={12} color={isDark ? "#83ACA1" : "#4A5568"} />
             </TouchableOpacity>
           </View>
 
@@ -282,7 +282,7 @@ export default function CalculatorScreen() {
           {/* Row 2 — Age */}
           <View style={styles.inputRow}>
             <Feather name="clock" size={13} color={colors.tint} />
-            <Text style={[styles.inputRowLabel, { color: isDark ? "#CCD6F6" : "#4A5568", fontFamily: "Inter_500Medium" }]}>
+            <Text style={[styles.inputRowLabel, { color: isDark ? "#C9E8DF" : "#4A5568", fontFamily: "Inter_500Medium" }]}>
               Age
             </Text>
             <TextInput
@@ -290,7 +290,7 @@ export default function CalculatorScreen() {
                 styles.compactInput,
                 {
                   color: isDark ? "#FFFFFF" : "#0D1B2A",
-                  backgroundColor: isDark ? "#0A192F" : "#FFFFFF",
+                  backgroundColor: isDark ? "#041B16" : "#FFFFFF",
                   fontFamily: "Inter_700Bold",
                 },
               ]}
@@ -302,14 +302,14 @@ export default function CalculatorScreen() {
               placeholder="–"
               placeholderTextColor={isDark ? "#4D6E88" : "#CBD5E0"}
             />
-            <View style={[styles.pillGroup, { backgroundColor: isDark ? "#0A192F" : "#E8EDF2" }]}>
+            <View style={[styles.pillGroup, { backgroundColor: isDark ? "#041B16" : "#E8EDF2" }]}>
               {(["yrs", "mths"] as const).map((u) => (
                 <TouchableOpacity
                   key={u}
                   onPress={() => handleAgeUnitChange(u)}
                   style={[styles.pill, ageUnit === u && { backgroundColor: colors.tint }]}
                 >
-                  <Text style={[styles.pillText, { color: ageUnit === u ? "#fff" : isDark ? "#8892B0" : "#4A5568", fontFamily: "Inter_600SemiBold" }]}>
+                  <Text style={[styles.pillText, { color: ageUnit === u ? "#fff" : isDark ? "#83ACA1" : "#4A5568", fontFamily: "Inter_600SemiBold" }]}>
                     {u}
                   </Text>
                 </TouchableOpacity>
@@ -339,7 +339,7 @@ export default function CalculatorScreen() {
                   styles.quickWeightBtn,
                   {
                     backgroundColor: weight === w ? colors.tint : isDark ? "#0D1B2A" : "#FFFFFF",
-                    borderColor: weight === w ? colors.tint : isDark ? "#233554" : "#E2E8F0",
+                    borderColor: weight === w ? colors.tint : isDark ? "#1D5243" : "#E2E8F0",
                   },
                 ]}
               >
@@ -347,7 +347,7 @@ export default function CalculatorScreen() {
                   style={[
                     styles.quickWeightText,
                     {
-                      color: weight === w ? "#FFFFFF" : isDark ? "#8892B0" : "#4A5568",
+                      color: weight === w ? "#FFFFFF" : isDark ? "#83ACA1" : "#4A5568",
                       fontFamily: weight === w ? "Inter_600SemiBold" : "Inter_400Regular",
                     },
                   ]}
@@ -360,19 +360,19 @@ export default function CalculatorScreen() {
         </View>
 
         {/* Search bar */}
-        <View style={[styles.searchBar, { backgroundColor: isDark ? "#0A192F" : "#EBF5FB" }]}>
+        <View style={[styles.searchBar, { backgroundColor: isDark ? "#041B16" : "#EBF5FB" }]}>
           <Feather name="search" size={16} color={isDark ? "#4D6E88" : Colors.light.tint} />
           <TextInput
             style={[styles.searchInput, { color: isDark ? "#FFFFFF" : "#0D1B2A", fontFamily: "Inter_400Regular" }]}
             placeholder="Search drugs, indications..."
-            placeholderTextColor={isDark ? "#8892B0" : "#8A9BB0"}
+            placeholderTextColor={isDark ? "#83ACA1" : "#8A9BB0"}
             value={search}
             onChangeText={setSearch}
             returnKeyType="search"
           />
           {search.length > 0 && (
             <Pressable onPress={() => setSearch("")}>
-              <Feather name="x" size={16} color={isDark ? "#8892B0" : "#8A9BB0"} />
+              <Feather name="x" size={16} color={isDark ? "#83ACA1" : "#8A9BB0"} />
             </Pressable>
           )}
         </View>
@@ -388,7 +388,7 @@ export default function CalculatorScreen() {
             style={[
               styles.catChip,
               {
-                backgroundColor: selectedCategory === null ? colors.tint : isDark ? "#233554" : "#F0F4F8",
+                backgroundColor: selectedCategory === null ? colors.tint : isDark ? "#1D5243" : "#F0F4F8",
               },
             ]}
           >
@@ -396,7 +396,7 @@ export default function CalculatorScreen() {
               style={[
                 styles.catChipText,
                 {
-                  color: selectedCategory === null ? "#fff" : isDark ? "#8892B0" : "#4A5568",
+                  color: selectedCategory === null ? "#fff" : isDark ? "#83ACA1" : "#4A5568",
                   fontFamily: "Inter_500Medium",
                 },
               ]}
@@ -412,7 +412,7 @@ export default function CalculatorScreen() {
                 styles.catChip,
                 {
                   backgroundColor:
-                    selectedCategory === key ? val.color : isDark ? "#233554" : "#F0F4F8",
+                    selectedCategory === key ? val.color : isDark ? "#1D5243" : "#F0F4F8",
                 },
               ]}
             >
@@ -420,7 +420,7 @@ export default function CalculatorScreen() {
                 style={[
                   styles.catChipText,
                   {
-                    color: selectedCategory === key ? "#fff" : isDark ? "#8892B0" : "#4A5568",
+                    color: selectedCategory === key ? "#fff" : isDark ? "#83ACA1" : "#4A5568",
                     fontFamily: "Inter_500Medium",
                   },
                 ]}
@@ -460,7 +460,7 @@ export default function CalculatorScreen() {
             <Text style={{ fontSize: 15, fontWeight: "800", color: isDark ? "#FFFFFF" : "#0D1B2A", marginTop: 1 }}>
               {activeCondition.label}
             </Text>
-            <Text style={{ fontSize: 11, color: isDark ? "#8892B0" : "#64748B", marginTop: 1 }}>
+            <Text style={{ fontSize: 11, color: isDark ? "#83ACA1" : "#64748B", marginTop: 1 }}>
               Medicines for this condition are included in the list below.
             </Text>
           </View>
@@ -474,7 +474,7 @@ export default function CalculatorScreen() {
               key={drug.id}
               style={[
                 styles.drugBlock,
-                { backgroundColor: isDark ? "#112240" : "#FFFFFF" },
+                { backgroundColor: isDark ? "#0B352B" : "#FFFFFF" },
               ]}
             >
               <View style={styles.drugBlockHeader}>
@@ -505,7 +505,7 @@ export default function CalculatorScreen() {
                       <Text
                         style={[
                           styles.drugBlockGeneric,
-                          { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular", fontSize: Math.round(12 * textScale) },
+                          { color: isDark ? "#83ACA1" : "#8A9BB0", fontFamily: "Inter_400Regular", fontSize: Math.round(12 * textScale) },
                         ]}
                       >
                         {drug.genericName}

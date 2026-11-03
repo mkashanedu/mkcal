@@ -71,10 +71,10 @@ function ResultDetail({ label, value, textColor, mutedColor }: { label: string; 
 }
 
 function RecipeCard({ recipe, drug, diluent, vialLabel, isDark }: { recipe: RecipeResult; drug: any; diluent: string; vialLabel: string; isDark: boolean }) {
-  const MUTED = isDark ? "#8892B0" : C.textMuted;
-  const SEC   = isDark ? "#8892B0" : C.textSecondary;
-  const TEXT  = isDark ? "#CCD6F6" : C.text;
-  const BORDER = isDark ? "#233554" : C.border;
+  const MUTED = isDark ? "#83ACA1" : C.textMuted;
+  const SEC   = isDark ? "#83ACA1" : C.textSecondary;
+  const TEXT  = isDark ? "#C9E8DF" : C.text;
+  const BORDER = isDark ? "#1D5243" : C.border;
   const drugMLStr  = recipe.drugML < 0.1 ? recipe.drugML.toFixed(3) : recipe.drugML < 10 ? recipe.drugML.toFixed(2) : recipe.drugML.toFixed(1);
   const diluentMLStr = recipe.diluentML < 1 ? recipe.diluentML.toFixed(2) : recipe.diluentML.toFixed(1);
   return (
@@ -100,7 +100,7 @@ function RecipeCard({ recipe, drug, diluent, vialLabel, isDark }: { recipe: Reci
           <Text style={[styles.recipeItemAmt, { color: MUTED }]}>to fill</Text>
         </View>
         <View style={styles.recipePlusCol}><Text style={[styles.recipePlus, { color: MUTED }]}>=</Text></View>
-        <View style={[styles.recipeItem, { backgroundColor: isDark ? "#0A192F" : "#F8FAFD", borderColor: BORDER }]}>
+        <View style={[styles.recipeItem, { backgroundColor: isDark ? "#041B16" : "#F8FAFD", borderColor: BORDER }]}>
           <Feather name="circle" size={11} color={SEC} />
           <Text style={[styles.recipeItemLabel, { color: TEXT }]}>Total</Text>
           <Text style={[styles.recipeItemSub, { color: MUTED }]}>(syringe)</Text>
@@ -148,12 +148,12 @@ export default function InfusionDetailScreen() {
 
   const fadeAnim = useRef(new Animated.Value(1)).current;
 
-  const BG    = isDark ? "#0B132B" : C.background;
-  const CARD  = isDark ? "#112240" : C.card;
-  const BORDER = isDark ? "#233554" : C.border;
+  const BG    = isDark ? "#06231D" : C.background;
+  const CARD  = isDark ? "#0B352B" : C.card;
+  const BORDER = isDark ? "#1D5243" : C.border;
   const TEXT  = isDark ? "#FFFFFF" : C.text;
-  const MUTED = isDark ? "#8892B0" : C.textMuted;
-  const SEC   = isDark ? "#CCD6F6" : C.textSecondary;
+  const MUTED = isDark ? "#83ACA1" : C.textMuted;
+  const SEC   = isDark ? "#C9E8DF" : C.textSecondary;
 
   const parsedWeight = Number(weight);
   const weightNum =
@@ -235,8 +235,8 @@ export default function InfusionDetailScreen() {
       >
         {/* ── HEADER ── */}
         <View style={[styles.header, { backgroundColor: CARD, borderBottomColor: BORDER }]}>
-          <TouchableOpacity onPress={() => goBack(router)} style={[styles.backBtn, { backgroundColor: isDark ? "#233554" : "#F0F4F8" }]}>
-            <Feather name="arrow-left" size={20} color={isDark ? "#8892B0" : C.tint} />
+          <TouchableOpacity onPress={() => goBack(router)} style={[styles.backBtn, { backgroundColor: isDark ? "#1D5243" : "#F0F4F8" }]}>
+            <Feather name="arrow-left" size={20} color={isDark ? "#83ACA1" : C.tint} />
           </TouchableOpacity>
           <View style={[styles.drugColorDot, { backgroundColor: selectedDrug.color }]} />
           <View style={{ flex: 1, minWidth: 0 }}>
@@ -331,7 +331,7 @@ export default function InfusionDetailScreen() {
                 <Text style={[styles.stepLabel, { color: TEXT }]}>Concentration</Text>
               </View>
 
-              <View style={[styles.modeTabs, { backgroundColor: isDark ? "#0A192F" : "#EBF5FB" }]}>
+              <View style={[styles.modeTabs, { backgroundColor: isDark ? "#041B16" : "#EBF5FB" }]}>
                 {(["standard", "dilution"] as ConcMode[]).map((mode) => (
                   <TouchableOpacity
                     key={mode}
@@ -451,7 +451,7 @@ export default function InfusionDetailScreen() {
                   <Text style={[styles.stepLabel, { color: TEXT }]}>Syringe Size & Recipe</Text>
                 </View>
 
-                <View style={[styles.syringeRow, { backgroundColor: isDark ? "#0A192F" : "#EBF5FB" }]}>
+                <View style={[styles.syringeRow, { backgroundColor: isDark ? "#041B16" : "#EBF5FB" }]}>
                   {SYRINGE_SIZES.map((ml) => (
                     <TouchableOpacity
                       key={ml}
@@ -676,7 +676,7 @@ const styles = StyleSheet.create({
   resultBox: {
     margin: 14, marginTop: 12, borderRadius: 24, padding: 24, borderWidth: 0,
     ...Platform.select({
-      ios: { shadowColor: "#0891B2", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.20, shadowRadius: 24 },
+      ios: { shadowColor: "#0D9488", shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.20, shadowRadius: 24 },
       android: { elevation: 8 },
       web: { boxShadow: "0 8px 32px rgba(8,145,178,0.18)" },
     }),

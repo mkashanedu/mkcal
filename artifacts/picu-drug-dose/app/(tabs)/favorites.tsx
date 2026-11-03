@@ -39,11 +39,11 @@ export default function FavoritesScreen() {
   const { openDrawer } = useDrawer();
   const topPadding = insets.top;
 
-  const bg = isDark ? "#0B132B" : "#F0F9FF";
-  const cardBg = isDark ? "#112240" : "#FFFFFF";
-  const border = isDark ? "#233554" : "#E2E8F0";
+  const bg = isDark ? "#06231D" : "#F0F9FF";
+  const cardBg = isDark ? "#0B352B" : "#FFFFFF";
+  const border = isDark ? "#1D5243" : "#E2E8F0";
   const textPrimary = isDark ? "#FFFFFF" : "#0D1B2A";
-  const textMuted = isDark ? "#8892B0" : "#64748B";
+  const textMuted = isDark ? "#83ACA1" : "#64748B";
 
   const grouped = items.reduce((acc, item) => {
     if (!acc[item.type]) acc[item.type] = [];
@@ -56,20 +56,20 @@ export default function FavoritesScreen() {
       <View
         style={[
           styles.header,
-          { paddingTop: topPadding + 12, backgroundColor: isDark ? "#0A192F" : "#FFFFFF" },
+          { paddingTop: topPadding + 12, backgroundColor: isDark ? "#041B16" : "#FFFFFF" },
         ]}
       >
         <View style={styles.headerRow}>
           <TouchableOpacity
             onPress={openDrawer}
-            style={[styles.hamburgerBtn, { backgroundColor: isDark ? "#233554" : "#F0F4F8" }]}
+            style={[styles.hamburgerBtn, { backgroundColor: isDark ? "#1D5243" : "#F0F4F8" }]}
             activeOpacity={0.7}
           >
-            <Feather name="menu" size={20} color={isDark ? "#8892B0" : "#0891B2"} />
+            <Feather name="menu" size={20} color={isDark ? "#83ACA1" : "#0D9488"} />
           </TouchableOpacity>
           <View style={{ flex: 1 }}>
             <Text style={[styles.headerTitle, { color: textPrimary }]}>
-              MKashanEdu
+              PeadsCal
             </Text>
             <Text style={[styles.headerSub, { color: textMuted }]}>
               Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 480 drugs
@@ -79,7 +79,7 @@ export default function FavoritesScreen() {
             onPress={toggleDark}
             style={[
               styles.nightBtn,
-              { backgroundColor: isDark ? "#233554" : "#F0F4F8" },
+              { backgroundColor: isDark ? "#1D5243" : "#F0F4F8" },
             ]}
           >
             <Feather
@@ -97,7 +97,7 @@ export default function FavoritesScreen() {
       >
         {items.length === 0 ? (
           <View style={styles.emptyState}>
-            <Feather name="star" size={48} color={isDark ? "#233554" : "#CBD5E0"} />
+            <Feather name="star" size={48} color={isDark ? "#1D5243" : "#CBD5E0"} />
             <Text style={[styles.emptyTitle, { color: textMuted }]}>
               No favorites yet
             </Text>
@@ -145,7 +145,7 @@ export default function FavoritesScreen() {
                   <View
                     style={[
                       styles.stripe,
-                      { backgroundColor: item.color || "#0891B2" },
+                      { backgroundColor: item.color || "#0D9488" },
                     ]}
                   />
                   <View style={styles.cardContent}>

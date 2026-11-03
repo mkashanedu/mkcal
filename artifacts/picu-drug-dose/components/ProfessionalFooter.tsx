@@ -13,8 +13,8 @@ export function ProfessionalFooter() {
       style={[
         styles.container,
         {
-          backgroundColor: D ? "#112240" : "#F0F9FF",
-          borderColor: D ? "#233554" : "#E4EDF4",
+          backgroundColor: D ? "#0B352B" : "#F0F9FF",
+          borderColor: D ? "#1D5243" : "#E4EDF4",
           borderLeftWidth: D ? 4 : 0,
           borderLeftColor: D ? "#0D9488" : "transparent",
           borderWidth: D ? 1 : 0,
@@ -24,7 +24,7 @@ export function ProfessionalFooter() {
       <View style={[styles.badge, { backgroundColor: D ? "#0D9488" : "#0D9488" }]}>
         <Feather name="activity" size={16} color="#FFFFFF" />
       </View>
-      <Text style={[styles.line1, { color: D ? "#8892B0" : "#64748B" }]}>
+      <Text style={[styles.line1, { color: D ? "#83ACA1" : "#64748B" }]}>
         PeadsCal · Pediatric Clinical Reference
       </Text>
       <Text style={[styles.byline, { color: D ? "#5A7094" : "#94A3B8" }]}>
@@ -33,8 +33,8 @@ export function ProfessionalFooter() {
       <Text style={[styles.line2, { color: D ? "#FFFFFF" : "#0F172A" }]}>
         M. Kashan, RN
       </Text>
-      <View style={[styles.divider, { backgroundColor: D ? "#233554" : "#E4EDF4" }]} />
-      <Text style={[styles.refs, { color: D ? "#8892B0" : "#64748B" }]}>
+      <View style={[styles.divider, { backgroundColor: D ? "#1D5243" : "#E4EDF4" }]} />
+      <Text style={[styles.refs, { color: D ? "#83ACA1" : "#64748B" }]}>
         References: Harriet Lane 24e · Nelson Pediatrics 22e · PALS 2025
       </Text>
       <Text style={[styles.meta, { color: D ? "#5A7094" : "#94A3B8" }]}>

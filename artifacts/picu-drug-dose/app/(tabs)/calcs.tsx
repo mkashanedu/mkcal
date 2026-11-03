@@ -34,12 +34,12 @@ function SectionHeader({ title, icon, color, open, onToggle, isDark }: {
 }) {
   return (
     <TouchableOpacity onPress={onToggle} activeOpacity={0.75}
-      style={[sh.header, { backgroundColor: isDark ? "#112240" : "#FFF", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
+      style={[sh.header, { backgroundColor: isDark ? "#0B352B" : "#FFF", borderColor: isDark ? "#1D5243" : "#E2E8F0" }]}>
       <View style={[sh.icon, { backgroundColor: color + "1A" }]}>
         <Feather name={icon as any} size={18} color={color} />
       </View>
-      <Text style={[sh.title, { color: isDark ? "#CCD6F6" : "#0D1B2A" }]}>{title}</Text>
-      <Feather name={open ? "chevron-up" : "chevron-down"} size={20} color={isDark ? "#8892B0" : "#8A9BB0"} />
+      <Text style={[sh.title, { color: isDark ? "#C9E8DF" : "#0D1B2A" }]}>{title}</Text>
+      <Feather name={open ? "chevron-up" : "chevron-down"} size={20} color={isDark ? "#83ACA1" : "#8A9BB0"} />
     </TouchableOpacity>
   );
 }
@@ -48,10 +48,10 @@ function InputField({ label, value, onChange, placeholder, unit, isDark }: {
   label: string; value: string; onChange: (t: string) => void;
   placeholder?: string; unit?: string; isDark: boolean;
 }) {
-  const border = isDark ? "#233554" : "#E2E8F0";
-  const bg = isDark ? "#0A192F" : "#F8FAFC";
-  const text = isDark ? "#CCD6F6" : "#0D1B2A";
-  const muted = isDark ? "#8892B0" : "#8A9BB0";
+  const border = isDark ? "#1D5243" : "#E2E8F0";
+  const bg = isDark ? "#041B16" : "#F8FAFC";
+  const text = isDark ? "#C9E8DF" : "#0D1B2A";
+  const muted = isDark ? "#83ACA1" : "#8A9BB0";
   return (
     <View style={sh.inputWrap}>
       <Text style={[sh.label, { color: muted }]}>{label}</Text>
@@ -88,7 +88,7 @@ function InfoBox({ color, title, text, isDark }: { color: string; title: string;
   return (
     <View style={[sh.infoBox, { backgroundColor: color + "10", borderColor: color + "30" }]}>
       <Text style={[sh.infoTitle, { color }]}>{title}</Text>
-      <Text style={[sh.infoText, { color: isDark ? "#8892B0" : "#475569" }]}>{text}</Text>
+      <Text style={[sh.infoText, { color: isDark ? "#83ACA1" : "#475569" }]}>{text}</Text>
     </View>
   );
 }
@@ -100,7 +100,7 @@ function WarningBox({ color, title, text, isDark }: { color: string; title: stri
         <Feather name="alert-circle" size={16} color={color} />
         <Text style={[sh.infoTitle, { color }]}>{title}</Text>
       </View>
-      <Text style={[sh.infoText, { color: isDark ? "#8892B0" : "#475569" }]}>{text}</Text>
+      <Text style={[sh.infoText, { color: isDark ? "#83ACA1" : "#475569" }]}>{text}</Text>
     </View>
   );
 }
@@ -341,11 +341,11 @@ export default function CalcsScreen() {
   const [openSection, setOpenSection] = useState<string | null>(null);
   const toggle = (key: string) => setOpenSection((p) => (p === key ? null : key));
 
-  const bg = isDark ? "#0B132B" : "#F0F4F8";
-  const cardBg = isDark ? "#112240" : "#FFF";
-  const border = isDark ? "#233554" : "#E2E8F0";
-  const textPrimary = isDark ? "#CCD6F6" : "#0D1B2A";
-  const textMuted = isDark ? "#8892B0" : "#8A9BB0";
+  const bg = isDark ? "#06231D" : "#F0F4F8";
+  const cardBg = isDark ? "#0B352B" : "#FFF";
+  const border = isDark ? "#1D5243" : "#E2E8F0";
+  const textPrimary = isDark ? "#C9E8DF" : "#0D1B2A";
+  const textMuted = isDark ? "#83ACA1" : "#8A9BB0";
 
   // ── 1. Electrolyte state ──────────────────────────────────────────────────
   const [eWt, setEWt] = useState(ctxWeight > 0 ? ctxWeight.toString() : "");
@@ -530,23 +530,23 @@ export default function CalcsScreen() {
   return (
     <View style={[sh.container, { backgroundColor: bg }]}>
       {/* Header */}
-      <View style={[sh.topHeader, { paddingTop: topPadding + 12, backgroundColor: isDark ? "#0A192F" : "#FFF" }]}>
+      <View style={[sh.topHeader, { paddingTop: topPadding + 12, backgroundColor: isDark ? "#041B16" : "#FFF" }]}>
         <View style={sh.topHeaderRow}>
           <TouchableOpacity
             onPress={openDrawer}
-            style={[sh.hamburgerBtn, { backgroundColor: isDark ? "#233554" : "#F0F4F8" }]}
+            style={[sh.hamburgerBtn, { backgroundColor: isDark ? "#1D5243" : "#F0F4F8" }]}
             activeOpacity={0.7}
           >
-            <Feather name="menu" size={20} color={isDark ? "#8892B0" : C.tint} />
+            <Feather name="menu" size={20} color={isDark ? "#83ACA1" : C.tint} />
           </TouchableOpacity>
           <View style={{ flex: 1 }}>
-            <Text style={[sh.headerTitle, { color: textPrimary }]}>MKashanEdu</Text>
+            <Text style={[sh.headerTitle, { color: textPrimary }]}>PeadsCal</Text>
             <Text style={[sh.headerSub, { color: textMuted }]}>
               Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 480 drugs
             </Text>
           </View>
           <TouchableOpacity onPress={toggleDark}
-            style={[sh.nightBtn, { backgroundColor: isDark ? "#233554" : "#F0F4F8" }]}>
+            style={[sh.nightBtn, { backgroundColor: isDark ? "#1D5243" : "#F0F4F8" }]}>
             <Feather name={isDark ? "sun" : "moon"} size={18} color={isDark ? "#FFD700" : "#4A5568"} />
           </TouchableOpacity>
         </View>
@@ -580,7 +580,7 @@ export default function CalcsScreen() {
                     </ResultBox>
                   )}
                   <View style={sh.chipRow}>
-                    <Chip label="🏥 Central Line" selected={kCentral} color="#0891B2" onPress={() => setKCentral(!kCentral)} />
+                    <Chip label="🏥 Central Line" selected={kCentral} color="#0D9488" onPress={() => setKCentral(!kCentral)} />
                     <Chip label="💧 Restrict Fluids" selected={kRestrict} color="#7C3AED" onPress={() => setKRestrict(!kRestrict)} />
                   </View>
                   <View style={[sh.infoBox, { backgroundColor: "#D9770612", borderColor: "#D9770650" }]}>
@@ -595,15 +595,15 @@ export default function CalcsScreen() {
                     ))}
                   </View>
                   {kDeficit > 0 && eWtN > 0 && kChecklistDone && (
-                    <ResultBox color="#0891B2">
+                    <ResultBox color="#0D9488">
                       <Text style={[sh.infoTitle, { color: "#2563EB", marginBottom: 4 }]}>{(kCentral || kRestrict) ? "Central / Fluid-Restricted Recipe" : "Peripheral Line Recipe"}</Text>
-                      <ResultRow label="KCl drawn (from 2 mEq/mL ampoule)" value={`${kKClML} mL`} color="#0891B2" />
-                      <ResultRow label="Add NS" value={`${kNSML} mL`} color="#0891B2" />
-                      <ResultRow label="Total syringe" value={`${kTotalVol} mL`} color="#0891B2" />
-                      <ResultRow label="Concentration" value={`${(kCentral || kRestrict) ? 80 : 40} mEq/L`} color="#0891B2" />
-                      <ResultRow label="Infusion rate" value={`${kRateMLHr} mL/hr`} color="#0891B2" />
-                      <ResultRow label="Infusion duration" value={`~${kDurationHr} hr`} color="#0891B2" />
-                      <ResultRow label="Rate" value={`${kCentral ? 0.5 : 0.3} mEq/kg/hr`} color="#0891B2" />
+                      <ResultRow label="KCl drawn (from 2 mEq/mL ampoule)" value={`${kKClML} mL`} color="#0D9488" />
+                      <ResultRow label="Add NS" value={`${kNSML} mL`} color="#0D9488" />
+                      <ResultRow label="Total syringe" value={`${kTotalVol} mL`} color="#0D9488" />
+                      <ResultRow label="Concentration" value={`${(kCentral || kRestrict) ? 80 : 40} mEq/L`} color="#0D9488" />
+                      <ResultRow label="Infusion rate" value={`${kRateMLHr} mL/hr`} color="#0D9488" />
+                      <ResultRow label="Infusion duration" value={`~${kDurationHr} hr`} color="#0D9488" />
+                      <ResultRow label="Rate" value={`${kCentral ? 0.5 : 0.3} mEq/kg/hr`} color="#0D9488" />
                       <Text style={[sh.refText, { color: textMuted, marginTop: 6 }]}>Recheck K⁺ level 1–2 hr after infusion</Text>
                     </ResultBox>
                   )}
@@ -795,18 +795,18 @@ export default function CalcsScreen() {
 
         {/* ══ 4. AIRWAY & LINES ═══════════════════════════════════════════ */}
         <View style={sh.sWrap}>
-          <SectionHeader title="Airway & Lines (OETT · UAC · UVC)" icon="cpu" color="#0891B2"
+          <SectionHeader title="Airway & Lines (OETT · UAC · UVC)" icon="cpu" color="#0D9488"
             open={openSection === "airway"} onToggle={() => toggle("airway")} isDark={isDark} />
           {openSection === "airway" && (
             <Body>
               <Text style={[sh.sectionLabel, { color: textPrimary }]}>Endotracheal Tube (OETT)</Text>
               <InputField label="Age (years)" value={airAge} onChange={setAirAge} placeholder="e.g. 4" isDark={isDark} />
               {uncuffed !== null && (
-                <ResultBox color="#0891B2">
-                  <ResultRow label="Uncuffed OETT (Age/4 + 4)" value={`${uncuffed} mm`} color="#0891B2" large />
-                  <ResultRow label="Cuffed OETT (Age/4 + 3.5)" value={`${cuffed} mm`} color="#0891B2" />
-                  <ResultRow label="Insertion depth (Age/2 + 12)" value={`${ettDepth} cm at lip`} color="#0891B2" />
-                  <ResultRow label="Laryngoscope blade" value={blade} color="#0891B2" />
+                <ResultBox color="#0D9488">
+                  <ResultRow label="Uncuffed OETT (Age/4 + 4)" value={`${uncuffed} mm`} color="#0D9488" large />
+                  <ResultRow label="Cuffed OETT (Age/4 + 3.5)" value={`${cuffed} mm`} color="#0D9488" />
+                  <ResultRow label="Insertion depth (Age/2 + 12)" value={`${ettDepth} cm at lip`} color="#0D9488" />
+                  <ResultRow label="Laryngoscope blade" value={blade} color="#0D9488" />
                 </ResultBox>
               )}
 
@@ -819,7 +819,7 @@ export default function CalcsScreen() {
                   <ResultRow label="UVC depth (BW/2 + 2.5)" value={`${uvc} cm`} color="#0D9488" />
                 </ResultBox>
               )}
-              <InfoBox color="#0891B2" title="Airway Reference" isDark={isDark}
+              <InfoBox color="#0D9488" title="Airway Reference" isDark={isDark}
                 text={"• Always have one size smaller and larger tube available\n• Confirm ET position: bilateral breath sounds, CXR (tip at T2–T3)\n• UAC tip: T6–T9 (low) or T6–T8 (high — above diaphragm)\n• UVC tip: junction of IVC and right atrium (T8–T9 on CXR)\n• Confirm catheter position with X-ray before use"} />
             </Body>
           )}
@@ -871,15 +871,15 @@ export default function CalcsScreen() {
               {/* Timer */}
               <View style={[sh.timerBox, { backgroundColor: elapsed >= 900 ? "#DC262618" : elapsed >= 300 ? "#D9770618" : "#16A34A18", borderColor: elapsed >= 900 ? "#DC2626" : elapsed >= 300 ? "#D97706" : "#16A34A" }]}>
                 <Text style={[sh.timerTime, { color: elapsed >= 900 ? "#DC2626" : elapsed >= 300 ? "#D97706" : "#16A34A" }]}>{fmtTime(elapsed)}</Text>
-                <Text style={[sh.timerStep, { color: isDark ? "#8892B0" : "#475569" }]}>
+                <Text style={[sh.timerStep, { color: isDark ? "#83ACA1" : "#475569" }]}>
                   {elapsed < 300 ? "STEP 1 — Benzodiazepines" : elapsed < 900 ? "STEP 2 — Phenytoin / Phenobarbitone" : "STEP 3 — RSI / Anaesthetic agent"}
                 </Text>
                 <View style={sh.timerBtns}>
                   {!running
                     ? <TouchableOpacity onPress={start} style={[sh.timerBtn, { backgroundColor: "#16A34A" }]}><Text style={sh.timerBtnText}>▶ Start</Text></TouchableOpacity>
                     : <TouchableOpacity onPress={pause} style={[sh.timerBtn, { backgroundColor: "#D97706" }]}><Text style={sh.timerBtnText}>⏸ Pause</Text></TouchableOpacity>}
-                  <TouchableOpacity onPress={reset} style={[sh.timerBtn, { backgroundColor: isDark ? "#233554" : "#E2E8F0" }]}>
-                    <Text style={[sh.timerBtnText, { color: isDark ? "#CCD6F6" : "#0D1B2A" }]}>↺ Reset</Text>
+                  <TouchableOpacity onPress={reset} style={[sh.timerBtn, { backgroundColor: isDark ? "#1D5243" : "#E2E8F0" }]}>
+                    <Text style={[sh.timerBtnText, { color: isDark ? "#C9E8DF" : "#0D1B2A" }]}>↺ Reset</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -915,7 +915,7 @@ export default function CalcsScreen() {
                   ].map((s) => (
                     <View key={s.step} style={[sh.seStep, {
                       borderLeftColor: s.color,
-                      backgroundColor: s.active ? s.color + "15" : isDark ? "#0A192F" : "#F8FAFC",
+                      backgroundColor: s.active ? s.color + "15" : isDark ? "#041B16" : "#F8FAFC",
                       opacity: !s.active && elapsed > 0 ? 0.6 : 1,
                     }]}>
                       <Text style={[sh.seStepTitle, { color: s.color }]}>STEP {s.step} · {s.time}</Text>

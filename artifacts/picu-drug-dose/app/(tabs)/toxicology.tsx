@@ -29,10 +29,10 @@ function InputField({ label, value, onChange, placeholder, unit, isDark }: {
   label: string; value: string; onChange: (t: string) => void;
   placeholder?: string; unit?: string; isDark: boolean;
 }) {
-  const border = isDark ? "#233554" : "#E2E8F0";
-  const bg = isDark ? "#0A192F" : "#F8FAFC";
-  const text = isDark ? "#CCD6F6" : "#0D1B2A";
-  const muted = isDark ? "#8892B0" : "#8A9BB0";
+  const border = isDark ? "#1D5243" : "#E2E8F0";
+  const bg = isDark ? "#041B16" : "#F8FAFC";
+  const text = isDark ? "#C9E8DF" : "#0D1B2A";
+  const muted = isDark ? "#83ACA1" : "#8A9BB0";
   return (
     <View style={sh.inputWrap}>
       <Text style={[sh.label, { color: muted }]}>{label}</Text>
@@ -69,7 +69,7 @@ function InfoBox({ color, title, text, isDark }: { color: string; title: string;
   return (
     <View style={[sh.infoBox, { backgroundColor: color + "10", borderColor: color + "30" }]}>
       <Text style={[sh.infoTitle, { color }]}>{title}</Text>
-      <Text style={[sh.infoText, { color: isDark ? "#8892B0" : "#475569" }]}>{text}</Text>
+      <Text style={[sh.infoText, { color: isDark ? "#83ACA1" : "#475569" }]}>{text}</Text>
     </View>
   );
 }
@@ -81,7 +81,7 @@ function WarningBox({ color, title, text, isDark }: { color: string; title: stri
         <Feather name="alert-circle" size={16} color={color} />
         <Text style={[sh.infoTitle, { color }]}>{title}</Text>
       </View>
-      <Text style={[sh.infoText, { color: isDark ? "#8892B0" : "#475569" }]}>{text}</Text>
+      <Text style={[sh.infoText, { color: isDark ? "#83ACA1" : "#475569" }]}>{text}</Text>
     </View>
   );
 }
@@ -115,10 +115,10 @@ const ANTIDOTE_OPTIONS: AntidoteOption[] = [
   { key: "flumazenil", label: "Benzodiazepines OD (Flumazenil)", color: "#7C3AED" },
   { key: "charcoal", label: "GI Poisoning / Decon (Activated Charcoal)", color: "#374151" },
   { key: "atropine", label: "Organophosphates (Atropine)", color: "#DC2626" },
-  { key: "calcium-gluconate", label: "Calcium Channel Blocker OD (Calcium Gluconate)", color: "#0891B2" },
+  { key: "calcium-gluconate", label: "Calcium Channel Blocker OD (Calcium Gluconate)", color: "#0D9488" },
   { key: "glucagon", label: "Beta-Blocker OD (Glucagon)", color: "#D97706" },
   { key: "deferoxamine", label: "Iron Toxicity (Deferoxamine)", color: "#7C3AED" },
-  { key: "bicarbonate", label: "TCA Overdose (Sodium Bicarbonate)", color: "#0891B2" },
+  { key: "bicarbonate", label: "TCA Overdose (Sodium Bicarbonate)", color: "#0D9488" },
   { key: "intralipid", label: "Local Anesthetic Toxicity (Intralipid 20%)", color: "#F59E0B" },
   { key: "pyridoxine", label: "Isoniazid / INH Seizures (Pyridoxine)", color: "#16A34A" },
   { key: "edta", label: "Lead Toxicity (CaNa2 EDTA)", color: "#475569" },
@@ -138,11 +138,11 @@ export default function ToxicologyScreen() {
   const { isFav, toggleFav } = useFavorites();
   const { isFav: isFavGlobal, toggleFav: toggleFavGlobal } = useFavorites();
 
-  const bg = isDark ? "#0B132B" : "#F0F9FF";
-  const cardBg = isDark ? "#112240" : "#FFFFFF";
-  const border = isDark ? "#233554" : "#E2E8F0";
-  const textPrimary = isDark ? "#CCD6F6" : "#0D1B2A";
-  const textMuted = isDark ? "#8892B0" : "#64748B";
+  const bg = isDark ? "#06231D" : "#F0F9FF";
+  const cardBg = isDark ? "#0B352B" : "#FFFFFF";
+  const border = isDark ? "#1D5243" : "#E2E8F0";
+  const textPrimary = isDark ? "#C9E8DF" : "#0D1B2A";
+  const textMuted = isDark ? "#83ACA1" : "#64748B";
   const topPadding = insets.top;
 
   const [toxWt, setToxWt] = useState(ctxWeight > 0 ? ctxWeight.toString() : "");
@@ -264,10 +264,10 @@ export default function ToxicologyScreen() {
       case "calcium-gluconate":
         return (
           <>
-            <ResultBox color="#0891B2">
-              <Text style={[sh.resultLabel, { color: "#0891B2" + "BB" }]}>Calcium Gluconate 10% — CCB Overdose</Text>
-              <ResultRow label="Dose (60 mg/kg IV, max 3 g)" value={`${calciumCap} mg`} color="#0891B2" large />
-              <MaxDoseRow value="3,000 mg (3 g) per dose" color="#0891B2" />
+            <ResultBox color="#0D9488">
+              <Text style={[sh.resultLabel, { color: "#0D9488" + "BB" }]}>Calcium Gluconate 10% — CCB Overdose</Text>
+              <ResultRow label="Dose (60 mg/kg IV, max 3 g)" value={`${calciumCap} mg`} color="#0D9488" large />
+              <MaxDoseRow value="3,000 mg (3 g) per dose" color="#0D9488" />
             </ResultBox>
             <WarningBox color="#DC2626" title="Preparation & Admin — Calcium Gluconate" isDark={isDark}
               text={"Slow IV over 5–10 mins. Continuous ECG required\nTissue necrosis with extravasation — use central line if possible\nNEVER give IV push — fatal bradycardia/asystole\nIncompatible with sodium bicarbonate (precipitates)\nHave calcium gluconate ready for magnesium sulfate toxicity"} />
@@ -300,10 +300,10 @@ export default function ToxicologyScreen() {
       case "bicarbonate":
         return (
           <>
-            <ResultBox color="#0891B2">
-              <Text style={[sh.resultLabel, { color: "#0891B2" + "BB" }]}>Sodium Bicarbonate — TCA Overdose</Text>
-              <ResultRow label="Dose (1–2 mEq/kg IV)" value={`${bicarbRange} mEq`} color="#0891B2" large />
-              <MaxDoseRow value="2 mEq/kg per dose; titrate to pH 7.45–7.55" color="#0891B2" />
+            <ResultBox color="#0D9488">
+              <Text style={[sh.resultLabel, { color: "#0D9488" + "BB" }]}>Sodium Bicarbonate — TCA Overdose</Text>
+              <ResultRow label="Dose (1–2 mEq/kg IV)" value={`${bicarbRange} mEq`} color="#0D9488" large />
+              <MaxDoseRow value="2 mEq/kg per dose; titrate to pH 7.45–7.55" color="#0D9488" />
             </ResultBox>
             <WarningBox color="#DC2626" title="Preparation & Admin — Sodium Bicarbonate" isDark={isDark}
               text={"Target pH 7.45–7.55 and narrow QRS on ECG\nAvoid in respiratory acidosis — worsens intracellular acidosis\nHypernatremia, hyperosmolarity risk with repeated doses\nIncompatible with calcium gluconate (precipitates)\nCheck blood gas after each dose"} />
@@ -421,14 +421,14 @@ export default function ToxicologyScreen() {
   return (
     <View style={[sh.container, { backgroundColor: bg }]}>
       {/* Header */}
-      <View style={[sh.topHeader, { paddingTop: topPadding + 12, backgroundColor: isDark ? "#0A192F" : "#FFF" }]}>
+      <View style={[sh.topHeader, { paddingTop: topPadding + 12, backgroundColor: isDark ? "#041B16" : "#FFF" }]}>
         <View style={sh.topHeaderRow}>
           <TouchableOpacity
             onPress={openDrawer}
-            style={[sh.hamburgerBtn, { backgroundColor: isDark ? "#233554" : "#F0F4F8" }]}
+            style={[sh.hamburgerBtn, { backgroundColor: isDark ? "#1D5243" : "#F0F4F8" }]}
             activeOpacity={0.7}
           >
-            <Feather name="menu" size={20} color={isDark ? "#8892B0" : C.tint} />
+            <Feather name="menu" size={20} color={isDark ? "#83ACA1" : C.tint} />
           </TouchableOpacity>
           <View style={{ flex: 1 }}>
             <Text style={[sh.headerTitle, { color: textPrimary }]}>Toxicology & Antidotes</Text>
@@ -448,22 +448,22 @@ export default function ToxicologyScreen() {
           <TouchableOpacity
             onPress={() => setShowDropdown(true)}
             activeOpacity={0.8}
-            style={[sh.toxDropdown, { borderColor: isDark ? "#233554" : "#E2E8F0", backgroundColor: isDark ? "#0A192F" : "#F8FAFC" }]}
+            style={[sh.toxDropdown, { borderColor: isDark ? "#1D5243" : "#E2E8F0", backgroundColor: isDark ? "#041B16" : "#F8FAFC" }]}
           >
-            <Text style={[sh.toxDropdownLabel, { color: isDark ? "#8892B0" : "#64748B" }]}>Select Poison / Antidote</Text>
+            <Text style={[sh.toxDropdownLabel, { color: isDark ? "#83ACA1" : "#64748B" }]}>Select Poison / Antidote</Text>
             <View style={sh.toxDropdownRow}>
               <Text style={[sh.toxDropdownValue, { color: isDark ? "#FFFFFF" : "#0D1B2A" }]}>{toxLabel}</Text>
-              <Feather name="chevron-down" size={18} color={isDark ? "#8892B0" : "#64748B"} />
+              <Feather name="chevron-down" size={18} color={isDark ? "#83ACA1" : "#64748B"} />
             </View>
           </TouchableOpacity>
 
           <Modal visible={showDropdown} transparent animationType="fade" onRequestClose={() => setShowDropdown(false)}>
             <View style={sh.modalOverlay}>
-              <View style={[sh.modalCard, { backgroundColor: isDark ? "#112240" : "#FFFFFF" }]}>
+              <View style={[sh.modalCard, { backgroundColor: isDark ? "#0B352B" : "#FFFFFF" }]}>
                 <View style={sh.modalHeader}>
-                  <Text style={[sh.modalTitle, { color: isDark ? "#CCD6F6" : "#0D1B2A" }]}>Select Poison / Antidote</Text>
+                  <Text style={[sh.modalTitle, { color: isDark ? "#C9E8DF" : "#0D1B2A" }]}>Select Poison / Antidote</Text>
                   <TouchableOpacity onPress={() => setShowDropdown(false)} style={sh.modalCloseBtn}>
-                    <Feather name="x" size={20} color={isDark ? "#8892B0" : "#64748B"} />
+                    <Feather name="x" size={20} color={isDark ? "#83ACA1" : "#64748B"} />
                   </TouchableOpacity>
                 </View>
                 <FlatList
@@ -475,12 +475,12 @@ export default function ToxicologyScreen() {
                       <TouchableOpacity
                         onPress={() => { setToxDrug(item.key); setShowDropdown(false); }}
                         style={[sh.modalOption, {
-                          backgroundColor: selected ? item.color + "18" : isDark ? "#0A192F" : "#F8FAFC",
+                          backgroundColor: selected ? item.color + "18" : isDark ? "#041B16" : "#F8FAFC",
                           borderLeftColor: selected ? item.color : "transparent",
                           borderLeftWidth: selected ? 3 : 0,
                         }]}
                       >
-                        <Text style={[sh.modalOptionText, { color: selected ? item.color : isDark ? "#CCD6F6" : "#0D1B2A" }]}>{item.label}</Text>
+                        <Text style={[sh.modalOptionText, { color: selected ? item.color : isDark ? "#C9E8DF" : "#0D1B2A" }]}>{item.label}</Text>
                         {selected && <Feather name="check" size={18} color={item.color} />}
                       </TouchableOpacity>
                     );
@@ -511,7 +511,7 @@ export default function ToxicologyScreen() {
           </View>
 
           {/* Citation footer */}
-          <View style={[sh.citationBox, { backgroundColor: isDark ? "#0A192F" : "#F8FAFD", borderColor: isDark ? "#1E3A5F" : "#E2E8F0" }]}>
+          <View style={[sh.citationBox, { backgroundColor: isDark ? "#041B16" : "#F8FAFD", borderColor: isDark ? "#1E3A5F" : "#E2E8F0" }]}>
             <Feather name="book-open" size={13} color={textMuted} style={{ marginTop: 1 }} />
             <Text style={{ flex: 1, fontSize: 11, color: textMuted, fontFamily: "Inter_400Regular", lineHeight: 16, fontStyle: "italic" }}>
               Reference: All antidote protocols derived from Harriet Lane 24e / Nelson's Pediatrics • Pediatric doses apply to ages ≤1 year unless specified.

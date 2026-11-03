@@ -29,7 +29,7 @@ const CLINICAL_CALCULATORS = [
     title: "Ventilator & ABG Management",
     subtitle: "Vt · PEEP · Pplat · Driving Pressure · Hamilton C3 Modes · PARDS & Asthma Protocols",
     icon: "wind",
-    color: "#0891B2",
+    color: "#0D9488",
     badge: "NEW",
   },
   {
@@ -37,7 +37,7 @@ const CLINICAL_CALCULATORS = [
     title: "GIR Calculator",
     subtitle: "Glucose Infusion Rate · IV rate + dextrose% + weight → mg/kg/min",
     icon: "droplet",
-    color: "#0EA5E9",
+    color: "#14B8A6",
     badge: "NEW",
   },
   {
@@ -45,14 +45,14 @@ const CLINICAL_CALCULATORS = [
     title: "IV Fluids & Dehydration",
     subtitle: "Holliday-Segar · Maintenance · Deficit · DKA · Resuscitation",
     icon: "droplet",
-    color: "#0EA5E9",
+    color: "#14B8A6",
   },
   {
     key: "electrolytes",
     title: "Electrolyte Correction — K⁺",
     subtitle: "K⁺ & Na⁺ correction — Protocols tab me",
     icon: "zap",
-    color: "#0891B2",
+    color: "#0D9488",
   },
   {
     key: "growth",
@@ -183,11 +183,11 @@ export default function ToolsScreen() {
   const { isFav } = useFavorites();
   const { openDrawer } = useDrawer();
 
-  const bg = isDark ? "#0B132B" : "#F0F4F8";
-  const cardBg = isDark ? "#112240" : "#FFFFFF";
-  const border = isDark ? "#233554" : "#E2E8F0";
-  const textPrimary = isDark ? "#CCD6F6" : "#0D1B2A";
-  const textMuted = isDark ? "#8892B0" : "#8A9BB0";
+  const bg = isDark ? "#06231D" : "#F0F4F8";
+  const cardBg = isDark ? "#0B352B" : "#FFFFFF";
+  const border = isDark ? "#1D5243" : "#E2E8F0";
+  const textPrimary = isDark ? "#C9E8DF" : "#0D1B2A";
+  const textMuted = isDark ? "#83ACA1" : "#8A9BB0";
 
   return (
     <View style={[styles.container, { backgroundColor: bg }]}>
@@ -195,26 +195,26 @@ export default function ToolsScreen() {
       <View
         style={[
           styles.header,
-          { paddingTop: insets.top + 12, backgroundColor: isDark ? "#0A192F" : "#FFFFFF" },
+          { paddingTop: insets.top + 12, backgroundColor: isDark ? "#041B16" : "#FFFFFF" },
         ]}
       >
         <View style={styles.headerRow}>
           <TouchableOpacity
             onPress={openDrawer}
-            style={[styles.hamburgerBtn, { backgroundColor: isDark ? "#233554" : "#F0F4F8" }]}
+            style={[styles.hamburgerBtn, { backgroundColor: isDark ? "#1D5243" : "#F0F4F8" }]}
             activeOpacity={0.7}
           >
-            <Feather name="menu" size={20} color={isDark ? "#8892B0" : C.tint} />
+            <Feather name="menu" size={20} color={isDark ? "#83ACA1" : C.tint} />
           </TouchableOpacity>
           <View style={{ flex: 1 }}>
-            <Text style={[styles.headerTitle, { color: textPrimary }]}>MKashanEdu</Text>
+            <Text style={[styles.headerTitle, { color: textPrimary }]}>PeadsCal</Text>
             <Text style={[styles.headerSub, { color: textMuted }]}>
               Pediatric Clinical Guide • Based on Harriet Lane & Nelson's • 480 drugs
             </Text>
           </View>
           <TouchableOpacity
             onPress={toggleDark}
-            style={[styles.nightToggle, { backgroundColor: isDark ? "#233554" : "#F0F4F8" }]}
+            style={[styles.nightToggle, { backgroundColor: isDark ? "#1D5243" : "#F0F4F8" }]}
           >
             <Feather name={isDark ? "sun" : "moon"} size={18} color={isDark ? "#FFD700" : "#4A5568"} />
           </TouchableOpacity>
@@ -237,12 +237,12 @@ export default function ToolsScreen() {
 
         {/* ── CLINICAL CALCULATORS ── */}
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 10 }}>
-          <View style={{ flex: 1, height: 1, backgroundColor: isDark ? "#233554" : "#E2E8F0" }} />
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "#0EA5E915", borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4 }}>
-            <Feather name="cpu" size={12} color="#0EA5E9" />
-            <Text style={{ fontSize: 11, fontWeight: "800", color: "#0EA5E9", letterSpacing: 0.5 }}>CLINICAL CALCULATORS</Text>
+          <View style={{ flex: 1, height: 1, backgroundColor: isDark ? "#1D5243" : "#E2E8F0" }} />
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "#14B8A615", borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4 }}>
+            <Feather name="cpu" size={12} color="#14B8A6" />
+            <Text style={{ fontSize: 11, fontWeight: "800", color: "#14B8A6", letterSpacing: 0.5 }}>CLINICAL CALCULATORS</Text>
           </View>
-          <View style={{ flex: 1, height: 1, backgroundColor: isDark ? "#233554" : "#E2E8F0" }} />
+          <View style={{ flex: 1, height: 1, backgroundColor: isDark ? "#1D5243" : "#E2E8F0" }} />
         </View>
 
         {CLINICAL_CALCULATORS.map((tool) => {
@@ -293,12 +293,12 @@ export default function ToolsScreen() {
 
         {/* ── ICU PROTOCOLS ── */}
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 8, marginBottom: 10 }}>
-          <View style={{ flex: 1, height: 1, backgroundColor: isDark ? "#233554" : "#E2E8F0" }} />
+          <View style={{ flex: 1, height: 1, backgroundColor: isDark ? "#1D5243" : "#E2E8F0" }} />
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "#0D948815", borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4 }}>
             <Feather name="file-text" size={12} color="#0D9488" />
             <Text style={{ fontSize: 11, fontWeight: "800", color: "#0D9488", letterSpacing: 0.5 }}>ICU PROTOCOLS</Text>
           </View>
-          <View style={{ flex: 1, height: 1, backgroundColor: isDark ? "#233554" : "#E2E8F0" }} />
+          <View style={{ flex: 1, height: 1, backgroundColor: isDark ? "#1D5243" : "#E2E8F0" }} />
         </View>
 
         {ICU_PROTOCOLS.map((tool) => {
@@ -349,12 +349,12 @@ export default function ToolsScreen() {
 
         {/* ── CLINICAL TOOLS ── */}
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10, marginTop: 8, marginBottom: 10 }}>
-          <View style={{ flex: 1, height: 1, backgroundColor: isDark ? "#233554" : "#E2E8F0" }} />
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: isDark ? "#233554" : "#F0F4F8", borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4 }}>
+          <View style={{ flex: 1, height: 1, backgroundColor: isDark ? "#1D5243" : "#E2E8F0" }} />
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: isDark ? "#1D5243" : "#F0F4F8", borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4 }}>
             <Feather name="tool" size={12} color={textMuted} />
             <Text style={{ fontSize: 11, fontWeight: "800", color: textMuted, letterSpacing: 0.5 }}>CLINICAL TOOLS</Text>
           </View>
-          <View style={{ flex: 1, height: 1, backgroundColor: isDark ? "#233554" : "#E2E8F0" }} />
+          <View style={{ flex: 1, height: 1, backgroundColor: isDark ? "#1D5243" : "#E2E8F0" }} />
         </View>
 
         {TOOL_SECTIONS.map((tool) => {

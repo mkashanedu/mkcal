@@ -43,12 +43,12 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: "Dashboard", icon: "home", route: "/", color: "#0891B2", description: "Home screen" },
+  { label: "Dashboard", icon: "home", route: "/", color: "#0D9488", description: "Home screen" },
   { label: "EMERGENCY / RESUSCITATION", icon: "alert-triangle", route: "/emergency", color: "#DC2626", description: "Rapid resuscitation reference", isEmergency: true },
-  { label: "Drug Calculator", icon: "sliders", route: "/calculator", color: "#0891B2", description: "480 drugs — Harriet Lane & Nelson's" },
+  { label: "Drug Calculator", icon: "sliders", route: "/calculator", color: "#0D9488", description: "480 drugs — Harriet Lane & Nelson's" },
   { label: "Drug Infusions", icon: "activity", route: "/infusion", color: "#7C3AED", description: "IV drip & infusion calculator" },
   { label: "Formulary", icon: "book-open", route: "/formulary", color: "#0D9488", description: "Tablets, syrups, nebulisers & IV" },
-  { label: "Electrolytes & Protocols", icon: "zap", route: "/calcs", color: "#0EA5E9", description: "K⁺ / Na⁺ correction, ABG & more" },
+  { label: "Electrolytes & Protocols", icon: "zap", route: "/calcs", color: "#14B8A6", description: "K⁺ / Na⁺ correction, ABG & more" },
   { label: "Toxicology & Antidotes", icon: "shield", route: "/toxicology", color: "#991B1B", description: "16 antidotes with weight-based dosing" },
   { label: "Tools & Protocols", icon: "tool", route: "/tools", color: "#16A34A", description: "Ventilator · BIG · Phoenix Sepsis · GCS" },
   { label: "Favorites", icon: "star", route: "/favorites", color: "#D97706", description: "Your starred drugs & infusions" },
@@ -127,10 +127,10 @@ export function AppDrawer() {
   const [backupDone, setBackupDone]     = useState(false);
 
   const teal       = Colors.light.tint;
-  const bg         = isDark ? "#0A192F" : "#FFFFFF";
+  const bg         = isDark ? "#041B16" : "#FFFFFF";
   const border     = isDark ? "#1E3A5F" : "#E2EFF6";
   const textPrimary = isDark ? "#E2E8F0" : "#0D1B2A";
-  const textMuted  = isDark ? "#8892B0" : "#64748B";
+  const textMuted  = isDark ? "#83ACA1" : "#64748B";
   const settingsBg = isDark ? "#070F1D" : "#F4F8FC";
 
   // Inject style vars for SettingsRow (can't easily use context from style fn)
@@ -197,14 +197,14 @@ export function AppDrawer() {
           {/* ── Header ── */}
           <View style={[styles.drawerHeader, { borderBottomColor: border }]}>
             <View style={styles.drawerBrand}>
-              <View style={[styles.brandDot, { backgroundColor: teal }]} />
+              <View style={{ width: 38, height: 38, borderRadius: 12, backgroundColor: "#0D9488", alignItems: "center", justifyContent: "center", marginRight: 10 }}><Feather name="activity" size={21} color="#FFFFFF" /></View>
               <View>
-                <Text style={[styles.brandName, { color: textPrimary }]}>MKashanEdu</Text>
+                <Text style={[styles.brandName, { color: textPrimary }]}>PeadsCal</Text>
                 <Text style={[styles.brandSub, { color: textMuted }]}>Clinical Suite</Text>
               </View>
             </View>
             <TouchableOpacity onPress={closeDrawer}
-              style={[styles.closeBtn, { backgroundColor: isDark ? "#1A2F4A" : "#F0F4F8" }]}
+              style={[styles.closeBtn, { backgroundColor: isDark ? "#173F31" : "#F0F4F8" }]}
               activeOpacity={0.7}>
               <Feather name="x" size={18} color={textMuted} />
             </TouchableOpacity>
@@ -348,7 +348,7 @@ export function AppDrawer() {
                 icon="home"
                 label="Startup Screen"
                 sublabel="Which screen opens first"
-                color="#0EA5E9"
+                color="#14B8A6"
                 right={
                   <View style={styles.segmentRow}>
                     {STARTUP_SCREEN_OPTIONS.map((opt) => (
@@ -357,7 +357,7 @@ export function AppDrawer() {
                         onPress={() => setStartupScreen(opt.key)}
                         style={[
                           styles.segmentBtn,
-                          { borderColor: border, backgroundColor: startupScreen === opt.key ? "#0EA5E9" : "transparent" },
+                          { borderColor: border, backgroundColor: startupScreen === opt.key ? "#14B8A6" : "transparent" },
                         ]}
                       >
                         <Text style={{ fontSize: 10, fontFamily: "Inter_700Bold",
@@ -380,8 +380,8 @@ export function AppDrawer() {
                 </Text>
                 {profiles.map((p) => (
                   <View key={p.id} style={{ flexDirection: "row", alignItems: "center", gap: 8, marginTop: 8 }}>
-                    <TouchableOpacity onPress={() => switchProfile(p.id)} activeOpacity={0.8} style={{ flex: 1, paddingHorizontal: 12, paddingVertical: 9, borderRadius: 10, borderWidth: 1, borderColor: activeProfileId === p.id ? "#0EA5E9" : border, backgroundColor: activeProfileId === p.id ? "#0EA5E922" : "transparent" }}>
-                      <Text style={{ fontSize: 13, fontFamily: "Inter_600SemiBold", color: isDark ? "#CCD6F6" : "#0D1B2A" }}>{p.name} · {p.weightKg} kg · {p.ageYears} yrs</Text>
+                    <TouchableOpacity onPress={() => switchProfile(p.id)} activeOpacity={0.8} style={{ flex: 1, paddingHorizontal: 12, paddingVertical: 9, borderRadius: 10, borderWidth: 1, borderColor: activeProfileId === p.id ? "#14B8A6" : border, backgroundColor: activeProfileId === p.id ? "#14B8A622" : "transparent" }}>
+                      <Text style={{ fontSize: 13, fontFamily: "Inter_600SemiBold", color: isDark ? "#C9E8DF" : "#0D1B2A" }}>{p.name} · {p.weightKg} kg · {p.ageYears} yrs</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => deleteProfile(p.id)} activeOpacity={0.7} style={{ padding: 8 }}>
                       <Feather name="trash-2" size={15} color="#DC2626" />
@@ -399,7 +399,7 @@ export function AppDrawer() {
                   <TouchableOpacity
                     onPress={() => { saveCurrentAsProfile(profileName); setProfileName(""); }}
                     activeOpacity={0.8}
-                    style={{ backgroundColor: "#0EA5E9", borderRadius: 10, paddingHorizontal: 14, justifyContent: "center" }}
+                    style={{ backgroundColor: "#14B8A6", borderRadius: 10, paddingHorizontal: 14, justifyContent: "center" }}
                   >
                     <Text style={{ color: "#FFFFFF", fontFamily: "Inter_700Bold", fontSize: 12.5 }}>Save</Text>
                   </TouchableOpacity>
@@ -445,13 +445,13 @@ export function AppDrawer() {
                     icon="lock"
                     label="Face ID / Fingerprint"
                     sublabel="Unlock app with biometrics"
-                    color="#0891B2"
+                    color="#0D9488"
                     right={
                       <Switch
                         value={biometricEnabled}
                         onValueChange={setBiometricEnabled}
-                        trackColor={{ false: "#CBD5E1", true: "#0891B260" }}
-                        thumbColor={biometricEnabled ? "#0891B2" : "#94A3B8"}
+                        trackColor={{ false: "#CBD5E1", true: "#0D948860" }}
+                        thumbColor={biometricEnabled ? "#0D9488" : "#94A3B8"}
                         ios_backgroundColor="#CBD5E1"
                       />
                     }

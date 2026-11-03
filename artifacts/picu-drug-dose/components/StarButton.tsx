@@ -20,7 +20,7 @@ export function StarButton({ isFav, onToggle, size = 20, color = "#F59E0B" }: St
       <Feather
         name={isFav ? "star" : "star"}
         size={size}
-        color={isFav ? color : "#8892B0"}
+        color={isFav ? color : "#83ACA1"}
       />
     </TouchableOpacity>
   );

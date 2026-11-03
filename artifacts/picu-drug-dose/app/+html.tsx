@@ -18,15 +18,15 @@ export default function Root({ children }: { children: React.ReactNode }) {
         />
         <meta
           name="description"
-          content="PeadsCal — Neonatal, Pediatric & Adult Dose Calculator for clinical professionals. 480 medications, PICU protocols, offline-capable."
+          content="PeadsCal — Neonatal, Pediatric & Adult Dose Calculator for clinical professionals. 544 medications, PICU protocols, offline-capable."
         />
 
         {/* PWA manifest — display: standalone */}
         <link rel="manifest" href="/manifest.json" />
 
         {/* Theme / brand colours */}
-        <meta name="theme-color" content="#0891B2" />
-        <meta name="msapplication-TileColor" content="#0891B2" />
+        <meta name="theme-color" content="#0D9488" />
+        <meta name="msapplication-TileColor" content="#0D9488" />
         <meta name="application-name" content="PeadsCal" />
 
         {/* iOS home-screen PWA */}
@@ -47,7 +47,7 @@ export default function Root({ children }: { children: React.ReactNode }) {
         <meta property="og:title" content="PeadsCal — Pediatric Drug Dose Calculator" />
         <meta
           property="og:description"
-          content="480 medications, weight-based dosing, emergency resuscitation, infusion calculator, ventilator management — for PICU professionals."
+          content="544 medications, weight-based dosing, emergency resuscitation, infusion calculator, ventilator management — for PICU professionals."
         />
         <meta property="og:image" content="/icon.png" />
 

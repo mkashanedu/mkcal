@@ -1,5 +1,5 @@
 /**
- * PeadsCal Service Worker — full-app offline support (v4)
+ * PeadsCal Service Worker — full-app offline support (v6)
  *
  * v4 note: registration moved into the JS bundle (lib/registerSW.ts) —
  * the SPA export's default HTML shell never carried the registration
@@ -17,7 +17,7 @@
  *    background revalidation for navigations (unchanged from v2).
  */
 
-const CACHE_NAME = "peadscal-v5";
+const CACHE_NAME = "peadscal-v6";
 const OFFLINE_URL = "/";
 
 const SHELL = ["/", "/manifest.json", "/icon.png", "/favicon.png", "/favicon.ico"];

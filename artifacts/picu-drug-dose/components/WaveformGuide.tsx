@@ -283,13 +283,13 @@ function ScalarChart({ pattern, muted, grid }: { pattern: Pattern; muted: string
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 export function WaveformGuide({ isDark }: { isDark: boolean }) {
-  const card = isDark ? "#112240" : "#FFFFFF";
-  const border = isDark ? "#233554" : "#E2E8F0";
-  const tp = isDark ? "#CCD6F6" : "#0D1B2A";
-  const tm = isDark ? "#8892B0" : "#8A9BB0";
-  const body = isDark ? "#8892B0" : "#475569";
-  const panel = isDark ? "#0A192F" : "#F8FAFC";
-  const grid = isDark ? "#233554" : "#E2E8F0";
+  const card = isDark ? "#0B352B" : "#FFFFFF";
+  const border = isDark ? "#1D5243" : "#E2E8F0";
+  const tp = isDark ? "#C9E8DF" : "#0D1B2A";
+  const tm = isDark ? "#83ACA1" : "#8A9BB0";
+  const body = isDark ? "#83ACA1" : "#475569";
+  const panel = isDark ? "#041B16" : "#F8FAFC";
+  const grid = isDark ? "#1D5243" : "#E2E8F0";
 
   const legend: { label: string; color: string }[] = [
     { label: "Pressure", color: COL_P },

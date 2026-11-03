@@ -500,7 +500,7 @@ export default function EmergencyScreen() {
       doseSub: "(2 mL/kg D10)",
       route: "IV",
       notes: "Neonate max 25 mL. Check glucose 15 min after.",
-      color: "#0891B2",
+      color: "#0D9488",
       exceedsAdultMax: d10Raw > 25,
       adultMaxLabel: d10Raw > 25 ? "Max 25 mL D10 neonate — dose capped" : undefined,
     });
@@ -514,7 +514,7 @@ export default function EmergencyScreen() {
       doseSub: "(2 mL/kg D25)",
       route: "IV",
       notes: "Infant/child. Max 25 mL D25.",
-      color: "#0891B2",
+      color: "#0D9488",
       exceedsAdultMax: d25Raw > 25,
       adultMaxLabel: d25Raw > 25 ? "Max 25 mL D25 — dose capped" : undefined,
     });
@@ -653,7 +653,7 @@ export default function EmergencyScreen() {
     }
   }, [cpr.epiDue]);
 
-  const cprColor = cpr.cprSecs <= 15 ? "#DC2626" : cpr.cprSecs <= 30 ? "#EA580C" : "#0891B2";
+  const cprColor = cpr.cprSecs <= 15 ? "#DC2626" : cpr.cprSecs <= 30 ? "#EA580C" : "#0D9488";
 
   // ── Alert sounds (Point 7): epi-due and compressor-switch beeps ──
   const alertBeep = (freq: number, times: number) => {
@@ -735,7 +735,7 @@ export default function EmergencyScreen() {
   useEffect(() => () => { if (metroTimer.current) clearInterval(metroTimer.current); }, []);
 
   return (
-    <View style={[styles.container, { backgroundColor: isDark ? "#0B132B" : "#F0F4F8" }]}>
+    <View style={[styles.container, { backgroundColor: isDark ? "#06231D" : "#F0F4F8" }]}>
       {/* Header */}
       <View style={[styles.header, { paddingTop: topPadding + 12, backgroundColor: "#6366F1" }]}>
         <View style={styles.headerTop}>
@@ -744,7 +744,7 @@ export default function EmergencyScreen() {
               <Feather name="menu" size={20} color="rgba(255,255,255,0.9)" />
             </TouchableOpacity>
             <Feather name="alert-circle" size={22} color="#FFFFFF" />
-            <Text style={[styles.headerTitle, { fontFamily: "Inter_700Bold" }]}>MKashanEdu</Text>
+            <Text style={[styles.headerTitle, { fontFamily: "Inter_700Bold" }]}>PeadsCal</Text>
           </View>
           <TouchableOpacity onPress={toggleDark} style={styles.nightToggle} activeOpacity={0.7}>
             <Feather name={isDark ? "sun" : "moon"} size={16} color={isDark ? "#FFD700" : "rgba(255,255,255,0.85)"} />
@@ -763,20 +763,20 @@ export default function EmergencyScreen() {
       </View>
 
       {/* ── PINNED: Inputs + Status Bar ── */}
-      <View style={[styles.pinnedSection, { backgroundColor: isDark ? "#112240" : "#FFFFFF", borderBottomColor: isDark ? "#233554" : "#E2E8F0" }]}>
+      <View style={[styles.pinnedSection, { backgroundColor: isDark ? "#0B352B" : "#FFFFFF", borderBottomColor: isDark ? "#1D5243" : "#E2E8F0" }]}>
         {/* Inputs — vertical stack on mobile (<600 px), side-by-side on tablet/desktop */}
         <View style={[styles.inputRow, { flexDirection: isNarrow ? "column" : "row" }]}>
 
           {/* ── WEIGHT ── */}
           <View style={[styles.inputWrap, isNarrow && styles.inputWrapFull]}>
-            <Text style={[styles.inputFieldLabel, { color: isDark ? "#8892B0" : "#64748B" }]}>
+            <Text style={[styles.inputFieldLabel, { color: isDark ? "#83ACA1" : "#64748B" }]}>
               WEIGHT
             </Text>
             <View style={styles.inputWithToggle}>
               <TextInput
                 style={[styles.inputBox, {
                   color: isDark ? "#FFFFFF" : "#0D1B2A",
-                  backgroundColor: isDark ? "#233554" : "#F0F4F8",
+                  backgroundColor: isDark ? "#1D5243" : "#F0F4F8",
                   borderColor: !weightValid ? "#DC2626" : isDark ? "#3D4770" : "#CBD5E1",
                 }]}
                 value={weightInput}
@@ -785,10 +785,10 @@ export default function EmergencyScreen() {
                 selectTextOnFocus
                 maxLength={6}
                 placeholder={weightUnit === "kg" ? "10" : "22"}
-                placeholderTextColor={isDark ? "#8892B0" : "#8A9BB0"}
+                placeholderTextColor={isDark ? "#83ACA1" : "#8A9BB0"}
               />
               {/* ── KG | LBS pill — horizontal, 44 px tall ── */}
-              <View style={[styles.segPill, { backgroundColor: isDark ? "#0B132B" : "#E2E8F0" }]}>
+              <View style={[styles.segPill, { backgroundColor: isDark ? "#06231D" : "#E2E8F0" }]}>
                 <TouchableOpacity
                   onPress={() => { if (weightUnit !== "kg") toggleWeightUnit(); }}
                   style={[styles.segOption, weightUnit === "kg" && styles.segOptionActiveBlue]}
@@ -823,14 +823,14 @@ export default function EmergencyScreen() {
 
           {/* ── AGE ── */}
           <View style={[styles.inputWrap, isNarrow && styles.inputWrapFull]}>
-            <Text style={[styles.inputFieldLabel, { color: isDark ? "#8892B0" : "#64748B", marginTop: isNarrow ? 10 : 0 }]}>
+            <Text style={[styles.inputFieldLabel, { color: isDark ? "#83ACA1" : "#64748B", marginTop: isNarrow ? 10 : 0 }]}>
               AGE
             </Text>
             <View style={styles.inputWithToggle}>
               <TextInput
                 style={[styles.inputBox, {
                   color: isDark ? "#FFFFFF" : "#0D1B2A",
-                  backgroundColor: isDark ? "#233554" : "#F0F4F8",
+                  backgroundColor: isDark ? "#1D5243" : "#F0F4F8",
                   borderColor: isDark ? "#3D4770" : "#CBD5E1",
                 }]}
                 value={ageInput}
@@ -839,10 +839,10 @@ export default function EmergencyScreen() {
                 selectTextOnFocus
                 maxLength={5}
                 placeholder={ageUnit === "years" ? "2" : "24"}
-                placeholderTextColor={isDark ? "#8892B0" : "#8A9BB0"}
+                placeholderTextColor={isDark ? "#83ACA1" : "#8A9BB0"}
               />
               {/* ── YRS | MONTHS pill — horizontal, 44 px tall ── */}
-              <View style={[styles.segPill, { backgroundColor: isDark ? "#0B132B" : "#E2E8F0" }]}>
+              <View style={[styles.segPill, { backgroundColor: isDark ? "#06231D" : "#E2E8F0" }]}>
                 <TouchableOpacity
                   onPress={() => { if (ageUnit !== "years") toggleAgeUnit(); }}
                   style={[styles.segOption, ageUnit === "years" && styles.segOptionActiveIndigo]}
@@ -869,7 +869,7 @@ export default function EmergencyScreen() {
         </View>
 
         {/* Compact Status Bar */}
-        <View style={[styles.statusBar, { backgroundColor: isDark ? "#0B132B" : "#F0F4F8", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
+        <View style={[styles.statusBar, { backgroundColor: isDark ? "#06231D" : "#F0F4F8", borderColor: isDark ? "#1D5243" : "#E2E8F0" }]}>
           {/* CPR Timer */}
           <Animated.View
             style={[
@@ -949,7 +949,7 @@ export default function EmergencyScreen() {
 
         {/* Post-Resuscitation Checklist — appears after code stopped */}
         {showPostCode && (
-          <View style={[styles.postCodeCard, { backgroundColor: isDark ? "#0A192F" : "#F0FFF4", borderColor: isDark ? "#146B35" : "#D1FAE5" }]}>
+          <View style={[styles.postCodeCard, { backgroundColor: isDark ? "#041B16" : "#F0FFF4", borderColor: isDark ? "#146B35" : "#D1FAE5" }]}>
             <TouchableOpacity onPress={() => setPostCodeOpen((p) => !p)} style={styles.postCodeHeader} activeOpacity={0.7}>
               <Feather name="clipboard" size={14} color={isDark ? "#6FCF97" : "#146B35"} />
               <Text style={[styles.postCodeTitle, { color: isDark ? "#6FCF97" : "#146B35" }]}>
@@ -966,7 +966,7 @@ export default function EmergencyScreen() {
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text style={[styles.htLabel, { color: isDark ? "#FFFFFF" : "#0D1B2A" }]}>{item.label}</Text>
-                      <Text style={[styles.htAction, { color: isDark ? "#8892B0" : "#64748B" }]}>{item.action}</Text>
+                      <Text style={[styles.htAction, { color: isDark ? "#83ACA1" : "#64748B" }]}>{item.action}</Text>
                     </View>
                   </TouchableOpacity>
                 ))}
@@ -1036,9 +1036,9 @@ export default function EmergencyScreen() {
 
         {/* ── HIGH-QUALITY CPR strip + metronome + code log (2025) ── */}
         {weightValid && (
-          <View style={[styles.palsBanner, { backgroundColor: isDark ? "#0A192F" : "#FFFFFF", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
+          <View style={[styles.palsBanner, { backgroundColor: isDark ? "#041B16" : "#FFFFFF", borderColor: isDark ? "#1D5243" : "#E2E8F0" }]}>
             <Text style={[styles.palsTitle, { color: "#DC2626", fontFamily: "Inter_700Bold" }]}>High-Quality CPR — AHA 2025</Text>
-            <Text style={{ fontSize: Math.round(12.5 * textScale), lineHeight: 19, color: isDark ? "#CCD6F6" : "#0D1B2A", fontFamily: "Inter_400Regular" }}>
+            <Text style={{ fontSize: Math.round(12.5 * textScale), lineHeight: 19, color: isDark ? "#C9E8DF" : "#0D1B2A", fontFamily: "Inter_400Regular" }}>
               Rate 100–120/min · Depth ≥ ⅓ of chest (infant ≈ 4 cm · child ≈ 5 cm · max 6 cm){"\n"}
               Full recoil · Interruptions &lt; 10 s · Change compressor every 2 min{"\n"}
               Ratio 15:2 (2 rescuers) · 30:2 (single rescuer){"\n"}
@@ -1046,7 +1046,7 @@ export default function EmergencyScreen() {
               Monitor ETCO2 + diastolic BP — DBP targets: ≥ 25 mmHg (infant) · ≥ 30 mmHg (child)
             </Text>
             <View style={{ flexDirection: "row", gap: 8, marginTop: 10 }}>
-              <TouchableOpacity onPress={toggleMetronome} activeOpacity={0.8} style={{ flex: 1, backgroundColor: metroOn ? "#DC2626" : (isDark ? "#112240" : "#F1F5F9"), borderWidth: 1, borderColor: "#DC2626", borderRadius: 10, paddingVertical: 10, alignItems: "center" }}>
+              <TouchableOpacity onPress={toggleMetronome} activeOpacity={0.8} style={{ flex: 1, backgroundColor: metroOn ? "#DC2626" : (isDark ? "#0B352B" : "#F1F5F9"), borderWidth: 1, borderColor: "#DC2626", borderRadius: 10, paddingVertical: 10, alignItems: "center" }}>
                 <Text style={{ fontFamily: "Inter_700Bold", fontSize: 13, color: metroOn ? "#FFFFFF" : "#DC2626" }}>{metroOn ? "■ STOP METRONOME" : "▶ METRONOME 110/min"}</Text>
               </TouchableOpacity>
             </View>
@@ -1058,13 +1058,13 @@ export default function EmergencyScreen() {
                 <Text style={{ fontFamily: "Inter_800ExtraBold", fontSize: 14, color: "#FFFFFF" }}>SHOCK DIYA ⚡</Text>
               </TouchableOpacity>
               {codeLog.length > 0 && (
-                <TouchableOpacity onPress={() => setCodeLog([])} activeOpacity={0.8} style={{ paddingHorizontal: 12, borderRadius: 10, paddingVertical: 12, alignItems: "center", borderWidth: 1, borderColor: isDark ? "#233554" : "#E2E8F0" }}>
-                  <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 12, color: isDark ? "#8892B0" : "#64748B" }}>Clear</Text>
+                <TouchableOpacity onPress={() => setCodeLog([])} activeOpacity={0.8} style={{ paddingHorizontal: 12, borderRadius: 10, paddingVertical: 12, alignItems: "center", borderWidth: 1, borderColor: isDark ? "#1D5243" : "#E2E8F0" }}>
+                  <Text style={{ fontFamily: "Inter_600SemiBold", fontSize: 12, color: isDark ? "#83ACA1" : "#64748B" }}>Clear</Text>
                 </TouchableOpacity>
               )}
             </View>
             {codeLog.length > 0 && (
-              <View style={{ marginTop: 10, backgroundColor: isDark ? "#112240" : "#F8FAFC", borderRadius: 10, padding: 10 }}>
+              <View style={{ marginTop: 10, backgroundColor: isDark ? "#0B352B" : "#F8FAFC", borderRadius: 10, padding: 10 }}>
                 <Text style={{ fontFamily: "Inter_700Bold", fontSize: 12.5, color: isDark ? "#FFFFFF" : "#0D1B2A" }}>
                   CODE LOG — Epi ×{epiGivenCount} · Shocks ×{shockGivenCount} · Elapsed ~{fmtTime(codeElapsed)}
                 </Text>
@@ -1086,7 +1086,7 @@ export default function EmergencyScreen() {
             alignItems: "center",
             justifyContent: "center",
             gap: 8,
-            backgroundColor: isDark ? "#112240" : "#FFFFFF",
+            backgroundColor: isDark ? "#0B352B" : "#FFFFFF",
             borderWidth: 1,
             borderColor: "#DC2626",
             borderRadius: 12,
@@ -1102,7 +1102,7 @@ export default function EmergencyScreen() {
 
         {/* ── PATHWAYS — AHA PALS 2025, step by step for this weight ── */}
         {weightValid && (
-          <View style={[styles.palsBanner, { backgroundColor: isDark ? "#0A192F" : "#FFFFFF", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
+          <View style={[styles.palsBanner, { backgroundColor: isDark ? "#041B16" : "#FFFFFF", borderColor: isDark ? "#1D5243" : "#E2E8F0" }]}>
             <Text style={[styles.palsTitle, { color: "#DC2626", fontFamily: "Inter_700Bold" }]}>Pathways — AHA PALS 2025</Text>
             <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
               {([
@@ -1176,12 +1176,12 @@ export default function EmergencyScreen() {
                   <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: "#DC2626", alignItems: "center", justifyContent: "center" }}>
                     <Text style={{ color: "#FFFFFF", fontFamily: "Inter_800ExtraBold", fontSize: 12 }}>{i + 1}</Text>
                   </View>
-                  <Text style={{ flex: 1, fontSize: Math.round(13 * textScale), lineHeight: 19, color: isDark ? "#CCD6F6" : "#0D1B2A", fontFamily: "Inter_500Medium" }}>{t}</Text>
+                  <Text style={{ flex: 1, fontSize: Math.round(13 * textScale), lineHeight: 19, color: isDark ? "#C9E8DF" : "#0D1B2A", fontFamily: "Inter_500Medium" }}>{t}</Text>
                 </View>
               ));
             })()}
             {pathway === "postop" && (
-              <Text style={{ fontSize: 11, color: isDark ? "#8892B0" : "#64748B", fontStyle: "italic", marginTop: 8, lineHeight: 15 }}>
+              <Text style={{ fontSize: 11, color: isDark ? "#83ACA1" : "#64748B", fontStyle: "italic", marginTop: 8, lineHeight: 15 }}>
                 Reference: EACTS / STS Cardiac Surgery Arrest (CSU-ALS) protocol · ERC 2025 — cardiac arrest after cardiac surgery
               </Text>
             )}
@@ -1193,7 +1193,7 @@ export default function EmergencyScreen() {
           onPress={() => router.push("/drug-chart" as any)}
           style={{
             flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8,
-            backgroundColor: isDark ? "#112240" : "#FFFFFF", borderWidth: 1, borderColor: "#059669",
+            backgroundColor: isDark ? "#0B352B" : "#FFFFFF", borderWidth: 1, borderColor: "#059669",
             borderRadius: 12, paddingVertical: 11, marginBottom: 12,
           }}
         >
@@ -1204,57 +1204,57 @@ export default function EmergencyScreen() {
         </Pressable>
 
         {/* Emergency Calculators */}
-        <View style={[styles.palsBanner, { backgroundColor: isDark ? "#0A192F" : "#FFFFFF", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
+        <View style={[styles.palsBanner, { backgroundColor: isDark ? "#041B16" : "#FFFFFF", borderColor: isDark ? "#1D5243" : "#E2E8F0" }]}>
           <Text style={[styles.palsTitle, { color: colors.tint, fontFamily: "Inter_700Bold" }]}>
             Emergency Calculators
           </Text>
-          <Text style={[styles.calcSource, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_400Regular" }]}>
+          <Text style={[styles.calcSource, { color: isDark ? "#83ACA1" : "#64748B", fontFamily: "Inter_400Regular" }]}>
             PALS 2025 · Harriet Lane 24e · ACLS
           </Text>
 
           {/* ET Tube + Airway */}
-          <View style={[styles.calcSection, { borderTopColor: isDark ? "#233554" : "#F0F4F8" }]}>
+          <View style={[styles.calcSection, { borderTopColor: isDark ? "#1D5243" : "#F0F4F8" }]}>
             <View style={styles.ettGrid}>
-              <View style={[styles.ettBox, { backgroundColor: isDark ? "#112240" : "#EBF8FF", borderColor: isDark ? "#1A4F7A" : "#EBF8FF" }]}>
+              <View style={[styles.ettBox, { backgroundColor: isDark ? "#0B352B" : "#EBF8FF", borderColor: isDark ? "#1A4F7A" : "#EBF8FF" }]}>
                 <Text style={[styles.ettLabel, { color: isDark ? "#5A8FC0" : "#1A4F7A", fontFamily: "Inter_500Medium" }]}>Uncuffed (mm)</Text>
                 <Text style={[styles.ettValue, { color: isDark ? "#93C5FD" : "#1A4F7A", fontFamily: "Inter_700Bold" }]}>{ettube.uncuffed}</Text>
               </View>
-              <View style={[styles.ettBox, { backgroundColor: isDark ? "#112240" : "#F0FFF4", borderColor: isDark ? "#146B35" : "#F0FFF4" }]}>
+              <View style={[styles.ettBox, { backgroundColor: isDark ? "#0B352B" : "#F0FFF4", borderColor: isDark ? "#146B35" : "#F0FFF4" }]}>
                 <Text style={[styles.ettLabel, { color: isDark ? "#6FCF97" : "#146B35", fontFamily: "Inter_500Medium" }]}>Cuffed (mm)</Text>
                 <Text style={[styles.ettValue, { color: isDark ? "#86EFAC" : "#146B35", fontFamily: "Inter_700Bold" }]}>{ettube.cuffed}</Text>
               </View>
-              <View style={[styles.ettBox, { backgroundColor: isDark ? "#112240" : "#FEE2E2", borderColor: isDark ? "#DC2626" : "#FEE2E2" }]}>
+              <View style={[styles.ettBox, { backgroundColor: isDark ? "#0B352B" : "#FEE2E2", borderColor: isDark ? "#DC2626" : "#FEE2E2" }]}>
                 <Text style={[styles.ettLabel, { color: isDark ? "#FCA5A5" : "#991B1B", fontFamily: "Inter_500Medium" }]}>Depth</Text>
                 <Text style={[styles.ettValue, { color: isDark ? "#FECACA" : "#DC2626", fontFamily: "Inter_700Bold" }]}>{ettube.depth}</Text>
               </View>
             </View>
             <View style={styles.airwayRow}>
               <View style={[styles.airwayBadge, { backgroundColor: isDark ? "#1A1F3D" : "#F0F4F8", borderColor: isDark ? "#3D4770" : "#E2E8F0" }]}>
-                <Text style={[styles.airwayBadgeLabel, { color: isDark ? "#8892B0" : "#64748B" }]}>Suction</Text>
+                <Text style={[styles.airwayBadgeLabel, { color: isDark ? "#83ACA1" : "#64748B" }]}>Suction</Text>
                 <Text style={[styles.airwayBadgeValue, { color: isDark ? "#FFD700" : "#B45309" }]}>{suctionFr} Fr</Text>
               </View>
               <View style={[styles.airwayBadge, { backgroundColor: isDark ? "#1A1F3D" : "#F0F4F8", borderColor: isDark ? "#3D4770" : "#E2E8F0" }]}>
-                <Text style={[styles.airwayBadgeLabel, { color: isDark ? "#8892B0" : "#64748B" }]}>Blade</Text>
+                <Text style={[styles.airwayBadgeLabel, { color: isDark ? "#83ACA1" : "#64748B" }]}>Blade</Text>
                 <Text style={[styles.airwayBadgeValue, { color: isDark ? "#FFD700" : "#B45309" }]}>{blade}</Text>
               </View>
               <View style={[styles.airwayBadge, { backgroundColor: isDark ? "#1A1F3D" : "#F0F4F8", borderColor: isDark ? "#3D4770" : "#E2E8F0" }]}>
-                <Text style={[styles.airwayBadgeLabel, { color: isDark ? "#8892B0" : "#64748B" }]}>LMA</Text>
+                <Text style={[styles.airwayBadgeLabel, { color: isDark ? "#83ACA1" : "#64748B" }]}>LMA</Text>
                 <Text style={[styles.airwayBadgeValue, { color: isDark ? "#FFD700" : "#B45309" }]}>Size {lma}</Text>
               </View>
             </View>
             <View style={[styles.dopeStrip, { backgroundColor: isDark ? "#1A1F3D" : "#F0F4F8", borderColor: isDark ? "#3D4770" : "#E2E8F0" }]}>
-              <Text style={[styles.dopeLabel, { color: isDark ? "#8892B0" : "#64748B" }]}>DOPE Check</Text>
-              <Text style={[styles.dopeText, { color: isDark ? "#8892B0" : "#64748B" }]}>Displacement · Obstruction · Pneumothorax · Equipment failure</Text>
+              <Text style={[styles.dopeLabel, { color: isDark ? "#83ACA1" : "#64748B" }]}>DOPE Check</Text>
+              <Text style={[styles.dopeText, { color: isDark ? "#83ACA1" : "#64748B" }]}>Displacement · Obstruction · Pneumothorax · Equipment failure</Text>
             </View>
           </View>
 
           {/* Defibrillator — hard-coded PALS */}
-          {weightValid && <View style={[styles.calcSection, { borderTopColor: isDark ? "#233554" : "#F0F4F8" }]}>
-            <Text style={[styles.calcSectionTitle, { color: isDark ? "#8892B0" : "#64748B", fontFamily: "Inter_600SemiBold", marginBottom: 10 }]}>
+          {weightValid && <View style={[styles.calcSection, { borderTopColor: isDark ? "#1D5243" : "#F0F4F8" }]}>
+            <Text style={[styles.calcSectionTitle, { color: isDark ? "#83ACA1" : "#64748B", fontFamily: "Inter_600SemiBold", marginBottom: 10 }]}>
               Defibrillator Energy — {weightKg.toFixed(1)} kg
             </Text>
             <View style={{ gap: 8 }}>
-              <View style={[styles.shockBox, { backgroundColor: isDark ? "#112240" : "#FEE2E2", borderColor: isDark ? "#DC2626" : "#FCA5A5" }]}>
+              <View style={[styles.shockBox, { backgroundColor: isDark ? "#0B352B" : "#FEE2E2", borderColor: isDark ? "#DC2626" : "#FCA5A5" }]}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 6 }}>
                   <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: "#DC2626" }} />
                   <Text style={[styles.shockType, { color: isDark ? "#FCA5A5" : "#991B1B" }]}>Unsynchronized — VF / pVT</Text>
@@ -1272,7 +1272,7 @@ export default function EmergencyScreen() {
                   <Text style={[styles.shockFormula, { color: isDark ? "#FCA5A5" : "#991B1B" }]}>Max = 10 J/kg (max 360)</Text>
                 </View>
               </View>
-              <View style={[styles.shockBox, { backgroundColor: isDark ? "#112240" : "#FEF3C7", borderColor: isDark ? "#D97706" : "#FCD34D" }]}>
+              <View style={[styles.shockBox, { backgroundColor: isDark ? "#0B352B" : "#FEF3C7", borderColor: isDark ? "#D97706" : "#FCD34D" }]}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 6 }}>
                   <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: "#D97706" }} />
                   <Text style={[styles.shockType, { color: isDark ? "#FCD34D" : "#92400E" }]}>Synchronized — SVT / VT with pulse</Text>
@@ -1306,10 +1306,10 @@ export default function EmergencyScreen() {
             style={[
               styles.emergencyCard,
               {
-                backgroundColor: isDark ? "#112240" : "#FFFFFF",
+                backgroundColor: isDark ? "#0B352B" : "#FFFFFF",
                 borderLeftColor: item.color,
                 borderWidth: isDark ? 1 : 0,
-                borderColor: isDark ? "#233554" : "transparent",
+                borderColor: isDark ? "#1D5243" : "transparent",
                 borderLeftWidth: 3,
               },
             ]}
@@ -1334,7 +1334,7 @@ export default function EmergencyScreen() {
                 <Text style={[styles.adultMaxAlertText, { fontFamily: "Inter_700Bold" }]}>{item.adultMaxLabel}</Text>
               </View>
             )}
-            <Text style={[styles.cardNotesCompact, { color: isDark ? "#8892B0" : "#8A9BB0", fontFamily: "Inter_400Regular" }]}>
+            <Text style={[styles.cardNotesCompact, { color: isDark ? "#83ACA1" : "#8A9BB0", fontFamily: "Inter_400Regular" }]}>
               {item.notes}
             </Text>
             <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
@@ -1359,17 +1359,17 @@ export default function EmergencyScreen() {
         ))}
 
         {/* Choking + Neonatal cards */}
-        <View style={[styles.palsBanner, { backgroundColor: isDark ? "#0A192F" : "#FFFFFF", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
+        <View style={[styles.palsBanner, { backgroundColor: isDark ? "#041B16" : "#FFFFFF", borderColor: isDark ? "#1D5243" : "#E2E8F0" }]}>
           <Text style={[styles.palsTitle, { color: colors.tint, fontFamily: "Inter_700Bold" }]}>Choking — Foreign-Body Airway Obstruction (BLS 2025)</Text>
-          <Text style={{ fontSize: Math.round(12.5 * textScale), lineHeight: 19, color: isDark ? "#CCD6F6" : "#0D1B2A", fontFamily: "Inter_400Regular" }}>
+          <Text style={{ fontSize: Math.round(12.5 * textScale), lineHeight: 19, color: isDark ? "#C9E8DF" : "#0D1B2A", fontFamily: "Inter_400Regular" }}>
             Conscious infant (&lt; 1 yr): 5 back blows ↔ 5 chest thrusts — repeat. NO abdominal thrusts. NO blind finger sweeps.{"\n"}
             Child ≥ 1 yr: 5 back blows, then 5 abdominal thrusts — alternate until the object clears or the child becomes unconscious.{"\n"}
             If unconscious: start CPR. Look into the mouth before each ventilation — remove the object only if you can see it.
           </Text>
         </View>
-        <View style={[styles.palsBanner, { backgroundColor: isDark ? "#0A192F" : "#FFFFFF", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
+        <View style={[styles.palsBanner, { backgroundColor: isDark ? "#041B16" : "#FFFFFF", borderColor: isDark ? "#1D5243" : "#E2E8F0" }]}>
           <Text style={[styles.palsTitle, { color: colors.tint, fontFamily: "Inter_700Bold" }]}>Neonatal Corner — NRP</Text>
-          <Text style={{ fontSize: Math.round(12.5 * textScale), lineHeight: 19, color: isDark ? "#CCD6F6" : "#0D1B2A", fontFamily: "Inter_400Regular" }}>
+          <Text style={{ fontSize: Math.round(12.5 * textScale), lineHeight: 19, color: isDark ? "#C9E8DF" : "#0D1B2A", fontFamily: "Inter_400Regular" }}>
             Warm · dry · stimulate. HR &lt; 100 → PPV (room air for term babies). HR &lt; 60 despite 30 s of effective PPV → chest compressions.{"\n"}
             Compressions : Ventilation = 3 : 1 (90 + 30 = 120 events/min) · 100% O2 during compressions.{"\n"}
             Epinephrine IV/IO 0.02–0.03 mg/kg (0.2–0.3 mL/kg of 0.1 mg/mL) if HR stays &lt; 60 — repeat every 3–5 min.{"\n"}
@@ -1378,10 +1378,10 @@ export default function EmergencyScreen() {
         </View>
 
         {/* Hs & Ts */}
-        <View style={[styles.palsBanner, { backgroundColor: isDark ? "#0A192F" : "#FFFFFF", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
+        <View style={[styles.palsBanner, { backgroundColor: isDark ? "#041B16" : "#FFFFFF", borderColor: isDark ? "#1D5243" : "#E2E8F0" }]}>
           <Text style={[styles.palsTitle, { color: colors.tint, fontFamily: "Inter_700Bold" }]}>Hs & Ts — Reversible Causes</Text>
           <View style={styles.htGrid}>
-            <View style={[styles.htCol, { backgroundColor: isDark ? "#112240" : "#F0FFF4", borderColor: isDark ? "#146B35" : "#D1FAE5" }]}>
+            <View style={[styles.htCol, { backgroundColor: isDark ? "#0B352B" : "#F0FFF4", borderColor: isDark ? "#146B35" : "#D1FAE5" }]}>
               <Text style={[styles.htColTitle, { color: isDark ? "#86EFAC" : "#146B35" }]}>H's</Text>
               {HsItems.map((h, i) => (
                 <TouchableOpacity key={i} onPress={() => toggleH(i)} style={styles.htRow} activeOpacity={0.7}>
@@ -1390,12 +1390,12 @@ export default function EmergencyScreen() {
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={[styles.htLabel, { color: isDark ? "#FFFFFF" : "#0D1B2A" }]}>{h.label}</Text>
-                    <Text style={[styles.htAction, { color: isDark ? "#8892B0" : "#64748B" }]}>{h.action}</Text>
+                    <Text style={[styles.htAction, { color: isDark ? "#83ACA1" : "#64748B" }]}>{h.action}</Text>
                   </View>
                 </TouchableOpacity>
               ))}
             </View>
-            <View style={[styles.htCol, { backgroundColor: isDark ? "#112240" : "#FEF2F2", borderColor: isDark ? "#7F1D1D" : "#FECACA" }]}>
+            <View style={[styles.htCol, { backgroundColor: isDark ? "#0B352B" : "#FEF2F2", borderColor: isDark ? "#7F1D1D" : "#FECACA" }]}>
               <Text style={[styles.htColTitle, { color: isDark ? "#FCA5A5" : "#991B1B" }]}>T's</Text>
               {TsItems.map((t, i) => (
                 <TouchableOpacity key={i} onPress={() => toggleT(i)} style={styles.htRow} activeOpacity={0.7}>
@@ -1404,7 +1404,7 @@ export default function EmergencyScreen() {
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={[styles.htLabel, { color: isDark ? "#FFFFFF" : "#0D1B2A" }]}>{t.label}</Text>
-                    <Text style={[styles.htAction, { color: isDark ? "#8892B0" : "#64748B" }]}>{t.action}</Text>
+                    <Text style={[styles.htAction, { color: isDark ? "#83ACA1" : "#64748B" }]}>{t.action}</Text>
                   </View>
                 </TouchableOpacity>
               ))}
@@ -1413,9 +1413,9 @@ export default function EmergencyScreen() {
         </View>
 
         {/* ── After ROSC targets ── */}
-        <View style={[styles.palsBanner, { backgroundColor: isDark ? "#0A192F" : "#FFFFFF", borderColor: isDark ? "#233554" : "#E2E8F0" }]}>
+        <View style={[styles.palsBanner, { backgroundColor: isDark ? "#041B16" : "#FFFFFF", borderColor: isDark ? "#1D5243" : "#E2E8F0" }]}>
           <Text style={[styles.palsTitle, { color: "#16A34A", fontFamily: "Inter_700Bold" }]}>After ROSC — Post-Arrest Targets (PALS 2025)</Text>
-          <Text style={{ fontSize: Math.round(12.5 * textScale), lineHeight: 19, color: isDark ? "#CCD6F6" : "#0D1B2A", fontFamily: "Inter_400Regular" }}>
+          <Text style={{ fontSize: Math.round(12.5 * textScale), lineHeight: 19, color: isDark ? "#C9E8DF" : "#0D1B2A", fontFamily: "Inter_400Regular" }}>
             SpO2 94–98% — avoid hypoxia AND hyperoxia.{"\n"}
             Blood pressure: keep SBP above the age floor (≥ {targetVitals.minSBP} mmHg for this age) — continuous arterial BP monitoring if available.{"\n"}
             Temperature: prevent fever — keep ≤ 37.5°C.{"\n"}
@@ -1512,7 +1512,7 @@ const styles = StyleSheet.create({
   segOption: { minWidth: 48, minHeight: 44, paddingHorizontal: 10, alignItems: "center", justifyContent: "center" },
 
   // Active states — teal for weight, indigo for age
-  segOptionActiveBlue: { backgroundColor: "#0891B2" },
+  segOptionActiveBlue: { backgroundColor: "#0D9488" },
   segOptionActiveIndigo: { backgroundColor: "#6366F1" },
 
   // Text inside each pill option

@@ -415,21 +415,21 @@ const TOOL_META: Record<string,{title:string;icon:string;color:string;subtitle:s
   growth:{title:"Growth Charts",icon:"bar-chart-2",color:"#0D9488",subtitle:"WHO Child Growth Standards"},
   vis:{title:"VIS / Cardiac",icon:"heart",color:"#E53E3E",subtitle:"Vasoactive-Inotropic Score"},
   bundles:{title:"PICU Care Bundles",icon:"check-square",color:"#7C3AED",subtitle:"ICU daily checklists"},
-  fluids:{title:"IV Fluids",icon:"droplet",color:"#0EA5E9",subtitle:"Holliday-Segar · Dehydration · DKA"},
-  electrolytes:{title:"Electrolyte Correction",icon:"zap",color:"#0891B2",subtitle:"K⁺ Potassium correction"},
+  fluids:{title:"IV Fluids",icon:"droplet",color:"#14B8A6",subtitle:"Holliday-Segar · Dehydration · DKA"},
+  electrolytes:{title:"Electrolyte Correction",icon:"zap",color:"#0D9488",subtitle:"K⁺ Potassium correction"},
   gcs:{title:"Pediatric GCS",icon:"activity",color:"#16A34A",subtitle:"Modified GCS for children & infants"},
   scores:{title:"ICU Scores",icon:"activity",color:"#FF4C60",subtitle:"FOUR · OSI · SIPA · WAT-1"},
   renal:{title:"Renal & Hepatic",icon:"shield",color:"#DC2626",subtitle:"Dose adjustments by organ function"},
   pews:{title:"PEWS Score",icon:"activity",color:"#FF4C60",subtitle:"Pediatric Early Warning Score"},
   apgar:{title:"APGAR Score",icon:"heart",color:"#EC4899",subtitle:"Neonatal assessment at 1 & 5 min"},
   // ── New: Clinical Calculators ──────────────────────────────────────────────
-  gir:{title:"GIR Calculator",icon:"droplet",color:"#0EA5E9",subtitle:"Glucose Infusion Rate · mg/kg/min"},
+  gir:{title:"GIR Calculator",icon:"droplet",color:"#14B8A6",subtitle:"Glucose Infusion Rate · mg/kg/min"},
   "big-score":{title:"BIG Score",icon:"trending-up",color:"#DC2626",subtitle:"Pediatric Trauma Mortality Prediction"},
   "phoenix-sepsis":{title:"Phoenix Sepsis Score 2024",icon:"activity",color:"#7C3AED",subtitle:"Schlapbach et al. JAMA 2024 Criteria"},
   // ── New: ICU Protocols ─────────────────────────────────────────────────────
   "streptokinase-empyema":{title:"Streptokinase — Empyema",icon:"shield",color:"#0D9488",subtitle:"Intrapleural Fibrinolysis Protocol"},
   // ── Ventilator & ABG Management ────────────────────────────────────────────
-  "ventilator":{title:"Ventilator & ABG Management",icon:"wind",color:"#0891B2",subtitle:"PALICC 2023 · Harriet Lane · Hamilton C3"},
+  "ventilator":{title:"Ventilator & ABG Management",icon:"wind",color:"#0D9488",subtitle:"PALICC 2023 · Harriet Lane · Hamilton C3"},
   // ── New: Nursing batch ─────────────────────────────────────────────────────
   "pain-sedation":{title:"Pain & Sedation Scores",icon:"thermometer",color:"#DB2777",subtitle:"FLACC · COMFORT-B · SAS (Riker) · Faces"},
   "fluid-balance":{title:"Fluid Balance — I/O Chart",icon:"clipboard",color:"#0369A1",subtitle:"Intake & Output · Urine mL/kg/hr"},
@@ -441,8 +441,8 @@ const TOOL_META: Record<string,{title:string;icon:string;color:string;subtitle:s
 function Row({label,value,isDark}:{label:string;value:string;isDark:boolean}) {
   return (
     <View style={{flexDirection:"row",justifyContent:"space-between",paddingVertical:4}}>
-      <Text style={{fontSize: Math.round(13 * activeTextScale),color:isDark?"#8892B0":"#64748B"}}>{label}</Text>
-      <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:isDark?"#CCD6F6":"#0D1B2A"}}>{value}</Text>
+      <Text style={{fontSize: Math.round(13 * activeTextScale),color:isDark?"#83ACA1":"#64748B"}}>{label}</Text>
+      <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:isDark?"#C9E8DF":"#0D1B2A"}}>{value}</Text>
     </View>
   );
 }
@@ -454,7 +454,7 @@ function GCSOption({options,selected,onSelect,isDark}:{options:{val:number;label
         <TouchableOpacity key={o.val} onPress={()=>onSelect(o.val)}
           style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,borderWidth:1.5,
             backgroundColor:selected===o.val?C.tint+"22":isDark?"#0F1F2E":"#F8FAFC",
-            borderColor:selected===o.val?C.tint:isDark?"#233554":"#E2E8F0"}}>
+            borderColor:selected===o.val?C.tint:isDark?"#1D5243":"#E2E8F0"}}>
           <View style={{width:18,height:18,borderRadius:9,borderWidth:2,justifyContent:"center",alignItems:"center",
             borderColor:selected===o.val?C.tint:isDark?"#3D5470":"#CBD5E1"}}>
             {selected===o.val&&<View style={{width:8,height:8,borderRadius:4,backgroundColor:C.tint}}/>}
@@ -470,9 +470,9 @@ function Chip({label,color,selected,onPress,isDark}:{label:string;color:string;s
   return (
     <TouchableOpacity onPress={onPress}
       style={{paddingHorizontal:12,paddingVertical:7,borderRadius:20,borderWidth:1.5,
-        backgroundColor:selected?color:isDark?"#0A192F":"#F1F5F9",
+        backgroundColor:selected?color:isDark?"#041B16":"#F1F5F9",
         borderColor:selected?color:isDark?"#2D4456":"#CBD5E1"}}>
-      <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"600",color:selected?"#FFF":isDark?"#8892B0":"#64748B"}}>{label}</Text>
+      <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"600",color:selected?"#FFF":isDark?"#83ACA1":"#64748B"}}>{label}</Text>
     </TouchableOpacity>
   );
 }
@@ -480,8 +480,8 @@ function Chip({label,color,selected,onPress,isDark}:{label:string;color:string;s
 function ScenarioFluidPanel({scenario,kCl,isDark,textMuted,textPrimary}:{scenario:string;kCl:boolean;isDark:boolean;textMuted:string;textPrimary:string}) {
   const data:Record<string,{fluid:string;alert:string;alertColor:string;bg:string;border:string}> = {
     neonatal:{fluid:"D10W or D10 0.2% NaCl",alert:"Monitor blood glucose periodically.",alertColor:"#7C3AED",bg:isDark?"#1A0A2E":"#F3E8FF",border:isDark?"#7C3AED":"#D8B4FE"},
-    maintenance:{fluid:`D5 0.45% NaCl or D5 0.9% NaCl${kCl?" + 20 mEq/L KCl":""}`,alert:"",alertColor:"#0EA5E9",bg:isDark?"#0A192F":"#EFF6FF",border:isDark?"#0EA5E9":"#BFDBFE"},
-    dehydration:{fluid:`D5 0.45% NaCl or D5 0.9% NaCl${kCl?" + 20 mEq/L KCl":""}`,alert:"",alertColor:"#0EA5E9",bg:isDark?"#0A192F":"#EFF6FF",border:isDark?"#0EA5E9":"#BFDBFE"},
+    maintenance:{fluid:`D5 0.45% NaCl or D5 0.9% NaCl${kCl?" + 20 mEq/L KCl":""}`,alert:"",alertColor:"#14B8A6",bg:isDark?"#041B16":"#EFF6FF",border:isDark?"#14B8A6":"#BFDBFE"},
+    dehydration:{fluid:`D5 0.45% NaCl or D5 0.9% NaCl${kCl?" + 20 mEq/L KCl":""}`,alert:"",alertColor:"#14B8A6",bg:isDark?"#041B16":"#EFF6FF",border:isDark?"#14B8A6":"#BFDBFE"},
     resuscitation:{fluid:"0.9% NaCl or Ringer's Lactate (10–20 mL/kg bolus)",alert:"Caution: Check Serum Calcium if massive transfusion or blood products are running with RL.",alertColor:"#DC2626",bg:isDark?"#450A0A":"#FEE2E2",border:isDark?"#DC2626":"#FCA5A5"},
     dka:{fluid:"0.9% NaCl",alert:"Avoid Dextrose initially.",alertColor:"#DC2626",bg:isDark?"#450A0A":"#FEE2E2",border:isDark?"#DC2626":"#FCA5A5"},
   };
@@ -509,12 +509,12 @@ export default function ToolDetailScreen() {
   const { textScale } = usePreferences();
   activeTextScale = textScale;
 
-  const bg   = isDark ? "#0B132B" : "#F0F4F8";
-  const card = isDark ? "#112240" : "#FFFFFF";
-  const border = isDark ? "#233554" : "#E2E8F0";
-  const tp   = isDark ? "#CCD6F6" : "#0D1B2A";
-  const tm   = isDark ? "#8892B0" : "#8A9BB0";
-  const inputBg = isDark ? "#0A192F" : "#F8FAFC";
+  const bg   = isDark ? "#06231D" : "#F0F4F8";
+  const card = isDark ? "#0B352B" : "#FFFFFF";
+  const border = isDark ? "#1D5243" : "#E2E8F0";
+  const tp   = isDark ? "#C9E8DF" : "#0D1B2A";
+  const tm   = isDark ? "#83ACA1" : "#8A9BB0";
+  const inputBg = isDark ? "#041B16" : "#F8FAFC";
 
   const meta = TOOL_META[id ?? ""] ?? { title:"Tool", icon:"tool", color:C.tint, subtitle:"" };
 
@@ -958,7 +958,7 @@ export default function ToolDetailScreen() {
           <BPGrowthCalc isDark={isDark} />
 
           {/* Vitals Table */}
-          <View style={{backgroundColor:isDark?"#0A192F":"#EFF6FF",borderColor:isDark?"#233554":"#BFDBFE",borderWidth:1,borderRadius:12,padding:12}}>
+          <View style={{backgroundColor:isDark?"#041B16":"#EFF6FF",borderColor:isDark?"#1D5243":"#BFDBFE",borderWidth:1,borderRadius:12,padding:12}}>
             <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:"#3B82F6",marginBottom:8}}>Normal Vitals by Age</Text>
             <View style={{flexDirection:"row",borderBottomWidth:1,borderBottomColor:border,paddingBottom:6,marginBottom:4}}>
               {["Age Group","HR","SBP","RR","MAP"].map(h=><Text key={h} style={{flex:1,fontSize: Math.round(11 * activeTextScale),fontWeight:"700",color:"#3B82F6",textAlign:"center"}}>{h}</Text>)}
@@ -981,15 +981,15 @@ export default function ToolDetailScreen() {
       case "bundles": return (
         <View style={{gap:10}}>
           <View style={{flexDirection:"row",flexWrap:"wrap",gap:8}}>
-            <Chip label={`FASTHUG (${fasthugPct}%)`} color="#0891B2" selected={bundleTab==="fasthug"} onPress={()=>setBundleTab("fasthug")} isDark={isDark}/>
+            <Chip label={`FASTHUG (${fasthugPct}%)`} color="#0D9488" selected={bundleTab==="fasthug"} onPress={()=>setBundleTab("fasthug")} isDark={isDark}/>
             <Chip label={`VAP (${vapPct}%)`} color="#E53E3E" selected={bundleTab==="vap"} onPress={()=>setBundleTab("vap")} isDark={isDark}/>
             <Chip label={`CLABSI (${clabsiPct}%)`} color="#7C3AED" selected={bundleTab==="clabsi"} onPress={()=>setBundleTab("clabsi")} isDark={isDark}/>
             <Chip label={`CAUTI (${cautiPct}%)`} color="#F59E0B" selected={bundleTab==="cauti"} onPress={()=>setBundleTab("cauti")} isDark={isDark}/>
           </View>
           {bundleTab==="fasthug"&&(
             <>
-              <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"700",color:"#0891B2"}}>FASTHUG (Daily ICU Checklist)</Text>
-              <View style={{height:6,borderRadius:3,backgroundColor:isDark?"#233554":"#E2E8F0"}}><View style={{height:6,borderRadius:3,width:`${fasthugPct}%` as any,backgroundColor:fasthugPct===100?"#16A34A":"#0891B2"}}/></View>
+              <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"700",color:"#0D9488"}}>FASTHUG (Daily ICU Checklist)</Text>
+              <View style={{height:6,borderRadius:3,backgroundColor:isDark?"#1D5243":"#E2E8F0"}}><View style={{height:6,borderRadius:3,width:`${fasthugPct}%` as any,backgroundColor:fasthugPct===100?"#16A34A":"#0D9488"}}/></View>
               <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm}}>{fasthugChecked.filter(Boolean).length}/{FASTHUG_BUNDLE.length} complete</Text>
               {FASTHUG_BUNDLE.map((item,i)=>(
                 <TouchableOpacity key={i} onPress={()=>setFasthugChecked(p=>p.map((v,j)=>j===i?!v:v))} style={{flexDirection:"row",alignItems:"center",gap:10,paddingVertical:8}}>
@@ -1003,7 +1003,7 @@ export default function ToolDetailScreen() {
           {bundleTab==="vap"&&(
             <>
               <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"700",color:"#E53E3E"}}>Ventilator-Associated Pneumonia (VAP) Prevention</Text>
-              <View style={{height:6,borderRadius:3,backgroundColor:isDark?"#233554":"#E2E8F0"}}><View style={{height:6,borderRadius:3,width:`${vapPct}%` as any,backgroundColor:vapPct===100?"#16A34A":"#E53E3E"}}/></View>
+              <View style={{height:6,borderRadius:3,backgroundColor:isDark?"#1D5243":"#E2E8F0"}}><View style={{height:6,borderRadius:3,width:`${vapPct}%` as any,backgroundColor:vapPct===100?"#16A34A":"#E53E3E"}}/></View>
               {VAP_BUNDLE_UPDATED.map((item,i)=>(
                 <TouchableOpacity key={i} onPress={()=>setVapChecked(p=>p.map((v,j)=>j===i?!v:v))} style={{flexDirection:"row",alignItems:"center",gap:10,paddingVertical:8}}>
                   <View style={{width:22,height:22,borderRadius:6,borderWidth:2,justifyContent:"center",alignItems:"center",backgroundColor:vapChecked[i]?"#16A34A":"transparent",borderColor:vapChecked[i]?"#16A34A":isDark?"#3D5470":"#CBD5E1"}}>{vapChecked[i]&&<Feather name="check" size={12} color="#FFF"/>}</View>
@@ -1016,7 +1016,7 @@ export default function ToolDetailScreen() {
           {bundleTab==="clabsi"&&(
             <>
               <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"700",color:"#7C3AED"}}>CLABSI Prevention (Central Line Bundle)</Text>
-              <View style={{height:6,borderRadius:3,backgroundColor:isDark?"#233554":"#E2E8F0"}}><View style={{height:6,borderRadius:3,width:`${clabsiPct}%` as any,backgroundColor:clabsiPct===100?"#16A34A":"#7C3AED"}}/></View>
+              <View style={{height:6,borderRadius:3,backgroundColor:isDark?"#1D5243":"#E2E8F0"}}><View style={{height:6,borderRadius:3,width:`${clabsiPct}%` as any,backgroundColor:clabsiPct===100?"#16A34A":"#7C3AED"}}/></View>
               {CLABSI_BUNDLE_UPDATED.map((item,i)=>(
                 <TouchableOpacity key={i} onPress={()=>setClabsiChecked(p=>p.map((v,j)=>j===i?!v:v))} style={{flexDirection:"row",alignItems:"center",gap:10,paddingVertical:8}}>
                   <View style={{width:22,height:22,borderRadius:6,borderWidth:2,justifyContent:"center",alignItems:"center",backgroundColor:clabsiChecked[i]?"#16A34A":"transparent",borderColor:clabsiChecked[i]?"#16A34A":isDark?"#3D5470":"#CBD5E1"}}>{clabsiChecked[i]&&<Feather name="check" size={12} color="#FFF"/>}</View>
@@ -1029,7 +1029,7 @@ export default function ToolDetailScreen() {
           {bundleTab==="cauti"&&(
             <>
               <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"700",color:"#F59E0B"}}>CAUTI Prevention (Urinary Catheter Bundle)</Text>
-              <View style={{height:6,borderRadius:3,backgroundColor:isDark?"#233554":"#E2E8F0"}}><View style={{height:6,borderRadius:3,width:`${cautiPct}%` as any,backgroundColor:cautiPct===100?"#16A34A":"#F59E0B"}}/></View>
+              <View style={{height:6,borderRadius:3,backgroundColor:isDark?"#1D5243":"#E2E8F0"}}><View style={{height:6,borderRadius:3,width:`${cautiPct}%` as any,backgroundColor:cautiPct===100?"#16A34A":"#F59E0B"}}/></View>
               {CAUTI_BUNDLE.map((item,i)=>(
                 <TouchableOpacity key={i} onPress={()=>setCautiChecked(p=>p.map((v,j)=>j===i?!v:v))} style={{flexDirection:"row",alignItems:"center",gap:10,paddingVertical:8}}>
                   <View style={{width:22,height:22,borderRadius:6,borderWidth:2,justifyContent:"center",alignItems:"center",backgroundColor:cautiChecked[i]?"#16A34A":"transparent",borderColor:cautiChecked[i]?"#16A34A":isDark?"#3D5470":"#CBD5E1"}}>{cautiChecked[i]&&<Feather name="check" size={12} color="#FFF"/>}</View>
@@ -1050,7 +1050,7 @@ export default function ToolDetailScreen() {
       case "fluids": return (
         <View style={{gap:12}}>
           <View style={{flexDirection:"row",justifyContent:"flex-end"}}>
-            <StarButton isFav={isFav("tool-fluids")} onToggle={()=>toggleFav({id:"tool-fluids",type:"tool",label:"IV Fluids",color:"#0EA5E9"})} size={18} color="#0EA5E9"/>
+            <StarButton isFav={isFav("tool-fluids")} onToggle={()=>toggleFav({id:"tool-fluids",type:"tool",label:"IV Fluids",color:"#14B8A6"})} size={18} color="#14B8A6"/>
           </View>
           <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,fontStyle:"italic"}}>Holliday-Segar · Harriet Lane 24e · Nelson 22e</Text>
           <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm}}>Patient Weight (kg)</Text>
@@ -1058,13 +1058,13 @@ export default function ToolDetailScreen() {
           <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm}}>Clinical Scenario</Text>
           <View style={{flexDirection:"row",flexWrap:"wrap",gap:8}}>
             {[{key:"maintenance",label:"Maintenance"},{key:"neonatal",label:"Neonatal"},{key:"dehydration",label:"Dehydration"},{key:"resuscitation",label:"Resuscitation"},{key:"dka",label:"DKA / Metabolic"}].map(s=>(
-              <Chip key={s.key} label={s.label} color={s.key==="resuscitation"||s.key==="dka"?"#DC2626":s.key==="neonatal"?"#7C3AED":"#0EA5E9"} selected={scenario===s.key as any} onPress={()=>setScenario(s.key as any)} isDark={isDark}/>
+              <Chip key={s.key} label={s.label} color={s.key==="resuscitation"||s.key==="dka"?"#DC2626":s.key==="neonatal"?"#7C3AED":"#14B8A6"} selected={scenario===s.key as any} onPress={()=>setScenario(s.key as any)} isDark={isDark}/>
             ))}
           </View>
           <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm}}>Maintenance Target</Text>
           <View style={{flexDirection:"row",flexWrap:"wrap",gap:8}}>
             {([{key:100,label:"100% (Full)"},{key:75,label:"75% (3/4)"},{key:66,label:"66% (2/3)"},{key:50,label:"50% (1/2)"}]).map(m=>(
-              <Chip key={m.key} label={m.label} color="#0891B2" selected={maintTarget===m.key as any} onPress={()=>setMaintTarget(m.key as any)} isDark={isDark}/>
+              <Chip key={m.key} label={m.label} color="#0D9488" selected={maintTarget===m.key as any} onPress={()=>setMaintTarget(m.key as any)} isDark={isDark}/>
             ))}
           </View>
           {maintenance&&(
@@ -1072,8 +1072,8 @@ export default function ToolDetailScreen() {
               {fluidWtNum>60&&(
                 <Text style={{fontSize: Math.round(11.5 * activeTextScale),color:"#D97706",fontWeight:"600"}}>⚠ Weight above 60 kg — Holliday-Segar is shown in full; many units cap total fluids in larger children. Confirm with your unit protocol.</Text>
               )}
-              <View style={{backgroundColor:"#0EA5E915",borderColor:"#0EA5E940",borderWidth:1.5,borderRadius:12,padding:14}}>
-                <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:"#0EA5E9",marginBottom:8}}>Maintenance Fluids {maintTarget<100?`(${maintTarget}% of Holliday-Segar)`:""}</Text>
+              <View style={{backgroundColor:"#14B8A615",borderColor:"#14B8A640",borderWidth:1.5,borderRadius:12,padding:14}}>
+                <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:"#14B8A6",marginBottom:8}}>Maintenance Fluids {maintTarget<100?`(${maintTarget}% of Holliday-Segar)`:""}</Text>
                 <Row label="24-hour total" value={`${maintenance.daily} mL/day`} isDark={isDark}/>
                 <Row label="Hourly rate (4-2-1)" value={`${maintenance.hourly} mL/hr`} isDark={isDark}/>
               </View>
@@ -1105,12 +1105,12 @@ export default function ToolDetailScreen() {
       case "electrolytes": return (
         <View style={{gap:12}}>
           <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
-            <View><Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:"#0891B2"}}>Electrolyte Correction</Text><Text style={{fontSize: Math.round(10 * activeTextScale),color:tm,marginTop:1}}>K⁺ Potassium correction</Text></View>
-            <StarButton isFav={isFav("tool-electrolytes")} onToggle={()=>toggleFav({id:"tool-electrolytes",type:"tool",label:"Electrolyte Correction",color:"#0891B2"})} size={18} color="#0891B2"/>
+            <View><Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:"#0D9488"}}>Electrolyte Correction</Text><Text style={{fontSize: Math.round(10 * activeTextScale),color:tm,marginTop:1}}>K⁺ Potassium correction</Text></View>
+            <StarButton isFav={isFav("tool-electrolytes")} onToggle={()=>toggleFav({id:"tool-electrolytes",type:"tool",label:"Electrolyte Correction",color:"#0D9488"})} size={18} color="#0D9488"/>
           </View>
-          <View style={{backgroundColor:isDark?"#0A192F":"#EFF6FF",borderColor:isDark?"#1E3A5F":"#BFDBFE",borderWidth:1,borderRadius:12,padding:16,gap:12}}>
+          <View style={{backgroundColor:isDark?"#041B16":"#EFF6FF",borderColor:isDark?"#1E3A5F":"#BFDBFE",borderWidth:1,borderRadius:12,padding:16,gap:12}}>
             <Text style={{fontSize: Math.round(13 * activeTextScale),color:tp,lineHeight:20}}>Potassium correction ab Protocols (Calcs) tab me he — K+ aur Na+ dono wahan hein.</Text>
-            <TouchableOpacity onPress={()=>router.push("/(tabs)/calcs" as any)} style={{paddingVertical:12,borderRadius:10,alignItems:"center",backgroundColor:"#0891B2"}}>
+            <TouchableOpacity onPress={()=>router.push("/(tabs)/calcs" as any)} style={{paddingVertical:12,borderRadius:10,alignItems:"center",backgroundColor:"#0D9488"}}>
               <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:"#FFFFFF"}}>Protocols (Calcs) tab kholo</Text>
             </TouchableOpacity>
           </View>
@@ -1143,7 +1143,7 @@ export default function ToolDetailScreen() {
       case "scores": return (
         <View style={{gap:10}}>
           <View style={{flexDirection:"row",flexWrap:"wrap",gap:8}}>
-            {[{key:"four",label:"FOUR Score",color:"#0891B2"},{key:"osi",label:"OSI",color:"#0EA5E9"},{key:"sipa",label:"SIPA",color:"#D97706"},{key:"wat1",label:"WAT-1",color:"#FF4C60"}].map(s=>(
+            {[{key:"four",label:"FOUR Score",color:"#0D9488"},{key:"osi",label:"OSI",color:"#14B8A6"},{key:"sipa",label:"SIPA",color:"#D97706"},{key:"wat1",label:"WAT-1",color:"#FF4C60"}].map(s=>(
               <Chip key={s.key} label={s.label} color={s.color} selected={scoreTab===s.key as any} onPress={()=>setScoreTab(s.key as any)} isDark={isDark}/>
             ))}
           </View>
@@ -1155,8 +1155,8 @@ export default function ToolDetailScreen() {
                   <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp,marginBottom:6}}>{section.label} — selected: {section.value}</Text>
                   <View style={{gap:6,marginBottom:8}}>
                     {section.options.map(opt=>(
-                      <TouchableOpacity key={opt.value} onPress={()=>section.setter(opt.value)} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,borderWidth:1.5,backgroundColor:section.value===opt.value?"#0891B220":isDark?"#0F1F2E":"#F8FAFC",borderColor:section.value===opt.value?"#0891B2":border}}>
-                        <View style={{width:18,height:18,borderRadius:9,borderWidth:2,justifyContent:"center",alignItems:"center",borderColor:section.value===opt.value?"#0891B2":tm}}>{section.value===opt.value&&<View style={{width:8,height:8,borderRadius:4,backgroundColor:"#0891B2"}}/>}</View>
+                      <TouchableOpacity key={opt.value} onPress={()=>section.setter(opt.value)} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,borderWidth:1.5,backgroundColor:section.value===opt.value?"#0D948820":isDark?"#0F1F2E":"#F8FAFC",borderColor:section.value===opt.value?"#0D9488":border}}>
+                        <View style={{width:18,height:18,borderRadius:9,borderWidth:2,justifyContent:"center",alignItems:"center",borderColor:section.value===opt.value?"#0D9488":tm}}>{section.value===opt.value&&<View style={{width:8,height:8,borderRadius:4,backgroundColor:"#0D9488"}}/>}</View>
                         <Text style={{flex:1,fontSize: Math.round(13 * activeTextScale),color:isDark?"#CBD5E1":"#334155"}}>{opt.label}</Text>
                       </TouchableOpacity>
                     ))}
@@ -1222,7 +1222,7 @@ export default function ToolDetailScreen() {
               <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp}}>Time to gain calm state</Text>
               <View style={{flexDirection:"row",gap:8}}>
                 {WAT1_CALM_TIME.map(opt=>(
-                  <TouchableOpacity key={opt.label} onPress={()=>setWat1CalmTime(opt.points)} style={{flex:1,paddingVertical:10,borderRadius:10,alignItems:"center",borderWidth:1.5,backgroundColor:wat1CalmTime===opt.points?"#FF4C60":isDark?"#0A192F":"#F8FAFC",borderColor:wat1CalmTime===opt.points?"#FF4C60":border}}>
+                  <TouchableOpacity key={opt.label} onPress={()=>setWat1CalmTime(opt.points)} style={{flex:1,paddingVertical:10,borderRadius:10,alignItems:"center",borderWidth:1.5,backgroundColor:wat1CalmTime===opt.points?"#FF4C60":isDark?"#041B16":"#F8FAFC",borderColor:wat1CalmTime===opt.points?"#FF4C60":border}}>
                     <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"600",color:wat1CalmTime===opt.points?"#FFFFFF":tm}}>{opt.label}</Text>
                     <Text style={{fontSize: Math.round(11 * activeTextScale),color:wat1CalmTime===opt.points?"rgba(255,255,255,0.8)":tm}}>{opt.points>0?`+${opt.points}`:opt.points}</Text>
                   </TouchableOpacity>
@@ -1261,7 +1261,7 @@ export default function ToolDetailScreen() {
               </View>
               <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"700",color:tp,marginTop:4}}>Drug Adjustments in Renal Failure</Text>
               {RENAL_DRUGS.map(d=>(
-                <View key={d.drug} style={{borderLeftWidth:3,borderLeftColor:d.alert==="high"?"#DC2626":d.alert==="moderate"?"#D97706":"#16A34A",backgroundColor:isDark?"#0A192F":"#F8FAFC",borderRadius:8,padding:12,marginBottom:4}}>
+                <View key={d.drug} style={{borderLeftWidth:3,borderLeftColor:d.alert==="high"?"#DC2626":d.alert==="moderate"?"#D97706":"#16A34A",backgroundColor:isDark?"#041B16":"#F8FAFC",borderRadius:8,padding:12,marginBottom:4}}>
                   <View style={{flexDirection:"row",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
                     <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp}}>{d.drug}</Text>
                     <View style={{backgroundColor:d.alert==="high"?"#DC262620":d.alert==="moderate"?"#D9770620":"#16A34A20",borderRadius:6,paddingHorizontal:8,paddingVertical:3}}>
@@ -1281,7 +1281,7 @@ export default function ToolDetailScreen() {
               </View>
               <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"700",color:tp,marginTop:4}}>Drug Adjustments in Hepatic Failure</Text>
               {HEPATIC_DRUGS.map(d=>(
-                <View key={d.drug} style={{borderLeftWidth:3,borderLeftColor:d.alert==="high"?"#DC2626":"#D97706",backgroundColor:isDark?"#0A192F":"#F8FAFC",borderRadius:8,padding:12,marginBottom:4}}>
+                <View key={d.drug} style={{borderLeftWidth:3,borderLeftColor:d.alert==="high"?"#DC2626":"#D97706",backgroundColor:isDark?"#041B16":"#F8FAFC",borderRadius:8,padding:12,marginBottom:4}}>
                   <View style={{flexDirection:"row",alignItems:"center",justifyContent:"space-between",marginBottom:4}}>
                     <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp}}>{d.drug}</Text>
                     <View style={{backgroundColor:d.alert==="high"?"#DC262620":"#D9770620",borderRadius:6,paddingHorizontal:8,paddingVertical:3}}>
@@ -1307,7 +1307,7 @@ export default function ToolDetailScreen() {
               <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp,marginBottom:8}}>{x.l} (0–3)</Text>
               <View style={{flexDirection:"row",gap:8}}>
                 {[0,1,2,3].map(n=>(
-                  <TouchableOpacity key={n} onPress={()=>x.s(n.toString())} style={{flex:1,paddingVertical:12,borderRadius:10,alignItems:"center",borderWidth:1.5,backgroundColor:x.v===n.toString()?"#FF4C60":isDark?"#0A192F":"#F8FAFC",borderColor:x.v===n.toString()?"#FF4C60":border}}>
+                  <TouchableOpacity key={n} onPress={()=>x.s(n.toString())} style={{flex:1,paddingVertical:12,borderRadius:10,alignItems:"center",borderWidth:1.5,backgroundColor:x.v===n.toString()?"#FF4C60":isDark?"#041B16":"#F8FAFC",borderColor:x.v===n.toString()?"#FF4C60":border}}>
                     <Text style={{fontSize: Math.round(16 * activeTextScale),fontWeight:"700",color:x.v===n.toString()?"#FFFFFF":tm}}>{n}</Text>
                   </TouchableOpacity>
                 ))}
@@ -1332,7 +1332,7 @@ export default function ToolDetailScreen() {
               <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:tp,marginBottom:8}}>{item.key} — <Text style={{color:tm,fontWeight:"400"}}>selected: {item.value??'—'}</Text></Text>
               <View style={{flexDirection:"row",gap:6}}>
                 {item.options.map(opt=>(
-                  <TouchableOpacity key={opt.score} onPress={()=>item.setter(opt.score)} style={{flex:1,paddingVertical:10,borderRadius:10,alignItems:"center",borderWidth:1.5,backgroundColor:item.value===opt.score?"#EC4899":isDark?"#0A192F":"#F8FAFC",borderColor:item.value===opt.score?"#EC4899":border}}>
+                  <TouchableOpacity key={opt.score} onPress={()=>item.setter(opt.score)} style={{flex:1,paddingVertical:10,borderRadius:10,alignItems:"center",borderWidth:1.5,backgroundColor:item.value===opt.score?"#EC4899":isDark?"#041B16":"#F8FAFC",borderColor:item.value===opt.score?"#EC4899":border}}>
                     <Text style={{fontSize: Math.round(16 * activeTextScale),fontWeight:"700",color:item.value===opt.score?"#FFFFFF":tm}}>{opt.score}</Text>
                     <Text style={{fontSize: Math.round(10 * activeTextScale),color:item.value===opt.score?"rgba(255,255,255,0.8)":tm,marginTop:2,textAlign:"center"}}>{opt.label}</Text>
                   </TouchableOpacity>
@@ -1357,10 +1357,10 @@ export default function ToolDetailScreen() {
         <View style={{gap:14}}>
           <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
             <View style={{flex:1}}>
-              <Text style={{fontSize: Math.round(12 * activeTextScale),color:"#0EA5E9",fontWeight:"700"}}>GIR = (Rate × Dextrose%) ÷ (Weight × 6)</Text>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),color:"#14B8A6",fontWeight:"700"}}>GIR = (Rate × Dextrose%) ÷ (Weight × 6)</Text>
               <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,marginTop:1}}>Result in mg/kg/min</Text>
             </View>
-            <StarButton isFav={isFav("tool-gir")} onToggle={()=>toggleFav({id:"tool-gir",type:"tool",label:"GIR Calculator",color:"#0EA5E9"})} size={18} color="#0EA5E9"/>
+            <StarButton isFav={isFav("tool-gir")} onToggle={()=>toggleFav({id:"tool-gir",type:"tool",label:"GIR Calculator",color:"#14B8A6"})} size={18} color="#14B8A6"/>
           </View>
           <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,fontStyle:"italic"}}>Normal neonatal range: 4–8 mg/kg/min. Premature neonates may require 6–10 mg/kg/min.</Text>
 
@@ -1369,8 +1369,8 @@ export default function ToolDetailScreen() {
             <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>Patient Weight (kg)</Text>
             <View style={{flexDirection:"row",gap:8,alignItems:"center"}}>
               <TextInput style={[inputStyle,{flex:1}]} value={girWeight} onChangeText={setGirWeight} keyboardType="decimal-pad" placeholder="kg" placeholderTextColor={tm}/>
-              {weight>0&&<TouchableOpacity onPress={()=>setGirWeight(weight.toString())} style={{paddingHorizontal:10,paddingVertical:8,borderRadius:8,backgroundColor:"#0EA5E915",borderWidth:1,borderColor:"#0EA5E940"}}>
-                <Text style={{fontSize: Math.round(11 * activeTextScale),color:"#0EA5E9",fontWeight:"700"}}>Use {weight} kg</Text>
+              {weight>0&&<TouchableOpacity onPress={()=>setGirWeight(weight.toString())} style={{paddingHorizontal:10,paddingVertical:8,borderRadius:8,backgroundColor:"#14B8A615",borderWidth:1,borderColor:"#14B8A640"}}>
+                <Text style={{fontSize: Math.round(11 * activeTextScale),color:"#14B8A6",fontWeight:"700"}}>Use {weight} kg</Text>
               </TouchableOpacity>}
             </View>
           </View>
@@ -1386,7 +1386,7 @@ export default function ToolDetailScreen() {
             <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>Dextrose Concentration (%)</Text>
             <View style={{flexDirection:"row",gap:6,flexWrap:"wrap",marginBottom:8}}>
               {["5","10","12.5","15","20","25"].map(d=>(
-                <TouchableOpacity key={d} onPress={()=>setGirDextrose(d)} style={{paddingHorizontal:14,paddingVertical:8,borderRadius:8,backgroundColor:girDextrose===d?"#0EA5E9":isDark?"#1E293B":"#F1F5F9",borderWidth:1.5,borderColor:girDextrose===d?"#0EA5E9":isDark?"#334155":"#CBD5E1"}}>
+                <TouchableOpacity key={d} onPress={()=>setGirDextrose(d)} style={{paddingHorizontal:14,paddingVertical:8,borderRadius:8,backgroundColor:girDextrose===d?"#14B8A6":isDark?"#1E293B":"#F1F5F9",borderWidth:1.5,borderColor:girDextrose===d?"#14B8A6":isDark?"#334155":"#CBD5E1"}}>
                   <Text style={{fontWeight:"700",fontSize: Math.round(13 * activeTextScale),color:girDextrose===d?"#FFFFFF":tm}}>D{d}</Text>
                 </TouchableOpacity>
               ))}
@@ -1427,7 +1427,7 @@ export default function ToolDetailScreen() {
           </View>
 
           {/* Reference ranges */}
-          <View style={{backgroundColor:isDark?"#112240":"#F8FAFC",borderRadius:10,padding:12,gap:5}}>
+          <View style={{backgroundColor:isDark?"#0B352B":"#F8FAFC",borderRadius:10,padding:12,gap:5}}>
             <Text style={{fontSize: Math.round(11 * activeTextScale),fontWeight:"700",color:tm,marginBottom:4}}>Reference Ranges</Text>
             {([
               {range:"< 4 mg/kg/min",label:"Low — supplementation needed",color:"#D97706"},
@@ -1496,7 +1496,7 @@ export default function ToolDetailScreen() {
           )}
 
           {/* Mortality table */}
-          <View style={{backgroundColor:isDark?"#112240":"#F8FAFC",borderRadius:10,padding:12,gap:6}}>
+          <View style={{backgroundColor:isDark?"#0B352B":"#F8FAFC",borderRadius:10,padding:12,gap:6}}>
             <Text style={{fontSize: Math.round(11 * activeTextScale),fontWeight:"700",color:tm,marginBottom:4}}>Predicted Mortality (Borgman 2009)</Text>
             {([
               {range:"< 16",mortality:"< 1%",color:"#16A34A"},
@@ -1531,20 +1531,20 @@ export default function ToolDetailScreen() {
           <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,fontStyle:"italic"}}>Sepsis = total score ≥ 2. Septic shock = cardiovascular domain ≥ 1. Replaces SIRS-based criteria.</Text>
 
           {/* ─ RESPIRATORY ─ */}
-          <View style={{backgroundColor:isDark?"#112240":"#FFFFFF",borderRadius:12,padding:14,gap:10,borderWidth:1,borderColor:isDark?"#233554":"#E2E8F0"}}>
+          <View style={{backgroundColor:isDark?"#0B352B":"#FFFFFF",borderRadius:12,padding:14,gap:10,borderWidth:1,borderColor:isDark?"#1D5243":"#E2E8F0"}}>
             <View style={{flexDirection:"row",alignItems:"center",gap:8}}>
-              <View style={{width:28,height:28,borderRadius:8,backgroundColor:"#0EA5E915",alignItems:"center",justifyContent:"center"}}><Feather name="wind" size={14} color="#0EA5E9"/></View>
+              <View style={{width:28,height:28,borderRadius:8,backgroundColor:"#14B8A615",alignItems:"center",justifyContent:"center"}}><Feather name="wind" size={14} color="#14B8A6"/></View>
               <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"800",color:tp}}>Respiratory</Text>
-              <View style={{marginLeft:"auto",backgroundColor:"#0EA5E920",borderRadius:8,paddingHorizontal:10,paddingVertical:4}}>
-                <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"900",color:"#0EA5E9"}}>{phxResp} / 3</Text>
+              <View style={{marginLeft:"auto",backgroundColor:"#14B8A620",borderRadius:8,paddingHorizontal:10,paddingVertical:4}}>
+                <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"900",color:"#14B8A6"}}>{phxResp} / 3</Text>
               </View>
             </View>
-            <TouchableOpacity onPress={()=>setPhxIMV(!phxIMV)} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,backgroundColor:phxIMV?"#0EA5E915":isDark?"#0A192F":"#F8FAFC",borderWidth:1.5,borderColor:phxIMV?"#0EA5E9":isDark?"#334155":"#E2E8F0"}}>
-              <View style={{width:20,height:20,borderRadius:5,borderWidth:2,borderColor:phxIMV?"#0EA5E9":isDark?"#475569":"#CBD5E1",backgroundColor:phxIMV?"#0EA5E9":"transparent",justifyContent:"center",alignItems:"center"}}>
+            <TouchableOpacity onPress={()=>setPhxIMV(!phxIMV)} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,backgroundColor:phxIMV?"#14B8A615":isDark?"#041B16":"#F8FAFC",borderWidth:1.5,borderColor:phxIMV?"#14B8A6":isDark?"#334155":"#E2E8F0"}}>
+              <View style={{width:20,height:20,borderRadius:5,borderWidth:2,borderColor:phxIMV?"#14B8A6":isDark?"#475569":"#CBD5E1",backgroundColor:phxIMV?"#14B8A6":"transparent",justifyContent:"center",alignItems:"center"}}>
                 {phxIMV&&<Feather name="check" size={12} color="#FFFFFF"/>}
               </View>
-              <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:phxIMV?"#0EA5E9":tp,flex:1}}>Invasive Mechanical Ventilation (IMV)</Text>
-              <Text style={{fontSize: Math.round(11 * activeTextScale),color:"#0EA5E9",fontWeight:"700"}}>+1</Text>
+              <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"700",color:phxIMV?"#14B8A6":tp,flex:1}}>Invasive Mechanical Ventilation (IMV)</Text>
+              <Text style={{fontSize: Math.round(11 * activeTextScale),color:"#14B8A6",fontWeight:"700"}}>+1</Text>
             </TouchableOpacity>
             {phxIMV&&(<View style={{gap:8}}>
               <Text style={{fontSize: Math.round(11 * activeTextScale),fontWeight:"700",color:tm}}>PaO₂/FiO₂ ratio (if blood gas available)</Text>
@@ -1556,7 +1556,7 @@ export default function ToolDetailScreen() {
           </View>
 
           {/* ─ CARDIOVASCULAR ─ */}
-          <View style={{backgroundColor:isDark?"#112240":"#FFFFFF",borderRadius:12,padding:14,gap:10,borderWidth:1,borderColor:isDark?"#233554":"#E2E8F0"}}>
+          <View style={{backgroundColor:isDark?"#0B352B":"#FFFFFF",borderRadius:12,padding:14,gap:10,borderWidth:1,borderColor:isDark?"#1D5243":"#E2E8F0"}}>
             <View style={{flexDirection:"row",alignItems:"center",gap:8}}>
               <View style={{width:28,height:28,borderRadius:8,backgroundColor:"#DC262615",alignItems:"center",justifyContent:"center"}}><Feather name="heart" size={14} color="#DC2626"/></View>
               <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"800",color:tp}}>Cardiovascular</Text>
@@ -1568,7 +1568,7 @@ export default function ToolDetailScreen() {
               <Text style={{fontSize: Math.round(11 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>Vasoactive medications (1 point each, max 2)</Text>
               <View style={{flexDirection:"row",gap:8}}>
                 {[0,1,2,3].map(n=>(
-                  <TouchableOpacity key={n} onPress={()=>setPhxVasoCount(n)} style={{flex:1,paddingVertical:10,borderRadius:8,alignItems:"center",backgroundColor:phxVasoCount===n?"#DC2626":isDark?"#0A192F":"#F1F5F9",borderWidth:1.5,borderColor:phxVasoCount===n?"#DC2626":isDark?"#334155":"#CBD5E1"}}>
+                  <TouchableOpacity key={n} onPress={()=>setPhxVasoCount(n)} style={{flex:1,paddingVertical:10,borderRadius:8,alignItems:"center",backgroundColor:phxVasoCount===n?"#DC2626":isDark?"#041B16":"#F1F5F9",borderWidth:1.5,borderColor:phxVasoCount===n?"#DC2626":isDark?"#334155":"#CBD5E1"}}>
                     <Text style={{fontWeight:"800",fontSize: Math.round(16 * activeTextScale),color:phxVasoCount===n?"#FFFFFF":tm}}>{n}</Text>
                     <Text style={{fontSize: Math.round(9 * activeTextScale),color:phxVasoCount===n?"rgba(255,255,255,0.75)":tm}}>drug{n!==1?"s":""}</Text>
                   </TouchableOpacity>
@@ -1584,7 +1584,7 @@ export default function ToolDetailScreen() {
               {label:"MAP below age-specific threshold",key:"map",val:phxMAPLow,set:setPhxMAPLow},
               {label:"pH < 7.0",key:"ph",val:phxPHLow,set:setPhxPHLow},
             ] as const).map((item:{label:string;key:string;val:boolean;set:(v:boolean)=>void})=>(
-              <TouchableOpacity key={item.key} onPress={()=>item.set(!item.val)} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,backgroundColor:item.val?"#DC262615":isDark?"#0A192F":"#F8FAFC",borderWidth:1.5,borderColor:item.val?"#DC2626":isDark?"#334155":"#E2E8F0"}}>
+              <TouchableOpacity key={item.key} onPress={()=>item.set(!item.val)} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,backgroundColor:item.val?"#DC262615":isDark?"#041B16":"#F8FAFC",borderWidth:1.5,borderColor:item.val?"#DC2626":isDark?"#334155":"#E2E8F0"}}>
                 <View style={{width:20,height:20,borderRadius:5,borderWidth:2,borderColor:item.val?"#DC2626":isDark?"#475569":"#CBD5E1",backgroundColor:item.val?"#DC2626":"transparent",justifyContent:"center",alignItems:"center"}}>
                   {item.val&&<Feather name="check" size={12} color="#FFFFFF"/>}
                 </View>
@@ -1595,7 +1595,7 @@ export default function ToolDetailScreen() {
           </View>
 
           {/* ─ COAGULATION ─ */}
-          <View style={{backgroundColor:isDark?"#112240":"#FFFFFF",borderRadius:12,padding:14,gap:10,borderWidth:1,borderColor:isDark?"#233554":"#E2E8F0"}}>
+          <View style={{backgroundColor:isDark?"#0B352B":"#FFFFFF",borderRadius:12,padding:14,gap:10,borderWidth:1,borderColor:isDark?"#1D5243":"#E2E8F0"}}>
             <View style={{flexDirection:"row",alignItems:"center",gap:8}}>
               <View style={{width:28,height:28,borderRadius:8,backgroundColor:"#D9770615",alignItems:"center",justifyContent:"center"}}><Feather name="droplet" size={14} color="#D97706"/></View>
               <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"800",color:tp}}>Coagulation</Text>
@@ -1612,7 +1612,7 @@ export default function ToolDetailScreen() {
               {label:"INR > 1.3",key:"inr",val:phxINRHigh,set:setPhxINRHigh},
               {label:"Fibrinogen < 100 mg/dL",key:"fib",val:phxFibLow,set:setPhxFibLow},
             ] as const).map((item:{label:string;key:string;val:boolean;set:(v:boolean)=>void})=>(
-              <TouchableOpacity key={item.key} onPress={()=>item.set(!item.val)} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,backgroundColor:item.val?"#D9770615":isDark?"#0A192F":"#F8FAFC",borderWidth:1.5,borderColor:item.val?"#D97706":isDark?"#334155":"#E2E8F0"}}>
+              <TouchableOpacity key={item.key} onPress={()=>item.set(!item.val)} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,backgroundColor:item.val?"#D9770615":isDark?"#041B16":"#F8FAFC",borderWidth:1.5,borderColor:item.val?"#D97706":isDark?"#334155":"#E2E8F0"}}>
                 <View style={{width:20,height:20,borderRadius:5,borderWidth:2,borderColor:item.val?"#D97706":isDark?"#475569":"#CBD5E1",backgroundColor:item.val?"#D97706":"transparent",justifyContent:"center",alignItems:"center"}}>
                   {item.val&&<Feather name="check" size={12} color="#FFFFFF"/>}
                 </View>
@@ -1623,7 +1623,7 @@ export default function ToolDetailScreen() {
           </View>
 
           {/* ─ NEUROLOGICAL ─ */}
-          <View style={{backgroundColor:isDark?"#112240":"#FFFFFF",borderRadius:12,padding:14,gap:10,borderWidth:1,borderColor:isDark?"#233554":"#E2E8F0"}}>
+          <View style={{backgroundColor:isDark?"#0B352B":"#FFFFFF",borderRadius:12,padding:14,gap:10,borderWidth:1,borderColor:isDark?"#1D5243":"#E2E8F0"}}>
             <View style={{flexDirection:"row",alignItems:"center",gap:8}}>
               <View style={{width:28,height:28,borderRadius:8,backgroundColor:"#7C3AED15",alignItems:"center",justifyContent:"center"}}><Feather name="zap" size={14} color="#7C3AED"/></View>
               <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"800",color:tp}}>Neurological</Text>
@@ -1635,7 +1635,7 @@ export default function ToolDetailScreen() {
               {label:"GCS ≤ 10",key:"gcs",val:phxGCSLow,set:setPhxGCSLow},
               {label:"Fixed bilateral pupils",key:"pupils",val:phxPupilsFixed,set:setPhxPupilsFixed},
             ] as const).map((item:{label:string;key:string;val:boolean;set:(v:boolean)=>void})=>(
-              <TouchableOpacity key={item.key} onPress={()=>item.set(!item.val)} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,backgroundColor:item.val?"#7C3AED15":isDark?"#0A192F":"#F8FAFC",borderWidth:1.5,borderColor:item.val?"#7C3AED":isDark?"#334155":"#E2E8F0"}}>
+              <TouchableOpacity key={item.key} onPress={()=>item.set(!item.val)} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,backgroundColor:item.val?"#7C3AED15":isDark?"#041B16":"#F8FAFC",borderWidth:1.5,borderColor:item.val?"#7C3AED":isDark?"#334155":"#E2E8F0"}}>
                 <View style={{width:20,height:20,borderRadius:5,borderWidth:2,borderColor:item.val?"#7C3AED":isDark?"#475569":"#CBD5E1",backgroundColor:item.val?"#7C3AED":"transparent",justifyContent:"center",alignItems:"center"}}>
                   {item.val&&<Feather name="check" size={12} color="#FFFFFF"/>}
                 </View>
@@ -1652,7 +1652,7 @@ export default function ToolDetailScreen() {
             {/* Domain breakdown */}
             <View style={{flexDirection:"row",gap:6}}>
               {([
-                {label:"Resp",val:phxResp,max:3,color:"#0EA5E9"},
+                {label:"Resp",val:phxResp,max:3,color:"#14B8A6"},
                 {label:"CV",val:phxCardio,max:6,color:"#DC2626"},
                 {label:"Coag",val:phxCoag,max:2,color:"#D97706"},
                 {label:"Neuro",val:phxNeuro,max:2,color:"#7C3AED"},
@@ -1701,14 +1701,14 @@ export default function ToolDetailScreen() {
           </View>
 
           {/* Dosing */}
-          <View style={{backgroundColor:isDark?"#112240":"#FFFFFF",borderRadius:12,padding:14,gap:12,borderWidth:1,borderColor:isDark?"#233554":"#E2E8F0"}}>
+          <View style={{backgroundColor:isDark?"#0B352B":"#FFFFFF",borderRadius:12,padding:14,gap:12,borderWidth:1,borderColor:isDark?"#1D5243":"#E2E8F0"}}>
             <View style={{flexDirection:"row",alignItems:"center",gap:8,marginBottom:2}}>
               <View style={{width:28,height:28,borderRadius:8,backgroundColor:"#0D948815",alignItems:"center",justifyContent:"center"}}><Feather name="droplet" size={14} color="#0D9488"/></View>
               <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"800",color:tp}}>Weight-Based Dosing</Text>
             </View>
 
             {/* < 1 year */}
-            <View style={{backgroundColor:isDark?"#0A192F":"#F0FDFA",borderRadius:10,padding:12,borderLeftWidth:4,borderLeftColor:"#0D9488"}}>
+            <View style={{backgroundColor:isDark?"#041B16":"#F0FDFA",borderRadius:10,padding:12,borderLeftWidth:4,borderLeftColor:"#0D9488"}}>
               <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"800",color:"#0D9488",marginBottom:8}}>Age &lt; 1 Year</Text>
               {[
                 {lbl:"Dose",val:"10,000 units/kg"},
@@ -1725,8 +1725,8 @@ export default function ToolDetailScreen() {
             </View>
 
             {/* > 1 year */}
-            <View style={{backgroundColor:isDark?"#0A192F":"#F0FDFA",borderRadius:10,padding:12,borderLeftWidth:4,borderLeftColor:"#0891B2"}}>
-              <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"800",color:"#0891B2",marginBottom:8}}>Age &gt; 1 Year</Text>
+            <View style={{backgroundColor:isDark?"#041B16":"#F0FDFA",borderRadius:10,padding:12,borderLeftWidth:4,borderLeftColor:"#0D9488"}}>
+              <Text style={{fontSize: Math.round(13 * activeTextScale),fontWeight:"800",color:"#0D9488",marginBottom:8}}>Age &gt; 1 Year</Text>
               {[
                 {lbl:"Dose",val:"20,000 units/kg"},
                 {lbl:"Diluent",val:"50 mL Normal Saline"},
@@ -1743,9 +1743,9 @@ export default function ToolDetailScreen() {
           </View>
 
           {/* Preparation steps */}
-          <View style={{backgroundColor:isDark?"#112240":"#FFFFFF",borderRadius:12,padding:14,gap:10,borderWidth:1,borderColor:isDark?"#233554":"#E2E8F0"}}>
+          <View style={{backgroundColor:isDark?"#0B352B":"#FFFFFF",borderRadius:12,padding:14,gap:10,borderWidth:1,borderColor:isDark?"#1D5243":"#E2E8F0"}}>
             <View style={{flexDirection:"row",alignItems:"center",gap:8,marginBottom:2}}>
-              <View style={{width:28,height:28,borderRadius:8,backgroundColor:"#0EA5E915",alignItems:"center",justifyContent:"center"}}><Feather name="settings" size={14} color="#0EA5E9"/></View>
+              <View style={{width:28,height:28,borderRadius:8,backgroundColor:"#14B8A615",alignItems:"center",justifyContent:"center"}}><Feather name="settings" size={14} color="#14B8A6"/></View>
               <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"800",color:tp}}>Preparation & Administration</Text>
             </View>
             {[
@@ -1758,8 +1758,8 @@ export default function ToolDetailScreen() {
               "Chest X-ray before each dose to assess radiological response",
             ].map((step,i)=>(
               <View key={i} style={{flexDirection:"row",gap:10,alignItems:"flex-start"}}>
-                <View style={{width:22,height:22,borderRadius:11,backgroundColor:"#0EA5E920",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1}}>
-                  <Text style={{fontSize: Math.round(11 * activeTextScale),fontWeight:"800",color:"#0EA5E9"}}>{i+1}</Text>
+                <View style={{width:22,height:22,borderRadius:11,backgroundColor:"#14B8A620",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1}}>
+                  <Text style={{fontSize: Math.round(11 * activeTextScale),fontWeight:"800",color:"#14B8A6"}}>{i+1}</Text>
                 </View>
                 <Text style={{fontSize: Math.round(12 * activeTextScale),color:tp,flex:1,lineHeight:18}}>{step}</Text>
               </View>
@@ -1781,13 +1781,13 @@ export default function ToolDetailScreen() {
             ].map((item,i)=>(
               <View key={i} style={{flexDirection:"row",gap:8,alignItems:"flex-start"}}>
                 <Text style={{fontSize: Math.round(14 * activeTextScale),color:"#DC2626",marginTop:-2}}>•</Text>
-                <Text style={{fontSize: Math.round(12 * activeTextScale),color:isDark?"#8892B0":"#475569",flex:1,lineHeight:17}}>{item}</Text>
+                <Text style={{fontSize: Math.round(12 * activeTextScale),color:isDark?"#83ACA1":"#475569",flex:1,lineHeight:17}}>{item}</Text>
               </View>
             ))}
           </View>
 
           {/* Monitoring */}
-          <View style={{backgroundColor:isDark?"#112240":"#FFFFFF",borderRadius:12,padding:14,gap:8,borderWidth:1,borderColor:isDark?"#233554":"#E2E8F0"}}>
+          <View style={{backgroundColor:isDark?"#0B352B":"#FFFFFF",borderRadius:12,padding:14,gap:8,borderWidth:1,borderColor:isDark?"#1D5243":"#E2E8F0"}}>
             <View style={{flexDirection:"row",alignItems:"center",gap:8,marginBottom:4}}>
               <View style={{width:28,height:28,borderRadius:8,backgroundColor:"#D9770615",alignItems:"center",justifyContent:"center"}}><Feather name="activity" size={14} color="#D97706"/></View>
               <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"800",color:tp}}>Monitoring</Text>
@@ -1838,7 +1838,7 @@ export default function ToolDetailScreen() {
                   <View style={{gap:6,marginBottom:8}}>
                     {item.options.map((opt,val)=>(
                       <TouchableOpacity key={val} onPress={()=>setFlacc(prev=>prev.map((v,j)=>j===idx?val:v))} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,borderWidth:1.5,backgroundColor:flacc[idx]===val?"#DB277720":isDark?"#0F1F2E":"#F8FAFC",borderColor:flacc[idx]===val?"#DB2777":border}}>
-                        <View style={{width:24,height:24,borderRadius:8,justifyContent:"center",alignItems:"center",backgroundColor:flacc[idx]===val?"#DB2777":isDark?"#233554":"#E2E8F0"}}>
+                        <View style={{width:24,height:24,borderRadius:8,justifyContent:"center",alignItems:"center",backgroundColor:flacc[idx]===val?"#DB2777":isDark?"#1D5243":"#E2E8F0"}}>
                           <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"800",color:flacc[idx]===val?"#FFFFFF":tm}}>{val}</Text>
                         </View>
                         <Text style={{flex:1,fontSize: Math.round(13 * activeTextScale),color:isDark?"#CBD5E1":"#334155"}}>{opt}</Text>
@@ -1874,7 +1874,7 @@ export default function ToolDetailScreen() {
                       const val = i+1;
                       return (
                         <TouchableOpacity key={val} onPress={()=>setComfort(prev=>prev.map((v,j)=>j===idx?val:v))} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,borderWidth:1.5,backgroundColor:comfort[idx]===val?"#DB277720":isDark?"#0F1F2E":"#F8FAFC",borderColor:comfort[idx]===val?"#DB2777":border}}>
-                          <View style={{width:24,height:24,borderRadius:8,justifyContent:"center",alignItems:"center",backgroundColor:comfort[idx]===val?"#DB2777":isDark?"#233554":"#E2E8F0"}}>
+                          <View style={{width:24,height:24,borderRadius:8,justifyContent:"center",alignItems:"center",backgroundColor:comfort[idx]===val?"#DB2777":isDark?"#1D5243":"#E2E8F0"}}>
                             <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"800",color:comfort[idx]===val?"#FFFFFF":tm}}>{val}</Text>
                           </View>
                           <Text style={{flex:1,fontSize: Math.round(13 * activeTextScale),color:isDark?"#CBD5E1":"#334155"}}>{opt}</Text>
@@ -1902,7 +1902,7 @@ export default function ToolDetailScreen() {
               <View style={{gap:6}}>
                 {SAS_LEVELS.map(l=>(
                   <TouchableOpacity key={l.score} onPress={()=>setSasLevel(l.score)} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,borderWidth:1.5,backgroundColor:sasLevel===l.score?"#DB277720":isDark?"#0F1F2E":"#F8FAFC",borderColor:sasLevel===l.score?"#DB2777":border}}>
-                    <View style={{width:28,height:28,borderRadius:9,justifyContent:"center",alignItems:"center",backgroundColor:sasLevel===l.score?"#DB2777":isDark?"#233554":"#E2E8F0"}}>
+                    <View style={{width:28,height:28,borderRadius:9,justifyContent:"center",alignItems:"center",backgroundColor:sasLevel===l.score?"#DB2777":isDark?"#1D5243":"#E2E8F0"}}>
                       <Text style={{fontSize: Math.round(14 * activeTextScale),fontWeight:"800",color:sasLevel===l.score?"#FFFFFF":tm}}>{l.score}</Text>
                     </View>
                     <View style={{flex:1}}>
@@ -2028,7 +2028,7 @@ export default function ToolDetailScreen() {
           )}
 
           {/* Totals */}
-          <View style={{backgroundColor:isDark?"#112240":"#F8FAFC",borderRadius:12,padding:14,borderWidth:1,borderColor:border}}>
+          <View style={{backgroundColor:isDark?"#0B352B":"#F8FAFC",borderRadius:12,padding:14,borderWidth:1,borderColor:border}}>
             <Text style={{fontSize: Math.round(11 * activeTextScale),fontWeight:"700",color:tm,marginBottom:6}}>TOTALS</Text>
             <Row label="Total IN" value={`${ioTotalIn} mL`} isDark={isDark}/>
             <Row label="Total OUT" value={`${ioTotalOut} mL`} isDark={isDark}/>
@@ -2061,7 +2061,7 @@ export default function ToolDetailScreen() {
                   const val = i+1;
                   return (
                     <TouchableOpacity key={val} onPress={()=>setBraden(prev=>prev.map((v,j)=>j===idx?val:v))} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,borderWidth:1.5,backgroundColor:braden[idx]===val?"#B4530920":isDark?"#0F1F2E":"#F8FAFC",borderColor:braden[idx]===val?"#B45309":border}}>
-                      <View style={{width:24,height:24,borderRadius:8,justifyContent:"center",alignItems:"center",backgroundColor:braden[idx]===val?"#B45309":isDark?"#233554":"#E2E8F0"}}>
+                      <View style={{width:24,height:24,borderRadius:8,justifyContent:"center",alignItems:"center",backgroundColor:braden[idx]===val?"#B45309":isDark?"#1D5243":"#E2E8F0"}}>
                         <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"800",color:braden[idx]===val?"#FFFFFF":tm}}>{val}</Text>
                       </View>
                       <Text style={{flex:1,fontSize: Math.round(13 * activeTextScale),color:isDark?"#CBD5E1":"#334155"}}>{opt}</Text>
@@ -2108,7 +2108,7 @@ export default function ToolDetailScreen() {
               <View style={{gap:6,marginBottom:8}}>
                 {param.options.map(o=>(
                   <TouchableOpacity key={o.label} onPress={()=>setHdfs(prev=>prev.map((v,j)=>j===idx?o.points:v))} style={{flexDirection:"row",alignItems:"center",gap:10,padding:10,borderRadius:10,borderWidth:1.5,backgroundColor:hdfs[idx]===o.points?"#65A30D20":isDark?"#0F1F2E":"#F8FAFC",borderColor:hdfs[idx]===o.points?"#65A30D":border}}>
-                    <View style={{width:24,height:24,borderRadius:8,justifyContent:"center",alignItems:"center",backgroundColor:hdfs[idx]===o.points?"#65A30D":isDark?"#233554":"#E2E8F0"}}>
+                    <View style={{width:24,height:24,borderRadius:8,justifyContent:"center",alignItems:"center",backgroundColor:hdfs[idx]===o.points?"#65A30D":isDark?"#1D5243":"#E2E8F0"}}>
                       <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"800",color:hdfs[idx]===o.points?"#FFFFFF":tm}}>{o.points}</Text>
                     </View>
                     <Text style={{flex:1,fontSize: Math.round(13 * activeTextScale),color:isDark?"#CBD5E1":"#334155"}}>{o.label}</Text>
@@ -2157,10 +2157,10 @@ export default function ToolDetailScreen() {
         <View style={{gap:12}}>
           <View style={{flexDirection:"row",justifyContent:"space-between",alignItems:"center"}}>
             <View>
-              <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:"#0891B2"}}>PALICC 2023 · Harriet Lane 24e</Text>
+              <Text style={{fontSize: Math.round(12 * activeTextScale),fontWeight:"700",color:"#0D9488"}}>PALICC 2023 · Harriet Lane 24e</Text>
               <Text style={{fontSize: Math.round(11 * activeTextScale),color:tm,marginTop:1}}>Hamilton C3 · Lung-Protective Ventilation</Text>
             </View>
-            <StarButton isFav={isFav("tool-ventilator")} onToggle={()=>toggleFav({id:"tool-ventilator",type:"tool",label:"Ventilator & ABG",color:"#0891B2"})} size={18} color="#0891B2"/>
+            <StarButton isFav={isFav("tool-ventilator")} onToggle={()=>toggleFav({id:"tool-ventilator",type:"tool",label:"Ventilator & ABG",color:"#0D9488"})} size={18} color="#0D9488"/>
           </View>
           <VentilatorTool/>
         </View>
@@ -2174,8 +2174,8 @@ export default function ToolDetailScreen() {
     <SafeAreaView style={{flex:1,backgroundColor:bg}} edges={["top","bottom"]}>
       {/* Header */}
       <View style={{flexDirection:"row",alignItems:"center",gap:12,paddingHorizontal:16,paddingVertical:14,backgroundColor:card,borderBottomWidth:1,borderBottomColor:border,...Platform.select({ios:{shadowColor:"#000",shadowOffset:{width:0,height:2},shadowOpacity:0.06,shadowRadius:8},android:{elevation:3}})}}>
-        <TouchableOpacity onPress={()=>goBack(router)} style={{width:38,height:38,borderRadius:19,alignItems:"center",justifyContent:"center",backgroundColor:isDark?"#233554":"#F0F4F8"}}>
-          <Feather name="arrow-left" size={20} color={isDark?"#8892B0":C.tint}/>
+        <TouchableOpacity onPress={()=>goBack(router)} style={{width:38,height:38,borderRadius:19,alignItems:"center",justifyContent:"center",backgroundColor:isDark?"#1D5243":"#F0F4F8"}}>
+          <Feather name="arrow-left" size={20} color={isDark?"#83ACA1":C.tint}/>
         </TouchableOpacity>
         <View style={{width:36,height:36,borderRadius:10,backgroundColor:meta.color+"1A",alignItems:"center",justifyContent:"center"}}>
           <Feather name={meta.icon as any} size={18} color={meta.color}/>

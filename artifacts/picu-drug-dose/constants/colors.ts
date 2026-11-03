@@ -1,26 +1,26 @@
-const primary = "#0891B2";
-const primaryDark = "#0E7490";
-const primaryLight = "#22D3EE";
+const primary = "#0D9488";
+const primaryDark = "#0F766E";
+const primaryLight = "#2DD4BF";
 const accent = "#F59E0B";
 const danger = "#DC2626";
 const safe = "#16A34A";
-const surface = "#F7FBFD";
+const surface = "#F4FAF8";
 
 // Premium Medical Dark Mode Palette
-const DARK_BG = "#0B132B";
-const DARK_CARD = "#112240";
-const DARK_CARD_ELEVATED = "#1C2541";
-const DARK_BORDER = "#233554";
+const DARK_BG = "#06231D";
+const DARK_CARD = "#0B352B";
+const DARK_CARD_ELEVATED = "#123C31";
+const DARK_BORDER = "#1D5243";
 const DARK_TEXT = "#FFFFFF";
-const DARK_TEXT_SECONDARY = "#CCD6F6";
-const DARK_TEXT_MUTED = "#8892B0";
-const DARK_INPUT_BG = "#0A192F";
-const DARK_PILL_BG = "#0A192F";
+const DARK_TEXT_SECONDARY = "#C9E8DF";
+const DARK_TEXT_MUTED = "#83ACA1";
+const DARK_INPUT_BG = "#041B16";
+const DARK_PILL_BG = "#041B16";
 const DARK_ACCENT_RED = "#FF4C60";
 const DARK_ACCENT_MINT = "#00B48A";
-const DARK_HEADER_BG = "#0A192F";
-const DARK_TAB_BAR = "#0B132B";
-const DARK_TAB_BORDER = "#1A2A4A";
+const DARK_HEADER_BG = "#041B16";
+const DARK_TAB_BAR = "#06231D";
+const DARK_TAB_BORDER = "#14362C";
 
 export const DarkTheme = {
   bg: DARK_BG,
@@ -53,7 +53,7 @@ export const LightTheme = {
   inputBg: "#EBF5FB",
   pillBg: "#EBF5FB",
   accentRed: "#DC2626",
-  accentMint: "#0891B2",
+  accentMint: "#0D9488",
   headerBg: "#FFFFFF",
   tabBar: "#FFFFFF",
   tabBorder: "#E4EDF4",
@@ -87,7 +87,7 @@ export default {
       antibiotic: "#047857",
       antiepileptic: "#B45309",
       emergency: "#6366F1",
-      fluid: "#0891B2",
+      fluid: "#0D9488",
       respiratory: "#0D9488",
       cardiovascular: "#7C3AED",
       antifungal: "#475569",
@@ -97,12 +97,12 @@ export default {
   },
   dark: {
     text: "#FFFFFF",
-    textSecondary: "#CCD6F6",
-    textMuted: "#8892B0",
-    background: "#0B132B",
-    backgroundSecondary: "#0A192F",
-    card: "#112240",
-    border: "#233554",
+    textSecondary: "#C9E8DF",
+    textMuted: "#83ACA1",
+    background: "#06231D",
+    backgroundSecondary: "#041B16",
+    card: "#0B352B",
+    border: "#1D5243",
     tint: "#00B48A",
     tintDark: "#059669",
     tintLight: "#34D399",

@@ -67,7 +67,7 @@ export const FORMULARY_CATEGORIES: Record<
   tablet: {
     label: "Tablets",
     icon: "circle",
-    color: "#0891B2",
+    color: "#0D9488",
     description: "Oral solid dose forms",
   },
   syrup: {

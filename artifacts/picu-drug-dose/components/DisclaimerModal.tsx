@@ -43,10 +43,10 @@ export function DisclaimerModal() {
     setVisible(false);
   }
 
-  const BG    = isDark ? "#0B132B" : "#FFFFFF";
+  const BG    = isDark ? "#06231D" : "#FFFFFF";
   const TEXT  = isDark ? "#FFFFFF" : "#0D1B2A";
-  const MUTED = isDark ? "#8892B0" : "#475569";
-  const BORDER = isDark ? "#233554" : "#E2E8F0";
+  const MUTED = isDark ? "#83ACA1" : "#475569";
+  const BORDER = isDark ? "#1D5243" : "#E2E8F0";
 
   return (
     <Modal
@@ -96,7 +96,7 @@ export function DisclaimerModal() {
               The developers and contributors assume no liability for clinical decisions made
               based on information provided by this application.
               {"\n\n"}
-              <Text style={[styles.italic, { color: isDark ? "#8892B0" : "#94A3B8" }]}>
+              <Text style={[styles.italic, { color: isDark ? "#83ACA1" : "#94A3B8" }]}>
                 Doses based on Harriet Lane Handbook 24th Edition, PALS 2025 and WHO Guidelines.
               </Text>
             </Text>
@@ -105,7 +105,7 @@ export function DisclaimerModal() {
           {/* Attribution */}
           <View style={[styles.attribution, { borderTopColor: BORDER }]}>
             <Text style={[styles.attributionBy, { color: MUTED }]}>Prepared by</Text>
-            <Text style={[styles.attributionName, { color: "#0EA5E9" }]}>
+            <Text style={[styles.attributionName, { color: "#14B8A6" }]}>
               M. Kashan, RN
             </Text>
           </View>
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   acceptBtn: {
     margin: 16,
     marginTop: 8,
-    backgroundColor: "#0EA5E9",
+    backgroundColor: "#14B8A6",
     borderRadius: 12,
     paddingVertical: 15,
     alignItems: "center",
