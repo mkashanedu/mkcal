@@ -17,7 +17,7 @@
  *    background revalidation for navigations (unchanged from v2).
  */
 
-const CACHE_NAME = "peadscal-v6";
+const CACHE_NAME = "peadscal-v7";
 const OFFLINE_URL = "/";
 
 const SHELL = ["/", "/manifest.json", "/icon.png", "/favicon.png", "/favicon.ico"];
